@@ -25,6 +25,8 @@ use XSLTProcessor;
  * An abstract base Propel manager to perform work related to the XML schema
  * file.
  *
+ * Requires PHP XSL extension for XSLT transformations.
+ *
  * @author Hans Lellelid <hans@xmpl.org> (Propel)
  * @author Jason van Zyl <jvanzyl@zenplex.com> (Torque)
  * @author Daniel Rall <dlr@finemaltcoding.com> (Torque)
@@ -76,8 +78,6 @@ abstract class AbstractManager
 
     /**
      * XSL file to use to normalize (or otherwise transform) schema before validation.
-     *
-     * @deprecated Not in use and not working due to missing class.
      *
      * @var mixed
      */
