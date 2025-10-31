@@ -6,7 +6,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Propel\Tests\Runtime\ActiveQuery;
+namespace Propel\Tests\Runtime\ActiveQuery\FilterExpression;
 
 use Propel\Runtime\ActiveQuery\ModelCriteria;
 use Propel\Runtime\Exception\PropelException;
