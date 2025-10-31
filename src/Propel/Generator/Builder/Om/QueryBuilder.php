@@ -905,7 +905,7 @@ class QueryBuilder extends AbstractOMBuilder
      *
      * @param array \$keys The list of primary key values to use for the query
      *
-     * @return \$this
+     * @return static
      */
     public function filterByPrimaryKeys(array \$keys)
     {";
@@ -930,18 +930,21 @@ class QueryBuilder extends AbstractOMBuilder
             // composite primary key
             $script .= "
         if (!\$keys) {
-            \$this->addFilter(null, '1<>1', Criteria::CUSTOM);
+            return \$this->addAnd('1<>1');
+        }\n";
 
-            return \$this;
-        }
+            foreach ($pks as $i => $col) {
+                $script .= "
+        \$resolvedColumn$i = \$this->resolveLocalColumnByName('{$col->getName()}');";
+            }
+            $script .= "
+
         foreach (\$keys as \$key) {";
             $i = 0;
             foreach ($pks as $i => $col) {
-                $colName = $col->getName();
-                $addOp = ($i === 0) ? '$this->addOr($filter0);' : "\$filter0->addAnd(\$filter$i);";
                 ($i > 0) && $script .= "\n";
+                $addOp = ($i === 0) ? '$this->addOr($filter0);' : "\$filter0->addAnd(\$filter$i);";
                 $script .= "
-            \$resolvedColumn$i = \$this->resolveLocalColumnByName('$colName');
             \$filter$i = \$this->buildFilter(\$resolvedColumn$i, \$key[$i], Criteria::EQUAL);
             {$addOp}";
             }
