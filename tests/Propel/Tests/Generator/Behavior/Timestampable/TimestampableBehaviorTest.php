@@ -8,6 +8,7 @@
 
 namespace Propel\Tests\Generator\Behavior\Timestampable;
 
+use Propel\Generator\Config\QuickGeneratorConfig;
 use Propel\Generator\Util\QuickBuilder;
 use Propel\Runtime\Collection\ObjectCollection;
 use Propel\Tests\Bookstore\Behavior\Map\Table1TableMap;
@@ -15,7 +16,6 @@ use Propel\Tests\Bookstore\Behavior\Map\Table2TableMap;
 use Propel\Tests\Bookstore\Behavior\Table2;
 use Propel\Tests\Bookstore\Behavior\Table2Query;
 use Propel\Tests\Helpers\Bookstore\BookstoreTestBase;
-use Propel\Generator\Config\QuickGeneratorConfig;
 use TableWithoutCreatedAt;
 use TableWithoutUpdatedAt;
 use TableDateTimeClass;
