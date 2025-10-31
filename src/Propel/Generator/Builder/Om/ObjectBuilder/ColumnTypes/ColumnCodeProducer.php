@@ -273,11 +273,7 @@ class ColumnCodeProducer extends ObjectCodeProducer
     public function addMutatorComment(string &$script): void
     {
         $clo = $this->column->getLowercasedName();
-        $type = $this->getQualifiedTypeString();
-
-        if (!$this->column->isNotNull()) {
-            $type .= '|null';
-        }
+        $type = $this->getQualifiedTypeString() . '|null';
 
         $script .= "
     /**

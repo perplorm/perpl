@@ -85,7 +85,6 @@ class OnDemandCollection extends Collection
         $ret = [];
         $keyGetterMethod = 'get' . $keyColumn;
 
-        /** @var \Propel\Runtime\ActiveRecord\ActiveRecordInterface $obj */
         foreach ($this as $key => $obj) {
             $key = $keyColumn === null ? $key : $obj->$keyGetterMethod();
             $key = $usePrefix ? ($this->getModel() . '_' . $key) : $key;

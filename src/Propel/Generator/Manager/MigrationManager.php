@@ -350,7 +350,7 @@ class MigrationManager extends AbstractManager
      *
      * @param int|null $version
      *
-     * @return list<int>
+     * @return array<int>
      */
     public function getNonExecutedMigrationTimestampsByVersion(?int $version = null): array
     {

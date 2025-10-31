@@ -29,10 +29,10 @@ use Traversable;
  * Class for iterating over a list of Propel elements
  * The collection keys must be integers - no associative array accepted
  *
- * @method \Propel\Runtime\Collection\Collection fromXML(string $data) Populate the collection from an XML string
- * @method \Propel\Runtime\Collection\Collection fromYAML(string $data) Populate the collection from a YAML string
- * @method \Propel\Runtime\Collection\Collection fromJSON(string $data) Populate the collection from a JSON string
- * @method \Propel\Runtime\Collection\Collection fromCSV(string $data) Populate the collection from a CSV string
+ * @method \Propel\Runtime\Collection\Collection<mixed> fromXML(string $data) Populate the collection from an XML string
+ * @method \Propel\Runtime\Collection\Collection<mixed> fromYAML(string $data) Populate the collection from a YAML string
+ * @method \Propel\Runtime\Collection\Collection<mixed> fromJSON(string $data) Populate the collection from a JSON string
+ * @method \Propel\Runtime\Collection\Collection<mixed> fromCSV(string $data) Populate the collection from a CSV string
  *
  * @method string toXML(bool $usePrefix = true, bool $includeLazyLoadColumns = true) Export the collection to an XML string
  * @method string toYAML(bool $usePrefix = true, bool $includeLazyLoadColumns = true) Export the collection to a YAML string
@@ -496,7 +496,7 @@ class Collection implements ArrayAccess, IteratorAggregate, Countable, Serializa
     }
 
     /**
-     * Get the model of the elements in the collection
+     * Get the model name of the elements in the collection
      *
      * @return string|null Name of the Propel object class stored in the collection
      */
@@ -586,7 +586,10 @@ class Collection implements ArrayAccess, IteratorAggregate, Countable, Serializa
         if (!method_exists($this, 'fromArray')) {
             throw new LogicException('Cannot import into plain Collection, use ArrayCollection or ObjectCollection');
         }
-        $this->fromArray($parser->listToArray($data, $this->getPluralModelName()));
+
+        $rootKey = $this->getPluralModelName();
+        $parsedArray = $parser->listToArray($data, $rootKey);
+        $this->fromArray($parsedArray);
     }
 
     /**
@@ -714,8 +717,6 @@ class Collection implements ArrayAccess, IteratorAggregate, Countable, Serializa
     }
 
     /**
-     * @deprecated should not have a pluralzier.
-     *
      * @return string
      */
     protected function getPluralModelName(): string

@@ -166,7 +166,7 @@ class SqlManager extends AbstractManager
                 $statementsToInsert[$database] = [];
             }
 
-            if ($datasource === null || ($database !== null && $database === $datasource)) {
+            if ($datasource === null || $database === $datasource) {
                 $filename = $this->getWorkingDirectory() . DIRECTORY_SEPARATOR . $sqlFile;
 
                 if (file_exists($filename)) {

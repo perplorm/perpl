@@ -134,13 +134,13 @@ class InitCommandTest extends TestCaseFixtures
         }
 
         if ($this->getDriver() !== 'sqlite') {
-            $inputs[] = $dsnData['host'] ?? null;
-            $inputs[] = $dsnData['port'] ?? null;
+            $inputs[] = $dsnData['host'] ?? '';
+            $inputs[] = $dsnData['port'] ?? '';
         }
         $inputs = array_merge($inputs, [
-            $dsnData['dbname'] ?? null,
-            $dsnData['user'] ?? null,
-            $dsnData['password'] ?? null,
+            $dsnData['dbname'] ?? '',
+            $dsnData['user'] ?? '',
+            $dsnData['password'] ?? '',
             'utf8',
             'no',
             $this->dir,

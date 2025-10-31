@@ -22,6 +22,7 @@ use Propel\Generator\Model\Schema;
 use Propel\Generator\Model\Table;
 use Propel\Generator\Model\Unique;
 use Propel\Generator\Model\VendorInfo;
+use RuntimeException;
 
 /**
  * A class for dumping a schema to an XML representation.
@@ -350,6 +351,8 @@ class XmlDumper implements DumperInterface
      * @param \Propel\Generator\Model\Behavior $behavior The Behavior model instance
      * @param \DOMNode $parentNode The parent DOMNode object
      *
+     * @throws \RuntimeException
+     *
      * @return void
      */
     private function appendBehaviorNode(Behavior $behavior, DOMNode $parentNode): void
@@ -364,6 +367,9 @@ class XmlDumper implements DumperInterface
 
         foreach ($behavior->getParameters() as $name => $value) {
             $parameterNode = $behaviorNode->appendChild($this->document->createElement('parameter'));
+            if (!$parameterNode) {
+                throw new RuntimeException('Unable to create behavior parameter node');
+            }
             $parameterNode->setAttribute('name', $name);
             $parameterNode->setAttribute('value', $value);
         }
@@ -476,6 +482,8 @@ class XmlDumper implements DumperInterface
      * @param \Propel\Generator\Model\ForeignKey $foreignKey The ForeignKey model instance
      * @param \DOMNode $parentNode The parent DOMNode object
      *
+     * @throws \RuntimeException
+     *
      * @return void
      */
     private function appendForeignKeyNode(ForeignKey $foreignKey, DOMNode $parentNode): void
@@ -518,6 +526,9 @@ class XmlDumper implements DumperInterface
 
         for ($i = 0, $size = count($foreignKey->getLocalColumns()); $i < $size; $i++) {
             $refNode = $foreignKeyNode->appendChild($this->document->createElement('reference'));
+            if (!$refNode) {
+                throw new RuntimeException('Unable to create fk reference node');
+            }
             $refNode->setAttribute('local', $foreignKey->getLocalColumnName($i));
             $refNode->setAttribute('foreign', $foreignKey->getForeignColumnName($i));
         }
@@ -579,6 +590,8 @@ class XmlDumper implements DumperInterface
      * @param \Propel\Generator\Model\Index $index The Index model instance
      * @param \DOMNode $parentNode The parent DOMNode object
      *
+     * @throws \RuntimeException
+     *
      * @return void
      */
     private function appendGenericIndexNode(string $nodeType, Index $index, DOMNode $parentNode): void
@@ -588,7 +601,10 @@ class XmlDumper implements DumperInterface
         $indexNode->setAttribute('name', $index->getName());
 
         foreach ($index->getColumns() as $columnName) {
-            $indexColumnNode = $indexNode->appendChild($this->document->createElement($nodeType . '-column'));
+            $indexColumnNode = $indexNode->appendChild($this->document->createElement("{$nodeType}-column"));
+            if (!$indexColumnNode) {
+                throw new RuntimeException('Unable to create index node');
+            }
             $indexColumnNode->setAttribute('name', $columnName);
 
             $size = $index->getColumnSize($columnName);

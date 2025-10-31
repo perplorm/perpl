@@ -15,7 +15,7 @@ interface ColumnFilterInterface
     /**
      * Builds the filter expression literal and adds its parameter data to the input buffer
      *
-     * @param array<string, array{table: string, column: string, value: mixed}> $paramCollector A list to which Prepared Statement parameters will be appended
+     * @param array<string, array{table?: string, column?: string, value: mixed}> $paramCollector A list to which Prepared Statement parameters will be appended
      *
      * @return string
      */

@@ -190,7 +190,7 @@ class CrossRelation
     }
 
     /**
-     * @param array<\Propel\Generator\Model\ForeignKey> $foreignKeys
+     * @param list<\Propel\Generator\Model\ForeignKey> $foreignKeys
      *
      * @return void
      */

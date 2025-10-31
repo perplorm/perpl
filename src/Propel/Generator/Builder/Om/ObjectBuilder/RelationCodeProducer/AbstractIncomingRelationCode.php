@@ -81,6 +81,7 @@ abstract class AbstractIncomingRelationCode extends AbstractRelationCodeProducer
      */
     public static function addInitRelations(string &$script, array $referrers, PluralizerInterface $pluralizer): void
     {
+        $matchCode = static::buildInitRelationCode($referrers, $pluralizer);
         $script .= "
     /**
      * Initializes a collection based on the name of a relation.
@@ -92,8 +93,19 @@ abstract class AbstractIncomingRelationCode extends AbstractRelationCodeProducer
      * @return void
      */
     public function initRelation(\$relationName): void
+    {{$matchCode}
+    }\n";
+    }
+
+    /**
+     * @param array<\Propel\Generator\Model\ForeignKey> $referrers
+     * @param \Propel\Common\Pluralizer\PluralizerInterface $pluralizer
+     *
+     * @return string
+     */
+    protected static function buildInitRelationCode(array $referrers, PluralizerInterface $pluralizer): string
     {
-        match (\$relationName) {";
+        $matches = '';
         foreach ($referrers as $refFK) {
             if ($refFK->isLocalPrimaryKey()) {
                 continue;
@@ -102,13 +114,14 @@ abstract class AbstractIncomingRelationCode extends AbstractRelationCodeProducer
             $relationIdentifierSingular = $refFK->getIdentifierReversed();
             $relationIdentifierPlural = $refFK->getIdentifierReversed($pluralizer);
 
-            $script .= "
+            $matches .= "
             '$relationIdentifierSingular' => \$this->init$relationIdentifierPlural(),";
         }
-        $script .= "
+
+        return !$matches ? '' : "
+        match (\$relationName) {{$matches}
             default => null
-        };
-    }\n";
+        };";
     }
 
     /**

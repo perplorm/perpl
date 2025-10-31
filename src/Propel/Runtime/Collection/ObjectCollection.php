@@ -89,7 +89,6 @@ class ObjectCollection extends Collection
             $con = $this->getWriteConnection();
         }
         $con->transaction(function () use ($con): void {
-            /** @var \Propel\Runtime\ActiveRecord\ActiveRecordInterface $element */
             foreach ($this as $element) {
                 $element->save($con);
             }
@@ -114,7 +113,6 @@ class ObjectCollection extends Collection
             $con = $this->getWriteConnection();
         }
         $con->transaction(function () use ($con): void {
-            /** @var \Propel\Runtime\ActiveRecord\ActiveRecordInterface $element */
             foreach ($this as $element) {
                 $element->delete($con);
             }
@@ -159,7 +157,6 @@ class ObjectCollection extends Collection
             throw new RuntimeException('Object collection has no model class.');
         }
         foreach ($arr as $element) {
-            /** @var RowFormat $obj */
             $obj = new $class();
             $obj->fromArray($element);
             $this->append($obj);

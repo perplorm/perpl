@@ -55,7 +55,7 @@ class OgTableMapModifier
     /**
      * @param \Propel\Generator\Builder\Om\TableMapBuilder $builder
      *
-     * @return array<array{'column_index'?: array<int>, 'relation'?: array<int>}> $outputGroups
+     * @return array<array{'column_index'?: array<int>, 'relation'?: array<string>}> $outputGroups
      */
     protected function buildOutputGroups(TableMapBuilder $builder): array
     {
@@ -69,7 +69,7 @@ class OgTableMapModifier
 
     /**
      * @param \Propel\Generator\Model\Table $table
-     * @param array<array{'column_index'?: array<int>, 'relation'?: array<int>}> $outputGroups
+     * @param array<array{'column_index'?: array<int>, 'relation'?: array<string>}> $outputGroups
      *
      * @return void
      */
@@ -78,14 +78,14 @@ class OgTableMapModifier
         foreach ($table->getColumns() as $columnIndex => $column) {
             $groupNames = $this->behavior->getGroupNames($table, $column);
             foreach ($groupNames as $groupName) {
-                $outputGroups[$groupName]['column_index'][] = $columnIndex;
+                $outputGroups[$groupName]['column_index'][] = (int)$columnIndex;
             }
         }
     }
 
     /**
      * @param \Propel\Generator\Builder\Om\TableMapBuilder $builder
-     * @param array<array{'column_index'?: array<int>, 'relation'?: array<int>}> $outputGroups
+     * @param array<array{'column_index'?: array<int>, 'relation'?: array<string>}> $outputGroups
      *
      * @return void
      */

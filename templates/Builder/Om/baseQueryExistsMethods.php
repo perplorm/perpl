@@ -1,4 +1,4 @@
-    
+
     /**
      * Use the <?= $relationDescription ?> for an EXISTS query.
      *
@@ -12,7 +12,7 @@
      *
      * @return <?= $queryClass ?><static> The inner query object of the EXISTS statement
      */
-    public function use<?= $relationName ?>ExistsQuery($modelAlias = null, $queryClass = null, $typeOfExists = '<?= $existsType ?>')
+    public function use<?= $relationName ?>ExistsQuery(?string $modelAlias = null, ?string $queryClass = null, string $typeOfExists = '<?= $existsType ?>')
     {
         /** @var <?= $queryClass ?><static> $q */
         $q = $this->useExistsQuery('<?= $relationName ?>', $modelAlias, $queryClass, $typeOfExists);
@@ -30,7 +30,7 @@
      *
      * @return <?= $queryClass ?><static> The inner query object of the NOT EXISTS statement
      */
-    public function use<?= $relationName ?>NotExistsQuery($modelAlias = null, $queryClass = null)
+    public function use<?= $relationName ?>NotExistsQuery(?string $modelAlias = null, ?string $queryClass = null)
     {
         /** @var <?= $queryClass ?><static> $q*/
         $q = $this->useExistsQuery('<?= $relationName ?>', $modelAlias, $queryClass, '<?= $notExistsType ?>');

@@ -33,31 +33,31 @@
  *
 <?php endif; ?>
 <?php foreach($columns as $column):?>
- * @method <?= $queryClass ?> orderBy<?= $column->getPhpName() ?>($order = \Propel\Runtime\ActiveQuery\Criteria::ASC) Order by the <?= $column->getName() ?> column
+ * @method static orderBy<?= $column->getPhpName() ?>($order = \Propel\Runtime\ActiveQuery\Criteria::ASC) Order by the <?= $column->getName() ?> column
 <?php endforeach;?>
  *
 <?php foreach($columns as $column):?>
- * @method <?= $queryClass ?> groupBy<?= $column->getPhpName() ?>() Group by the <?= $column->getName() ?> column
+ * @method static groupBy<?= $column->getPhpName() ?>() Group by the <?= $column->getName() ?> column
 <?php endforeach;?>
  *
- * @method <?= $queryClass ?> leftJoin($relation) Adds a LEFT JOIN clause to the query
- * @method <?= $queryClass ?> rightJoin($relation) Adds a RIGHT JOIN clause to the query
- * @method <?= $queryClass ?> innerJoin($relation) Adds a INNER JOIN clause to the query
+ * @method static leftJoin($relation) Adds a LEFT JOIN clause to the query
+ * @method static rightJoin($relation) Adds a RIGHT JOIN clause to the query
+ * @method static innerJoin($relation) Adds a INNER JOIN clause to the query
  *
- * @method <?= $queryClass ?> leftJoinWith($relation) Adds a LEFT JOIN clause and with to the query
- * @method <?= $queryClass ?> rightJoinWith($relation) Adds a RIGHT JOIN clause and with to the query
- * @method <?= $queryClass ?> innerJoinWith($relation) Adds a INNER JOIN clause and with to the query
+ * @method static leftJoinWith($relation) Adds a LEFT JOIN clause and with to the query
+ * @method static rightJoinWith($relation) Adds a RIGHT JOIN clause and with to the query
+ * @method static innerJoinWith($relation) Adds a INNER JOIN clause and with to the query
  *
 <?php foreach($relationNames as $relationName):?>
- * @method <?= $queryClass ?> leftJoin<?= $relationName ?>($relationAlias = null) Adds a LEFT JOIN clause to the query using the <?= $relationName ?> relation
- * @method <?= $queryClass ?> rightJoin<?= $relationName ?>($relationAlias = null) Adds a RIGHT JOIN clause to the query using the <?= $relationName ?> relation
- * @method <?= $queryClass ?> innerJoin<?= $relationName ?>($relationAlias = null) Adds a INNER JOIN clause to the query using the <?= $relationName ?> relation
+ * @method static leftJoin<?= $relationName ?>($relationAlias = null) Adds a LEFT JOIN clause to the query using the <?= $relationName ?> relation
+ * @method static rightJoin<?= $relationName ?>($relationAlias = null) Adds a RIGHT JOIN clause to the query using the <?= $relationName ?> relation
+ * @method static innerJoin<?= $relationName ?>($relationAlias = null) Adds a INNER JOIN clause to the query using the <?= $relationName ?> relation
  *
- * @method <?= $queryClass ?> joinWith<?= $relationName ?>($joinType = \Propel\Runtime\ActiveQuery\Criteria::INNER_JOIN) Adds a join clause and with to the query using the <?= $relationName ?> relation
+ * @method static joinWith<?= $relationName ?>($joinType = \Propel\Runtime\ActiveQuery\Criteria::INNER_JOIN) Adds a join clause and with to the query using the <?= $relationName ?> relation
  *
- * @method <?= $queryClass ?> leftJoinWith<?= $relationName ?>() Adds a LEFT JOIN clause and with to the query using the <?= $relationName ?> relation
- * @method <?= $queryClass ?> rightJoinWith<?= $relationName ?>() Adds a RIGHT JOIN clause and with to the query using the <?= $relationName ?> relation
- * @method <?= $queryClass ?> innerJoinWith<?= $relationName ?>() Adds a INNER JOIN clause and with to the query using the <?= $relationName ?> relation
+ * @method static leftJoinWith<?= $relationName ?>() Adds a LEFT JOIN clause and with to the query using the <?= $relationName ?> relation
+ * @method static rightJoinWith<?= $relationName ?>() Adds a RIGHT JOIN clause and with to the query using the <?= $relationName ?> relation
+ * @method static innerJoinWith<?= $relationName ?>() Adds a INNER JOIN clause and with to the query using the <?= $relationName ?> relation
  *
 <?php endforeach; ?>
  * @method <?= $modelClass ?>|null findOne(\Propel\Runtime\Connection\ConnectionInterface|null $con = null) Return the first <?= $modelClass ?> matching the query
@@ -81,7 +81,7 @@
  * @method array<<?= $modelClass ?>>|\Propel\Runtime\Collection\Collection<<?= $modelClass ?>> findBy<?= $column->getPhpName() ?>(<?= $column->getTypeHint() ?: $column->resolveQualifiedType() ?>|array<<?= $column->resolveQualifiedType() ?>> $<?= $column->getName() ?>) Return <?= $modelClass ?> objects filtered by the <?= $column->getName() ?> column
 <?php endforeach;?>
  *
- * @method array<<?= $modelClass ?>>|\Propel\Runtime\Util\PropelModelPager paginate($page = 1, $maxPerPage = 10, \Propel\Runtime\Connection\ConnectionInterface|null $con = null) Issue a SELECT query based on the current ModelCriteria and uses a page and a maximum number of results per page to compute an offset and a limit
+ * @method array<<?= $modelClass ?>>|\Propel\Runtime\Util\PropelModelPager<mixed> paginate($page = 1, $maxPerPage = 10, \Propel\Runtime\Connection\ConnectionInterface|null $con = null) Issue a SELECT query based on the current ModelCriteria and uses a page and a maximum number of results per page to compute an offset and a limit
  *
  * @template ParentQuery of \Propel\Runtime\ActiveQuery\ModelCriteria|null = null
  * @extends <?= $parentClassFq ?><ParentQuery>

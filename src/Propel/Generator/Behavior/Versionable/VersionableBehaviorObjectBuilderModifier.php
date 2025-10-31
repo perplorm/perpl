@@ -9,6 +9,7 @@
 namespace Propel\Generator\Behavior\Versionable;
 
 use Propel\Generator\Builder\Om\AbstractOMBuilder;
+use Propel\Generator\Exception\SchemaException;
 use Propel\Generator\Model\Column;
 
 /**
@@ -141,20 +142,40 @@ class VersionableBehaviorObjectBuilderModifier
      */
     public function preSave(AbstractOMBuilder $builder): string
     {
+        $columnPhpName = $this->getColumnPhpName();
+        $logCreatedAtCode = $this->buildCodeToSetCreatedAtColumn();
+
         $script = "if (\$this->isVersioningNecessary()) {
-    \$this->set{$this->getColumnPhpName()}(\$this->isNew() ? 1 : \$this->getLastVersionNumber(\$con) + 1);";
-        if ($this->behavior->getParameter('log_created_at') == 'true') {
-            $col = $this->behavior->getTable()->getColumn($this->getParameter('version_created_at_column'));
-            $script .= "
-    if (!\$this->isColumnModified({$this->builder->getColumnConstant($col)})) {
-        \$this->{$this->getColumnSetter('version_created_at_column')}(time());
-    }";
-        }
-        $script .= "
+    \$this->set{$columnPhpName}(\$this->isNew() ? 1 : \$this->getLastVersionNumber(\$con) + 1);$logCreatedAtCode
     \$createVersion = true; // for postSave hook
 }";
 
         return $script;
+    }
+
+    /**
+     * @throws \Propel\Generator\Exception\SchemaException
+     *
+     * @return string
+     */
+    protected function buildCodeToSetCreatedAtColumn(): string
+    {
+        $doLogCreatedAt = $this->behavior->getParameter('log_created_at') == 'true';
+        if (!$doLogCreatedAt) {
+            return '';
+        }
+        $columnName = $this->getParameter('version_created_at_column');
+        $column = $this->behavior->getTable()->getColumn($columnName);
+        if (!$column) {
+            throw new SchemaException("Versionable Behavior: No column '$columnName' in table (specified in 'version_created_at_column')");
+        }
+        $columnConstant = $this->builder->getColumnConstant($column);
+        $columnSetterName = $this->getColumnSetter('version_created_at_column');
+
+        return "
+    if (!\$this->isColumnModified($columnConstant)) {
+        \$this->{$columnSetterName}(time());
+    }";
     }
 
     /**
@@ -461,7 +482,7 @@ public function addVersion(?ConnectionInterface \$con = null)
                 ";
             }
         }
-            $script .= "
+        $script .= "
     \$version->save(\$con);
 
     return \$version;
@@ -529,8 +550,9 @@ public function populateFromVersion(\$version, \$con = null, &\$loadedObjects = 
 
         $columns = $this->table->getColumns();
         foreach ($columns as $col) {
+            $columnPhpName = $col->getPhpName();
             $script .= "
-    \$this->set" . $col->getPhpName() . '($version->get' . $col->getPhpName() . '());';
+    \$this->set{$columnPhpName}(\$version->get{$columnPhpName}());";
         }
         foreach ($this->behavior->getVersionableFks() as $fk) {
             $foreignTable = $fk->getForeignTable();

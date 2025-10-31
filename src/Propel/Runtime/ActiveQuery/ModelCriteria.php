@@ -1547,24 +1547,24 @@ class ModelCriteria extends BaseModelCriteria
 
         // As the query uses a PK condition, no limit(1) is necessary.
         $this->basePreSelect($con);
-        $criteria = $this->isKeepQuery() ? clone $this : $this;
+        $query = $this->isKeepQuery() ? clone $this : $this;
         $pkCols = array_values($this->getTableMapOrFail()->getPrimaryKeys());
         if (count($pkCols) === 1) {
             // simple primary key
             $pkCol = $pkCols[0];
             $column = new LocalColumnExpression($this, $this->getTableNameInQuery(), $pkCol);
-            $criteria->addFilter($column, $key);
+            $query->addAnd($column, $key);
         } else {
             // composite primary key
             foreach ($pkCols as $pkCol) {
                 $keyPart = array_shift($key);
                 $column = new LocalColumnExpression($this, $this->getTableNameInQuery(), $pkCol);
-                $criteria->addFilter($column, $keyPart);
+                $query->addAnd($column, $keyPart);
             }
         }
-        $dataFetcher = $criteria->doSelect($con);
+        $dataFetcher = $query->doSelect($con);
 
-        return $criteria->getFormatter()->init($criteria)->formatOne($dataFetcher);
+        return $query->getFormatter()->init($query)->formatOne($dataFetcher);
     }
 
     /**
@@ -1597,7 +1597,7 @@ class ModelCriteria extends BaseModelCriteria
             // simple primary key
             $pkColumnMap = array_shift($pkCols);
             $column = new LocalColumnExpression($this, $this->getTableNameInQuery(), $pkColumnMap);
-            $criteria->addFilter($column, $keys, Criteria::IN);
+            $criteria->addAnd($column, $keys, Criteria::IN);
         } else {
             // composite primary key
             throw new PropelException('Multiple object retrieval is not implemented for composite primary keys');

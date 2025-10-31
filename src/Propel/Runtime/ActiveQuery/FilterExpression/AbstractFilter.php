@@ -111,7 +111,7 @@ abstract class AbstractFilter extends ClauseList implements ColumnFilterInterfac
     abstract protected function resolveUnresolved(): void;
 
     /**
-     * @param array $paramCollector
+     * @param array<array{table?: ?string, column?: string, value: mixed, type?: int}> $paramCollector
      *
      * @return string
      */
@@ -151,7 +151,7 @@ abstract class AbstractFilter extends ClauseList implements ColumnFilterInterfac
     /**
      * Collects a Prepared Statement representation of the Filter onto the buffer
      *
-     * @param array<string, array{table: string, column: string, value: mixed}> $paramCollector A list to which Prepared Statement parameters will be appended
+     * @param array<array{table?: ?string, column?: string, value: mixed, type?: int}> $paramCollector A list to which Prepared Statement parameters will be appended
      *
      * @return string
      */

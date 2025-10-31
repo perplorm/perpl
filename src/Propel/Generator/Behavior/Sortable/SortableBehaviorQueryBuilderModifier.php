@@ -535,7 +535,7 @@ static public function retrieveByRank(\$rank, " . ($useScope ? '$scope = null, '
     }
 
     \$c = new Criteria;
-    \$c->addFilter({$this->tableMapClassName}::RANK_COL, \$rank);";
+    \$c->addAnd({$this->tableMapClassName}::RANK_COL, \$rank);";
         if ($useScope) {
             $script .= "
     static::sortableApplyScopeCriteria(\$c, \$scope);";

@@ -30,8 +30,6 @@ abstract class SyncedTableBehaviorDeclaration extends BehaviorWithParameterAcces
     public const PARAMETER_KEY_SYNCED_TABLE = 'table_name';
 
     /**
-     * @deprecated Needed for BC - prefer table_attributes
-     *
      * @var string
      */
     public const PARAMETER_KEY_SYNCED_PHPNAME = 'synced_phpname';

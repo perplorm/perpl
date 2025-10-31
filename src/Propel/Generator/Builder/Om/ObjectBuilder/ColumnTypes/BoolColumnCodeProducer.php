@@ -93,7 +93,6 @@ class BoolColumnCodeProducer extends ColumnCodeProducer
     {
         $col = $this->column;
         $clo = $col->getLowercasedName();
-        $orNull = $col->isNotNull() ? '' : '|null';
 
         $script .= "
     /**
@@ -104,7 +103,7 @@ class BoolColumnCodeProducer extends ColumnCodeProducer
      * - 0, '0', 'false', 'off', 'no' are converted to boolean false
      * Check on string values is case insensitive (so 'FaLsE' is seen as 'false').{$this->getColumnDescriptionDoc()}
      *
-     * @param string|int|bool{$orNull} \$v The new value
+     * @param string|int|bool|null \$v The new value
      *
      * @return \$this
      */";

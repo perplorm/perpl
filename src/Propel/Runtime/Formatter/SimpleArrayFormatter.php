@@ -53,9 +53,7 @@ class SimpleArrayFormatter extends AbstractFormatter
 
         foreach ($dataFetcher as $row) {
             $rowArray = $this->getStructuredArrayFromRow($row);
-            if ($rowArray !== false) {
-                $collection[] = $rowArray;
-            }
+            $collection[] = $rowArray;
         }
         $dataFetcher->close();
 
@@ -98,9 +96,7 @@ class SimpleArrayFormatter extends AbstractFormatter
 
         foreach ($dataFetcher as $row) {
             $rowArray = $this->getStructuredArrayFromRow($row);
-            if ($rowArray !== false) {
-                $result = $rowArray;
-            }
+            $result = $rowArray;
         }
         $dataFetcher->close();
 

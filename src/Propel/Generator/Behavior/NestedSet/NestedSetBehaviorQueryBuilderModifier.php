@@ -565,18 +565,18 @@ public function findTree(" . ($useScope ? '$scope = null, ' : '') . "?Connection
 /**
  * Returns the root nodes for the tree
  *
- * @param \Propel\Runtime\ActiveQuery\Criteria \$criteria    Optional Criteria to filter the query
+ * @param \Propel\Runtime\ActiveQuery\Criteria|null \$query    Optional Criteria to filter the query
  * @param \Propel\Runtime\Connection\ConnectionInterface \$con Connection to use.
  * @return {$this->objectClassName}[]|ObjectCollection|mixed the list of results, formatted by the current formatter
  */
-static public function retrieveRoots(?Criteria \$criteria = null, ?ConnectionInterface \$con = null)
+static public function retrieveRoots(?Criteria \$query = null, ?ConnectionInterface \$con = null)
 {
-    if (null === \$criteria) {
-        \$criteria = new Criteria($tableMapClassName::DATABASE_NAME);
+    if (!\$query) {
+        \$query = new Criteria($tableMapClassName::DATABASE_NAME);
     }
-    \$criteria->addFilter($objectClassName::LEFT_COL, 1, Criteria::EQUAL);
+    \$query->addAnd($objectClassName::LEFT_COL, 1, Criteria::EQUAL);
 
-    return $queryClassName::create(null, \$criteria)->find(\$con);
+    return $queryClassName::create(null, \$query)->find(\$con);
 }
 ";
     }
@@ -608,15 +608,15 @@ static public function retrieveRoots(?Criteria \$criteria = null, ?ConnectionInt
  */
 static public function retrieveRoot(" . ($useScope ? '$scope = null, ' : '') . "?ConnectionInterface \$con = null)
 {
-    \$c = new Criteria($tableMapClassName::DATABASE_NAME);
-    \$c->addFilter($objectClassName::LEFT_COL, 1, Criteria::EQUAL);";
+    \$query = new Criteria($tableMapClassName::DATABASE_NAME);
+    \$query->addAnd($objectClassName::LEFT_COL, 1, Criteria::EQUAL);";
         if ($useScope) {
             $script .= "
-    \$c->addFilter($objectClassName::SCOPE_COL, \$scope, Criteria::EQUAL);";
+    \$query->addAnd($objectClassName::SCOPE_COL, \$scope, Criteria::EQUAL);";
         }
         $script .= "
 
-    return $queryClassName::create(null, \$c)->findOne(\$con);
+    return $queryClassName::create(null, \$query)->findOne(\$con);
 }
 ";
     }
@@ -642,24 +642,24 @@ static public function retrieveRoot(" . ($useScope ? '$scope = null, ' : '') . "
  * @param int \$scope        Scope to determine which root node to return";
         }
         $script .= "
- * @param \Propel\Runtime\ActiveQuery\Criteria \$criteria    Optional Criteria to filter the query
+ * @param \Propel\Runtime\ActiveQuery\Criteria \$query    Optional Criteria to filter the query
  * @param \Propel\Runtime\Connection\ConnectionInterface \$con Connection to use.
  *
  * @return {$this->objectClassName}[]|ObjectCollection|mixed the list of results, formatted by the current formatter
  */
-static public function retrieveTree(" . ($useScope ? '$scope = null, ' : '') . "?Criteria \$criteria = null, ?ConnectionInterface \$con = null)
+static public function retrieveTree(" . ($useScope ? '$scope = null, ' : '') . "?Criteria \$query = null, ?ConnectionInterface \$con = null)
 {
-    if (null === \$criteria) {
-        \$criteria = new Criteria($tableMapClassName::DATABASE_NAME);
+    if (null === \$query) {
+        \$query = new Criteria($tableMapClassName::DATABASE_NAME);
     }
-    \$criteria->addAscendingOrderByColumn($objectClassName::LEFT_COL);";
+    \$query->addAscendingOrderByColumn($objectClassName::LEFT_COL);";
         if ($useScope) {
             $script .= "
-    \$criteria->addFilter($objectClassName::SCOPE_COL, \$scope, Criteria::EQUAL);";
+    \$query->addAnd($objectClassName::SCOPE_COL, \$scope, Criteria::EQUAL);";
         }
         $script .= "
 
-    return $queryClassName::create(null, \$criteria)->find(\$con);
+    return $queryClassName::create(null, \$query)->find(\$con);
 }
 ";
     }
@@ -720,10 +720,10 @@ static public function deleteTree(" . ($useScope ? '$scope = null, ' : '') . "?C
 {";
         if ($useScope) {
             $script .= "
-    \$c = new Criteria($tableMapClassName::DATABASE_NAME);
-    \$c->addFilter($objectClassName::SCOPE_COL, \$scope, Criteria::EQUAL);
+    \$query = new Criteria($tableMapClassName::DATABASE_NAME);
+    \$query->addAnd($objectClassName::SCOPE_COL, \$scope, Criteria::EQUAL);
 
-    return $tableMapClassName::doDelete(\$c, \$con);";
+    return $tableMapClassName::doDelete(\$query, \$con);";
         } else {
             $script .= "
 
@@ -776,10 +776,10 @@ static public function shiftRLValues(\$delta, \$first, \$last = null" . ($useSco
     if (null !== \$last) {
         \$criterion->addAnd(\$updateQuery->getNewCriterion($objectClassName::LEFT_COL, \$last, Criteria::LESS_EQUAL));
     }
-    \$updateQuery->addFilter(\$criterion);";
+    \$updateQuery->addAnd(\$criterion);";
         if ($useScope) {
             $script .= "
-    \$updateQuery->addFilter($objectClassName::SCOPE_COL, \$scope, Criteria::EQUAL);";
+    \$updateQuery->addAnd($objectClassName::SCOPE_COL, \$scope, Criteria::EQUAL);";
         }
         $script .= "
 
@@ -793,10 +793,10 @@ static public function shiftRLValues(\$delta, \$first, \$last = null" . ($useSco
     if (null !== \$last) {
         \$criterion->addAnd(\$updateQuery->getNewCriterion($objectClassName::RIGHT_COL, \$last, Criteria::LESS_EQUAL));
     }
-    \$updateQuery->addFilter(\$criterion);";
+    \$updateQuery->addAnd(\$criterion);";
         if ($useScope) {
             $script .= "
-    \$updateQuery->addFilter($objectClassName::SCOPE_COL, \$scope, Criteria::EQUAL);";
+    \$updateQuery->addAnd($objectClassName::SCOPE_COL, \$scope, Criteria::EQUAL);";
         }
         $script .= "
 
@@ -844,11 +844,11 @@ static public function shiftLevel(\$delta, \$first, \$last" . ($useScope ? ', $s
     }
 
     \$updateQuery = new Criteria($tableMapClassName::DATABASE_NAME);
-    \$updateQuery->addFilter($objectClassName::LEFT_COL, \$first, Criteria::GREATER_EQUAL);
-    \$updateQuery->addFilter($objectClassName::RIGHT_COL, \$last, Criteria::LESS_EQUAL);";
+    \$updateQuery->addAnd($objectClassName::LEFT_COL, \$first, Criteria::GREATER_EQUAL);
+    \$updateQuery->addAnd($objectClassName::RIGHT_COL, \$last, Criteria::LESS_EQUAL);";
         if ($useScope) {
             $script .= "
-    \$updateQuery->addFilter($objectClassName::SCOPE_COL, \$scope, Criteria::EQUAL);";
+    \$updateQuery->addAnd($objectClassName::SCOPE_COL, \$scope, Criteria::EQUAL);";
         }
         $script .= "
 
@@ -893,12 +893,12 @@ static public function updateLoadedNodes(\$prune = null, ?ConnectionInterface \$
         if (!empty(\$keys)) {
             // We don't need to alter the object instance pool; we're just modifying these ones
             // already in the pool.
-            \$criteria = new Criteria($tableMapClassName::DATABASE_NAME);";
+            \$query = new Criteria($tableMapClassName::DATABASE_NAME);";
         if (count($this->table->getPrimaryKey()) === 1) {
             $pkey = $this->table->getPrimaryKey();
             $col = array_shift($pkey);
             $script .= "
-            \$criteria->addFilter(" . $this->builder->getColumnConstant($col) . ', $keys, Criteria::IN);';
+            \$query->addAnd(" . $this->builder->getColumnConstant($col) . ', $keys, Criteria::IN);';
         } else {
             $fields = [];
             foreach ($this->table->getPrimaryKey() as $col) {
@@ -909,25 +909,25 @@ static public function updateLoadedNodes(\$prune = null, ?ConnectionInterface \$
             // Loop on each instances in pool
             foreach (\$keys as \$values) {
               // Create initial Criterion
-                \$cton = \$criteria->getNewCriterion(" . $fields[0] . ', $values[0]);';
+                \$cton = \$query->getNewCriterion(" . $fields[0] . ', $values[0]);';
             unset($fields[0]);
             foreach ($fields as $k => $col) {
                 $script .= "
 
                 // Create next criterion
-                \$nextcton = \$criteria->getNewCriterion(" . $col . ", \$values[$k]);
+                \$nextcton = \$query->getNewCriterion(" . $col . ", \$values[$k]);
                 // And merge it with the first
                 \$cton->addAnd(\$nextcton);";
             }
             $script .= "
 
                 // Add final Criterion to Criteria
-                \$criteria->addOr(\$cton);
+                \$query->addOr(\$cton);
             }";
         }
 
         $script .= "
-            \$dataFetcher = $queryClassName::create(null, \$criteria)->fetch(\$con);
+            \$dataFetcher = $queryClassName::create(null, \$query)->fetch(\$con);
             while (\$row = \$dataFetcher->fetch()) {
                 \$key = $tableMapClassName::getPrimaryKeyHashFromRow(\$row, 0);
                 /** @var \$object $objectClassName */
@@ -1026,14 +1026,14 @@ static public function makeRoomForLeaf(\$left" . ($useScope ? ', $scope' : '') .
  */
 static public function fixLevels(" . ($useScope ? '$scope, ' : '') . "?ConnectionInterface \$con = null): void
 {
-    \$c = new Criteria();";
+    \$query = new Criteria();";
         if ($useScope) {
             $script .= "
-    \$c->addFilter($objectClassName::SCOPE_COL, \$scope, Criteria::EQUAL);";
+    \$query->addAnd($objectClassName::SCOPE_COL, \$scope, Criteria::EQUAL);";
         }
         $script .= "
-    \$c->addAscendingOrderByColumn($objectClassName::LEFT_COL);
-    \$dataFetcher = $queryClassName::create(null, \$c)->fetch(\$con);
+    \$query->addAscendingOrderByColumn($objectClassName::LEFT_COL);
+    \$dataFetcher = $queryClassName::create(null, \$query)->fetch(\$con);
     ";
         if (!$this->table->getChildrenColumn()) {
             $script .= "
@@ -1115,7 +1115,7 @@ public static function setNegativeScope(\$scope, ?ConnectionInterface \$con = nu
 {
     //adjust scope value to \$scope
     \$updateQuery = new Criteria($tableMapClassName::DATABASE_NAME);
-    \$updateQuery->addFilter($objectClassName::LEFT_COL, 0, Criteria::LESS_EQUAL);
+    \$updateQuery->addAnd($objectClassName::LEFT_COL, 0, Criteria::LESS_EQUAL);
     \$updateQuery->setUpdateValue($objectClassName::SCOPE_COL, \$scope);
 
     \$updateQuery->doUpdate(null, \$con);

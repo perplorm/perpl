@@ -98,7 +98,6 @@ class TimestampableBehaviorTest extends BookstoreTestBase
         $t1->save();
         $this->assertTimeEquals($tsave, $t1->getUpdatedAt('U'), 'Timestampable sets updated_column to time() on creation');
         sleep(1);
-        $tupdate = time();
         $t1->save();
         $this->assertTimeEquals($tsave, $t1->getUpdatedAt('U'), 'Timestampable only changes updated_column if the object was modified');
     }
@@ -132,9 +131,9 @@ class TimestampableBehaviorTest extends BookstoreTestBase
         $tsave = time();
         $t1->save();
         $this->assertTimeEquals($tsave, $t1->getCreatedAt('U'), 'Timestampable sets created_column to time() on creation');
+        $this->assertEquals($t1->getCreatedAt('u'), $t1->getUpdatedAt('u'), 'Timestampable does not set created_column and updated_column to the same value on creation');
         sleep(1);
         $t1->setTitle('foo');
-        $tupdate = time();
         $t1->save();
         $this->assertTimeEquals($tsave, $t1->getCreatedAt('U'), 'Timestampable does not update created_column on update');
     }

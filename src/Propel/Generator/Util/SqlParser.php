@@ -255,7 +255,7 @@ class SqlParser
             switch ($char) {
                 case '#':
                     // detect comment line
-                    if ($newLine === true && $isCommentLine === false) {
+                    if ($newLine === true) {
                         $this->pos++;
                         $isCommentLine = true;
 
