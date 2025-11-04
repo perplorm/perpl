@@ -176,7 +176,7 @@ class PropelDateTime extends DateTime
 
             // timezone must be explicitly specified and then changed
             // because of a DateTime bug: http://bugs.php.net/bug.php?id=43003
-            $dateTimeObject->setTimeZone(new DateTimeZone(date_default_timezone_get()));
+            $dateTimeObject->setTimezone(new DateTimeZone(date_default_timezone_get()));
         } else {
             if ($timeZone === null) {
                 // stupid DateTime constructor signature
@@ -201,7 +201,7 @@ class PropelDateTime extends DateTime
         // We need to use a string without a time zone, due to
         // PHP bug: http://bugs.php.net/bug.php?id=40743
         $this->dateString = $this->format('Y-m-d H:i:s');
-        $this->tzString = $this->getTimeZone()->getName();
+        $this->tzString = $this->getTimezone()->getName();
 
         return ['dateString', 'tzString'];
     }

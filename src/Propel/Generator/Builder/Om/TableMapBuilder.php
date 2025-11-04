@@ -425,7 +425,7 @@ class " . $this->getUnqualifiedClassName() . " extends TableMap
 ";
 
             if (strtoupper($child->getClassName()) != $child->getConstantSuffix()) {
-                $childClassLiteral = strtoupper($child->getClassname());
+                $childClassLiteral = strtoupper($child->getClassName());
                 $script .= "
     /** A key representing a particular subclass */
     public const CLASSKEY_{$childClassLiteral} = '$fqcn';

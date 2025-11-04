@@ -327,7 +327,7 @@ abstract class AbstractManager
                     $xslDom = new DOMDocument('1.0', 'UTF-8');
                     $xslDom->load($this->xsl->getAbsolutePath());
                     $xsl = new XSLTProcessor();
-                    $xsl->importStyleSheet($xslDom);
+                    $xsl->importStylesheet($xslDom);
                     $dom = $xsl->transformToDoc($dom);
 
                     if ($dom === false) {

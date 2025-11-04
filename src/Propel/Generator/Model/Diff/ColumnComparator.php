@@ -31,7 +31,7 @@ class ColumnComparator
         if ($changedProperties) {
             if ($fromColumn->hasPlatform() || $toColumn->hasPlatform()) {
                 $platform = $fromColumn->hasPlatform() ? $fromColumn->getPlatform() : $toColumn->getPlatform();
-                if ($platform->getColumnDDL($fromColumn) == $platform->getColumnDDl($toColumn)) {
+                if ($platform->getColumnDDL($fromColumn) == $platform->getColumnDDL($toColumn)) {
                     return false;
                 }
             }

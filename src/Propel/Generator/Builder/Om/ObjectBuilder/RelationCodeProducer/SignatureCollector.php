@@ -234,7 +234,7 @@ class SignatureCollector
         }
 
         foreach ($this->relation->getUnclassifiedPrimaryKeys() as $column) {
-            $argumentName = '$' . lcFirst($column->getPhpName());
+            $argumentName = '$' . lcfirst($column->getPhpName());
             $qualifiedType = $column->getPhpType();
             $defaultValue = $this->resolveDefaultValue($column, $withDefaultValue);
             $docType = $defaultValue === 'null' ? "$qualifiedType|null" : $qualifiedType;

@@ -276,7 +276,7 @@ class CrossRelation
      * @return string
      */
     #[\Override]
-    public function __tostring(): string
+    public function __toString(): string
     {
         if (!$this->crossForeignKeys) {
             return 'Incomplete many-to-many relation';

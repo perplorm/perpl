@@ -359,7 +359,7 @@ protected function makeSlugUnique(string \$slug, string \$separator = '" . $this
         if ($this->getParameter('slug_pattern') == null) {
             $script .= "
 
-        \$count = " . $this->builder->getStubQueryBuilder()->getClassname() . "::create()
+        \$count = " . $this->builder->getStubQueryBuilder()->getClassName() . "::create()
             ->filterBySlug(\$this->$getter())
             ->filterByPrimaryKey(\$this->getPrimaryKey())
         ->count();
@@ -376,7 +376,7 @@ protected function makeSlugUnique(string \$slug, string \$separator = '" . $this
     \$col = 'q." . $this->getColumnForParameter('slug_column')->getPhpName() . "';
     \$compare = \$alreadyExists ? \$adapter->compareRegex(\$col, '?') : sprintf('%s = ?', \$col);
 
-    \$query = " . $this->builder->getStubQueryBuilder()->getClassname() . "::create('q')
+    \$query = " . $this->builder->getStubQueryBuilder()->getClassName() . "::create('q')
         ->where(\$compare, \$alreadyExists ? '^' . \$slug2 . '[0-9]+$' : \$slug2)
         ->prune(\$this)";
 
