@@ -29,12 +29,12 @@ class TernaryNamedRelationCodeTest extends AbstractManyToManyCodeTest
     {
         $expected = '
     /**
-     * @var \Propel\Runtime\Collection\ObjectCombinationCollection<array{\Base\Team, \Base\Event, string}>|null Objects in LeTeamLeEventDate relation.
+     * Objects associated via LeTeamLeEventDate relation (n:m).
      */
-    protected ?ObjectCombinationCollection $combinationLeTeamLeEventDates = null;
+    protected ObjectCombinationCollection|null $combinationLeTeamLeEventDates = null;
 
     /**
-     * @var bool
+     * If $combinationLeTeamLeEventDates contains all objects in LeTeamLeEventDate relation.
      */
     protected bool $combinationLeTeamLeEventDatesIsPartial = false;
 ';
@@ -49,10 +49,8 @@ class TernaryNamedRelationCodeTest extends AbstractManyToManyCodeTest
         $expected = '
     /**
      * Items of LeTeamLeEventDate relation marked for deletion.
-     *
-     * @var \Propel\Runtime\Collection\ObjectCombinationCollection<array{\Base\Team, \Base\Event, string}>|null
      */
-    protected ?ObjectCombinationCollection $leTeamLeEventDatesScheduledForDeletion = null;
+    protected ObjectCombinationCollection|null $leTeamLeEventDatesScheduledForDeletion = null;
 ';
         $this->assertProducedCodeMatches('addScheduledForDeletionAttribute', $expected);
     }

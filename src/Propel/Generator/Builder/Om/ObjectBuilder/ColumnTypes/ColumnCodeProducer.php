@@ -30,6 +30,14 @@ class ColumnCodeProducer extends ObjectCodeProducer
     }
 
     /**
+     * @return \Propel\Generator\Model\Column
+     */
+    public function getColumn(): Column
+    {
+        return $this->getColumn();
+    }
+
+    /**
      * @return string
      */
     protected function getQualifiedTypeString(): string
@@ -65,18 +73,19 @@ class ColumnCodeProducer extends ObjectCodeProducer
             || array_intersect(explode('|', $rawType), ['resource', 'mixed']);
 
         if ($omitTypeHint) {
-            $docType = "$rawType|null";
+            $docType = "
+     *
+     * @var $rawType|null";
             $columnDeclaration = "\${$columnName}";
         } else {
-            $docType = $this->referencedClasses->resolveTypeHintFromDocType($rawType) . '|null';
-            $columnDeclaration = "$docType \${$columnName} = null";
+            $docType = '';
+            $typeHint = $this->referencedClasses->resolveTypeHintFromDocType($rawType) . '|null';
+            $columnDeclaration = "$typeHint \${$columnName} = null";
         }
 
         $script .= "
     /**
-     * The value for the $columnName field.{$this->getColumnDescriptionDoc()}{$this->getDefaultValueDescription()}
-     *
-     * @var $docType
+     * The value for the $columnName field.{$this->getColumnDescriptionDoc()}{$this->getDefaultValueDescription()}{$docType}
      */
     protected $columnDeclaration;\n";
     }

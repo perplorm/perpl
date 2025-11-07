@@ -2692,8 +2692,6 @@ $indent};";
     /**
      * Flag to prevent endless save loop, if this object is referenced
      * by another object which falls in this transaction.
-     *
-     * @var bool
      */
     protected bool \$alreadyInSave = false;
 ";
