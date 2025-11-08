@@ -7,9 +7,11 @@
         "persistence",
         "Active Record",
         "Propel",
-        "Propel2"
+        "Propel2",
+        "Perpl",
+        "database"
     ],
-    "homepage": "http://www.propelorm.org/",
+    "homepage": "https://github.com/perplorm/perpl",
     "license": "MIT",
     "authors": [
         {
