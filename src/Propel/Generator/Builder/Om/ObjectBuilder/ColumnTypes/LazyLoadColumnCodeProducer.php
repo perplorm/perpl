@@ -79,7 +79,7 @@ class LazyLoadColumnCodeProducer extends ColumnCodeProducer
      *
      * @var bool
      */
-    protected \${$clo}_isLoaded = false;\n";
+    protected bool \${$clo}_isLoaded = false;\n";
     }
 
     /**

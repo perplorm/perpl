@@ -14,6 +14,6 @@ final class BoxedString
 
     public function __toString()
     {
-        return $this->s;
+        return "Boxed: {$this->s}";
     }
 }

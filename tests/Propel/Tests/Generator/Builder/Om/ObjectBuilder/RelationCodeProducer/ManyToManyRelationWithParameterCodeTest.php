@@ -29,12 +29,12 @@ class ManyToManyRelationWithParameterCodeTest extends AbstractManyToManyCodeTest
     {
         $expected = '
     /**
-     * @var \Propel\Runtime\Collection\ObjectCombinationCollection<array{\Base\Team, string, int}>|null Objects in TeamDayType relation.
+     * Objects associated via TeamDayType relation (n:m).
      */
-    protected ?ObjectCombinationCollection $combinationTeamDayTypes = null;
+    protected ObjectCombinationCollection|null $combinationTeamDayTypes = null;
 
     /**
-     * @var bool
+     * If $combinationTeamDayTypes contains all objects in TeamDayType relation.
      */
     protected bool $combinationTeamDayTypesIsPartial = false;
 ';
@@ -49,10 +49,8 @@ class ManyToManyRelationWithParameterCodeTest extends AbstractManyToManyCodeTest
         $expected = '
     /**
      * Items of TeamDayType relation marked for deletion.
-     *
-     * @var \Propel\Runtime\Collection\ObjectCombinationCollection<array{\Base\Team, string, int}>|null
      */
-    protected ?ObjectCombinationCollection $teamDayTypesScheduledForDeletion = null;
+    protected ObjectCombinationCollection|null $teamDayTypesScheduledForDeletion = null;
 ';
         $this->assertProducedCodeMatches('addScheduledForDeletionAttribute', $expected);
     }

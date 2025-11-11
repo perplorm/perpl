@@ -722,23 +722,23 @@ abstract class {$this->getUnqualifiedClassName()}$parentClass implements ActiveR
         // FIXME - Apply support for PHP default expressions here
         // see: http://propel.phpdb.org/trac/ticket/378
 
-        $colsWithDefaults = [];
         foreach ($table->getColumns() as $column) {
             $def = $column->getDefaultValue();
-            if ($def !== null && !$def->isExpression()) {
-                $colsWithDefaults[] = $column;
+            if ($def === null || $def->isExpression()) {
+                continue;
             }
-        }
 
-        foreach ($colsWithDefaults as $column) {
             $clo = $column->getLowercasedName();
             $defaultValue = ColumnCodeProducerFactory::create($column, $this)->getDefaultValueString();
             if ($column->isTemporalType()) {
                 $dateTimeClass = $this->resolveColumnDateTimeClass($column);
                 $defaultValue = "PropelDateTime::newInstance($defaultValue, null, '$dateTimeClass')";
+            } elseif ($column->isPhpObjectType()) {
+                $assumedClassName = $this->declareClass($column->getPhpType());
+                $defaultValue = "new $assumedClassName($defaultValue )";
             }
             $script .= "
-        \$this->" . $clo . " = $defaultValue;";
+        \$this->{$clo} = $defaultValue;";
         }
     }
 
@@ -839,7 +839,10 @@ abstract class {$this->getUnqualifiedClassName()}$parentClass implements ActiveR
             }
             $notEquals = '!==';
             $defaultValueString = ColumnCodeProducerFactory::create($col, $this)->getDefaultValueString();
-
+            if ($col->isPhpObjectType()) {
+                $assumedClassName = $this->declareClass($col->getPhpType());
+                $defaultValueString = "new $assumedClassName($defaultValueString)";
+            }
             if (strpos($defaultValueString, 'new ') === 0) {
                 $notEquals = '!='; // allow object-comparison for custom PHP types
             }
@@ -862,7 +865,6 @@ abstract class {$this->getUnqualifiedClassName()}$parentClass implements ActiveR
     protected function addHasOnlyDefaultValuesClose(string &$script): void
     {
         $script .= "
-        // otherwise, everything was equal, so return TRUE
         return true;";
         $script .= "
     }
@@ -947,78 +949,82 @@ abstract class {$this->getUnqualifiedClassName()}$parentClass implements ActiveR
         $table = $this->getTable();
         $platform = $this->getPlatform();
 
-        $tableMap = $this->getTableMapClassName();
+        $tableMapClassName = $this->getTableMapClassName();
 
         $script .= "
-        try {";
-        $n = 0;
-        foreach ($table->getColumns() as $col) {
-            if (!$col->isLazyLoad()) {
-                $indexName = "TableMap::TYPE_NUM == \$indexType ? $n + \$startcol : $tableMap::translateFieldName('{$col->getPhpName()}', TableMap::TYPE_PHPNAME, \$indexType)";
+        try {
+            \$useNumericIndex = \$indexType === TableMap::TYPE_NUM;";
 
+        $rowOffset = 0;
+        foreach ($table->getColumns() as $col) {
+            if ($col->isLazyLoad()) {
+                continue;
+            }
+
+            $script .= "\n
+            \$rowIndex = \$useNumericIndex ? \$startcol + $rowOffset : $tableMapClassName::translateFieldName('{$col->getPhpName()}', TableMap::TYPE_PHPNAME, \$indexType);
+            \$columnValue = \$row[\$rowIndex];";
+            $clo = $col->getLowercasedName();
+            if ($col->getType() === PropelTypes::CLOB_EMU && $this->getPlatform() instanceof OraclePlatform) {
+                // PDO_OCI returns a stream for CLOB objects, while other PDO adapters return a string...
                 $script .= "
-            \$col = \$row[$indexName];";
-                $clo = $col->getLowercasedName();
-                if ($col->getType() === PropelTypes::CLOB_EMU && $this->getPlatform() instanceof OraclePlatform) {
-                    // PDO_OCI returns a stream for CLOB objects, while other PDO adapters return a string...
-                    $script .= "
-            \$this->$clo = stream_get_contents(\$col);";
-                } elseif ($col->isLobType() && !$platform->hasStreamBlobImpl()) {
-                    $script .= "
-            \$this->$clo = \$this->writeResource(\$col);";
-                } elseif ($col->isTemporalType()) {
-                    $dateTimeClass = $this->resolveColumnDateTimeClass($col);
-                    $handleMysqlDate = false;
-                    if ($this->getPlatform() instanceof MysqlPlatform) {
-                        if (in_array($col->getType(), [PropelTypes::TIMESTAMP, PropelTypes::DATETIME], true)) {
-                            $handleMysqlDate = true;
-                            $mysqlInvalidDateString = '0000-00-00 00:00:00';
-                        } elseif ($col->getType() === PropelTypes::DATE) {
-                            $handleMysqlDate = true;
-                            $mysqlInvalidDateString = '0000-00-00';
-                        }
-                        // 00:00:00 is a valid time, so no need to check for that.
+            \$this->$clo = stream_get_contents(\$columnValue);";
+            } elseif ($col->isLobType() && !$platform->hasStreamBlobImpl()) {
+                $script .= "
+            \$this->$clo = \$this->writeResource(\$columnValue);";
+            } elseif ($col->isTemporalType()) {
+                $dateTimeClass = $this->resolveColumnDateTimeClass($col);
+                $handleMysqlDate = false;
+                if ($this->getPlatform() instanceof MysqlPlatform) {
+                    if (in_array($col->getType(), [PropelTypes::TIMESTAMP, PropelTypes::DATETIME], true)) {
+                        $handleMysqlDate = true;
+                        $mysqlInvalidDateString = '0000-00-00 00:00:00';
+                    } elseif ($col->getType() === PropelTypes::DATE) {
+                        $handleMysqlDate = true;
+                        $mysqlInvalidDateString = '0000-00-00';
                     }
-                    if ($handleMysqlDate) {
-                        $script .= "
-            if (\$col === '$mysqlInvalidDateString') {
-                \$col = null;
-            }";
-                    }
-                    $script .= "
-            \$this->$clo = (\$col !== null) ? PropelDateTime::newInstance(\$col, null, '$dateTimeClass') : null;";
-                } elseif ($col->isUuidBinaryType()) {
-                    $uuidSwapFlag = $this->getUuidSwapFlagLiteral();
-                    $script .= "
-            if (is_resource(\$col)) {
-                \$col = stream_get_contents(\$col);
-            }
-            \$this->$clo = UuidConverter::binToUuid(\$col, $uuidSwapFlag);";
-                } elseif ($col->isPhpPrimitiveType()) {
-                    $script .= "
-            \$this->$clo = \$col !== null ? ({$col->getPhpType()})\$col : null;";
-                } elseif ($col->getType() === PropelTypes::OBJECT) {
-                    $script .= "
-            \$this->$clo = \$col;";
-                } elseif ($col->getType() === PropelTypes::PHP_ARRAY) {
-                    $cloUnserialized = $clo . '_unserialized';
-                    $script .= "
-            \$this->$clo = \$col;
-            \$this->$cloUnserialized = null;";
-                } elseif ($col->isSetType()) {
-                    $cloConverted = $clo . '_converted';
-                    $script .= "
-            \$this->$clo = \$col;
-            \$this->$cloConverted = null;";
-                } elseif ($col->isPhpObjectType()) {
-                    $script .= "
-            \$this->$clo = (\$col !== null) ? new " . $col->getPhpType() . '($col) : null;';
-                } else {
-                    $script .= "
-            \$this->$clo = \$col;";
+                    // 00:00:00 is a valid time, so no need to check for that.
                 }
-                $n++;
+                if ($handleMysqlDate) {
+                    $script .= "
+            if (\$columnValue === '$mysqlInvalidDateString') {
+                \$columnValue = null;
+            }";
+                }
+                $script .= "
+            \$this->$clo = (\$columnValue !== null) ? PropelDateTime::newInstance(\$columnValue, null, '$dateTimeClass') : null;";
+            } elseif ($col->isUuidBinaryType()) {
+                $uuidSwapFlag = $this->getUuidSwapFlagLiteral();
+                $script .= "
+            if (is_resource(\$columnValue)) {
+                \$columnValue = stream_get_contents(\$columnValue);
             }
+            \$this->$clo = UuidConverter::binToUuid(\$columnValue, $uuidSwapFlag);";
+            } elseif ($col->isPhpPrimitiveType()) {
+                $script .= "
+            \$this->$clo = \$columnValue !== null ? ({$col->getPhpType()})\$columnValue : null;";
+            } elseif ($col->getType() === PropelTypes::OBJECT) {
+                $script .= "
+            \$this->$clo = \$columnValue;";
+            } elseif ($col->getType() === PropelTypes::PHP_ARRAY) {
+                $cloUnserialized = $clo . '_unserialized';
+                $script .= "
+            \$this->$clo = \$columnValue;
+            \$this->$cloUnserialized = null;";
+            } elseif ($col->isSetType()) {
+                $cloConverted = $clo . '_converted';
+                $script .= "
+            \$this->$clo = \$columnValue;
+            \$this->$cloConverted = null;";
+            } elseif ($col->isPhpObjectType()) {
+                $assumedClassName = $this->declareClass($col->getPhpType());
+                $script .= "
+            \$this->$clo = (\$columnValue === null) ? null : new $assumedClassName(\$columnValue);";
+            } else {
+                $script .= "
+            \$this->$clo = \$columnValue;";
+            }
+            $rowOffset++;
         }
 
         if ($this->getBuildProperty('generator.objectModel.addSaveMethod')) {
@@ -1036,10 +1042,11 @@ abstract class {$this->getUnqualifiedClassName()}$parentClass implements ActiveR
 
         $this->applyBehaviorModifier('postHydrate', $script, '            ');
 
+        $ownClassName = $this->getStubObjectBuilder()->getClassName();
         $script .= "
-            return \$startcol + $n; // $n = " . $this->getTableMapClass() . "::NUM_HYDRATE_COLUMNS.
+            return \$startcol + $rowOffset;
         } catch (Exception \$e) {
-            throw new PropelException(sprintf('Error populating %s object', " . var_export($this->getStubObjectBuilder()->getClassName(), true) . "), 0, \$e);
+            throw new PropelException('Error populating $ownClassName object', 0, \$e);
         }";
     }
 
@@ -2692,8 +2699,6 @@ $indent};";
     /**
      * Flag to prevent endless save loop, if this object is referenced
      * by another object which falls in this transaction.
-     *
-     * @var bool
      */
     protected bool \$alreadyInSave = false;
 ";

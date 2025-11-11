@@ -726,6 +726,7 @@ XML;
         $builder->build();
 
         $t = new \ExampleNamespace\Thing();
+        $this->assertInstanceOf(BoxedString::class, $t->getBoxedstring());
         $this->assertEquals(new BoxedString('asdf'), $t->getBoxedstring());
         $this->assertTrue(
             $t->hasOnlyDefaultValues(),

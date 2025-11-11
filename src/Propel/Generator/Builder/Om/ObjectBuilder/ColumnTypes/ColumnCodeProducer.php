@@ -30,6 +30,14 @@ class ColumnCodeProducer extends ObjectCodeProducer
     }
 
     /**
+     * @return \Propel\Generator\Model\Column
+     */
+    public function getColumn(): Column
+    {
+        return $this->getColumn();
+    }
+
+    /**
      * @return string
      */
     protected function getQualifiedTypeString(): string
@@ -51,22 +59,16 @@ class ColumnCodeProducer extends ObjectCodeProducer
 
     /**
      * @param string $script
-     * @param string|null $columnType
+     * @param string|null $columnDocType
      *
      * @return void
      */
-    public function addDefaultColumnAttribute(string &$script, ?string $columnType = null): void
+    public function addDefaultColumnAttribute(string &$script, ?string $columnDocType = null): void
     {
-        $columnType ??= $this->getQualifiedTypeString();
-        $clo = $this->column->getLowercasedName();
-
-        $script .= "
-    /**
-     * The value for the $clo field.{$this->getColumnDescriptionDoc()}{$this->getDefaultValueDescription()}
-     *
-     * @var $columnType|null
-     */
-    protected \${$clo };\n";
+        $columnName = $this->column->getLowercasedName();
+        $description = "The value for the $columnName field.{$this->getColumnDescriptionDoc()}{$this->getDefaultValueDescription()}";
+        $docType = $columnDocType ?? $this->getQualifiedTypeString();
+        $script .= $this->buildDeclareColumnCode($columnName, $description, $docType);
     }
 
     /**
@@ -79,16 +81,42 @@ class ColumnCodeProducer extends ObjectCodeProducer
      */
     protected function addColumnAttributeUnserialized(string &$script, string $typeHint): void
     {
-        $columnName = $this->column->getLowercasedName();
+        $valueColumnName = $this->column->getLowercasedName();
+        $description = "The unserialized \$$valueColumnName value.";
+        $columnName = "{$valueColumnName}_unserialized";
 
-        $script .= "
+        $script .= $this->buildDeclareColumnCode($columnName, $description, $typeHint);
+    }
+
     /**
-     * The unserialized \$$columnName value - i.e. the persisted object.
-     * This is necessary to avoid repeated calls to unserialize() at runtime.
+     * @param string $columnName
+     * @param string $description
+     * @param string $docType
      *
-     * @var $typeHint|null
+     * @return string
      */
-    protected \${$columnName}_unserialized;\n";
+    protected function buildDeclareColumnCode(string $columnName, string $description, string $docType): string
+    {
+        $declareType = $this->getBuildProperty('generator.objectModel.typeColumnDataFields')
+            && !array_intersect(explode('|', $docType), ['resource', 'mixed']);
+        $handleGenericDeclaration = $declareType && $this->referencedClasses->isGenericTypeDeclaration($docType);
+
+        $docTypeDeclaration = ($declareType && !$handleGenericDeclaration) ? '' : "
+     *
+     * @var $docType|null";
+
+        if (!$declareType) {
+            $columnDeclaration = "\${$columnName}";
+        } else {
+            $typeDeclaration = $this->referencedClasses->resolveTypeDeclarationFromDocType($docType) . '|null';
+            $columnDeclaration = "$typeDeclaration \${$columnName} = null";
+        }
+
+        return "
+    /**
+     * {$description}{$docTypeDeclaration}
+     */
+    protected $columnDeclaration;\n";
     }
 
     /**
@@ -328,7 +356,7 @@ class ColumnCodeProducer extends ObjectCodeProducer
      */
     protected function addMutatorBody(string &$script): void
     {
-         $clo = $this->column->getLowercasedName();
+        $clo = $this->column->getLowercasedName();
 
         if ($this->column->isPhpPrimitiveType()) {
             $type = $this->column->getPhpType();

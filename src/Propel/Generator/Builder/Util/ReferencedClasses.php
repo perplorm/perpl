@@ -8,6 +8,7 @@
 
 namespace Propel\Generator\Builder\Util;
 
+use DateTimeInterface;
 use Propel\Generator\Builder\BuilderFactory\BuilderFactory;
 use Propel\Generator\Builder\Om\AbstractOMBuilder;
 use Propel\Generator\Config\GeneratorConfigInterface;
@@ -17,9 +18,9 @@ use Propel\Generator\Model\Table;
 
 class ReferencedClasses
 {
- /**
-  * @var \Propel\Generator\Builder\Om\AbstractOMBuilder
-  */
+    /**
+     * @var \Propel\Generator\Builder\Om\AbstractOMBuilder
+     */
     protected $builder;
 
     /**
@@ -386,5 +387,42 @@ class ReferencedClasses
         asort($usedClasses, SORT_STRING | SORT_FLAG_CASE);
 
         return implode("\n", $usedClasses) . "\n";
+    }
+
+    /**
+     * Register classes in builder from a doc type string.
+     *
+     * A string like 'DateTimeImmutable|string|null' would register DateTimeImmutable.
+     *
+     * @param string $docType
+     *
+     * @return string
+     */
+    public function resolveTypeDeclarationFromDocType(string $docType): string
+    {
+        $docTypeWithoutGenerics = preg_replace('/<[^>]*>/', '', $docType);
+        $types = explode('|', $docTypeWithoutGenerics);
+        foreach ($types as $key => $typeName) {
+            if (!class_exists($typeName)) {
+                // scalar type
+                continue;
+            }
+            if (is_subclass_of($typeName, DateTimeInterface::class)) {
+                $typeName = DateTimeInterface::class;
+            }
+            $types[$key] = $this->registerClassByFullyQualifiedName($typeName);
+        }
+
+        return implode('|', array_unique($types));
+    }
+
+    /**
+     * @param string $typeDeclaration
+     *
+     * @return bool
+     */
+    public function isGenericTypeDeclaration(string $typeDeclaration): bool
+    {
+        return (bool)preg_match('/<.*>\s*$/', $typeDeclaration); // check if type ends with generic param like "array<string>"
     }
 }

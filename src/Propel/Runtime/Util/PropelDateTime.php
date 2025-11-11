@@ -8,6 +8,7 @@
 
 namespace Propel\Runtime\Util;
 
+use DateMalformedStringException;
 use DateTime;
 use DateTimeImmutable;
 use DateTimeInterface;
@@ -123,13 +124,13 @@ class PropelDateTime extends DateTime
      *
      * @param mixed $value The value to convert (can be a string, a timestamp, or another DateTime)
      * @param \DateTimeZone|null $timeZone (optional) timezone
-     * @param string $dateTimeClass The class of the object to create, defaults to DateTime
+     * @param class-string<\DateTimeInterface> $dateTimeClass The class of the object to create, defaults to DateTime
      *
      * @throws \Propel\Runtime\Exception\PropelException
      *
-     * @return mixed|null An instance of $dateTimeClass
+     * @return \DateTimeInterface|null An instance of $dateTimeClass
      */
-    public static function newInstance($value, ?DateTimeZone $timeZone = null, string $dateTimeClass = 'DateTime')
+    public static function newInstance($value, ?DateTimeZone $timeZone = null, string $dateTimeClass = DateTime::class): DateTimeInterface|null
     {
         if ($value instanceof DateTimeInterface) {
             return $value;
@@ -154,13 +155,13 @@ class PropelDateTime extends DateTime
     /**
      * @param mixed $value
      * @param \DateTimeZone|null $timeZone
-     * @param string $dateTimeClass
+     * @param class-string<\DateTimeInterface> $dateTimeClass
      *
-     * @throws \Exception
+     * @throws \DateMalformedStringException
      *
-     * @return mixed
+     * @return \DateTimeInterface
      */
-    protected static function createDateTime($value, ?DateTimeZone $timeZone = null, string $dateTimeClass = 'DateTime')
+    protected static function createDateTime($value, ?DateTimeZone $timeZone = null, string $dateTimeClass = DateTime::class): DateTimeInterface
     {
         if (static::isTimestamp($value)) { // if it's a unix timestamp
             $format = 'U';
@@ -170,20 +171,16 @@ class PropelDateTime extends DateTime
             }
 
             $dateTimeObject = DateTime::createFromFormat($format, $value, new DateTimeZone('UTC'));
-            if ($dateTimeObject === false) {
-                throw new Exception(sprintf('Cannot create DateTime from format `%s`', $format));
+            if (is_bool($dateTimeObject)) {
+                throw new DateMalformedStringException(sprintf('Cannot create DateTime from format `%s`', $format));
             }
 
             // timezone must be explicitly specified and then changed
             // because of a DateTime bug: http://bugs.php.net/bug.php?id=43003
             $dateTimeObject->setTimezone(new DateTimeZone(date_default_timezone_get()));
         } else {
-            if ($timeZone === null) {
-                // stupid DateTime constructor signature
-                $dateTimeObject = new $dateTimeClass($value);
-            } else {
-                $dateTimeObject = new $dateTimeClass($value, $timeZone);
-            }
+            /** @var \DateTimeInterface $dateTimeObject */
+            $dateTimeObject = new $dateTimeClass($value, $timeZone);
         }
 
         return $dateTimeObject;

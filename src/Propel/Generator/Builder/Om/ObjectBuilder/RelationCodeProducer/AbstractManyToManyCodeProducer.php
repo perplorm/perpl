@@ -240,12 +240,12 @@ abstract class AbstractManyToManyCodeProducer extends AbstractRelationCodeProduc
 
         $script .= "
     /**
-     * @var $objectCollectionType|null Objects in $relationIdentifier relation.
+     * Objects associated via $relationIdentifier relation (n:m).
      */
-    protected ?$objectCollectionName $attributeName = null;
+    protected $objectCollectionName|null $attributeName = null;
 
     /**
-     * @var bool
+     * If $attributeName contains all objects in $relationIdentifier relation.
      */
     protected bool $attributePartialName = false;\n";
     }
@@ -259,15 +259,13 @@ abstract class AbstractManyToManyCodeProducer extends AbstractRelationCodeProduc
     {
         $attributeName = $this->names->getAttributeScheduledForDeletionName();
         $targetIdentifierSingular = $this->names->getTargetIdentifier(false);
-        [$objectCollectionName, $objectCollectionType] = $this->resolveObjectCollectionClassNameAndType();
+        [$objectCollectionName] = $this->resolveObjectCollectionClassNameAndType();
 
         $script .= "
     /**
      * Items of $targetIdentifierSingular relation marked for deletion.
-     *
-     * @var $objectCollectionType|null
      */
-    protected ?$objectCollectionName \$$attributeName = null;\n";
+    protected $objectCollectionName|null \$$attributeName = null;\n";
     }
 
     /**
