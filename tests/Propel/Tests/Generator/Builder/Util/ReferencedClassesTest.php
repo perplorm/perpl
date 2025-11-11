@@ -21,6 +21,7 @@ class ReferencedClassesTest extends TestCase
         return [
             ['string', 'string', []],
             ['string|int', 'string|int', []],
+            ['array<string|int>', 'array', []],
             ['Propel\Runtime\Propel', 'Propel', ['Propel\Runtime' => ['Propel' => 'Propel']]],
             ['DateTime', 'DateTimeInterface', ['' => ['DateTimeInterface' => 'DateTimeInterface']]],
             ['string|DateTimeImmutable', 'string|DateTimeInterface', ['' => ['DateTimeInterface' => 'DateTimeInterface']]],
@@ -40,7 +41,7 @@ class ReferencedClassesTest extends TestCase
     {
         $referencedClasses = new ReferencedClasses($this->createMock(ObjectBuilder::class));
 
-        $actualTypeHint = $referencedClasses->resolveTypeHintFromDocType($docType);
+        $actualTypeHint = $referencedClasses->resolveTypeDeclarationFromDocType($docType);
         $actualDeclarations = $referencedClasses->getDeclaredClasses();
 
         $this->assertSame($expectedTypeHint, $actualTypeHint, 'Type hint string should match');

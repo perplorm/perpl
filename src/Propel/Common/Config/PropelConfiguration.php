@@ -395,7 +395,7 @@ class PropelConfiguration implements ConfigurationInterface
                                 ->booleanNode('useLeftJoinsInDoJoinMethods')->defaultTrue()->end()
                                 ->scalarNode('pluralizerClass')->defaultValue('\Propel\Common\Pluralizer\StandardEnglishPluralizer')->end()
                                 ->scalarNode('entityNotFoundExceptionClass')->defaultValue('\Propel\Runtime\Exception\EntityNotFoundException')->end()
-                                ->scalarNode(name: 'typeColumnDataFields')->defaultTrue()->end()
+                                ->booleanNode(name: 'typeColumnDataFields')->defaultTrue()->end()
                                 ->arrayNode('builders')
                                     ->addDefaultsIfNotSet()
                                     ->children()

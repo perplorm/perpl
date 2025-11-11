@@ -18,9 +18,9 @@ use Propel\Generator\Model\Table;
 
 class ReferencedClasses
 {
- /**
-  * @var \Propel\Generator\Builder\Om\AbstractOMBuilder
-  */
+    /**
+     * @var \Propel\Generator\Builder\Om\AbstractOMBuilder
+     */
     protected $builder;
 
     /**
@@ -398,9 +398,10 @@ class ReferencedClasses
      *
      * @return string
      */
-    public function resolveTypeHintFromDocType(string $docType): string
+    public function resolveTypeDeclarationFromDocType(string $docType): string
     {
-        $types = explode('|', $docType);
+        $docTypeWithoutGenerics = preg_replace('/<[^>]*>/', '', $docType);
+        $types = explode('|', $docTypeWithoutGenerics);
         foreach ($types as $key => $typeName) {
             if (!class_exists($typeName)) {
                 // scalar type
@@ -413,5 +414,15 @@ class ReferencedClasses
         }
 
         return implode('|', array_unique($types));
+    }
+
+    /**
+     * @param string $typeDeclaration
+     *
+     * @return bool
+     */
+    public function isGenericTypeDeclaration(string $typeDeclaration): bool
+    {
+        return (bool)preg_match('/<.*>\s*$/', $typeDeclaration); // check if type ends with generic param like "array<string>"
     }
 }

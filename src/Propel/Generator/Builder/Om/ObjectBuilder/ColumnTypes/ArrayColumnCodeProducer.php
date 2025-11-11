@@ -28,7 +28,7 @@ class ArrayColumnCodeProducer extends AbstractArrayColumnCodeProducer
     public function addColumnAttributes(string &$script): void
     {
         $this->addDefaultColumnAttribute($script, 'string');
-        $this->addColumnAttributeUnserialized($script, 'array');
+        $this->addColumnAttributeUnserialized($script, 'array<string>');
     }
 
     /**
