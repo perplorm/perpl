@@ -75,8 +75,7 @@ class ArrayColumnCodeProducer extends AbstractArrayColumnCodeProducer
             \$this->$cloUnserialized = [];
         }
         if (!\$this->$cloUnserialized && \$this->$clo !== null) {
-            \$$cloUnserialized = substr(\$this->$clo, 2, -2);
-            \$this->$cloUnserialized = \$$cloUnserialized !== '' ? explode(' | ', \$$cloUnserialized) : [];
+            \$this->$cloUnserialized = static::unserializeArray(\$this->$clo);
         }
 
         return \$this->$cloUnserialized;";
@@ -115,7 +114,7 @@ class ArrayColumnCodeProducer extends AbstractArrayColumnCodeProducer
         $script .= "
         if (\$this->$cloUnserialized !== \$v) {
             \$this->$cloUnserialized = \$v;
-            \$this->$clo = '| ' . implode(' | ', \$v) . ' |';
+            \$this->$clo = static::serializeArray(\$v);
             \$this->modifiedColumns[" . $this->objectBuilder->getColumnConstant($col) . "] = true;
         }\n";
     }

@@ -8,6 +8,8 @@
 
 namespace Propel\Runtime\ActiveRecord;
 
+use Propel\Runtime\ActiveQuery\FilterExpression\FilterCollector;
+
 /**
  * This ActiveRecord interface helps to find Propel Object
  *
@@ -74,4 +76,11 @@ interface ActiveRecordInterface
      * @return void
      */
     public function setNew(bool $b): void;
+
+    /**
+     * @param \Propel\Runtime\ActiveQuery\FilterExpression\FilterCollector $filterCollector
+     *
+     * @return static
+     */
+    public static function createFromFilters(FilterCollector $filterCollector);
 }

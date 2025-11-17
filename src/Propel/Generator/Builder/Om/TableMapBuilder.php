@@ -273,12 +273,13 @@ class " . $this->getUnqualifiedClassName() . " extends TableMap
         foreach ($this->getTable()->getColumns() as $column) {
             $columnName = $column->getName();
             $columnConstant = $column->getConstantName();
+            $qualifiedName = $column->getFullyQualifiedName(true);
 
             $script .= "
     /**
      * The column name for the $columnName field
      */
-    public const {$columnConstant} = '$tableName.$columnName';\n";
+    public const {$columnConstant} = '$qualifiedName';\n";
         }
     }
 

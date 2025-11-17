@@ -945,7 +945,7 @@ class Table extends ScopedMappingModel implements IdMethod
         /** @var array<\Propel\Generator\Model\Column> $pks */
         $pks = [];
         foreach ($this->getPrimaryKey() as $primaryKey) {
-            if ($primaryKey->isNotNull() && !$primaryKey->hasDefaultValue() && !in_array($primaryKey, $primaryKeys, true)) {
+            if ($primaryKey->isNotNull() && !$primaryKey->hasDefault() && !in_array($primaryKey, $primaryKeys, true)) {
                 $pks[] = $primaryKey;
             }
         }
@@ -1603,6 +1603,16 @@ class Table extends ScopedMappingModel implements IdMethod
     public function getColumns(): array
     {
         return $this->columns;
+    }
+
+    /**
+     * Get columns that are not lazy-load.
+     *
+     * @return array<\Propel\Generator\Model\Column>
+     */
+    public function getEagerColumns(): array
+    {
+        return array_filter($this->columns, fn (Column $col) => !$col->isLazyLoad());
     }
 
     /**

@@ -457,13 +457,17 @@ class Column extends MappingModel
     }
 
     /**
-     * Returns the fully qualified column name (table.column).
+     * Returns the fully qualified column name (table.COLUMN or table.column).
+     *
+     * @param bool $lowercaseColumnName
      *
      * @return string
      */
-    public function getFullyQualifiedName(): string
+    public function getFullyQualifiedName(bool $lowercaseColumnName = false): string
     {
-        return $this->parentTable->getName() . '.' . strtoupper($this->getName());
+        $columnName = $this->getName();
+
+        return $this->parentTable->getName() . '.' . ($lowercaseColumnName ? $columnName : strtoupper($columnName));
     }
 
     /**
@@ -712,7 +716,7 @@ class Column extends MappingModel
     }
 
     /**
-     * Returns the column constant name.
+     * Returns the column constant name (i.e. COL_ID).
      *
      * @return string
      */
@@ -1485,9 +1489,29 @@ class Column extends MappingModel
      *
      * @return bool
      */
-    public function hasDefaultValue(): bool
+    public function hasDefault(): bool
     {
         return $this->getDefaultValue() !== null;
+    }
+
+    /**
+     * Check if the column has a default value that is a value (not an expression).
+     *
+     * @return bool
+     */
+    public function hasDefaultValue(): bool
+    {
+        return (bool)$this->getDefaultValue()?->isValue();
+    }
+
+    /**
+     * Check if the column has a default value that is an expression (not a value).
+     *
+     * @return bool
+     */
+    public function hasDefaultExpression(): bool
+    {
+        return (bool)$this->getDefaultValue()?->isExpression();
     }
 
     /**
@@ -1720,7 +1744,7 @@ class Column extends MappingModel
     public static function generatePhpName(string $name, ?string $phpNamingMethod = null, ?string $namePrefix = null): string
     {
         if ($phpNamingMethod === null) {
-            $phpNamingMethod = PhpNameGenerator::CONV_METHOD_CLEAN;
+            $phpNamingMethod = NameGeneratorInterface::CONV_METHOD_CLEAN;
         }
 
         return NameFactory::generateName(NameFactory::PHP_GENERATOR, [$name, $phpNamingMethod, (string)$namePrefix]);

@@ -23,6 +23,7 @@ use Propel\Generator\Platform\MssqlPlatform;
 use Propel\Generator\Platform\MysqlPlatform;
 use Propel\Generator\Platform\OraclePlatform;
 use Propel\Generator\Platform\PlatformInterface;
+use Propel\Runtime\ActiveQuery\FilterExpression\FilterCollector;
 use Propel\Runtime\Exception\PropelException;
 
 /**
@@ -313,6 +314,7 @@ class ObjectBuilder extends AbstractObjectBuilder
             $script .= "
  *
  * @package propel.generator.{$this->getPackage()}
+ * @phpstan-consistent-constructor
  */";
         }
 
@@ -451,6 +453,12 @@ abstract class {$this->getUnqualifiedClassName()}$parentClass implements ActiveR
         $this->addClearAllReferences($script);
 
         $this->addPrimaryString($script);
+
+        $this->addCreateFromFilter($script);
+
+        if (array_any($table->getColumns(), fn (Column $column) => $column->getType() === PropelTypes::PHP_ARRAY)) {
+            $this->addArraySerializationMethods($script);
+        }
 
         // apply behaviors
         $this->applyBehaviorModifier('objectMethods', $script, '    ');
@@ -1508,7 +1516,6 @@ $indent};";
     {
         /** @var int \$pos */
         \$pos = {$tableMapClassName}::translateFieldName(\$name, \$type, TableMap::TYPE_NUM);
-
         \$this->setByPosition(\$pos, \$value);
 
         return \$this;
@@ -1526,71 +1533,30 @@ $indent};";
         $table = $this->getTable();
         $script .= "
     /**
-     * Sets a field from the object by Position as specified in the xml schema.
-     * Zero-based.
+     * Set field by column position in xml schema.
      *
-     * @param int \$pos position in xml schema
-     * @param mixed \$value field value";
-
-        if (array_any($table->getColumns(), fn (Column $col) => $col->isSetType())) {
-            $script .= "
+     * @param int \$pos Zero-based position in xml schema
+     * @param mixed \$value field value
      *
-     * @throws \Propel\Runtime\Exception\PropelException";
-        }
-
-        $script .= "
+     * @throws \RuntimeException Postion out of range
      *
      * @return \$this
      */
     public function setByPosition(int \$pos, \$value)
     {
-        switch (\$pos) {";
-        $i = 0;
-        foreach ($table->getColumns() as $col) {
+        match (\$pos) {";
+        foreach ($table->getColumns() as $i => $col) {
             $cfc = $col->getPhpName();
 
             $script .= "
-            case $i:";
-
-            if ($col->getType() === PropelTypes::ENUM) {
-                $script .= "
-                \$valueSet = " . $this->getTableMapClassName() . '::getValueSet(' . $this->getColumnConstant($col) . ");
-                if (isset(\$valueSet[\$value])) {
-                    \$value = \$valueSet[\$value];
-                }";
-            } elseif ($col->isSetType()) {
-                $this->declareClasses(
-                    'Propel\Common\Util\SetColumnConverter',
-                    'Propel\Common\Exception\SetColumnConverterException',
-                );
-                $script .= "
-                \$valueSet = " . $this->getTableMapClassName() . '::getValueSet(' . $this->getColumnConstant($col) . ");
-                try {
-                    \$value = SetColumnConverter::convertIntToArray(\$value, \$valueSet);
-                } catch (SetColumnConverterException \$e) {
-                    throw new PropelException('Unknown stored set key: ' . \$e->getValue(), \$e->getCode(), \$e);
-                }
-                ";
-            } elseif ($col->getType() === PropelTypes::PHP_ARRAY) {
-                $script .= "
-                if (!is_array(\$value)) {
-                    \$v = trim(substr(\$value, 2, -2));
-                    \$value = \$v ? explode(' | ', \$v) : [];
-                }";
-            }
-
-            $script .= "
-                \$this->set$cfc(\$value);
-
-                break;";
-            $i++;
-        } /* foreach */
+            $i => \$this->set$cfc(\$value),";
+        }
         $script .= "
-        } // switch()
+            default => throw new RuntimeException(\"No column at position: \$pos\")
+        };
 
         return \$this;
-    }
-";
+    }\n";
     }
 
     /**
@@ -3345,6 +3311,92 @@ $indent};";
         rewind(\$stream);
 
         return \$stream;
+    }\n";
+    }
+
+    /**
+     * @param string $script
+     *
+     * @return void
+     */
+    protected function addCreateFromFilter(string &$script): void
+    {
+        $this->declareClass(FilterCollector::class);
+        $table = $this->getTable();
+        $objectVar = '$' . lcfirst($table->getPhpName());
+
+        $script .= "
+    /**
+     * @param \Propel\Runtime\ActiveQuery\FilterExpression\FilterCollector \$filterCollector
+     *
+     * @return static
+     */
+    public static function createFromFilters(FilterCollector \$filterCollector)
+    {
+        $objectVar = new static();
+        foreach (\$filterCollector->getColumnFilters() as \$filter) {
+            \$columnIdentifier = \$filter->getLocalColumnName(false);
+            \$value = \$filter->getValue();
+
+            match (\$columnIdentifier) {";
+        foreach ($this->getTable()->getColumns() as $col) {
+            $columnName = $col->getFullyQualifiedName(true);
+            $cfc = $col->getPhpName();
+            $valueExpression = '$value';
+
+            if ($col->getType() === PropelTypes::PHP_ARRAY) {
+                $valueExpression = "is_array($valueExpression) ? $valueExpression : static::unserializeArray($valueExpression)";
+            } elseif ($col->getType() === PropelTypes::ENUM) {
+                $tableMapClassName = $this->getTableMapClassName();
+                $columnConstant = $this->getColumnConstant($col);
+                $valueExpression = "$tableMapClassName::getValueSet($columnConstant)[$valueExpression] ?? $valueExpression";
+            } elseif ($col->isSetType()) {
+                $this->declareClasses('Propel\Common\Util\SetColumnConverter');
+                $tableMapClassName = $this->getTableMapClassName();
+                $columnConstant = $this->getColumnConstant($col);
+                $valueExpression = "SetColumnConverter::convertIntToArray($valueExpression, $tableMapClassName::getValueSet($columnConstant))";
+            }
+
+            $script .= "
+                '$columnName' => {$objectVar}->set$cfc($valueExpression),";
+        }
+        $script .= "
+                default => null
+            };
+        }
+
+        return $objectVar;
+    }\n";
+    }
+
+    /**
+     * @param string $script
+     *
+     * @return void
+     */
+    protected function addArraySerializationMethods(string &$script): void
+    {
+        $script .= "
+    /**
+     * @param array \$array
+     *
+     * @return string
+     */
+    public static function serializeArray(array \$array): string
+    {
+        return '| ' . implode(' | ', \$array) . ' |';
+    }
+
+    /**
+     * @param string \$serializedArray
+     *
+     * @return array<string>
+     */
+    public static function unserializeArray(string \$serializedArray): array
+    {
+        \$unboundString = trim(substr(\$serializedArray, 2, -2));
+
+        return \$unboundString ? explode(' | ', \$unboundString) : [];
     }\n";
     }
 }

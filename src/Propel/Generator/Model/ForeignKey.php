@@ -881,7 +881,7 @@ class ForeignKey extends MappingModel
     public function hasColumnWithRequiredValue(): bool
     {
         foreach ($this->getLocalColumnObjects() as $pk) {
-            if ($pk->isNotNull() && !$pk->hasDefaultValue()) {
+            if ($pk->isNotNull() && !$pk->hasDefault()) {
                 return true;
             }
         }

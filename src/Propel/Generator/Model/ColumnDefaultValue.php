@@ -80,6 +80,16 @@ class ColumnDefaultValue
     }
 
     /**
+     * Check if this is a default value (and not an expression).
+     *
+     * @return bool Whether value this object holds is an expression.
+     */
+    public function isValue(): bool
+    {
+        return $this->type === self::TYPE_VALUE;
+    }
+
+    /**
      * @return string|int|null The value, as specified in the schema.
      */
     public function getValue()
