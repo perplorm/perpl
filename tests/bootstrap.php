@@ -2,6 +2,8 @@
 
 require_once __DIR__ . '/../autoload.php.dist';
 
+use \Propel\Generator\Util\QuickBuilder;
+
 // check if user is root and
 if (function_exists("posix_getuid")) {
     if (posix_getuid() === 0 && !getenv('ALLOW_TESTS_AS_ROOT')) {
@@ -23,3 +25,7 @@ echo sprintf("Tests started in temp %s.\n", sys_get_temp_dir());
 ini_set('precision', '14');
 ini_set('serialize_precision', '14');
 setlocale(LC_ALL, 'en_US.utf8'); //fixed issues with hhvm and iconv
+
+if ((bool)getenv('DISABLE_VFS')) {
+    QuickBuilder::$disableVfs = true;
+}

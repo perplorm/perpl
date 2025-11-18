@@ -22,7 +22,7 @@ use Propel\Generator\Model\Table;
  *
  * @author François Zaninotto
  */
-class QueryInheritanceBuilder extends AbstractOMBuilder
+class QueryInheritanceBuilder extends AbstractOMBuilder implements ExtensionBuilderInterface
 {
     /**
      * @var \Propel\Generator\Builder\Util\EntityObjectClassNames
@@ -87,6 +87,7 @@ class QueryInheritanceBuilder extends AbstractOMBuilder
      *
      * @return void
      */
+    #[\Override]
     public function setChild(Inheritance $child): void
     {
         $this->child = $child;
@@ -99,6 +100,7 @@ class QueryInheritanceBuilder extends AbstractOMBuilder
      *
      * @return \Propel\Generator\Model\Inheritance
      */
+    #[\Override]
     public function getChild(): Inheritance
     {
         if (!$this->child) {
