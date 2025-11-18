@@ -20,7 +20,7 @@ use Propel\Generator\Model\Inheritance;
  *
  * @author Hans Lellelid <hans@xmpl.org>
  */
-class MultiExtendObjectBuilder extends AbstractObjectBuilder
+class MultiExtendObjectBuilder extends AbstractObjectBuilder implements ExtensionBuilderInterface
 {
     /**
      * The current child "object" we are operating on.
@@ -58,6 +58,7 @@ class MultiExtendObjectBuilder extends AbstractObjectBuilder
      *
      * @return void
      */
+    #[\Override]
     public function setChild(Inheritance $child): void
     {
         $this->child = $child;
@@ -70,6 +71,7 @@ class MultiExtendObjectBuilder extends AbstractObjectBuilder
      *
      * @return \Propel\Generator\Model\Inheritance
      */
+    #[\Override]
     public function getChild(): Inheritance
     {
         if (!$this->child) {
