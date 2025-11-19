@@ -50,13 +50,13 @@ class RelationFromOneCodeProducer extends AbstractIncomingRelationCode
     {
         $varName = '$' . $this->getAttributeName();
         $className = $this->targetTableNames->useObjectBaseClassName();
-        $classNameFq = $this->targetTableNames->useObjectBaseClassName(false);
+        $relationIdentifier = $this->relation->getIdentifierReversed();
 
         $script .= "
     /**
-     * @var $classNameFq|null one-to-one related $className object
+     * $className associated via $relationIdentifier relation (1:1).
      */
-    protected ?$className $varName = null;\n";
+    protected $className|null $varName = null;\n";
     }
 
     /**

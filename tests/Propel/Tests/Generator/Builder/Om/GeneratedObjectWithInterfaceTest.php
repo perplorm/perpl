@@ -37,6 +37,6 @@ EOF;
      */
     public function testClassHasInterface()
     {
-          $this->assertInstanceOf('Foo\MyInterface', new MyClassWithInterface());
+        $this->assertInstanceOf('Foo\MyInterface', new MyClassWithInterface());
     }
 }

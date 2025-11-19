@@ -60,16 +60,16 @@ class OneToManyRelationCodeProducer extends AbstractIncomingRelationCode
     {
         $variable = '$' . $this->getAttributeName();
         $targetCollectionName = $this->targetTableNames->useCollectionClassName();
-        $targetCollectionType = $this->targetTableNames->useCollectionClassName(false);
+        $relationIdentifier = $this->relation->getIdentifierReversed();
 
         $script .= "
     /**
-     * @var $targetCollectionType|null Collection to store aggregation of $targetCollectionName objects.
+     * Objects associated via $relationIdentifier relation (1:n).
      */
-    protected ?$targetCollectionName $variable = null;
+    protected $targetCollectionName|null $variable = null;
 
     /**
-     * @var bool
+     * If $variable contains all objects in $relationIdentifier relation.
      */
     protected bool {$variable}Partial = false;\n";
     }

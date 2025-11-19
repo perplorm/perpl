@@ -150,12 +150,15 @@ abstract class AbstractIncomingRelationCode extends AbstractRelationCodeProducer
         $refFK = $this->relation;
         $classNameFq = $this->targetTableNames->useObjectBaseClassName(false);
 
-        $fkName = lcfirst($this->getRefFKPhpNameAffix($refFK, true));
+        $relationIdentifier = $this->getRefFKPhpNameAffix($refFK, true);
+        $relationIdentifierLc = lcfirst($relationIdentifier);
 
         $script .= "
     /**
+     * Items of $relationIdentifier relation marked for deletion.
+     *
      * @var \Propel\Runtime\Collection\ObjectCollection<{$classNameFq}>|null
      */
-    protected ObjectCollection|null \${$fkName}ScheduledForDeletion = null;\n";
+    protected ObjectCollection|null \${$relationIdentifierLc}ScheduledForDeletion = null;\n";
     }
 }

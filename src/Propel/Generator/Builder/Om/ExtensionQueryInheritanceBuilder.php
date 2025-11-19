@@ -19,7 +19,7 @@ use Propel\Generator\Model\Inheritance;
  *
  * @author François Zaninotto
  */
-class ExtensionQueryInheritanceBuilder extends AbstractOMBuilder
+class ExtensionQueryInheritanceBuilder extends AbstractOMBuilder implements ExtensionBuilderInterface
 {
     /**
      * The current child "object" we are operating on.
@@ -57,6 +57,7 @@ class ExtensionQueryInheritanceBuilder extends AbstractOMBuilder
      *
      * @return void
      */
+    #[\Override]
     public function setChild(Inheritance $child): void
     {
         $this->child = $child;
@@ -69,6 +70,7 @@ class ExtensionQueryInheritanceBuilder extends AbstractOMBuilder
      *
      * @return \Propel\Generator\Model\Inheritance
      */
+    #[\Override]
     public function getChild(): Inheritance
     {
         if (!$this->child) {

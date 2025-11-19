@@ -36,7 +36,7 @@ class SetColumnCodeProducer extends AbstractArrayColumnCodeProducer
     /**
      * @var array<string>|null
      */
-    protected ?array $attributeName = null;\n";
+    protected array|null $attributeName = null;\n";
     }
 
     /**

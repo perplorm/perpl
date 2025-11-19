@@ -91,15 +91,14 @@ class FkRelationCodeProducer extends AbstractRelationCodeProducer
     public function addAttributes(string &$script): void
     {
         $className = $this->targetTableNames->useObjectBaseClassName();
-        $classNameFq = $this->targetTableNames->useObjectBaseClassName(false);
-
+        $relationIdentifier = $this->relation->getIdentifier();
         $varName = '$' . $this->getAttributeName();
 
         $script .= "
     /**
-     * @var $classNameFq|null
+     * $className associated via $relationIdentifier relation (n:1).
      */
-    protected ?$className $varName = null;\n";
+    protected $className|null $varName = null;\n";
     }
 
     /**

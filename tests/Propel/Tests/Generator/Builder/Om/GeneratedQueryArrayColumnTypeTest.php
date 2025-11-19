@@ -258,4 +258,32 @@ EOF;
         $this->assertEquals([], $e[0]->getTags(), 'array columns are searchable by element using Criteria::CONTAINS_NONE');
         $this->assertEquals(['bar23'], $e[1]->getTags(), 'array columns are searchable by element using Criteria::CONTAINS_NONE');
     }
+
+    public function queryStructureDataProvider(): array
+    {
+        $t = 'complex_column_type_entity_11';
+        $sf = "SELECT  FROM $t WHERE $t.id=:p1";
+
+        return [
+            [Criteria::CONTAINS_ALL, "$sf AND ($t.tags LIKE :p2 AND $t.tags LIKE :p3)"],
+            [Criteria::CONTAINS_SOME, "$sf AND ($t.tags LIKE :p2 OR $t.tags LIKE :p3)"],
+            [Criteria::CONTAINS_NONE, "$sf AND (($t.tags NOT LIKE :p2 AND $t.tags NOT LIKE :p3) OR $t.tags IS NULL )"],
+            [null, "$sf AND ($t.tags LIKE :p2 AND $t.tags LIKE :p3)"],
+        ];
+    }
+    /**
+     * @dataProvider queryStructureDataProvider
+     *
+     * @return void
+     */
+    public function testQueryStructure(string|null $op, string $expected)
+    {
+        $p = [];
+        $actually = ComplexColumnTypeEntity11Query::create()
+            ->filterById(1)
+            ->filterByTags(['a', 'b'], $op)
+            ->createSelectSql($p);
+
+        $this->assertEquals($expected, $actually);
+    }
 }

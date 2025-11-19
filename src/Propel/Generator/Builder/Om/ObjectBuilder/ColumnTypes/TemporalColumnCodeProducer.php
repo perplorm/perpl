@@ -9,6 +9,7 @@
 namespace Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes;
 
 use DateTime;
+use DateTimeInterface;
 use Exception;
 use Propel\Generator\Exception\EngineException;
 use Propel\Generator\Model\PropelTypes;
@@ -78,6 +79,7 @@ class TemporalColumnCodeProducer extends ColumnCodeProducer
         $clo = $column->getLowercasedName();
 
         $dateTimeClass = $this->resolveColumnDateTimeClass($this->column);
+        $orDateTimeInterface = is_subclass_of($dateTimeClass, DateTimeInterface::class) ? '|\DateTimeInterface' : '';
 
         $handleMysqlDate = false;
         $mysqlInvalidDateString = '';
@@ -92,7 +94,6 @@ class TemporalColumnCodeProducer extends ColumnCodeProducer
             // 00:00:00 is a valid time, so no need to check for that.
         }
 
-        $orNull = $column->isNotNull() ? '' : '|null';
         $descriptionReturnValueNull = $column->isNotNull() ? '' : ', NULL if column is NULL';
         $descriptionReturnMysqlInvalidDate = $handleMysqlDate ? ", and 0 if column value is $mysqlInvalidDateString" : '';
 
@@ -100,12 +101,12 @@ class TemporalColumnCodeProducer extends ColumnCodeProducer
     /**
      * Get the [optionally formatted] temporal [$clo] column value.{$this->getColumnDescriptionDoc()}
      *
-     * @psalm-return (\$format is null ? {$dateTimeClass}{$orNull} : string{$orNull})
+     * @psalm-return (\$format is null ? {$dateTimeClass}|\DateTimeInterface|null : string|null)
      *
      * @param string|null \$format The date/time format string (either date()-style or strftime()-style).
      *   If format is NULL, then the raw $dateTimeClass object will be returned.{$additionalParam}
      *
-     * @return {$dateTimeClass}|string{$orNull} Formatted date/time value as string or $dateTimeClass object (if format is NULL){$descriptionReturnValueNull}{$descriptionReturnMysqlInvalidDate}.
+     * @return {$dateTimeClass}{$orDateTimeInterface}|string|null Formatted date/time value as string or $dateTimeClass object (if format is NULL){$descriptionReturnValueNull}{$descriptionReturnMysqlInvalidDate}.
      */";
     }
 

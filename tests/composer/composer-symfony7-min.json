@@ -61,6 +61,11 @@
     "config": {
         "allow-plugins": {
             "dealerdirect/phpcodesniffer-composer-installer": true
+        },
+        "audit": {
+            "ignore": {
+                "PKSA-w2tw-kmfg-rt9s": "Ignore Security Advisories in symfony/valdiator (https://symfony.com/blog/cve-2025-64500-incorrect-parsing-of-path-info-can-lead-to-limited-authorization-bypass)"
+            }
         }
     }
 }

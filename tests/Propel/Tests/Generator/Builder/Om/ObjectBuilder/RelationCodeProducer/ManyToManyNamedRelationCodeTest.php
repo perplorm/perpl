@@ -27,12 +27,12 @@ class ManyToManyNamedRelationCodeTest extends AbstractManyToManyCodeTest
     {
         $expected = '
     /**
-     * @var \Base\Collection\TeamCollection|null Objects in LeTeam relation.
+     * Objects associated via LeTeam relation (n:m).
      */
-    protected ?TeamCollection $collLeTeams = null;
+    protected TeamCollection|null $collLeTeams = null;
 
     /**
-     * @var bool
+     * If $collLeTeams contains all objects in LeTeam relation.
      */
     protected bool $collLeTeamsIsPartial = false;
 ';
@@ -44,10 +44,8 @@ class ManyToManyNamedRelationCodeTest extends AbstractManyToManyCodeTest
         $expected = '
     /**
      * Items of LeTeam relation marked for deletion.
-     *
-     * @var \Base\Collection\TeamCollection|null
      */
-    protected ?TeamCollection $leTeamsScheduledForDeletion = null;
+    protected TeamCollection|null $leTeamsScheduledForDeletion = null;
 ';
         $this->assertProducedCodeMatches('addScheduledForDeletionAttribute', $expected);
     }

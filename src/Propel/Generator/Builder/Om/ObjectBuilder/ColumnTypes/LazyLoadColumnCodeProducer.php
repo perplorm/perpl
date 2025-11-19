@@ -76,10 +76,8 @@ class LazyLoadColumnCodeProducer extends ColumnCodeProducer
     /**
      * Whether the lazy-loaded \$$clo value has been loaded from database.
      * This is necessary to avoid repeated lookups if \$$clo column is NULL in the db.
-     *
-     * @var bool
      */
-    protected \${$clo}_isLoaded = false;\n";
+    protected bool \${$clo}_isLoaded = false;\n";
     }
 
     /**

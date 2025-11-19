@@ -37,6 +37,13 @@ class QuickBuilder
     use VfsTrait;
 
     /**
+     * Used to globally disable building to Vfs
+     *
+     * @var bool
+     */
+    public static bool $disableVfs = false;
+
+    /**
      * The Xml.
      *
      * @var string
@@ -203,7 +210,7 @@ class QuickBuilder
      */
     public function isVfs(): bool
     {
-        return $this->vfs;
+        return !static::$disableVfs && $this->vfs;
     }
 
     /**
@@ -445,12 +452,14 @@ class QuickBuilder
     public function buildClasses(?array $classTargets = null): void
     {
         $classes = $classTargets ?? ['tablemap', 'object', 'objectstub', 'collection', 'query', 'querystub'];
+        $tables = $this->getDatabase()->getTables();
 
-        $includes = $this->isVfs() ? $this->buildClassesToVirtual($classes, $this->getDatabase()->getTables())
-            : $this->buildClassesToPhysical($classes, $this->getDatabase()->getTables());
+        $includes = $this->isVfs()
+            ? $this->buildClassesToVirtual($classes, $tables)
+            : $this->buildClassesToPhysical($classes, $tables);
 
         foreach ($includes as $tempFile) {
-            include($tempFile);
+            include $tempFile;
         }
 
         if (in_array('tablemap', $classes, true)) {
@@ -489,37 +498,15 @@ class QuickBuilder
             $abstractBuilder = $this->getConfig()->getConfiguredBuilder($table, $target);
             $class = $abstractBuilder->build();
             $script .= $this->fixNamespaceDeclarations($class);
-        }
+            $script .= $this->buildInheritanceClassesCode($target, $table);
 
-        $column = $table->getChildrenColumn();
-        if ($column && $column->isEnumeratedClasses()) {
-            foreach ($column->getChildren() as $child) {
-                if (!$child->getAncestor()) {
-                    continue;
-                }
-
-                /** @var \Propel\Generator\Builder\Om\QueryInheritanceBuilder $builder */
-                $builder = $this->getConfig()->getConfiguredBuilder($table, 'queryinheritance');
-                $builder->setChild($child);
-                $class = $builder->build();
-                $script .= $this->fixNamespaceDeclarations($class);
-
-                foreach (['objectmultiextend', 'queryinheritancestub'] as $target) {
-                    /** @var \Propel\Generator\Builder\Om\MultiExtendObjectBuilder $builder */
-                    $builder = $this->getConfig()->getConfiguredBuilder($table, $target);
-                    $builder->setChild($child);
-                    $class = $builder->build();
-                    $script .= $this->fixNamespaceDeclarations($class);
-                }
+            if ($target === 'object' && $table->getInterface()) {
+                $interface = $this->getConfig()->getConfiguredBuilder($table, 'interface')->build();
+                $script .= $this->fixNamespaceDeclarations($interface);
             }
         }
 
-        if ($table->getInterface()) {
-            $interface = $this->getConfig()->getConfiguredBuilder($table, 'interface')->build();
-            $script .= $this->fixNamespaceDeclarations($interface);
-        }
-
-        if ($table->hasAdditionalBuilders()) {
+        if ($table->hasAdditionalBuilders()) { // will be built multiple times if this method is called for individual targets (buildToPhysical())
             foreach ($table->getAdditionalBuilders() as $builderClass) {
                 $builder = new $builderClass($table);
                 $class = $builder->build();
@@ -530,6 +517,43 @@ class QuickBuilder
         $script = str_replace('<?php', '', $script);
 
         return $script;
+    }
+
+    /**
+     * Build code for classes defined via inheritance in schema.xml.
+     *
+     * @param string $target
+     * @param \Propel\Generator\Model\Table $table
+     *
+     * @return string
+     */
+    protected function buildInheritanceClassesCode(string $target, Table $table): string
+    {
+        $childTarget = match ($target) {
+            'query' => 'queryinheritance',
+            'objectstub' => 'objectmultiextend',
+            'querystub' => 'queryinheritancestub',
+            default => null
+        };
+        $column = $table->getChildrenColumn();
+        if (!$childTarget || !$column?->isEnumeratedClasses()) {
+            return '';
+        }
+
+        $code = '';
+        foreach ($column->getChildren() as $child) {
+            if (!$child->getAncestor()) {
+                continue;
+            }
+
+            /** @var \Propel\Generator\Builder\Om\AbstractOMBuilder&\Propel\Generator\Builder\Om\ExtensionBuilderInterface $builder */
+            $builder = $this->getConfig()->getConfiguredBuilder($table, $childTarget);
+            $builder->setChild($child);
+            $class = $builder->build();
+            $code .= $this->fixNamespaceDeclarations($class);
+        }
+
+        return $code;
     }
 
     /**
@@ -640,8 +664,8 @@ class QuickBuilder
     private function buildClassesToPhysical(array $classes, array $tables): array
     {
         $includes = [];
-        $dirName = sys_get_temp_dir()
-            . '/propelQuickBuild-' . Propel::VERSION . '-' . substr(sha1((string)getcwd()), 0, 10) . '/';
+        $hashFromCwd = substr(sha1((string)getcwd()), 0, 10);
+        $dirName = sys_get_temp_dir() . '/propelQuickBuild-' . Propel::VERSION . '-' . $hashFromCwd . '/';
         if (!is_dir($dirName)) {
             mkdir($dirName);
         }

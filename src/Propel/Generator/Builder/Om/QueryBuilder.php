@@ -1089,17 +1089,17 @@ class QueryBuilder extends AbstractOMBuilder
         }";
         } elseif ($col->getType() == PropelTypes::PHP_ARRAY) {
             $script .= "
-        if (
-            \$comparison === null 
-            || \$comparison === Criteria::CONTAINS_ALL 
-            || \$comparison === Criteria::CONTAINS_SOME 
-            || \$comparison === Criteria::CONTAINS_NONE
-        ) {
+        \$arrayOps = [null, Criteria::CONTAINS_ALL, Criteria::CONTAINS_SOME, Criteria::CONTAINS_NONE];
+        if (in_array(\$comparison, \$arrayOps, true)) {
             \$andOr = (\$comparison === Criteria::CONTAINS_SOME) ? Criteria::LOGICAL_OR : Criteria::LOGICAL_AND;
             \$operator = (\$comparison === Criteria::CONTAINS_NONE) ? Criteria::NOT_LIKE : Criteria::LIKE;
+
+            \$this->combineFilters();
             foreach (\$$variableName as \$value) {
                 \$this->addFilterWithConjunction(\$andOr, \$resolvedColumn, \"%| \$value |%\", \$operator);
             }
+            \$this->endCombineFilters();
+
             if (\$comparison == Criteria::CONTAINS_NONE) {
                 \$this->addOr(\$resolvedColumn, null, Criteria::ISNULL);
             }
