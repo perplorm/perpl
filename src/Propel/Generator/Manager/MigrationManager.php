@@ -40,7 +40,6 @@ use function preg_match;
 use function preg_replace;
 use function scandir;
 use function sort;
-use function sprintf;
 use function strlen;
 use function ucfirst;
 use function usort;
@@ -114,7 +113,7 @@ class MigrationManager extends AbstractManager
     public function getConnection(string $datasource): array
     {
         if (!isset($this->connections[$datasource])) {
-            throw new InvalidArgumentException(sprintf('Unknown datasource "%s"', $datasource));
+            throw new InvalidArgumentException("Unknown datasource `$datasource`");
         }
 
         return $this->connections[$datasource];
@@ -176,11 +175,21 @@ class MigrationManager extends AbstractManager
     }
 
     /**
-     * @throws \Exception
+     * @deprecated Use aptly named {@see static::loadExecutedMigrationTimestamps()}
      *
      * @return list<int>
      */
     public function getAllDatabaseVersions(): array
+    {
+        return $this->loadExecutedMigrationTimestamps();
+    }
+
+    /**
+     * @throws \Exception
+     *
+     * @return list<int>
+     */
+    protected function loadExecutedMigrationTimestamps(): array
     {
         $connections = $this->getConnections();
         if (!$connections) {
@@ -197,43 +206,23 @@ class MigrationManager extends AbstractManager
             }
         }
 
-        usort($migrationData, function (array $a, array $b) {
-            if ($a[static::COL_EXECUTION_DATETIME] === $b[static::COL_EXECUTION_DATETIME]) {
-                return $a[static::COL_VERSION] <=> $b[static::COL_VERSION];
-            }
+        usort($migrationData, fn (array $a, array $b): int => $a[static::COL_EXECUTION_DATETIME] <=> $b[static::COL_EXECUTION_DATETIME]
+            ?: $a[static::COL_VERSION] <=> $b[static::COL_VERSION]);
 
-            return $a[static::COL_EXECUTION_DATETIME] <=> $b[static::COL_EXECUTION_DATETIME];
-        });
-
-        return array_map(function (array $migration) {
-            return (int)$migration[static::COL_VERSION];
-        }, $migrationData);
+        return array_map(fn (array $migration) => (int)$migration[static::COL_VERSION], $migrationData);
     }
 
     /**
      * @param string $datasource
      *
-     * @throws \RuntimeException
-     *
      * @return bool
      */
     public function migrationTableExists(string $datasource): bool
     {
-        $conn = $this->getAdapterConnection($datasource);
-        $sql = sprintf('SELECT version FROM %s', $this->getMigrationTable());
-        try {
-            $stmt = $conn->prepare($sql);
+        $migrationTable = $this->getMigrationTable();
+        $sql = "SELECT version FROM $migrationTable";
 
-            if ($stmt === false) {
-                throw new RuntimeException('PdoConnection::prepare() failed and did not return statement object for execution.');
-            }
-
-            $stmt->execute();
-
-            return true;
-        } catch (PDOException $e) {
-            return false;
-        }
+        return $this->statementSucceeds($datasource, $sql);
     }
 
     /**
@@ -263,7 +252,7 @@ class MigrationManager extends AbstractManager
         $res = SqlParser::executeString($statements, $conn);
 
         if (!$res) {
-            throw new Exception(sprintf('Unable to create migration table in datasource "%s"', $datasource));
+            throw new Exception("Unable to create migration table in datasource `$datasource`");
         }
     }
 
@@ -278,11 +267,10 @@ class MigrationManager extends AbstractManager
         $platform = $this->getPlatform($datasource);
         $conn = $this->getAdapterConnection($datasource);
         $conn->transaction(function () use ($conn, $platform, $timestamp): void {
-            $sql = sprintf(
-                'DELETE FROM %s WHERE %s = ?',
-                $this->getMigrationTable(),
-                $platform->doQuoting('version'),
-            );
+            $migrationTable = $this->getMigrationTable();
+            $versionColumn = $platform->doQuoting('version');
+
+            $sql = "DELETE FROM $migrationTable WHERE $versionColumn = ?";
             $stmt = $conn->prepare($sql);
 
             if ($stmt === false) {
@@ -309,12 +297,10 @@ class MigrationManager extends AbstractManager
 
         $this->modifyMigrationTableIfOutdated($datasource);
 
-        $sql = sprintf(
-            'INSERT INTO %s (%s, %s) VALUES (?, ?)',
-            $this->getMigrationTable(),
-            $platform->doQuoting(static::COL_VERSION),
-            $platform->doQuoting(static::COL_EXECUTION_DATETIME),
-        );
+        $migrationTable = $this->getMigrationTable();
+        $versionColumn = $platform->doQuoting(static::COL_VERSION);
+        $executionDateColumn = $platform->doQuoting(static::COL_EXECUTION_DATETIME);
+        $sql = "INSERT INTO $migrationTable ($versionColumn, $executionDateColumn) VALUES (?, ?)";
 
         $executionDatetime = date(static::EXECUTION_DATETIME_FORMAT);
 
@@ -330,22 +316,30 @@ class MigrationManager extends AbstractManager
     }
 
     /**
+     * @deprecated Use aptly named {@see static::readMigrationFileTimestamps()}
+     *
      * @return array<int>
      */
     public function getMigrationTimestamps(): array
     {
+        return $this->readMigrationFileTimestamps();
+    }
+
+    /**
+     * @return array<int>
+     */
+    public function readMigrationFileTimestamps(): array
+    {
         $path = $this->getWorkingDirectory();
+        if (!$path || !is_dir($path)) {
+            return [];
+        }
         $migrationTimestamps = [];
+        $files = scandir($path) ?: [];
 
-        if (is_dir($path)) {
-            $files = scandir($path);
-
-            if ($files) {
-                foreach ($files as $file) {
-                    if (preg_match('/^PropelMigration_(\d+).*\.php$/', $file, $matches)) {
-                        $migrationTimestamps[] = (int)$matches[1];
-                    }
-                }
+        foreach ($files as $file) {
+            if (preg_match('/^PropelMigration_(\d+).*\.php$/', $file, $matches)) {
+                $migrationTimestamps[] = (int)$matches[1];
             }
         }
 
@@ -353,11 +347,23 @@ class MigrationManager extends AbstractManager
     }
 
     /**
+     * @deprecated Use aptly named {@see static::findUncommittedMigrationFileTimestamps()}
+     *
      * @return array<int>
      */
     public function getValidMigrationTimestamps(): array
     {
-        $migrationTimestamps = array_diff($this->getMigrationTimestamps(), $this->getAllDatabaseVersions());
+        return $this->findUncommittedMigrationFileTimestamps();
+    }
+
+    /**
+     * @return array<int>
+     */
+    public function findUncommittedMigrationFileTimestamps(): array
+    {
+        $fileTimestamps = $this->readMigrationFileTimestamps();
+        $dbTimestamps = $this->loadExecutedMigrationTimestamps();
+        $migrationTimestamps = array_diff($fileTimestamps, $dbTimestamps);
         sort($migrationTimestamps);
 
         return $migrationTimestamps;
@@ -373,18 +379,17 @@ class MigrationManager extends AbstractManager
      */
     public function getNonExecutedMigrationTimestampsByVersion(?int $version = null): array
     {
-        $migrationTimestamps = $this->getValidMigrationTimestamps();
+        $openMigrationTimestamps = $this->findUncommittedMigrationFileTimestamps();
 
         if ($version === null) {
-            return $migrationTimestamps;
+            return $openMigrationTimestamps;
         }
 
-        $versionIndex = array_search($version, $migrationTimestamps, true);
-        if ($versionIndex === false) {
-            return $migrationTimestamps;
-        }
+        $versionIndex = array_search($version, $openMigrationTimestamps, true);
 
-        return array_slice($migrationTimestamps, 0, (int)$versionIndex + 1);
+        return $versionIndex === false
+            ? $openMigrationTimestamps
+            : array_slice($openMigrationTimestamps, 0, (int)$versionIndex + 1);
     }
 
     /**
@@ -392,7 +397,7 @@ class MigrationManager extends AbstractManager
      */
     public function hasPendingMigrations(): bool
     {
-        return $this->getValidMigrationTimestamps() !== [];
+        return $this->findUncommittedMigrationFileTimestamps() !== [];
     }
 
     /**
@@ -400,13 +405,12 @@ class MigrationManager extends AbstractManager
      */
     public function getAlreadyExecutedMigrationTimestamps(): array
     {
-        $allDatabaseVersions = $this->getAllDatabaseVersions();
-        $migrationTimestamps = array_intersect($this->getMigrationTimestamps(), $allDatabaseVersions);
+        $fileTimestamps = $this->readMigrationFileTimestamps();
+        $dbTimestamps = $this->loadExecutedMigrationTimestamps();
+        $migrationTimestamps = array_intersect($fileTimestamps, $dbTimestamps);
 
-        $sortOrder = array_flip($allDatabaseVersions);
-        usort($migrationTimestamps, function (int $a, int $b) use ($sortOrder) {
-            return $sortOrder[$a] <=> $sortOrder[$b];
-        });
+        $sortOrder = array_flip($dbTimestamps);
+        usort($migrationTimestamps, fn (int $a, int $b): int => $sortOrder[$a] <=> $sortOrder[$b]);
 
         return $migrationTimestamps;
     }
@@ -440,7 +444,7 @@ class MigrationManager extends AbstractManager
      */
     public function getFirstUpMigrationTimestamp(): ?int
     {
-        $validTimestamps = $this->getValidMigrationTimestamps();
+        $validTimestamps = $this->findUncommittedMigrationFileTimestamps();
 
         return array_shift($validTimestamps);
     }
@@ -459,17 +463,12 @@ class MigrationManager extends AbstractManager
      *
      * @return string
      */
-    public function getMigrationClassName(int $timestamp, string $suffix = ''): string
+    public function resolveMigrationNameByTimestamp(int $timestamp, string $suffix = ''): string
     {
-        $className = sprintf('PropelMigration_%d', $timestamp);
-        if ($suffix === '') {
-            $suffix = $this->findMigrationClassNameSuffix($timestamp);
-        }
-        if ($suffix !== '') {
-            $className .= '_' . $suffix;
-        }
+        $className = "PropelMigration_$timestamp";
+        $suffix = $suffix ?: $this->findExistingMigrationFileNameSuffix($timestamp);
 
-        return $className;
+        return $suffix ? "{$className}_{$suffix}" : $className;
     }
 
     /**
@@ -477,16 +476,18 @@ class MigrationManager extends AbstractManager
      *
      * @return string
      */
-    public function findMigrationClassNameSuffix(int $timestamp): string
+    private function findExistingMigrationFileNameSuffix(int $timestamp): string
     {
-        $suffix = '';
         $path = $this->getWorkingDirectory();
-        if ($path && is_dir($path)) {
-            $files = scandir($path) ?: [];
-            foreach ($files as $file) {
-                if (preg_match('/^PropelMigration_' . $timestamp . '(_)?(.*)\.php$/', $file, $matches)) {
-                    $suffix = (string)$matches[2];
-                }
+        if (!$path || !is_dir($path)) {
+            return '';
+        }
+
+        $suffix = '';
+        $files = scandir($path) ?: [];
+        foreach ($files as $file) {
+            if (preg_match('/^PropelMigration_' . $timestamp . '(_)?(.*)\.php$/', $file, $matches)) {
+                $suffix = (string)$matches[2];
             }
         }
 
@@ -498,17 +499,14 @@ class MigrationManager extends AbstractManager
      *
      * @return object
      */
-    public function getMigrationObject(int $timestamp): object
+    public function instantiateMigration(int $timestamp): object
     {
-        $className = $this->getMigrationClassName($timestamp);
-        $filename = sprintf(
-            '%s/%s.php',
-            $this->getWorkingDirectory(),
-            $className,
-        );
-        require_once $filename;
+        $dir = $this->getWorkingDirectory();
+        $fileName = $this->resolveMigrationNameByTimestamp($timestamp);
 
-        return new $className();
+        require_once "$dir/$fileName.php";
+
+        return new $fileName();
     }
 
     /**
@@ -523,26 +521,19 @@ class MigrationManager extends AbstractManager
     public function getMigrationClassBody(array $migrationsUp, array $migrationsDown, int $timestamp, string $comment = '', string $suffix = ''): string
     {
         $connectionToVariableName = self::buildConnectionToVariableNameMap($migrationsUp, $migrationsDown);
+        $templateFileName = $this->getTemplatePath(__DIR__) . 'migration_template.php';
 
-        $vars = [
+        return PropelTemplate::renderFile($templateFileName, [
             'timestamp' => $timestamp,
             'commentString' => addcslashes($comment, ','),
             'suffix' => $suffix,
             'timeInWords' => date('Y-m-d H:i:s', $timestamp),
             'migrationAuthor' => ($author = $this->getUser()) ? 'by ' . $author : '',
-            'migrationClassName' => $this->getMigrationClassName($timestamp, $suffix),
+            'migrationClassName' => $this->resolveMigrationNameByTimestamp($timestamp, $suffix),
             'migrationsUp' => $migrationsUp,
             'migrationsDown' => $migrationsDown,
             'connectionToVariableName' => $connectionToVariableName,
-        ];
-
-        $templatePath = $this->getTemplatePath(__DIR__);
-
-        $template = new PropelTemplate();
-        $filePath = $templatePath . 'migration_template.php';
-        $template->setTemplateFile($filePath);
-
-        return $template->render($vars);
+        ]);
     }
 
     /**
@@ -585,7 +576,7 @@ class MigrationManager extends AbstractManager
      */
     public function getMigrationFileName(int $timestamp, string $suffix = ''): string
     {
-        return sprintf('%s.php', $this->getMigrationClassName($timestamp, $suffix));
+        return $this->resolveMigrationNameByTimestamp($timestamp, $suffix) . '.php';
     }
 
     /**
@@ -608,12 +599,9 @@ class MigrationManager extends AbstractManager
      */
     public function getOldestDatabaseVersion(): ?int
     {
-        $versions = $this->getAllDatabaseVersions();
-        if (!$versions) {
-            return null;
-        }
+        $versions = $this->loadExecutedMigrationTimestamps();
 
-        return array_pop($versions);
+        return $versions ? array_pop($versions) : null;
     }
 
     /**
@@ -625,19 +613,18 @@ class MigrationManager extends AbstractManager
      */
     public function modifyMigrationTableIfOutdated(string $datasource): void
     {
-        $connection = $this->getAdapterConnection($datasource);
-
-        if ($this->columnExists($connection, static::COL_EXECUTION_DATETIME)) {
+        if ($this->columnExists($datasource, static::COL_EXECUTION_DATETIME)) {
             return;
         }
 
         $table = new Table($this->getMigrationTable());
 
+        /** @phpstan-var \Propel\Generator\Platform\DefaultPlatform $platform */
         $platform = $this->getPlatform($datasource);
         $column = $this->createExecutionDatetimeColumn($platform);
         $column->setTable($table);
 
-        /** @phpstan-var \Propel\Generator\Platform\DefaultPlatform $platform */
+        $connection = $this->getAdapterConnection($datasource);
         $sql = $platform->getAddColumnDDL($column);
         $stmt = $connection->prepare($sql);
 
@@ -675,13 +662,11 @@ class MigrationManager extends AbstractManager
 
         $this->modifyMigrationTableIfOutdated($connectionName);
 
-        $sql = sprintf(
-            'SELECT %s, %s FROM %s',
-            static::COL_VERSION,
-            static::COL_EXECUTION_DATETIME,
-            $this->getMigrationTable(),
-        );
+        $migrationTable = $this->getMigrationTable();
+        $versionColumn = $platform->doQuoting(static::COL_VERSION);
+        $executionDateColumn = $platform->doQuoting(static::COL_EXECUTION_DATETIME);
 
+        $sql = "SELECT $versionColumn, $executionDateColumn FROM $migrationTable";
         $stmt = $connection->prepare($sql);
 
         if ($stmt === false) {
@@ -721,24 +706,30 @@ class MigrationManager extends AbstractManager
     }
 
     /**
-     * @param \Propel\Runtime\Connection\ConnectionInterface $connection
+     * @param string $datasource
      * @param string $columnName
-     *
-     * @throws \RuntimeException
      *
      * @return bool
      */
-    protected function columnExists(ConnectionInterface $connection, string $columnName): bool
+    protected function columnExists(string $datasource, string $columnName): bool
     {
+        $migrationTable = $this->getMigrationTable();
+        $sql = "SELECT $columnName FROM $migrationTable";
+
+        return $this->statementSucceeds($datasource, $sql);
+    }
+
+    /**
+     * @param string $datasource
+     * @param string $sql
+     *
+     * @return bool
+     */
+    private function statementSucceeds(string $datasource, string $sql): bool
+    {
+        $connection = $this->getAdapterConnection($datasource);
         try {
-            $sql = sprintf('SELECT %s FROM %s', $columnName, $this->getMigrationTable());
-            $stmt = $connection->prepare($sql);
-
-            if ($stmt === false) {
-                throw new RuntimeException('PdoConnection::prepare() failed and did not return statement object for execution.');
-            }
-
-            $stmt->execute();
+            $connection->query($sql);
 
             return true;
         } catch (PDOException $e) {

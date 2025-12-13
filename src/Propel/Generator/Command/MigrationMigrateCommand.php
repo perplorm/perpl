@@ -16,7 +16,6 @@ use function array_key_last;
 use function array_pop;
 use function count;
 use function property_exists;
-use function sprintf;
 
 class MigrationMigrateCommand extends AbstractMigrationCommand
 {
@@ -76,29 +75,28 @@ class MigrationMigrateCommand extends AbstractMigrationCommand
         }
 
         $timestamps = $manager->getNonExecutedMigrationTimestampsByVersion($version);
-        if (count($timestamps) > 1) {
-            $output->writeln(sprintf('%d migrations to execute', count($timestamps)));
+        $numberOfMigrations = count($timestamps);
+        if ($numberOfMigrations > 1) {
+            $output->writeln("$numberOfMigrations migrations to execute");
         }
 
-        foreach ($timestamps as $timestamp) {
-            if ($input->getOption('fake')) {
-                $output->writeln(
-                    sprintf('Faking migration %s up', $manager->getMigrationClassName($timestamp)),
-                );
-            } else {
-                $output->writeln(
-                    sprintf('Executing migration %s up', $manager->getMigrationClassName($timestamp)),
-                );
-            }
+        $isDryRun = $input->getOption('fake');
+        $isForce = $input->getOption('force');
+        $isVerbose = $input->getOption('verbose');
 
-            if (!$input->getOption('fake')) {
-                $migration = $manager->getMigrationObject($timestamp);
+        foreach ($timestamps as $timestamp) {
+            $nextMigrationFileName = $manager->resolveMigrationNameByTimestamp($timestamp);
+            $action = $isDryRun ? 'Faking' : 'Executing';
+            $output->writeln("$action migration $nextMigrationFileName up");
+
+            if (!$isDryRun) {
+                $migration = $manager->instantiateMigration($timestamp);
                 if (property_exists($migration, 'comment') && $migration->comment) {
-                    $output->writeln(sprintf('<info>%s</info>', $migration->comment));
+                    $output->writeln("<info>{$migration->comment}</info>");
                 }
 
                 if ($migration->preUp($manager) === false) {
-                    if ($input->getOption('force')) {
+                    if ($isForce) {
                         $output->writeln('<error>preUp() returned false. Continue migration.</error>');
                     } else {
                         $output->writeln('<error>preUp() returned false. Aborting migration.</error>');
@@ -109,68 +107,43 @@ class MigrationMigrateCommand extends AbstractMigrationCommand
 
                 foreach ($migration->getUpSQL() as $datasource => $sql) {
                     $connection = $manager->getConnection($datasource);
-                    if ($input->getOption('verbose')) {
-                        $output->writeln(
-                            sprintf(
-                                'Connecting to database "%s" using DSN "%s"',
-                                $datasource,
-                                $connection['dsn'],
-                            ),
-                        );
+                    if ($isVerbose) {
+                        $output->writeln("Connecting to database `$datasource` using DSN `{$connection['dsn']}`");
                     }
 
                     $conn = $manager->getAdapterConnection($datasource);
-                    $res = 0;
+                    $executedStatementsCount = 0;
                     $statements = SqlParser::parseString($sql);
 
                     foreach ($statements as $statement) {
                         try {
-                            if ($input->getOption('verbose')) {
-                                $output->writeln(sprintf('Executing statement "%s"', $statement));
+                            if ($isVerbose) {
+                                $output->writeln("Executing statement `$statement`");
                             }
                             $conn->exec($statement);
-                            $res++;
+                            $executedStatementsCount++;
                         } catch (Exception $e) {
-                            if ($input->getOption('force')) {
-                                //continue, but print error message
-                                $output->writeln(
-                                    sprintf('<error>Failed to execute SQL "%s". Continue migration.</error>', $statement),
-                                );
+                            if ($isForce) {
+                                //print error and continue
+                                $output->writeln("'<error>Failed to execute SQL `$statement`. Continue migration.</error>");
                             } else {
-                                throw new RuntimeException(
-                                    sprintf('<error>Failed to execute SQL "%s". Aborting migration.</error>', $statement),
-                                    0,
-                                    $e,
-                                );
+                                throw new RuntimeException("<error>Failed to execute SQL `$statement`. Aborting migration.</error>", 0, $e);
                             }
                         }
                     }
-
-                    $output->writeln(
-                        sprintf(
-                            '%d of %d SQL statements executed successfully on datasource "%s"',
-                            $res,
-                            count($statements),
-                            $datasource,
-                        ),
-                    );
+                    $totalStatements = count($statements);
+                    $output->writeln("$executedStatementsCount of $totalStatements SQL statements executed successfully on datasource `$datasource`");
                 }
             }
 
-            // migrations for datasources have passed - update the timestamp
-            // for all datasources
             foreach ($manager->getConnections() as $datasource => $connection) {
                 $manager->updateLatestMigrationTimestamp($datasource, $timestamp);
-                if ($input->getOption('verbose')) {
-                    $output->writeln(sprintf(
-                        'Updated latest migration date to %d for datasource "%s"',
-                        $timestamp,
-                        $datasource,
-                    ));
+                if ($isVerbose) {
+                    $output->writeln("Updated latest migration date to {$timestamp} for datasource `$datasource`");
                 }
             }
 
-            if (!$input->getOption('fake')) {
+            if (!$isDryRun) {
                 $migration->postUp($manager);
             }
         }
@@ -196,7 +169,7 @@ class MigrationMigrateCommand extends AbstractMigrationCommand
     ): int {
         $alreadyExecutedMigrations = $migrationManager->getAlreadyExecutedMigrationTimestampsByVersion($version);
         if ($alreadyExecutedMigrations === []) {
-            $output->writeln(sprintf('Already at version %s.', $version));
+            $output->writeln("Already at version {$version}.");
 
             return static::CODE_SUCCESS;
         }
@@ -212,7 +185,7 @@ class MigrationMigrateCommand extends AbstractMigrationCommand
             }
         }
 
-        $output->writeln(sprintf('Successfully rollback to migration version %s.', $version));
+        $output->writeln("Successfully rollback to migration version {$version}.");
 
         return static::CODE_SUCCESS;
     }

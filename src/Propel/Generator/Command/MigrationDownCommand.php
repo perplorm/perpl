@@ -10,7 +10,6 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use function array_pop;
 use function count;
-use function sprintf;
 
 class MigrationDownCommand extends AbstractMigrationCommand
 {
@@ -46,7 +45,7 @@ class MigrationDownCommand extends AbstractMigrationCommand
         $this->setUpMigrationManagerAccess($customConnectionData);
 
         $alreadyExecutedMigrations = $manager->getAlreadyExecutedMigrationTimestamps();
-        if ($alreadyExecutedMigrations === []) {
+        if (!$alreadyExecutedMigrations) {
             $output->writeln('No migrations were ever executed on this database - nothing to reverse.');
 
             return static::CODE_ERROR;
@@ -55,7 +54,6 @@ class MigrationDownCommand extends AbstractMigrationCommand
         $rollbackExecutor = new RollbackExecutor($input, $output, $manager);
 
         $currentMigrationVersion = array_pop($alreadyExecutedMigrations);
-
         $leftMigrationsCount = count($alreadyExecutedMigrations);
         $previousMigrationVersion = array_pop($alreadyExecutedMigrations);
 
@@ -63,11 +61,10 @@ class MigrationDownCommand extends AbstractMigrationCommand
             return static::CODE_ERROR;
         }
 
-        if ($leftMigrationsCount) {
-            $output->writeln(sprintf('Reverse migration complete. %d more migrations available for reverse.', $leftMigrationsCount));
-        } else {
-            $output->writeln('Reverse migration complete. No more migration available for reverse');
-        }
+        $status = $leftMigrationsCount
+            ? "Reverse migration complete. $leftMigrationsCount more migrations available for reverse."
+            : 'Reverse migration complete. No more migration available for reverse';
+        $output->writeln($status);
 
         return static::CODE_SUCCESS;
     }

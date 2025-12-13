@@ -53,14 +53,14 @@ class MigrationManagerTest extends TestCase
         $connections = $generatorConfig->getBuildConnections();
 
         $migrationManager = $this->getMockBuilder(MigrationManager::class)
-            ->onlyMethods(['getMigrationTimestamps'])
+            ->onlyMethods(['readMigrationFileTimestamps'])
             ->getMock();
         $migrationManager->setGeneratorConfig($generatorConfig);
         $migrationManager->setConnections($connections);
         $migrationManager->setMigrationTable('migration');
         $migrationManager
             ->expects($this->any())
-            ->method('getMigrationTimestamps')
+            ->method('readMigrationFileTimestamps')
             ->will($this->returnValue($migrationTimestamps));
 
         // make sure there is no other table named migration
@@ -94,8 +94,9 @@ class MigrationManagerTest extends TestCase
         $migrationManager->createMigrationTable('migration');
 
         $this->addMigrations($migrationManager, $migrationData);
+        $actualDatabaseMigrations = $this->callMethod($migrationManager, 'loadExecutedMigrationTimestamps');
 
-        $this->assertSame($expectedDatabaseVersions, $migrationManager->getAllDatabaseVersions());
+        $this->assertSame($expectedDatabaseVersions, $actualDatabaseMigrations);
     }
 
     /**
@@ -114,7 +115,7 @@ class MigrationManagerTest extends TestCase
             $migrationManager->updateLatestMigrationTimestamp('migration', $timestamp);
         }
 
-        $this->assertEquals($expectedMigrationTimestamps, $migrationManager->getValidMigrationTimestamps());
+        $this->assertEquals($expectedMigrationTimestamps, $migrationManager->findUncommittedMigrationFileTimestamps());
     }
 
     /**
@@ -157,9 +158,9 @@ class MigrationManagerTest extends TestCase
             $migrationManager->updateLatestMigrationTimestamp('migration', $timestamp);
         }
 
-        $this->assertEquals([], $migrationManager->getValidMigrationTimestamps());
+        $this->assertEquals([], $migrationManager->findUncommittedMigrationFileTimestamps());
         $migrationManager->removeMigrationTimestamp('migration', 2);
-        $this->assertEquals([2], $migrationManager->getValidMigrationTimestamps());
+        $this->assertEquals([2], $migrationManager->findUncommittedMigrationFileTimestamps());
     }
 
     /**

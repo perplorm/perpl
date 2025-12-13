@@ -11,7 +11,6 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use function count;
-use function sprintf;
 
 class MigrationUpCommand extends AbstractMigrationCommand
 {
@@ -55,112 +54,76 @@ class MigrationUpCommand extends AbstractMigrationCommand
             return static::CODE_ERROR;
         }
 
-        if ($input->getOption('fake')) {
-            $output->writeln(
-                sprintf(
-                    'Faking migration %s up',
-                    $manager->getMigrationClassName($nextMigrationTimestamp),
-                ),
-            );
-        } else {
-            $output->writeln(
-                sprintf(
-                    'Executing migration %s up',
-                    $manager->getMigrationClassName($nextMigrationTimestamp),
-                ),
-            );
-        }
+        $isDryRun = $input->getOption('fake');
+        $isForce = $input->getOption('force');
+        $isVerbose = $input->getOption('verbose');
 
-        $migration = $manager->getMigrationObject($nextMigrationTimestamp);
+        $nextMigrationFileName = $manager->resolveMigrationNameByTimestamp($nextMigrationTimestamp);
+        $action = $isDryRun ? 'Faking' : 'Executing';
+        $output->writeln("$action migration $nextMigrationFileName up");
 
-        if (!$input->getOption('fake')) {
-            if ($migration->preUp($manager) === false) {
-                if ($input->getOption('force')) {
-                    $output->writeln('<error>preUp() returned false. Continue migration.</error>');
-                } else {
-                    $output->writeln('<error>preUp() returned false. Aborting migration.</error>');
+        $migration = $manager->instantiateMigration($nextMigrationTimestamp);
 
-                    return static::CODE_ERROR;
-                }
+        if (!$isDryRun && $migration->preUp($manager) === false) {
+            if ($isForce) {
+                $output->writeln('<error>preUp() returned false. Continue migration.</error>');
+            } else {
+                $output->writeln('<error>preUp() returned false. Aborting migration.</error>');
+
+                return static::CODE_ERROR;
             }
         }
 
-        foreach ($migration->getUpSQL() as $datasource => $sql) {
-            $connection = $manager->getConnection($datasource);
+        foreach ($migration->getUpSQL() as $dataSource => $sql) {
+            $connection = $manager->getConnection($dataSource);
 
-            if ($input->getOption('verbose')) {
-                $output->writeln(sprintf(
-                    'Connecting to database "%s" using DSN "%s"',
-                    $datasource,
-                    $connection['dsn'],
-                ));
+            if ($isVerbose) {
+                $output->writeln("Connecting to database `$dataSource` using DSN `{$connection['dsn']}`");
             }
 
-            $conn = $manager->getAdapterConnection($datasource);
-            $res = 0;
+            $conn = $manager->getAdapterConnection($dataSource);
+            $executedStatementsCount = 0;
             $statements = SqlParser::parseString($sql);
 
-            if (!$input->getOption('fake')) {
+            if (!$isDryRun) {
                 foreach ($statements as $statement) {
                     try {
-                        if ($input->getOption('verbose')) {
-                            $output->writeln(sprintf('Executing statement "%s"', $statement));
+                        if ($isVerbose) {
+                            $output->writeln("Executing statement `$statement`");
                         }
 
                         $conn->exec($statement);
-                        $res++;
+                        $executedStatementsCount++;
                     } catch (Exception $e) {
-                        if ($input->getOption('force')) {
-                            //continue, but print error message
-                            $output->writeln(
-                                sprintf('<error>Failed to execute SQL "%s". Continue migration.</error>', $statement),
-                            );
+                        if ($isForce) {
+                            //print error and continue
+                            $output->writeln("'<error>Failed to execute SQL `$statement`. Continue migration.</error>");
                         } else {
-                            throw new RuntimeException(
-                                sprintf('<error>Failed to execute SQL "%s". Aborting migration.</error>', $statement),
-                                0,
-                                $e,
-                            );
+                            throw new RuntimeException("<error>Failed to execute SQL `$statement`. Aborting migration.</error>", 0, $e);
                         }
                     }
                 }
 
-                //make sure foreign_keys are activated again in mysql
-
-                $output->writeln(
-                    sprintf(
-                        '%d of %d SQL statements executed successfully on datasource "%s"',
-                        $res,
-                        count($statements),
-                        $datasource,
-                    ),
-                );
+                $numberOfStatements = count($statements);
+                $output->writeln("$executedStatementsCount of $numberOfStatements SQL statements executed successfully on datasource `$dataSource`");
             }
 
-            $manager->updateLatestMigrationTimestamp($datasource, $nextMigrationTimestamp);
+            $manager->updateLatestMigrationTimestamp($dataSource, $nextMigrationTimestamp);
 
-            if ($input->getOption('verbose')) {
-                $output->writeln(sprintf(
-                    'Updated latest migration date to %d for datasource "%s"',
-                    $nextMigrationTimestamp,
-                    $datasource,
-                ));
+            if ($isVerbose) {
+                $output->writeln("Updated latest migration date to $nextMigrationTimestamp for datasource `$dataSource`");
             }
         }
 
-        if (!$input->getOption('fake')) {
+        if (!$isDryRun) {
             $migration->postUp($manager);
         }
 
-        $timestamps = $manager->getValidMigrationTimestamps();
-        if ($timestamps) {
-            $output->writeln(sprintf(
-                'Migration complete. %d migrations left to execute.',
-                count($timestamps),
-            ));
-        } else {
-            $output->writeln('Migration complete. No further migration to execute.');
-        }
+        $leftMigrationsCount = count($manager->findUncommittedMigrationFileTimestamps());
+        $status = $leftMigrationsCount === 0
+            ? 'No further migration to execute.'
+            : "$leftMigrationsCount migrations left to execute.";
+        $output->writeln("Migration complete. $status");
 
         return static::CODE_SUCCESS;
     }

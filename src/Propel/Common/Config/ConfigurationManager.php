@@ -228,11 +228,14 @@ class ConfigurationManager
     }
 
     /**
-     * Find a configuration file and loads it into an array.
-     * Default configuration file is named 'propel' and is expected to be found in the current directory
+     * Find a configuration file and load it as array.
+     *
+     * Default configuration file is named 'perpl' and is expected to be found in the current directory
      * or a subdirectory named '/conf' or '/config'. It can have one of the supported extensions (.ini, .properties,
      * .json, .yaml, .yml, .xml, .php, .inc).
+     *
      * Only one configuration file is supposed to be found.
+     *
      * This method also looks for a '.dist' configuration file and loads it.
      *
      * @param string $path Configuration file name or directory in which resides the configuration file.

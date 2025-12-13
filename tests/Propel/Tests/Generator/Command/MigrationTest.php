@@ -113,6 +113,18 @@ class MigrationTest extends TestCaseFixturesDatabase
     /**
      * @return void
      */
+    public function testDiffCommandErrorOnOpenMigration(): void
+    {
+        $args = ['--schema-dir' => self::BASE_SCHEMA_DIR];
+        $this->deleteMigrationFiles();
+        $this->runCommandAndAssertSuccess('migration:diff', new MigrationDiffCommand(), $args);
+        $errorMessgage = $this->runCommandAndAssertSuccess('migration:diff', new MigrationDiffCommand(), $args, false, true);
+        $this->assertStringContainsString('Uncommitted migrations have been found ; you should either execute or delet', $errorMessgage); // NOTE: Respect console line limit 
+    }
+
+    /**
+     * @return void
+     */
     public function testCreateCommandCreatesFiles(): void
     {
         $this->deleteMigrationFiles();
@@ -279,7 +291,7 @@ class MigrationTest extends TestCaseFixturesDatabase
 
         $this->tearDownMigrateToVersion($this->getMigrationVersions());
 
-        $this->assertSame((string)array_pop($migrationVersions), trim(str_replace('\n', '', $outputString)));
+        $this->assertSame((string) array_pop($migrationVersions), trim(str_replace('\n', '', $outputString)));
     }
 
     /**
@@ -315,6 +327,7 @@ class MigrationTest extends TestCaseFixturesDatabase
      * @param \Propel\Generator\Command\AbstractCommand $commandInstance
      * @param array $additionalArguments
      * @param bool $migrateDownAfterwards
+     * @param bool $expectNonZeroExitCode
      *
      * @return string
      */
@@ -322,7 +335,8 @@ class MigrationTest extends TestCaseFixturesDatabase
         string $commandName,
         AbstractCommand $commandInstance,
         array $additionalArguments = [],
-        bool $migrateDownAfterwards = false
+        bool $migrateDownAfterwards = false,
+        bool $expectNonZeroExitCode = false
     ): string {
         $outputCapturer = new StreamOutput(fopen('php://temp', 'r+'));
         $exitCode = $this->runCommand($commandName, $commandInstance, $additionalArguments, $outputCapturer);
@@ -335,8 +349,12 @@ class MigrationTest extends TestCaseFixturesDatabase
         rewind($streamedOutput);
         $outputString = stream_get_contents($streamedOutput);
 
-        $msg = "$commandName should exit successfully, but failed with message '$outputString'";
-        $this->assertEquals(0, $exitCode, $msg);
+        if ($expectNonZeroExitCode) {
+            $this->assertNotEquals(0, $exitCode, 'Expected non-zero exit code.');
+        } else {
+            $msg = "$commandName should exit successfully, but failed with message '$outputString'";
+            $this->assertEquals(0, $exitCode, $msg);
+        }
 
         return $outputString;
     }
@@ -447,7 +465,7 @@ class MigrationTest extends TestCaseFixturesDatabase
         $versions = $stmt->fetchAll();
         $lastVersion = array_pop($versions)[self::COL_VERSION];
 
-        $this->assertSame($version, (int)$lastVersion);
+        $this->assertSame($version, (int) $lastVersion);
     }
 
     /**
@@ -494,7 +512,7 @@ class MigrationTest extends TestCaseFixturesDatabase
         $migrationVersions = [];
         foreach ($migrationFiles as $migrationFile) {
             if (preg_match('/^PropelMigration_(\d+).*\.php$/', $migrationFile, $matches)) {
-                $migrationVersions[] = (int)$matches[1];
+                $migrationVersions[] = (int) $matches[1];
             }
         }
 

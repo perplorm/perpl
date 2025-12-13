@@ -173,8 +173,6 @@ interface ConnectionInterface
      * @param string $statement The SQL statement to prepare and execute.
      *                          Data inside the query should be properly escaped.
      *
-     * @throws \Propel\Runtime\Connection\Exception\ConnectionException depending on error handling.
-     *
      * @return \Propel\Runtime\DataFetcher\DataFetcherInterface|\PDOStatement|false
      */
     public function query(string $statement);

@@ -73,10 +73,10 @@ class RollbackExecutor
     {
         $this->output->writeln(sprintf(
             'Executing migration %s down',
-            $this->migrationManager->getMigrationClassName($currentVersion),
+            $this->migrationManager->resolveMigrationNameByTimestamp($currentVersion),
         ));
 
-        $migration = $this->migrationManager->getMigrationObject($currentVersion);
+        $migration = $this->migrationManager->instantiateMigration($currentVersion);
 
         $canBeRollback = $this->isFake() || $migration->preDown($this->migrationManager) !== false;
         if (!$canBeRollback && !$this->isForce()) {

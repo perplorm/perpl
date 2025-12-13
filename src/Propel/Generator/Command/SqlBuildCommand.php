@@ -33,7 +33,7 @@ class SqlBuildCommand extends AbstractCommand
             ->addOption('composer-dir', null, InputOption::VALUE_REQUIRED, 'Directory in which your composer.json resides', null)
             ->setName('sql:build')
             ->setAliases(['build-sql'])
-            ->setDescription('Create SQL script with DDL statements from schema.xml in --output-dir (or paths.schemaDir in config)');
+            ->setDescription('Create SQL script with DDL statements from schema.xml in --output-dir (or paths.sqlDir in config)');
     }
 
     /**

@@ -12,7 +12,6 @@ use Propel\Generator\Model\IdMethod;
 use Propel\Generator\Model\Schema;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Output\Output;
 use Symfony\Component\Console\Output\OutputInterface;
 use function array_merge;
 use function escapeshellarg;
@@ -69,7 +68,7 @@ class MigrationDiffCommand extends AbstractMigrationCommand
         if ($manager->hasPendingMigrations()) {
             throw new RuntimeException(sprintf(
                 'Uncommitted migrations have been found ; you should either execute or delete them before rerunning the \'diff\' task. %s',
-                "\n" . implode("\n", $manager->getValidMigrationTimestamps()),
+                "\n" . implode("\n", $manager->findUncommittedMigrationFileTimestamps()),
             ));
         }
 
@@ -122,7 +121,7 @@ class MigrationDiffCommand extends AbstractMigrationCommand
             $totalNbTables += $nbTables;
 
             if ($input->getOption('verbose')) {
-                $output->writeln(sprintf('%d tables found in database "%s"', $nbTables, $name), Output::VERBOSITY_VERBOSE);
+                $output->writeln(sprintf('%d tables found in database "%s"', $nbTables, $name), OutputInterface::VERBOSITY_VERBOSE);
             }
         }
 
@@ -147,12 +146,12 @@ class MigrationDiffCommand extends AbstractMigrationCommand
             $name = $database->getName();
 
             if ($input->getOption('verbose')) {
-                $output->writeln(sprintf('Comparing database "%s"', $name));
+                $output->writeln("Comparing database \"$name\"");
             }
 
             $appDataDatabase = $manager->getDatabase($name);
             if (!$appDataDatabase) {
-                $output->writeln(sprintf('<error>Database "%s" does not exist in schema.xml. Skipped.</error>', $name));
+                $output->writeln("<error>Database \"$name\" does not exist in schema.xml. Skipped.</error>");
 
                 continue;
             }
@@ -161,7 +160,7 @@ class MigrationDiffCommand extends AbstractMigrationCommand
 
             if (!$databaseDiff) {
                 if ($input->getOption('verbose')) {
-                    $output->writeln(sprintf('Same XML and database structures for datasource "%s" - no diff to generate', $name));
+                    $output->writeln("Same XML and database structures for datasource \"$name\" - no diff to generate");
                 }
 
                 continue;

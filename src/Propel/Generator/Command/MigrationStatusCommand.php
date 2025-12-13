@@ -10,7 +10,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 use function count;
 use function date;
 use function in_array;
-use function sprintf;
 
 class MigrationStatusCommand extends AbstractMigrationCommand
 {
@@ -54,29 +53,24 @@ class MigrationStatusCommand extends AbstractMigrationCommand
         $customConnectionData = $input->getOption('connection');
         $this->setUpMigrationManagerAccess($customConnectionData);
 
-        $oldestMigrationTimestamp = $manager->getOldestDatabaseVersion();
+        $lastMigrationTimestamp = $manager->getOldestDatabaseVersion();
         if ($input->getOption(static::COMMAND_OPTION_LAST_VERSION)) {
-            $output->writeln((string)$oldestMigrationTimestamp);
+            $output->writeln((string)$lastMigrationTimestamp);
 
             return static::CODE_SUCCESS;
         }
 
+        $isVerbose = $input->getOption('verbose');
+
         $output->writeln('Checking Database Versions...');
         foreach ($manager->getConnections() as $datasource => $params) {
-            if ($input->getOption('verbose')) {
-                $output->writeln(sprintf(
-                    'Connecting to database "%s" using DSN "%s"',
-                    $datasource,
-                    $params['dsn'],
-                ));
+            if ($isVerbose) {
+                $output->writeln("Connecting to database `$datasource` using DSN `{$params['dsn']}`");
             }
 
             if (!$manager->migrationTableExists($datasource)) {
-                if ($input->getOption('verbose')) {
-                    $output->writeln(sprintf(
-                        'Migration table does not exist in datasource "%s"; creating it.',
-                        $datasource,
-                    ));
+                if ($isVerbose) {
+                    $output->writeln("Migration table does not exist in datasource `$datasource`; creating it.");
                 }
                 $manager->createMigrationTable($datasource);
             } else {
@@ -84,57 +78,46 @@ class MigrationStatusCommand extends AbstractMigrationCommand
             }
         }
 
-        if ($input->getOption('verbose')) {
-            if ($oldestMigrationTimestamp) {
-                $output->writeln(sprintf(
-                    'Latest migration was executed on %s (timestamp %d)',
-                    date('Y-m-d H:i:s', $oldestMigrationTimestamp),
-                    (string)$oldestMigrationTimestamp,
-                ));
-            } else {
+        if ($isVerbose) {
+            if (!$lastMigrationTimestamp) {
                 $output->writeln('No migration was ever executed on these connection settings.');
+            } else {
+                $lastMigrationDate = date('Y-m-d H:i:s', $lastMigrationTimestamp);
+                $output->writeln("Latest migration was executed on $lastMigrationDate (timestamp $lastMigrationTimestamp)");
             }
         }
 
-        $output->writeln('Listing Migration files...');
-        $migrationTimestamps = $manager->getMigrationTimestamps();
-        $nbExistingMigrations = count($migrationTimestamps);
+        $migrationFileTimestamps = $manager->readMigrationFileTimestamps();
+        $nbExistingMigrations = count($migrationFileTimestamps);
 
-        if ($migrationTimestamps) {
-            $output->writeln(sprintf(
-                '%d valid migration classes found in "%s"',
-                $nbExistingMigrations,
-                $this->migrationDir,
-            ));
-
-            $validTimestamps = $manager->getValidMigrationTimestamps();
-            if ($validTimestamps) {
-                $countValidTimestamps = count($validTimestamps);
-
-                if ($countValidTimestamps === 1) {
-                    $output->writeln('1 migration needs to be executed:');
-                } else {
-                    $output->writeln(sprintf('%d migrations need to be executed:', $countValidTimestamps));
-                }
-            }
-            foreach ($migrationTimestamps as $timestamp) {
-                if ($timestamp > $oldestMigrationTimestamp || $input->getOption('verbose')) {
-                    $output->writeln(sprintf(
-                        ' %s %s %s',
-                        $timestamp == $oldestMigrationTimestamp ? '>' : ' ',
-                        $manager->getMigrationClassName($timestamp),
-                        !in_array($timestamp, $validTimestamps) ? '(executed)' : '',
-                    ));
-                }
-            }
-        } else {
+        if (!$migrationFileTimestamps) {
             $output->writeln("No migration file found in '{$this->migrationDir}'");
 
             return static::CODE_ERROR;
         }
 
-        $migrationTimestamps = $manager->getValidMigrationTimestamps();
-        $nbNotYetExecutedMigrations = count($migrationTimestamps);
+        $output->writeln("$nbExistingMigrations valid migration classes found in migrations directory `$this->migrationDir`");
+
+        $openMigrationTimestamps = $manager->findUncommittedMigrationFileTimestamps();
+        $nbNotYetExecutedMigrations = count($openMigrationTimestamps);
+        if ($nbNotYetExecutedMigrations) {
+            $msg = $nbNotYetExecutedMigrations === 1
+                ? '1 migration needs to be executed:'
+                : "$nbNotYetExecutedMigrations migrations need to be executed:";
+
+            $output->writeln($msg);
+        }
+
+        foreach ($migrationFileTimestamps as $timestamp) {
+            if ($timestamp <= $lastMigrationTimestamp && !$isVerbose) {
+                continue;
+            }
+
+            $oldestMigrationMarker = $timestamp === $lastMigrationTimestamp ? '>' : ' ';
+            $migrationFileName = $manager->resolveMigrationNameByTimestamp($timestamp);
+            $executedLabel = in_array($timestamp, $openMigrationTimestamps) ? '' : ' (executed)';
+            $output->writeln(" $oldestMigrationMarker {$migrationFileName}{$executedLabel}");
+        }
 
         if (!$nbNotYetExecutedMigrations) {
             $output->writeln('All migration files were already executed - Nothing to migrate.');
@@ -142,10 +125,8 @@ class MigrationStatusCommand extends AbstractMigrationCommand
             return static::CODE_ERROR;
         }
 
-        $output->writeln(sprintf(
-            'Call the "migrate" task to execute %s',
-            $countValidTimestamps == 1 ? 'it' : 'them',
-        ));
+        $pronoun = $nbNotYetExecutedMigrations == 1 ? 'it' : 'them';
+        $output->writeln("Call the `migrate` task to execute $pronoun");
 
         return static::CODE_SUCCESS;
     }
