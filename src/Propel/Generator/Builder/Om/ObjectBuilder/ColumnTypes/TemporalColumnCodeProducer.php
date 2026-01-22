@@ -28,6 +28,22 @@ class TemporalColumnCodeProducer extends ColumnCodeProducer
     }
 
     /**
+     * Build statement used in Model::applyDefaultValues()
+     *
+     * @return string
+     */
+    #[\Override]
+    public function getApplyDefaultValueStatement(): string
+    {
+        $clo = $this->column->getLowercasedName();
+        $defaultValue = $this->getDefaultValueString();
+        $dateTimeClass = $this->resolveColumnDateTimeClass($this->column);
+
+        return "
+        \$this->{$clo} = PropelDateTime::newInstance($defaultValue, null, '$dateTimeClass');";
+    }
+
+    /**
      * Returns the type-casted and stringified default value for the specified
      * Column. This only works for scalar default values currently.
      *

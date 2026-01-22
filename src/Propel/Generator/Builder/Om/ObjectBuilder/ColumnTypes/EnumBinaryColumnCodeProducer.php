@@ -9,7 +9,7 @@ use function array_search;
 use function in_array;
 use function sprintf;
 
-class EnumColumnCodeProducer extends ColumnCodeProducer
+class EnumBinaryColumnCodeProducer extends ColumnCodeProducer
 {
     /**
      * @throws \Propel\Generator\Exception\EngineException
@@ -33,8 +33,6 @@ class EnumColumnCodeProducer extends ColumnCodeProducer
     }
 
     /**
-     * Add the comment for an enum accessor method.
-     *
      * @param string $script
      * @param string $additionalParam
      *
@@ -56,8 +54,6 @@ class EnumColumnCodeProducer extends ColumnCodeProducer
     }
 
     /**
-     * Adds the function body for an enum accessor method.
-     *
      * @param string $script
      *
      * @return void
@@ -80,8 +76,6 @@ class EnumColumnCodeProducer extends ColumnCodeProducer
     }
 
     /**
-     * Adds the comment for an enum mutator.
-     *
      * @param string $script
      *
      * @return void
@@ -105,11 +99,9 @@ class EnumColumnCodeProducer extends ColumnCodeProducer
     }
 
     /**
-     * Adds a setter for Enum columns.
-     *
      * @see parent::addColumnMutators()
      *
-     * @param string $script The script will be modified in this method.
+     * @param string $script
      *
      * @return void
      */

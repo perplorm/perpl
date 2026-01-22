@@ -34,7 +34,7 @@ class ColumnCodeProducer extends ObjectCodeProducer
      */
     public function getColumn(): Column
     {
-        return $this->getColumn();
+        return $this->column;
     }
 
     /**
@@ -147,6 +147,24 @@ class ColumnCodeProducer extends ObjectCodeProducer
         return !$description ? '' : "
      *
      * {$description}";
+    }
+
+    /**
+     * Build statement used in Model::applyDefaultValues()
+     *
+     * @return string
+     */
+    public function getApplyDefaultValueStatement(): string
+    {
+        $clo = $this->column->getLowercasedName();
+        $defaultValue = $this->getDefaultValueString();
+        if ($this->column->isPhpObjectType()) {
+            $assumedClassName = $this->declareClass($this->column->getPhpType());
+            $defaultValue = "new $assumedClassName($defaultValue )";
+        }
+
+        return "
+        \$this->{$clo} = $defaultValue;";
     }
 
     /**

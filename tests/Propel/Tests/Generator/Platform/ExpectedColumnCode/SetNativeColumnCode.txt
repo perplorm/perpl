@@ -1,0 +1,54 @@
+
+    /**
+     * The value for the enumerated_column field.
+     */
+    protected string|null $enumerated_column = null;
+
+    /**
+     * @var array<string>|null
+     */
+    protected array|null $enumerated_column_converted = null;
+
+    /**
+     * Get the [enumerated_column] column value.
+     *
+     * @return array|null
+     */
+    public function getEnumeratedColumn()
+    {
+        if ($this->enumerated_column_converted === null) {
+            $this->enumerated_column_converted = [];
+        }
+        if (!$this->enumerated_column_converted && $this->enumerated_column !== null) {
+            $this->enumerated_column_converted = explode(',', $this->enumerated_column);
+        }
+
+        return $this->enumerated_column_converted;
+    }
+
+    /**
+     * Set the value of [enumerated_column] column.
+     *
+     * @param array|null $v new value
+     *
+     * @throws \Propel\Runtime\Exception\PropelException
+     *
+     * @return $this
+     */
+    public function setEnumeratedColumn($v)
+    {
+        if ($this->enumerated_column_converted === null || array_diff($this->enumerated_column_converted, $v) || array_diff($v, $this->enumerated_column_converted)) {
+            $v = array_map('trim', $v);
+            $valueSet = TableTableMap::getValueSet(TableTableMap::COL_ENUMERATED_COLUMN);
+            SetColumnConverter::requireValuesInSet($v, $valueSet);
+            
+            if ($this->enumerated_column !== $v) {
+                $this->enumerated_column_converted = null;
+                $orderedValues = SetColumnConverter::getItemsInOrder($v, $valueSet);
+                $this->enumerated_column = !$orderedValues ? null : implode(',', $orderedValues);
+                $this->modifiedColumns[TableTableMap::COL_ENUMERATED_COLUMN] = true;
+            }
+        }
+
+        return $this;
+    }

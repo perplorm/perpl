@@ -284,13 +284,13 @@ class ColumnMap
     }
 
     /**
-     * Whether this column is of type set.
+     * @deprecated Check against PropelTypes::SET_BINARY directly
      *
      * @return bool
      */
     public function isSetType(): bool
     {
-        return $this->type === PropelTypes::SET;
+        return $this->type === PropelTypes::SET_BINARY;
     }
 
     /**

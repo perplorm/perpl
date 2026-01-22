@@ -9,7 +9,11 @@
 namespace Propel\Tests;
 
 use PHPUnit\Framework\TestCase as PHPUnitTestCase;
+use Propel\Generator\Builder\Util\SchemaReader;
+use Propel\Generator\Config\QuickGeneratorConfig;
+use Propel\Generator\Model\Database;
 use Propel\Generator\Platform\PlatformInterface;
+use Propel\Generator\Platform\SqlitePlatform;
 use ReflectionClass;
 use ReflectionProperty;
 use function is_object;
@@ -206,7 +210,7 @@ class TestCase extends PHPUnitTestCase
     {
         // restore instance pool default
         \Propel\Runtime\Propel::enableInstancePooling();
-        
+
         parent::setUpBeforeClass();
 
         //static::printFileNameOnStart();
@@ -220,7 +224,7 @@ class TestCase extends PHPUnitTestCase
     public static function printFileNameOnStart(): void
     {
         $bt = debug_backtrace();
-        foreach($bt as $call) {
+        foreach ($bt as $call) {
             if (!isset($call['object'])) {
                 continue;
             }
@@ -228,5 +232,26 @@ class TestCase extends PHPUnitTestCase
             return;
         }
         var_dump($bt);
+    }
+
+    /**
+     * @param PlatformInterface $platform
+     * @param bool $defaultToNative
+     * @param string $schema
+     * @return Database|null
+     */
+    public function buildDatabaseFromSchema(
+        string $schema,
+        array|null $additionalConfig,
+        PlatformInterface|null $platform,
+    ): Database {
+        $config = new QuickGeneratorConfig($additionalConfig);
+        $platform ??= new SqlitePlatform();
+        $platform->setGeneratorConfig($config);
+        $schemaReader = new SchemaReader($platform);
+        $schemaReader->setGeneratorConfig($config);
+        $schema = $schemaReader->parseString($schema);
+
+        return $schema->getDatabase(); // does final initialization
     }
 }

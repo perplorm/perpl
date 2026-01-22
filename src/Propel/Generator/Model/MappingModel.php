@@ -154,16 +154,7 @@ abstract class MappingModel implements MappingModelInterface
     {
         $stringValue = trim($stringValue);
 
-        if (!$stringValue) {
-            return null;
-        }
-
-        $values = [];
-        foreach (explode(',', $stringValue) as $v) {
-            $values[] = trim($v);
-        }
-
-        return $values;
+        return !$stringValue ? null : array_map('trim', explode(',', $stringValue));
     }
 
     /**

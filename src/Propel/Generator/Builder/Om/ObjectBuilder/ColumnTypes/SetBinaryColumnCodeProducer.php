@@ -7,10 +7,10 @@ namespace Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes;
 use Propel\Common\Exception\SetColumnConverterException;
 use Propel\Common\Util\SetColumnConverter;
 
-class SetColumnCodeProducer extends AbstractArrayColumnCodeProducer
+class SetBinaryColumnCodeProducer extends AbstractArrayColumnCodeProducer
 {
     /**
-     * @param string $script The script will be modified in this method.
+     * @param string $script
      *
      * @return void
      */
@@ -46,7 +46,7 @@ class SetColumnCodeProducer extends AbstractArrayColumnCodeProducer
 
         return $defaultValue === null
             ? 'null'
-            : (string)SetColumnConverter::convertToInt($defaultValue, $this->column->getValueSet());
+            : (string)SetColumnConverter::convertToBitmask($defaultValue, $this->column->getValueSet());
     }
 
     /**
@@ -63,8 +63,6 @@ class SetColumnCodeProducer extends AbstractArrayColumnCodeProducer
     }
 
     /**
-     * Add the comment for a SET column accessor method.
-     *
      * @param string $script
      * @param string $additionalParam injected from outer class (lazy load)
      *
@@ -86,8 +84,6 @@ class SetColumnCodeProducer extends AbstractArrayColumnCodeProducer
     }
 
     /**
-     * Adds the function body for a SET column accessor method.
-     *
      * @param string $script
      *
      * @return void
@@ -137,8 +133,6 @@ class SetColumnCodeProducer extends AbstractArrayColumnCodeProducer
     }
 
     /**
-     * Adds the comment for a SET column mutator.
-     *
      * @param string $script
      *
      * @return void
@@ -163,11 +157,9 @@ class SetColumnCodeProducer extends AbstractArrayColumnCodeProducer
     }
 
     /**
-     * Adds a setter for SET column mutator.
-     *
      * @see parent::addColumnMutators()
      *
-     * @param string $script The script will be modified in this method.
+     * @param string $script
      *
      * @return void
      */
@@ -187,7 +179,7 @@ class SetColumnCodeProducer extends AbstractArrayColumnCodeProducer
         if (\$this->$cloConverted === null || count(array_diff(\$this->$cloConverted, \$v)) > 0 || count(array_diff(\$v, \$this->$cloConverted)) > 0) {
             \$valueSet = " . $this->getTableMapClassName() . '::getValueSet(' . $this->objectBuilder->getColumnConstant($col) . ");
             try {
-                \$v = SetColumnConverter::convertToInt(\$v, \$valueSet);
+                \$v = SetColumnConverter::convertToBitmask(\$v, \$valueSet);
             } catch (SetColumnConverterException \$e) {
                 throw new PropelException(sprintf('Value \"%s\" is not accepted in this set column', \$e->getValue()), \$e->getCode(), \$e);
             }

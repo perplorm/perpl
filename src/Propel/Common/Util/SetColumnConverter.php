@@ -5,6 +5,7 @@ declare(strict_types = 1);
 namespace Propel\Common\Util;
 
 use Propel\Common\Exception\SetColumnConverterException;
+use Propel\Runtime\Exception\PropelException;
 use function array_diff;
 use function array_filter;
 use function array_intersect;
@@ -23,27 +24,40 @@ class SetColumnConverter
     /**
      * Converts set column values to the corresponding integer.
      *
-     * @param array<string>|string|null $val
+     * @param array<string>|string|null $items
      * @param array<int, string> $valueSet
      *
      * @throws \Propel\Common\Exception\SetColumnConverterException
      *
      * @return int
      */
-    public static function convertToInt($val, array $valueSet): int
+    public static function convertToBitmask($items, array $valueSet): int
     {
-        if ($val === null) {
+        if ($items === null) {
             return 0;
         }
-        $setValues = array_intersect($valueSet, (array)$val);
+        $setValues = array_intersect($valueSet, (array)$items);
 
-        $missingValues = array_diff((array)$val, $setValues);
+        $missingValues = array_diff((array)$items, $setValues);
         if ($missingValues) {
             throw new SetColumnConverterException(sprintf('Value "%s" is not among the valueSet', $missingValues[0]), $missingValues[0]);
         }
         $keys = array_keys($setValues);
 
         return array_reduce($keys, fn (int $bitVector, int $ix): int => $bitVector | (1 << $ix), 0);
+    }
+
+    /**
+     * @deprecated Use aptly named {@see static::convertToBitmask()}.
+     *
+     * @param array<string>|string|null $val
+     * @param array<int, string> $valueSet
+     *
+     * @return int
+     */
+    public static function convertToInt($val, array $valueSet): int
+    {
+        return static::convertToBitmask($val, $valueSet);
     }
 
     /**
@@ -68,5 +82,44 @@ class SetColumnConverter
         }
 
         return array_values(array_filter($valueSet, fn ($ix) => (bool)($val & (1 << $ix)), ARRAY_FILTER_USE_KEY));
+    }
+
+    /**
+     * @param array|string $items
+     * @param array $setValues
+     *
+     * @return array|null
+     */
+    public static function getItemsInOrder(array|string|null $items, array $setValues): array|null
+    {
+        if ($items === null) {
+            return null;
+        }
+        $items = (array)$items;
+        static::requireValuesInSet($items, $setValues);
+
+        return array_intersect($setValues, $items);
+    }
+
+    /**
+     * @param array|string $items
+     * @param array $setValues
+     * @param string $locationDescription
+     *
+     * @throws \Propel\Runtime\Exception\PropelException
+     *
+     * @return void
+     */
+    public static function requireValuesInSet(array|string $items, array $setValues, string $locationDescription = ''): void
+    {
+        $unknownValues = array_diff((array)$items, $setValues);
+        if (!$unknownValues) {
+            return;
+        }
+
+        $unknownValuesCsv = implode(',', $unknownValues);
+        $allowedValuesCsv = implode(',', $setValues);
+
+        throw new PropelException("Illegal value in SET $locationDescription: Set '$allowedValuesCsv' does not contain '$unknownValuesCsv'");
     }
 }

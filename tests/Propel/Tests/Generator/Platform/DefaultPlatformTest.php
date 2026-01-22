@@ -122,22 +122,10 @@ class DefaultPlatformTest extends TestCase
         return $column;
     }
 
-    public function createEnumColumn($defaultValues, $defaultValue)
+    public function createEnumeratedColumn(string $propelType, $defaultValues, $defaultValue)
     {
-        $column = new Column('');
-        $column->setType(PropelTypes::ENUM);
+        $column = $this->createColumn($propelType, $defaultValue);
         $column->setValueSet($defaultValues);
-        $column->setDefaultValue($defaultValue);
-
-        return $column;
-    }
-
-    public function createSetColumn($defaultValues, $defaultValue)
-    {
-        $column = new Column('');
-        $column->setType(PropelTypes::SET);
-        $column->setValueSet($defaultValues);
-        $column->setDefaultValue($defaultValue);
 
         return $column;
     }
@@ -155,12 +143,15 @@ class DefaultPlatformTest extends TestCase
             [$this->createColumn(PropelTypes::BOOLEAN, 'false'), 'DEFAULT 0'],
             [$this->createColumn(PropelTypes::BOOLEAN, 'TRUE'), 'DEFAULT 1'],
             [$this->createColumn(PropelTypes::BOOLEAN, 'FALSE'), 'DEFAULT 0'],
-            [$this->createEnumColumn(['foo', 'bar', 'baz'], 'foo'), 'DEFAULT 0'],
-            [$this->createEnumColumn(['foo', 'bar', 'baz'], 'bar'), 'DEFAULT 1'],
-            [$this->createEnumColumn(['foo', 'bar', 'baz'], 'baz'), 'DEFAULT 2'],
-            [$this->createSetColumn(['foo', 'bar', 'baz'], 'foo'), 'DEFAULT 1'],
-            [$this->createSetColumn(['foo', 'bar', 'baz'], 'bar'), 'DEFAULT 2'],
-            [$this->createSetColumn(['foo', 'bar', 'baz'], 'baz'), 'DEFAULT 4'],
+            [$this->createEnumeratedColumn(PropelTypes::ENUM_BINARY, ['foo', 'bar', 'baz'], 'foo'), 'DEFAULT 0'],
+            [$this->createEnumeratedColumn(PropelTypes::ENUM_BINARY, ['foo', 'bar', 'baz'], 'bar'), 'DEFAULT 1'],
+            [$this->createEnumeratedColumn(PropelTypes::ENUM_BINARY, ['foo', 'bar', 'baz'], 'baz'), 'DEFAULT 2'],
+            [$this->createEnumeratedColumn(PropelTypes::SET_BINARY, ['foo', 'bar', 'baz'], 'foo'), 'DEFAULT 1'],
+            [$this->createEnumeratedColumn(PropelTypes::SET_BINARY, ['foo', 'bar', 'baz'], 'bar'), 'DEFAULT 2'],
+            [$this->createEnumeratedColumn(PropelTypes::SET_BINARY, ['foo', 'bar', 'baz'], 'baz'), 'DEFAULT 4'],
+            [$this->createEnumeratedColumn(PropelTypes::ENUM_NATIVE, ['foo', 'bar', 'baz'], 'bar'), 'DEFAULT \'bar\''],
+            [$this->createEnumeratedColumn(PropelTypes::SET_NATIVE, ['foo', 'bar', 'baz'], 'bar'), 'DEFAULT \'bar\''],
+
         ];
     }
 

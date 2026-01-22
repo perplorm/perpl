@@ -87,11 +87,9 @@ class ColumnDefaultValue
     }
 
     /**
-     * Check if this is a default value (and not an expression).
-     *
      * @return bool Whether value this object holds is an expression.
      */
-    public function isValue(): bool
+    public function isValueType(): bool
     {
         return $this->type === self::TYPE_VALUE;
     }
