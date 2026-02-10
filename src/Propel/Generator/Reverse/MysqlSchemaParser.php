@@ -125,7 +125,7 @@ class MysqlSchemaParser extends AbstractSchemaParser
     public function parse(Database $database, array $additionalTables = []): int
     {
         if ($this->getGeneratorConfig() !== null) {
-            $this->addVendorInfo = (bool)$this->getGeneratorConfig()->getConfigProperty('migrations.addVendorInfo');
+            $this->addVendorInfo = (bool) $this->getGeneratorConfig()->getConfigProperty('migrations.addVendorInfo');
         }
 
         $this->parseTables($database);
@@ -327,10 +327,10 @@ class MysqlSchemaParser extends AbstractSchemaParser
             if ($matches[2]) {
                 $cpos = strpos($matches[2], ',');
                 if ($cpos !== false) {
-                    $size = (int)substr($matches[2], 0, $cpos);
-                    $scale = (int)substr($matches[2], $cpos + 1);
+                    $size = (int) substr($matches[2], 0, $cpos);
+                    $scale = (int) substr($matches[2], $cpos + 1);
                 } else {
-                    $size = (int)$matches[2];
+                    $size = (int) $matches[2];
                 }
             }
             if ($matches[3]) {
@@ -362,12 +362,17 @@ class MysqlSchemaParser extends AbstractSchemaParser
     protected function extractDefaultValue(?string $parsedValue, string $propelType, string $nativeType, string $extra): ?ColumnDefaultValue
     {
         // BLOBs can't have any default values in MySQL
-        $isBlob = preg_match('~blob|text~', $nativeType);
+        $isBlob = preg_match('/blob/', $nativeType);
 
         if ($parsedValue === null || $isBlob) {
             return null;
         }
         $default = $parsedValue;
+
+        if ($parsedValue !== '' && preg_match('~text~', $nativeType)) {
+            // MariaDB wraps TEXT type default values in extra single quotes, but not other types
+            $default = preg_replace('@^\'(.*)\'$@', '$1', $parsedValue);
+        }
 
         if ($propelType == PropelTypes::BOOLEAN) {
             if ($parsedValue == '1') {
@@ -605,7 +610,7 @@ EOT;
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             $colName = $row['Column_name'];
             $colSize = $row['Sub_part'];
-            $name = (string)$row['Key_name'];
+            $name = (string) $row['Key_name'];
 
             if ($name === 'PRIMARY') {
                 continue;
