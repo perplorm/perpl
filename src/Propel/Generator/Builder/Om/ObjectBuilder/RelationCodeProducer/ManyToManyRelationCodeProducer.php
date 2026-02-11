@@ -18,9 +18,6 @@ use function array_search;
  */
 class ManyToManyRelationCodeProducer extends AbstractManyToManyCodeProducer
 {
-    /**
-     * @var \Propel\Generator\Builder\Util\EntityObjectClassNames
-     */
     protected EntityObjectClassNames $targetTableNames;
 
     /**

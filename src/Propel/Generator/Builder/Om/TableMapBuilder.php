@@ -31,9 +31,6 @@ use const PHP_EOL;
  */
 class TableMapBuilder extends AbstractOMBuilder
 {
-    /**
-     * @var \Propel\Generator\Builder\Util\EntityObjectClassNames
-     */
     protected EntityObjectClassNames $tableNames;
 
     /**
@@ -241,7 +238,7 @@ class " . $this->getUnqualifiedClassName() . " extends TableMap
      */
     protected function addConstants(): string
     {
-        $collectionBuilder = $this->builderFactory->createObjectCollectionBuilder($this->getTable());
+        $collectionBuilder = $this->getObjectCollectionBuilder();
 
         return $this->renderTemplate('tableMapConstants', [
             'className' => $this->getClasspath(),
@@ -412,7 +409,7 @@ class " . $this->getUnqualifiedClassName() . " extends TableMap
         $isNumericKey = $col->isNumericType() && $col->getType() !== PropelTypes::DECIMAL;
 
         foreach ($col->getChildren() as $child) {
-            $childBuilder = $this->getMultiExtendObjectBuilder();
+            $childBuilder = $this->getObjectInheritanceStubBuilder();
             $childBuilder->setChild($child);
             $fqcn = addslashes($childBuilder->getFullyQualifiedClassName());
 
@@ -729,7 +726,7 @@ class " . $this->getUnqualifiedClassName() . " extends TableMap
         string $pluralName
     ): string {
         $table = $isBack ? $fkey->getTable() : $fkey->getForeignTable();
-        $fkTableNameFq = addslashes($this->getNewStubObjectBuilder($table)->getFullyQualifiedClassName());
+        $fkTableNameFq = addslashes($this->getStubObjectBuilder($table)->getFullyQualifiedClassName());
         $joinCondition = $isCrossFk ? '[]' : $this->arrayToString($fkey->getNormalizedMap($fkey->getMapping()));
         $onDelete = $fkey->hasOnDelete() ? "'{$fkey->getOnDelete()}'" : 'null';
         $onUpdate = $fkey->hasOnUpdate() ? "'{$fkey->getOnUpdate()}'" : 'null';
@@ -880,7 +877,7 @@ class " . $this->getUnqualifiedClassName() . " extends TableMap
             // actually be the table name of other table
             $tblFK = $fk->getTable();
 
-            $joinedTableTableMapBuilder = $this->getNewTableMapBuilder($tblFK)->getTableMapBuilder();
+            $joinedTableTableMapBuilder = $this->getTableMapBuilder($tblFK)->getTableMapBuilder();
             $tableMapClassName = $this->declareClassFromBuilder($joinedTableTableMapBuilder, true);
 
             if (!$tblFK->isForReferenceOnly()) {

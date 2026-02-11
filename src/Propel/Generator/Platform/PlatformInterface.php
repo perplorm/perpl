@@ -4,7 +4,7 @@ declare(strict_types = 1);
 
 namespace Propel\Generator\Platform;
 
-use Propel\Generator\Config\GeneratorConfigInterface;
+use Propel\Generator\Config\AbstractGeneratorConfig;
 use Propel\Generator\Model\Column;
 use Propel\Generator\Model\Domain;
 use Propel\Generator\Model\Table;
@@ -55,11 +55,11 @@ interface PlatformInterface
     /**
      * Sets the GeneratorConfigInterface which contains any generator build properties.
      *
-     * @param \Propel\Generator\Config\GeneratorConfigInterface $generatorConfig
+     * @param \Propel\Generator\Config\AbstractGeneratorConfig $generatorConfig
      *
      * @return void
      */
-    public function setGeneratorConfig(GeneratorConfigInterface $generatorConfig): void;
+    public function setGeneratorConfig(AbstractGeneratorConfig $generatorConfig): void;
 
     /**
      * Returns the short name of the database type that this platform represents.

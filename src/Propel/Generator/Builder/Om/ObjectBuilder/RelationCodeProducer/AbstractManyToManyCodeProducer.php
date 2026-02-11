@@ -6,7 +6,7 @@ namespace Propel\Generator\Builder\Om\ObjectBuilder\RelationCodeProducer;
 
 use Propel\Generator\Builder\Om\ObjectBuilder;
 use Propel\Generator\Builder\Util\EntityObjectClassNames;
-use Propel\Generator\Config\GeneratorConfigInterface;
+use Propel\Generator\Config\AbstractGeneratorConfig;
 use Propel\Generator\Model\CrossRelation;
 use Propel\Generator\Model\ForeignKey;
 use Propel\Generator\Model\Table;
@@ -24,19 +24,13 @@ abstract class AbstractManyToManyCodeProducer extends AbstractRelationCodeProduc
      */
     protected const ATTRIBUTE_PREFIX = 'coll'; // abbrev for 'collection' TODO: fix
 
-    /**
-     * @var \Propel\Generator\Model\CrossRelation
-     */
-    protected $crossRelation;
+    protected CrossRelation $crossRelation;
 
     /**
      * @var \Propel\Generator\Builder\Om\ObjectBuilder\RelationCodeProducer\CrossRelationNames
      */
     protected $names;
 
-    /**
-     * @var \Propel\Generator\Builder\Util\EntityObjectClassNames
-     */
     protected EntityObjectClassNames $middleTableNames;
 
     protected SignatureCollector $signature;
@@ -55,12 +49,12 @@ abstract class AbstractManyToManyCodeProducer extends AbstractRelationCodeProduc
 
     /**
      * @param \Propel\Generator\Model\Table $table
-     * @param \Propel\Generator\Config\GeneratorConfigInterface|null $generatorConfig
+     * @param \Propel\Generator\Config\AbstractGeneratorConfig|null $generatorConfig
      *
      * @return void
      */
     #[\Override]
-    protected function init(Table $table, ?GeneratorConfigInterface $generatorConfig): void
+    protected function init(Table $table, ?AbstractGeneratorConfig $generatorConfig): void
     {
         parent::init($table, $generatorConfig);
         if (!$generatorConfig) {

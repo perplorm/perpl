@@ -83,7 +83,7 @@ class VersionableBehaviorObjectBuilderModifier
      */
     protected function getVersionQueryClassName(): string
     {
-        return $this->builder->getClassNameFromBuilder($this->builder->getNewStubQueryBuilder($this->behavior->getVersionTable()));
+        return $this->builder->getClassNameFromBuilder($this->builder->getStubQueryBuilder($this->behavior->getVersionTable()));
     }
 
     /**
@@ -422,7 +422,7 @@ public function isVersioningNecessary(?ConnectionInterface \$con = null): bool
     protected function addAddVersion(string &$script): void
     {
         $versionTable = $this->behavior->getVersionTable();
-        $versionARClassName = $this->builder->getClassNameFromBuilder($this->builder->getNewStubObjectBuilder($versionTable));
+        $versionARClassName = $this->builder->getClassNameFromBuilder($this->builder->getStubObjectBuilder($versionTable));
 
         $script .= "
 /**
@@ -525,7 +525,7 @@ public function toVersion(\$versionNumber, ?ConnectionInterface \$con = null)
         $ARclassName = $this->getActiveRecordClassName();
         $versionTable = $this->behavior->getVersionTable();
         $versionColumnName = $versionTable->getColumn($this->behavior->getParameter('version_column'))->getPhpName();
-        $versionARClassName = $this->builder->getClassNameFromBuilder($this->builder->getNewStubObjectBuilder($versionTable));
+        $versionARClassName = $this->builder->getClassNameFromBuilder($this->builder->getStubObjectBuilder($versionTable));
         $tablePKs = $this->table->getPrimaryKey();
         $primaryKeyName = $tablePKs[0]->getPhpName();
         $script .= "
@@ -555,8 +555,8 @@ public function populateFromVersion(\$version, \$con = null, &\$loadedObjects = 
             /** @var \Propel\Generator\Behavior\Versionable\VersionableBehavior $behavior */
             $behavior = $fk->getForeignTable()->getBehavior($this->behavior->getId());
             $foreignVersionTable = $behavior->getVersionTable();
-            $relatedClassName = $this->builder->getClassNameFromBuilder($this->builder->getNewStubObjectBuilder($foreignTable));
-            $relatedVersionQueryClassName = $this->builder->getClassNameFromBuilder($this->builder->getNewStubQueryBuilder($foreignVersionTable));
+            $relatedClassName = $this->builder->getClassNameFromBuilder($this->builder->getStubObjectBuilder($foreignTable));
+            $relatedVersionQueryClassName = $this->builder->getClassNameFromBuilder($this->builder->getStubQueryBuilder($foreignVersionTable));
             $fkColumnName = $fk->getLocalColumnName();
             $fkColumnPhpName = $fk->getLocalColumn()->getPhpName();
             $fkVersionColumnPhpName = $versionTable->getColumn($fkColumnName . '_version')->getPhpName();
@@ -587,9 +587,9 @@ public function populateFromVersion(\$version, \$con = null, &\$loadedObjects = 
             $foreignVersionTable = $foreignBehavior->getVersionTable();
             $fkColumnIds = $this->behavior->getReferrerIdsColumn($fk);
             $fkColumnVersions = $this->behavior->getReferrerVersionsColumn($fk);
-            $relatedVersionQueryClassName = $this->builder->getClassNameFromBuilder($this->builder->getNewStubQueryBuilder($foreignVersionTable));
-            $relatedVersionTableMapClassName = $this->builder->getClassNameFromBuilder($this->builder->getNewTableMapBuilder($foreignVersionTable));
-            $relatedClassName = $this->builder->getClassNameFromBuilder($this->builder->getNewStubObjectBuilder($foreignTable));
+            $relatedVersionQueryClassName = $this->builder->getClassNameFromBuilder($this->builder->getStubQueryBuilder($foreignVersionTable));
+            $relatedVersionTableMapClassName = $this->builder->getClassNameFromBuilder($this->builder->getTableMapBuilder($foreignVersionTable));
+            $relatedClassName = $this->builder->getClassNameFromBuilder($this->builder->getStubObjectBuilder($foreignTable));
             $fkColumn = $foreignTable->getFirstPrimaryKeyColumn();
             $fkVersionColumn = $foreignVersionTable->getColumn($this->behavior->getParameter('version_column'));
 
@@ -683,7 +683,7 @@ public function isLastVersion(?ConnectionInterface \$con = null)
      */
     protected function addGetOneVersion(string &$script): void
     {
-        $versionARClassName = $this->builder->getClassNameFromBuilder($this->builder->getNewStubObjectBuilder($this->behavior->getVersionTable()));
+        $versionARClassName = $this->builder->getClassNameFromBuilder($this->builder->getStubObjectBuilder($this->behavior->getVersionTable()));
         $script .= "
 /**
  * Retrieves a version object for this entity and a version number
@@ -711,9 +711,9 @@ public function getOneVersion(int \$versionNumber, ?ConnectionInterface \$con = 
     protected function addGetAllVersions(string &$script): void
     {
         $versionTable = $this->behavior->getVersionTable();
-        $versionARClassName = $this->builder->getClassNameFromBuilder($this->builder->getNewStubObjectBuilder($versionTable));
+        $versionARClassName = $this->builder->getClassNameFromBuilder($this->builder->getStubObjectBuilder($versionTable));
         //this force the use statement for  VersionTableMap
-        $this->builder->getClassNameFromBuilder($this->builder->getNewTableMapBuilder($versionTable));
+        $this->builder->getClassNameFromBuilder($this->builder->getTableMapBuilder($versionTable));
         $versionForeignColumn = $versionTable->getColumn($this->behavior->getParameter('version_column'));
         $fks = $versionTable->getForeignKeysReferencingTable($this->table->getName());
         $relCol = $this->builder->getRefFKPhpNameAffix($fks[0], true);
@@ -885,8 +885,8 @@ public function compareVersions(int \$fromVersionNumber, int \$toVersionNumber, 
     protected function addGetLastVersions(string &$script): void
     {
         $versionTable = $this->behavior->getVersionTable();
-        $versionARClassName = $this->builder->getNewStubObjectBuilder($versionTable)->getClassName();
-        $versionTableMapClassName = $this->builder->getClassNameFromBuilder($this->builder->getNewTableMapBuilder($versionTable));
+        $versionARClassName = $this->builder->getStubObjectBuilder($versionTable)->getClassName();
+        $versionTableMapClassName = $this->builder->getClassNameFromBuilder($this->builder->getTableMapBuilder($versionTable));
         $fks = $versionTable->getForeignKeysReferencingTable($this->table->getName());
         $relCol = $this->builder->getRefFKPhpNameAffix($fks[0], true);
         $versionGetter = 'get' . $relCol;

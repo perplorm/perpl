@@ -6,7 +6,7 @@ namespace Propel\Generator\Platform;
 
 use PDO;
 use Propel\Common\Config\Exception\InvalidConfigurationException;
-use Propel\Generator\Config\GeneratorConfigInterface;
+use Propel\Generator\Config\AbstractGeneratorConfig;
 use Propel\Generator\Exception\EngineException;
 use Propel\Generator\Model\Column;
 use Propel\Generator\Model\Database;
@@ -96,14 +96,14 @@ class MysqlPlatform extends DefaultPlatform
     }
 
     /**
-     * @param \Propel\Generator\Config\GeneratorConfigInterface $generatorConfig
+     * @param \Propel\Generator\Config\AbstractGeneratorConfig $generatorConfig
      *
      * @throws \Propel\Common\Config\Exception\InvalidConfigurationException
      *
      * @return void
      */
     #[\Override]
-    public function setGeneratorConfig(GeneratorConfigInterface $generatorConfig): void
+    public function setGeneratorConfig(AbstractGeneratorConfig $generatorConfig): void
     {
         parent::setGeneratorConfig($generatorConfig);
 

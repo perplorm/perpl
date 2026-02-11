@@ -255,9 +255,9 @@ class InsertCodeBehavior extends Behavior
     {
         switch (get_class($builder)) {
             case ObjectBuilder::class:
-                return $builder->getNewStubObjectBuilder($table);
+                return $builder->getStubObjectBuilder($table);
             case QueryBuilder::class:
-                return $builder->getNewStubQueryBuilder($table);
+                return $builder->getStubQueryBuilder($table);
             default:
                 return null;
         }

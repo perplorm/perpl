@@ -4,52 +4,37 @@ declare(strict_types = 1);
 
 namespace Propel\Generator\Builder\Util;
 
-use Propel\Generator\Builder\BuilderFactory\BuilderFactory;
-use Propel\Generator\Config\GeneratorConfig;
+use Propel\Generator\Builder\Om\BuilderType;
 use Propel\Generator\Model\Table;
 
 class EntityObjectClassNames
 {
-    /**
-     * @var \Propel\Generator\Model\Table
-     */
     protected Table $table;
 
-    /**
-     * @var \Propel\Generator\Builder\Util\ReferencedClasses
-     */
     protected ReferencedClasses $referencedClasses;
-
-    /**
-     * @var \Propel\Generator\Builder\BuilderFactory\BuilderFactory
-     */
-    protected BuilderFactory $builderFactory;
 
     /**
      * @param \Propel\Generator\Model\Table $table
      * @param \Propel\Generator\Builder\Util\ReferencedClasses $referencedClasses
-     * @param \Propel\Generator\Builder\BuilderFactory\BuilderFactory $builderFactory
      */
     public function __construct(
         Table $table,
-        ReferencedClasses $referencedClasses,
-        BuilderFactory $builderFactory
+        ReferencedClasses $referencedClasses
     ) {
         $this->table = $table;
         $this->referencedClasses = $referencedClasses;
-        $this->builderFactory = $builderFactory;
     }
 
     /**
      * @param bool $inLocalNamespace
      * @param string|bool $aliasPrefix
-     * @param string $builderType
+     * @param \Propel\Generator\Builder\Om\BuilderType $builderType
      *
      * @return string
      */
-    protected function getClassNameFromBuilder(bool $inLocalNamespace, string|bool $aliasPrefix, string $builderType): string
+    protected function getClassNameFromBuilder(bool $inLocalNamespace, string|bool $aliasPrefix, BuilderType $builderType): string
     {
-        $builder = $this->builderFactory->createBuilderForTable($this->table, $builderType);
+        $builder = $this->referencedClasses->getGeneratorConfig()->loadConfiguredBuilder($this->table, $builderType);
 
         return $inLocalNamespace
             ? $this->referencedClasses->registerBuilderResultClass($builder, $aliasPrefix)
@@ -66,7 +51,7 @@ class EntityObjectClassNames
      */
     public function useObjectBaseClassName(bool $inLocalNamespace = true, string|bool $aliasPrefix = false): string
     {
-        return $this->getClassNameFromBuilder($inLocalNamespace, $aliasPrefix, GeneratorConfig::KEY_OBJECT_BASE);
+        return $this->getClassNameFromBuilder($inLocalNamespace, $aliasPrefix, BuilderType::ObjectBase);
     }
 
     /**
@@ -79,7 +64,7 @@ class EntityObjectClassNames
      */
     public function useObjectStubClassName(bool $inLocalNamespace = true, string|bool $aliasPrefix = false): string
     {
-        return $this->getClassNameFromBuilder($inLocalNamespace, $aliasPrefix, GeneratorConfig::KEY_OBJECT_STUB);
+        return $this->getClassNameFromBuilder($inLocalNamespace, $aliasPrefix, BuilderType::ObjectStub);
     }
 
     /**
@@ -92,7 +77,7 @@ class EntityObjectClassNames
      */
     public function useQueryBaseClassName(bool $inLocalNamespace = true, string|bool $aliasPrefix = false): string
     {
-        return $this->getClassNameFromBuilder($inLocalNamespace, $aliasPrefix, GeneratorConfig::KEY_QUERY_BASE);
+        return $this->getClassNameFromBuilder($inLocalNamespace, $aliasPrefix, BuilderType::QueryBase);
     }
 
     /**
@@ -105,7 +90,7 @@ class EntityObjectClassNames
      */
     public function useQueryStubClassName(bool $inLocalNamespace = true, string|bool $aliasPrefix = false): string
     {
-        return $this->getClassNameFromBuilder($inLocalNamespace, $aliasPrefix, GeneratorConfig::KEY_QUERY_STUB);
+        return $this->getClassNameFromBuilder($inLocalNamespace, $aliasPrefix, BuilderType::QueryStub);
     }
 
     /**
@@ -118,7 +103,7 @@ class EntityObjectClassNames
      */
     public function useCollectionClassName(bool $inLocalNamespace = true, string|bool $aliasPrefix = false): string
     {
-        return $this->getClassNameFromBuilder($inLocalNamespace, $aliasPrefix, GeneratorConfig::KEY_COLLECTION);
+        return $this->getClassNameFromBuilder($inLocalNamespace, $aliasPrefix, BuilderType::Collection);
     }
 
     /**
@@ -131,6 +116,6 @@ class EntityObjectClassNames
      */
     public function useTablemapClassName(bool $inLocalNamespace = true, string|bool $aliasPrefix = false): string
     {
-        return $this->getClassNameFromBuilder($inLocalNamespace, $aliasPrefix, GeneratorConfig::KEY_TABLEMAP);
+        return $this->getClassNameFromBuilder($inLocalNamespace, $aliasPrefix, BuilderType::TableMap);
     }
 }

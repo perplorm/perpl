@@ -4,7 +4,7 @@ declare(strict_types = 1);
 
 namespace Propel\Generator\Reverse;
 
-use Propel\Generator\Config\GeneratorConfigInterface;
+use Propel\Generator\Config\AbstractGeneratorConfig;
 use Propel\Generator\Model\VendorInfo;
 use Propel\Generator\Platform\PlatformInterface;
 use Propel\Runtime\Connection\ConnectionInterface;
@@ -33,7 +33,7 @@ abstract class AbstractSchemaParser implements SchemaParserInterface
     /**
      * GeneratorConfig object holding build properties.
      *
-     * @var \Propel\Generator\Config\GeneratorConfigInterface
+     * @var \Propel\Generator\Config\AbstractGeneratorConfig
      */
     private $generatorConfig;
 
@@ -150,12 +150,12 @@ abstract class AbstractSchemaParser implements SchemaParserInterface
     /**
      * Sets the GeneratorConfig to use in the parsing.
      *
-     * @param \Propel\Generator\Config\GeneratorConfigInterface $config
+     * @param \Propel\Generator\Config\AbstractGeneratorConfig $config
      *
      * @return void
      */
     #[\Override]
-    public function setGeneratorConfig(GeneratorConfigInterface $config): void
+    public function setGeneratorConfig(AbstractGeneratorConfig $config): void
     {
         $this->generatorConfig = $config;
     }
@@ -163,9 +163,9 @@ abstract class AbstractSchemaParser implements SchemaParserInterface
     /**
      * Gets the GeneratorConfig option.
      *
-     * @return \Propel\Generator\Config\GeneratorConfigInterface|null
+     * @return \Propel\Generator\Config\AbstractGeneratorConfig|null
      */
-    public function getGeneratorConfig(): ?GeneratorConfigInterface
+    public function getGeneratorConfig(): ?AbstractGeneratorConfig
     {
         return $this->generatorConfig;
     }

@@ -94,7 +94,7 @@ static \$isVersioningEnabled = true;
      */
     protected function getVersionQueryClassName(): string
     {
-        return $this->builder->getClassNameFromBuilder($this->builder->getNewStubQueryBuilder($this->behavior->getVersionTable()));
+        return $this->builder->getClassNameFromBuilder($this->builder->getStubQueryBuilder($this->behavior->getVersionTable()));
     }
 
     /**

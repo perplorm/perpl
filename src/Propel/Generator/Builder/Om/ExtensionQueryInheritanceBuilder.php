@@ -88,7 +88,7 @@ class ExtensionQueryInheritanceBuilder extends AbstractOMBuilder implements Exte
         $tableName = $table->getName();
         $tableDesc = $table->getDescription();
 
-        $baseBuilder = $this->getNewQueryInheritanceBuilder($this->getChild());
+        $baseBuilder = $this->getQueryInheritanceBuilder($this->getChild());
         $baseClassName = $this->getClassNameFromBuilder($baseBuilder);
         $timeStampBlock = $this->generateTimestampBlock();
 

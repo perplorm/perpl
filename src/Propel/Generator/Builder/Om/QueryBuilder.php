@@ -36,9 +36,6 @@ use function var_export;
  */
 class QueryBuilder extends AbstractOMBuilder
 {
-    /**
-     * @var \Propel\Generator\Builder\Util\EntityObjectClassNames
-     */
     protected EntityObjectClassNames $tableNames;
 
     /**
@@ -134,7 +131,7 @@ class QueryBuilder extends AbstractOMBuilder
     protected function addClassOpen(string &$script): void
     {
         $table = $this->getTable();
-        $collectionBuilder = $this->builderFactory->createObjectCollectionBuilder($this->getTable());
+        $collectionBuilder = $this->getObjectCollectionBuilder();
 
         $script .= $this->renderTemplate('baseQueryClassHeader.php', [
             'tableName' => $table->getName(),
@@ -184,7 +181,7 @@ class QueryBuilder extends AbstractOMBuilder
         $refFkTables = array_map(fn ($fk) => $fk->getTable(), $table->getReferrers());
         $relationTables = array_merge($fkTables, $refFkTables);
 
-        return array_map(fn ($table) => $this->getNewStubQueryBuilder($table)->getQueryClassName(true), $relationTables);
+        return array_map(fn ($table) => $this->getStubQueryBuilder($table)->getQueryClassName(true), $relationTables);
     }
 
     /**
@@ -1017,7 +1014,7 @@ class QueryBuilder extends AbstractOMBuilder
         }
 
         $fkTable = $fk->getForeignTable();
-        $targetObjectBuilder = $this->getNewObjectBuilder($fkTable);
+        $targetObjectBuilder = $this->getObjectBuilder($fkTable);
         $varName = '$' . $fkTable->getCamelCaseName();
 
         $columnNameAndValueStatement = [];
@@ -1057,7 +1054,7 @@ class QueryBuilder extends AbstractOMBuilder
         $this->declareClass('\Propel\Runtime\Collection\ObjectCollection');
 
         $fkTable = $this->getTable()->getDatabase()->getTable($fk->getTableName());
-        $targetObjectBuilder = $this->getNewObjectBuilder($fkTable);
+        $targetObjectBuilder = $this->getObjectBuilder($fkTable);
 
         $relationColumnValues = [];
         foreach ($fk->getInverseMapping() as $mapping) {
@@ -1154,7 +1151,7 @@ class QueryBuilder extends AbstractOMBuilder
     protected function addUseFkQuery(string &$script, ForeignKey $fk): void
     {
         $fkTable = $fk->getForeignTable();
-        $fkQueryBuilder = $this->getNewStubQueryBuilder($fkTable);
+        $fkQueryBuilder = $this->getStubQueryBuilder($fkTable);
         $queryClass = $this->getClassNameFromBuilder($fkQueryBuilder, true);
         $relationName = $this->getFKPhpNameAffix($fk);
         $joinType = $this->getJoinType($fk);
@@ -1176,7 +1173,7 @@ class QueryBuilder extends AbstractOMBuilder
     protected function addUseRefFkQuery(string &$script, ForeignKey $fk): void
     {
         $fkTable = $this->getTable()->getDatabase()->getTable($fk->getTableName());
-        $fkQueryBuilder = $this->getNewStubQueryBuilder($fkTable);
+        $fkQueryBuilder = $this->getStubQueryBuilder($fkTable);
         $queryClass = $this->getClassNameFromBuilder($fkQueryBuilder, true);
         $relationName = $this->getRefFKPhpNameAffix($fk);
         $joinType = $this->getJoinType($fk);
@@ -1297,7 +1294,7 @@ class QueryBuilder extends AbstractOMBuilder
         foreach ($crossFKs->getCrossForeignKeys() as $crossFK) {
             $middleTable = $crossFK->getTable();
             $targetTable = $crossFK->getForeignTable();
-            $targetObjectBuilder = $this->getNewObjectBuilder($targetTable);
+            $targetObjectBuilder = $this->getObjectBuilder($targetTable);
 
             $script .= $this->renderTemplate('baseQueryFilterByCrossFk', [
                 'targetTableClassName' => $this->declareClassFromBuilder($targetObjectBuilder),
@@ -1576,7 +1573,7 @@ class QueryBuilder extends AbstractOMBuilder
                 continue;
             }
             $identifiers = [];
-            $foreignTableTableMapBuilder = $this->getNewTableMapBuilder($foreignTable);
+            $foreignTableTableMapBuilder = $this->getTableMapBuilder($foreignTable);
             $this->declareClassFromBuilder($foreignTableTableMapBuilder);
             $identifiers['fkModelName'] = $foreignTableTableMapBuilder->getObjectClassName();
             $identifiers['fkQueryClassNameFQ'] = $this->declareClassFromBuilder($foreignTableTableMapBuilder->getStubQueryBuilder());
