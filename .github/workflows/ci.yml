@@ -15,18 +15,22 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                php-version: [ '8.1', '8.4' ]
+                php-version: [ '8.1', '8.5' ]
                 db-type: [ sqlite, mysql, pgsql, agnostic ]
-                symfony-version: [ '5-min', '5-max', '6-min', '6-max', '7-min', '7-max']
+                symfony-version: [ '6-min', '6-max', '7-min', '7-max', '8-min', '8-max']
                 exclude:
                   - symfony-version: '6-min'
                     php-version: '8.1'
                   - symfony-version: '6-max'
-                    php-version: '8.1'
+                    php-version: '8.5'
                   - symfony-version: '7-min'
-                    php-version: '8.1'
+                    php-version: '8.2'
                   - symfony-version: '7-max'
-                    php-version: '8.1'
+                    php-version: '8.5'
+                  - symfony-version: '8-min'
+                    php-version: '8.4'
+                  - symfony-version: '8-max'
+                    php-version: '8.5'
         env:
             DB_NAME: 'propel_tests'
             DB_USER: 'propel'
@@ -108,7 +112,7 @@ jobs:
             - name: Run tests
               shell: 'script -q -e -c "bash {0}"'
               run: |
-                if [[ ${{ matrix.php-version }} == '8.1' && ${{ matrix.symfony-version }} == '5-max' ]]; then
+                if [[ ${{ matrix.php-version }} == '8.1' && ${{ matrix.symfony-version }} == '6-max' ]]; then
                   export CODECOVERAGE=1 && vendor/bin/phpunit -c tests/${{ matrix.db-type }}.phpunit.xml --verbose --coverage-clover=tests/coverage.xml
                 else
                   vendor/bin/phpunit -c tests/${{ matrix.db-type }}.phpunit.xml
@@ -117,7 +121,7 @@ jobs:
                 SYMFONY_VERSION: ${{ matrix.symfony-version }}
 
             - name: Code Coverage Report
-              if: success() && matrix.php-version == '8.1' && matrix.symfony-version == '5-max'
+              if: success() && matrix.php-version == '8.1' && matrix.symfony-version == '6-max'
               uses: codecov/codecov-action@v1
               with:
                   flags: ${{ matrix.php-version }}, ${{ matrix.db-type }}, ${{ matrix.symfony-version }}
@@ -182,7 +186,7 @@ jobs:
               run: |
                 bin/propel test:prepare --vendor=sqlite --dsn='sqlite:/tmp/perpl.sq3' --exclude-database \
                 && composer stan -- -a autoload.php.dist tests/Fixtures/bookstore/build/classes/Propel/Tests/Bookstore/Base/*[^Query].php
- 
+
     query-code-style:
         runs-on: ubuntu-24.04
         steps:
