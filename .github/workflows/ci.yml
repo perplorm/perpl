@@ -19,18 +19,14 @@ jobs:
                 db-type: [ sqlite, mysql, pgsql, agnostic ]
                 symfony-version: [ '6-min', '6-max', '7-min', '7-max', '8-min', '8-max']
                 exclude:
-                  - symfony-version: '6-min'
-                    php-version: '8.1'
-                  - symfony-version: '6-max'
-                    php-version: '8.5'
                   - symfony-version: '7-min'
-                    php-version: '8.2'
+                    php-version: '8.1'
                   - symfony-version: '7-max'
-                    php-version: '8.5'
+                    php-version: '8.1'
                   - symfony-version: '8-min'
-                    php-version: '8.4'
+                    php-version: '8.1'
                   - symfony-version: '8-max'
-                    php-version: '8.5'
+                    php-version: '8.1'
         env:
             DB_NAME: 'propel_tests'
             DB_USER: 'propel'
