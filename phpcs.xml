@@ -12,5 +12,7 @@
 
     <file>src/</file>
 
-    <rule ref="Spryker"/>
+    <rule ref="Spryker">
+        <exclude ref="Spryker.Commenting.FileDocBlock.FileDocBlockWrong" />
+    </rule>
 </ruleset>
