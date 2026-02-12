@@ -41,7 +41,7 @@ class Type extends SymfonyType
             type: is_string($options) ? $options : $type,
             message: $message,
             groups: $groups,
-            payload: $payload
+            payload: $payload,
         );
     }
 }

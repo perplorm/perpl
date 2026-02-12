@@ -40,7 +40,7 @@ class Regex extends SymfonyRegex
                 match: $options['match'] ?? null,
                 normalizer: $options['normalizer'] ?? null,
                 groups: $options['groups'] ?? null,
-                payload: $options['payload'] ?? null
+                payload: $options['payload'] ?? null,
             );
 
             return;
@@ -52,7 +52,7 @@ class Regex extends SymfonyRegex
             message: $message,
             match: $match,
             groups: $groups,
-            payload: $payload
+            payload: $payload,
         );
     }
 }

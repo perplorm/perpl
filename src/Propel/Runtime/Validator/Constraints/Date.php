@@ -44,7 +44,7 @@ class Date extends SymfonyDateConstraint
             options: null,
             message: is_string($options) ? $options : $message,
             groups: $groups,
-            payload: $payload
+            payload: $payload,
         );
     }
 }
