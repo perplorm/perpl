@@ -11,6 +11,7 @@ namespace Propel\Tests\Generator\Model\Diff;
 use Propel\Generator\Model\Column;
 use Propel\Generator\Model\ColumnDefaultValue;
 use Propel\Generator\Model\Diff\ColumnComparator;
+use Propel\Generator\Model\Table;
 use Propel\Generator\Platform\MysqlPlatform;
 use Propel\Tests\TestCase;
 
@@ -232,5 +233,27 @@ class ColumnComparatorTest extends TestCase
             'defaultValueValue' => [null, 123],
         ];
         $this->assertEquals($expectedChangedProperties, ColumnComparator::compareColumns($c1, $c2));
+    }
+
+    /**
+     * @return void
+     */
+    public function testIgnoreIntegerSizeOnMySQL()
+    {
+        $platform = new MysqlPlatform();
+        $domain = clone $platform->getDomainForType('INTEGER');
+
+        $tableStub = $this->createStub(Table::class);
+        $tableStub->method('getPlatform')->willReturn($platform);
+
+        $fromColumn = new Column('foo');
+        $fromColumn->setTable($tableStub);
+        $fromColumn->setDomain($domain);
+
+        $toColumn = clone $fromColumn;
+        $toColumn->getDomain()->setSize(5);
+
+        $hasChange = ColumnComparator::computeDiff($fromColumn, $toColumn);
+        $this->assertFalse($hasChange, 'Changing integer column size should not build diff on MySQL');
     }
 }

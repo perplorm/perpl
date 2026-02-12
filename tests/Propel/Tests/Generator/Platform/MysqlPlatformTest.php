@@ -482,6 +482,48 @@ DROP TABLE IF EXISTS `Woopah`.`foo`;
     }
 
     /**
+     * @return array{string, bool, string}[]
+     */
+    public function IntegerTypesDataProvider(): array
+    {
+        $integerTypes = [PropelTypes::INTEGER, PropelTypes::BIGINT, PropelTypes::SMALLINT, PropelTypes::TINYINT];
+
+        return array_merge([
+                [PropelTypes::DECIMAL, true, "`foo` DECIMAL(3)"],
+                [PropelTypes::DECIMAL, false, "`foo` DECIMAL(3)"],
+            ],
+            array_map(fn($type) => [$type, true, "`foo` $type"], $integerTypes),
+            array_map(fn($type) => [$type, false, "`foo` {$type}(3)"], $integerTypes),
+            
+        );
+    }
+
+    /**
+     * @dataProvider IntegerTypesDataProvider
+     *
+     * @param string $integerType
+     * @param bool $ignoreSize
+     * @param string $expectedDdl
+     *
+     * @return void
+     */
+    public function testGetColumnDDLIgnoresSizeOnInteger(string $integerType, bool $ignoreSize, string $expectedDdl)
+    {
+        $platform = new MysqlPlatform();
+        $this->setObjectPropertyValue($platform, 'ignoreSizeOnIntegerTypes', $ignoreSize);
+        $domain = clone $platform->getDomainForType($integerType);
+        $domain->replaceSize(3);
+
+        $column = new Column('foo');
+        $column->setDomain($domain);
+
+        $actual = $platform->getColumnDDL($column);
+
+        $this->assertEquals($expectedDdl, $actual);
+    }
+
+
+    /**
      * @return void
      */
     public function testGetColumnDDLCharsetVendor()

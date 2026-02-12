@@ -182,6 +182,7 @@ class PropelConfiguration implements ConfigurationInterface
                                         ->scalarNode('tableType')->defaultValue('InnoDB')->treatNullLike('InnoDB')->end()
                                         ->scalarNode('tableEngineKeyword')->defaultValue('ENGINE')->end()
                                         ->scalarNode('uuidColumnType')->defaultValue('binary')->end()
+                                        ->booleanNode('ignoreSizeOnIntegerTypes')->defaultTrue()->end()
                                     ->end()
                                 ->end()
                                 ->arrayNode('sqlite')

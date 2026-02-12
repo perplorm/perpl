@@ -122,7 +122,7 @@ class Column extends MappingModel
     private $domain;
 
     /**
-     * @var \Propel\Generator\Model\Table
+     * @var \Propel\Generator\Model\Table|null
      */
     private $parentTable;
 
