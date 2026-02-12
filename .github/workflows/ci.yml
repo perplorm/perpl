@@ -64,9 +64,6 @@ jobs:
 
             - uses: actions/checkout@v3
 
-            - name: Move specific composer.json (Symfony version ${{ matrix.symfony-version }})
-              run: mv tests/composer/composer-symfony${{ matrix.symfony-version }}.json composer.json
-
             - id: build-container
               uses: ./.github/actions/setup-php
               with:
