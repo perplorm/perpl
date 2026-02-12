@@ -8,26 +8,25 @@
 
 namespace Propel\Runtime\Validator\Constraints;
 
-use Symfony\Component\Validator\Constraints\Date as SymfonyDateConstraint;
+use Symfony\Component\Validator\Constraints\Regex as SymfonyRegex;
 
 /**
- * BC wrapper for Symfony's Date constraint supporting both Symfony < 8 and 8+
+ * BC wrapper for Symfony's Regex constraint supporting both Symfony < 8 and 8+
  */
-class Date extends SymfonyDateConstraint
+class Regex extends SymfonyRegex
 {
     /**
-     * @var string
-     */
-    public $column = '';
-
-    /**
-     * @param array|string|null $options Options array (Symfony < 8) or message (Symfony 8+)
+     * @param array|string|null $options Options array (Symfony < 8) or pattern (Symfony 8+)
+     * @param string|null $pattern Pattern for Symfony 8+
+     * @param bool|null $match Match flag for Symfony 8+
      * @param string|null $message Error message for Symfony 8+
      * @param array|null $groups Validation groups
      * @param mixed $payload Additional payload
      */
     public function __construct(
         array|string|null $options = null,
+        ?string $pattern = null,
+        ?bool $match = null,
         ?string $message = null,
         ?array $groups = null,
         mixed $payload = null
@@ -41,10 +40,16 @@ class Date extends SymfonyDateConstraint
 
         // Handle Symfony 8+ named parameters - build options array
         $constructorOptions = [];
+        if ($pattern !== null) {
+            $constructorOptions['pattern'] = $pattern;
+        } elseif (is_string($options)) {
+            $constructorOptions['pattern'] = $options;
+        }
+        if ($match !== null) {
+            $constructorOptions['match'] = $match;
+        }
         if ($message !== null) {
             $constructorOptions['message'] = $message;
-        } elseif (is_string($options)) {
-            $constructorOptions['message'] = $options;
         }
         if ($groups !== null) {
             $constructorOptions['groups'] = $groups;
