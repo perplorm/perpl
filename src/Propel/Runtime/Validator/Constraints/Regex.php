@@ -31,33 +31,28 @@ class Regex extends SymfonyRegex
         ?array $groups = null,
         mixed $payload = null
     ) {
-        // Handle array syntax (works for both Symfony < 8 and 8+)
+        // Handle array syntax - extract required pattern for Symfony 8 compatibility
         if (is_array($options)) {
-            parent::__construct(options: $options);
+            parent::__construct(
+                pattern: $options['pattern'] ?? null,
+                message: $options['message'] ?? null,
+                htmlPattern: $options['htmlPattern'] ?? null,
+                match: $options['match'] ?? null,
+                normalizer: $options['normalizer'] ?? null,
+                groups: $options['groups'] ?? null,
+                payload: $options['payload'] ?? null
+            );
 
             return;
         }
 
-        // Handle Symfony 8+ named parameters - build options array
-        $constructorOptions = [];
-        if ($pattern !== null) {
-            $constructorOptions['pattern'] = $pattern;
-        } elseif (is_string($options)) {
-            $constructorOptions['pattern'] = $options;
-        }
-        if ($match !== null) {
-            $constructorOptions['match'] = $match;
-        }
-        if ($message !== null) {
-            $constructorOptions['message'] = $message;
-        }
-        if ($groups !== null) {
-            $constructorOptions['groups'] = $groups;
-        }
-        if ($payload !== null) {
-            $constructorOptions['payload'] = $payload;
-        }
-
-        parent::__construct($constructorOptions);
+        // Handle Symfony 8+ named parameters - pass directly
+        parent::__construct(
+            pattern: is_string($options) ? $options : $pattern,
+            message: $message,
+            match: $match,
+            groups: $groups,
+            payload: $payload
+        );
     }
 }

@@ -32,27 +32,19 @@ class Date extends SymfonyDateConstraint
         ?array $groups = null,
         mixed $payload = null
     ) {
-        // Handle array syntax (works for both Symfony < 8 and 8+)
+        // Handle array syntax - Date accepts array as first param in Symfony 8
         if (is_array($options)) {
-            parent::__construct(options: $options);
+            parent::__construct($options);
 
             return;
         }
 
-        // Handle Symfony 8+ named parameters - build options array
-        $constructorOptions = [];
-        if ($message !== null) {
-            $constructorOptions['message'] = $message;
-        } elseif (is_string($options)) {
-            $constructorOptions['message'] = $options;
-        }
-        if ($groups !== null) {
-            $constructorOptions['groups'] = $groups;
-        }
-        if ($payload !== null) {
-            $constructorOptions['payload'] = $payload;
-        }
-
-        parent::__construct($constructorOptions);
+        // Handle Symfony 8+ named parameters - pass directly
+        parent::__construct(
+            options: null,
+            message: is_string($options) ? $options : $message,
+            groups: $groups,
+            payload: $payload
+        );
     }
 }

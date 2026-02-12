@@ -35,39 +35,34 @@ class Length extends SymfonyLength
         ?array $groups = null,
         mixed $payload = null
     ) {
-        // Handle array syntax (works for both Symfony < 8 and 8+)
+        // Handle array syntax - extract parameters for Symfony 8 compatibility
         if (is_array($options)) {
-            parent::__construct(options: $options);
+            parent::__construct(
+                exactly: $options['exactly'] ?? null,
+                min: $options['min'] ?? null,
+                max: $options['max'] ?? null,
+                charset: $options['charset'] ?? null,
+                normalizer: $options['normalizer'] ?? null,
+                minMessage: $options['minMessage'] ?? null,
+                maxMessage: $options['maxMessage'] ?? null,
+                exactMessage: $options['exactMessage'] ?? null,
+                charsetMessage: $options['charsetMessage'] ?? null,
+                groups: $options['groups'] ?? null,
+                payload: $options['payload'] ?? null
+            );
 
             return;
         }
 
-        // Handle Symfony 8+ named parameters - build options array
-        $constructorOptions = [];
-        if ($exactly !== null) {
-            $constructorOptions['exactly'] = $exactly;
-        } elseif (is_int($options)) {
-            $constructorOptions['exactly'] = $options;
-        }
-        if ($min !== null) {
-            $constructorOptions['min'] = $min;
-        }
-        if ($max !== null) {
-            $constructorOptions['max'] = $max;
-        }
-        if ($charset !== null) {
-            $constructorOptions['charset'] = $charset;
-        }
-        if ($message !== null) {
-            $constructorOptions['message'] = $message;
-        }
-        if ($groups !== null) {
-            $constructorOptions['groups'] = $groups;
-        }
-        if ($payload !== null) {
-            $constructorOptions['payload'] = $payload;
-        }
-
-        parent::__construct($constructorOptions);
+        // Handle Symfony 8+ named parameters - pass directly
+        parent::__construct(
+            exactly: is_int($options) ? $options : $exactly,
+            min: $min,
+            max: $max,
+            charset: $charset,
+            message: $message,
+            groups: $groups,
+            payload: $payload
+        );
     }
 }

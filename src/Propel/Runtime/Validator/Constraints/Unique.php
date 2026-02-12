@@ -38,9 +38,9 @@ class Unique extends Constraint
         ?array $groups = null,
         mixed $payload = null
     ) {
-        // Handle array syntax (works for both Symfony < 8 and 8+)
+        // Handle array syntax - Unique extends base Constraint which accepts array
         if (is_array($options)) {
-            parent::__construct(options: $options);
+            parent::__construct($options);
 
             return;
         }

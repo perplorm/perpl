@@ -29,30 +29,19 @@ class Type extends SymfonyType
         ?array $groups = null,
         mixed $payload = null
     ) {
-        // Handle array syntax (works for both Symfony < 8 and 8+)
+        // Handle array syntax - Type accepts array as first param in Symfony 8
         if (is_array($options)) {
-            parent::__construct(options: $options);
+            parent::__construct($options);
 
             return;
         }
 
-        // Handle Symfony 8+ named parameters - build options array
-        $constructorOptions = [];
-        if ($type !== null) {
-            $constructorOptions['type'] = $type;
-        } elseif (is_string($options)) {
-            $constructorOptions['type'] = $options;
-        }
-        if ($message !== null) {
-            $constructorOptions['message'] = $message;
-        }
-        if ($groups !== null) {
-            $constructorOptions['groups'] = $groups;
-        }
-        if ($payload !== null) {
-            $constructorOptions['payload'] = $payload;
-        }
-
-        parent::__construct($constructorOptions);
+        // Handle Symfony 8+ named parameters - pass type directly
+        parent::__construct(
+            type: is_string($options) ? $options : $type,
+            message: $message,
+            groups: $groups,
+            payload: $payload
+        );
     }
 }
