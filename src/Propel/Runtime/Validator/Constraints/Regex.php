@@ -31,9 +31,9 @@ class Regex extends SymfonyRegex
         ?array $groups = null,
         mixed $payload = null
     ) {
-        // Handle Symfony < 8 array syntax
+        // Handle array syntax (works for both Symfony < 8 and 8+)
         if (is_array($options)) {
-            parent::__construct($options);
+            parent::__construct(options: $options);
 
             return;
         }
