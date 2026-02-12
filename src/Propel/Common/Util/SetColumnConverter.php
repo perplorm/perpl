@@ -98,6 +98,8 @@ class SetColumnConverter
     }
 
     /**
+     * @psalm-return ($items is null ? null : array)
+     *
      * @param array|string $items
      * @param array $setValues
      *
@@ -111,7 +113,7 @@ class SetColumnConverter
         $items = (array)$items;
         static::requireValuesInSet($items, $setValues);
 
-        return array_intersect($setValues, $items);
+        return array_values(array_intersect($setValues, $items));
     }
 
     /**
@@ -148,7 +150,7 @@ class SetColumnConverter
         }
         $items = explode(',', $itemsCsv);
 
-        return array_map('trim', $items);
+        return array_filter(array_map('trim', $items));
     }
 
     /**
@@ -161,10 +163,12 @@ class SetColumnConverter
      */
     public static function rawInputToSetItems(array|string|int $value, array $valueSet): array
     {
-        return match (gettype($value)) {
+        $items = match (gettype($value)) {
             'string' => self::itemsCsvToArray($value),
             'integer' => self::convertBitmaskToArray($value, $valueSet),
             default => (array)$value,
         };
+
+        return self::getItemsInOrder($items, $valueSet);
     }
 }
