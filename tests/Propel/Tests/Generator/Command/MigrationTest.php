@@ -380,7 +380,7 @@ class MigrationTest extends TestCaseFixturesDatabase
         }
 
         $app = new Application('Propel', Propel::VERSION);
-        $app->add($commandInstance);
+        $app->addCommands([$commandInstance]); // Using addCommands for BC with Symfony < 8
         $app->setAutoExit(false);
 
         return $app->run($applicationInputArguments, $outputCapturer);
@@ -453,7 +453,7 @@ class MigrationTest extends TestCaseFixturesDatabase
     /**
      * Creates migratoins according to the schemas in the folders
      * ./util/migrate-to-version/version-* and applies them.
-     * 
+     *
      * @return void
      */
     private function setUpMigrateToVersion(): void
