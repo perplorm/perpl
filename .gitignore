@@ -3,6 +3,7 @@
 vendor/
 composer.phar
 /composer.lock
+/tests/composer/*.lock
 autoload.php
 phpunit.xml
 .phpunit.result.cache

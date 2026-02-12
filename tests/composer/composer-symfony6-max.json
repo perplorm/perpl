@@ -24,7 +24,10 @@
         "symfony/finder": "^6.0.0",
         "symfony/translation": "^6.0.0",
         "symfony/validator": "^6.0.0",
-        "psr/log": "^1.0"
+        "psr/log": "^1.0",
+        "symfony/polyfill-php82": "^1.31",
+        "symfony/polyfill-php83": "^1.31",
+        "symfony/polyfill-php84": "^1.31"
     },
     "require-dev": {
         "ext-pdo": "*",

@@ -103,7 +103,7 @@ jobs:
               run: tests/bin/setup.${{ matrix.db-type }}.sh
 
             - name: Run tests
-              shell: 'script -q -e -c "bash {0}"'
+              shell: bash
               run: |
                 if [[ ${{ matrix.php-version }} == '8.1' && ${{ matrix.symfony-version }} == '6-max' ]]; then
                   export CODECOVERAGE=1 && vendor/bin/phpunit -c tests/${{ matrix.db-type }}.phpunit.xml --verbose --coverage-clover=tests/coverage.xml
