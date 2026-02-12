@@ -69,6 +69,16 @@ jobs:
                 symfony-version: ${{ matrix.symfony-version }}
                 cache-key-suffix: ${{ matrix.db-type}}
 
+            - name: Grant MySQL privileges to propel user
+              if: matrix.db-type == 'mysql'
+              run: |
+                mysql -h 127.0.0.1 -u root -e "
+                  GRANT ALL PRIVILEGES ON *.* TO 'propel'@'%';
+                  FLUSH PRIVILEGES;
+                "
+              env:
+                MYSQL_PWD: propel
+
             - name: Setup database for test suite
               if: matrix.db-type != 'agnostic'
               run: tests/bin/setup.${{ matrix.db-type }}.sh
