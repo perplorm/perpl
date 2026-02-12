@@ -55,6 +55,10 @@ jobs:
                     --health-interval=10s
                     --health-timeout=5s
                     --health-retries=3
+        env:
+            DB_NAME: 'propel_tests'
+            DB_USER: 'propel'
+            DB_PW: 'propel'
         steps:
             - uses: actions/checkout@v3
 
