@@ -12,5 +12,9 @@
 
     <file>src/</file>
 
-    <rule ref="Spryker" />
+    <rule ref="SprykerStrict">
+        <exclude name="SprykerStrict.TypeHints.ParameterTypeHint"/>
+        <exclude name="SprykerStrict.TypeHints.PropertyTypeHint"/>
+        <exclude name="SprykerStrict.TypeHints.ReturnTypeHint"/>
+    </rule>
 </ruleset>
