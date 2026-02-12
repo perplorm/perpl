@@ -13,6 +13,6 @@
     <file>src/</file>
 
     <rule ref="Spryker">
-        <exclude ref="Spryker.Commenting.FileDocBlock.FileDocBlockWrong" />
+        <exclude name="Spryker.Commenting.FileDocBlock.FileDocBlockWrong" />
     </rule>
 </ruleset>
