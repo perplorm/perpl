@@ -50,7 +50,7 @@ class Length extends SymfonyLength
                 $maxValue,
                 $options['minMessage'] ?? null,
                 $options['maxMessage'] ?? null,
-                $options['exactMessage'] ?? null
+                $options['exactMessage'] ?? null,
             );
 
             parent::__construct(
@@ -89,6 +89,16 @@ class Length extends SymfonyLength
 
     /**
      * Maps a generic message to specific message parameters based on which constraints are set
+     *
+     * @param string|null $genericMessage Generic message to map
+     * @param int|null $exactly Exact length constraint value
+     * @param int|null $min Minimum length constraint value
+     * @param int|null $max Maximum length constraint value
+     * @param string|null $explicitMinMessage Explicit minMessage override
+     * @param string|null $explicitMaxMessage Explicit maxMessage override
+     * @param string|null $explicitExactMessage Explicit exactMessage override
+     *
+     * @return array<string, string|null> Array with minMessage, maxMessage, and exactMessage keys
      */
     private function mapGenericMessage(
         ?string $genericMessage,
