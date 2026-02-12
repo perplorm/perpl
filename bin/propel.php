@@ -30,12 +30,7 @@ $ns = '\\Propel\\Generator\\Command\\';
 foreach ($finder as $file) {
     $r = new \ReflectionClass($ns . $file->getBasename('.php'));
     if ($r->isSubclassOf(Command::class) && !$r->isAbstract()) {
-        // BC layer: addCommand() was introduced in Symfony 7.4, add() was removed in 8.0
-        if (method_exists($app, 'addCommand')) {
-            $app->addCommand($r->newInstance());
-        } else {
-            $app->add($r->newInstance());
-        }
+        $app->addCommands([$r->newInstance()]); // Using addCommands for BC with Symfony <8.0
     }
 }
 

@@ -176,7 +176,7 @@ class TestCaseFixtures extends TestCase
         }
 
         $app = new Application('Propel', Propel::VERSION);
-        array_map([$app, 'add'], $commands);
+        $app->addCommands($commands);
         $app->setAutoExit(false);
 
         return $app;
@@ -294,7 +294,7 @@ class TestCaseFixtures extends TestCase
 
     /**
      * Returns current database driver.
-     * 
+     *
      * @param \Propel\Runtime\Connection\ConnectionInterface|null $con
      *
      * @return string
@@ -308,7 +308,7 @@ class TestCaseFixtures extends TestCase
 
     /**
      * Returns current database driver.
-     * 
+     *
      * @return string
      */
     protected function getDriver()
