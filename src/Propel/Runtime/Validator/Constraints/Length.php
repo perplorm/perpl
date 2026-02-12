@@ -37,32 +37,115 @@ class Length extends SymfonyLength
     ) {
         // Handle array syntax - extract parameters for Symfony 8 compatibility
         if (is_array($options)) {
+            $exactlyValue = $options['exactly'] ?? null;
+            $minValue = $options['min'] ?? null;
+            $maxValue = $options['max'] ?? null;
+            $genericMessage = $options['message'] ?? null;
+
+            // Map generic message to specific messages, preferring explicit specific messages
+            $messages = $this->mapGenericMessage(
+                $genericMessage,
+                $exactlyValue,
+                $minValue,
+                $maxValue,
+                $options['minMessage'] ?? null,
+                $options['maxMessage'] ?? null,
+                $options['exactMessage'] ?? null
+            );
+
             parent::__construct(
-                exactly: $options['exactly'] ?? null,
-                min: $options['min'] ?? null,
-                max: $options['max'] ?? null,
+                exactly: $exactlyValue,
+                min: $minValue,
+                max: $maxValue,
                 charset: $options['charset'] ?? null,
                 normalizer: $options['normalizer'] ?? null,
-                minMessage: $options['minMessage'] ?? null,
-                maxMessage: $options['maxMessage'] ?? null,
-                exactMessage: $options['exactMessage'] ?? null,
+                minMessage: $messages['minMessage'],
+                maxMessage: $messages['maxMessage'],
+                exactMessage: $messages['exactMessage'],
                 charsetMessage: $options['charsetMessage'] ?? null,
                 groups: $options['groups'] ?? null,
-                payload: $options['payload'] ?? null
+                payload: $options['payload'] ?? null,
             );
 
             return;
         }
 
-        // Handle Symfony 8+ named parameters - pass directly
+        // Handle Symfony 8+ named parameters
+        $exactlyValue = is_int($options) ? $options : $exactly;
+        $messages = $this->mapGenericMessage($message, $exactlyValue, $min, $max);
+
         parent::__construct(
-            exactly: is_int($options) ? $options : $exactly,
+            exactly: $exactlyValue,
             min: $min,
             max: $max,
             charset: $charset,
-            message: $message,
+            minMessage: $messages['minMessage'],
+            maxMessage: $messages['maxMessage'],
+            exactMessage: $messages['exactMessage'],
             groups: $groups,
-            payload: $payload
+            payload: $payload,
         );
+    }
+
+    /**
+     * Maps a generic message to specific message parameters based on which constraints are set
+     */
+    private function mapGenericMessage(
+        ?string $genericMessage,
+        ?int $exactly,
+        ?int $min,
+        ?int $max,
+        ?string $explicitMinMessage = null,
+        ?string $explicitMaxMessage = null,
+        ?string $explicitExactMessage = null
+    ): array {
+        // If no generic message or all explicit messages provided, use explicit values
+        if ($genericMessage === null) {
+            return [
+                'minMessage' => $explicitMinMessage,
+                'maxMessage' => $explicitMaxMessage,
+                'exactMessage' => $explicitExactMessage,
+            ];
+        }
+
+        // Map generic message based on which constraints are set, preferring explicit messages
+        if ($exactly !== null) {
+            return [
+                'minMessage' => $explicitMinMessage,
+                'maxMessage' => $explicitMaxMessage,
+                'exactMessage' => $explicitExactMessage ?? $genericMessage,
+            ];
+        }
+
+        if ($min !== null && $max === null) {
+            return [
+                'minMessage' => $explicitMinMessage ?? $genericMessage,
+                'maxMessage' => $explicitMaxMessage,
+                'exactMessage' => $explicitExactMessage,
+            ];
+        }
+
+        if ($max !== null && $min === null) {
+            return [
+                'minMessage' => $explicitMinMessage,
+                'maxMessage' => $explicitMaxMessage ?? $genericMessage,
+                'exactMessage' => $explicitExactMessage,
+            ];
+        }
+
+        if ($min !== null && $max !== null) {
+            return [
+                'minMessage' => $explicitMinMessage ?? $genericMessage,
+                'maxMessage' => $explicitMaxMessage ?? $genericMessage,
+                'exactMessage' => $explicitExactMessage,
+            ];
+        }
+
+        // No constraints set, return explicit messages
+        return [
+            'minMessage' => $explicitMinMessage,
+            'maxMessage' => $explicitMaxMessage,
+            'exactMessage' => $explicitExactMessage,
+        ];
     }
 }
