@@ -9,9 +9,9 @@ on:
   workflow_dispatch:
 
 env:
-  DB_NAME: 'propel_tests'
-  DB_USER: 'propel'
-  DB_PW: 'propel'
+  DB_NAME: 'perpl_tests'
+  DB_USER: 'perpl'
+  DB_PW: 'perpl'
 
 jobs:
     testsuite:
