@@ -4,8 +4,10 @@ declare(strict_types = 1);
 
 namespace Propel\Common\Util;
 
+use BackedEnum;
 use Propel\Common\Exception\SetColumnConverterException;
 use Propel\Runtime\Exception\PropelException;
+use UnitEnum;
 use function array_diff;
 use function array_filter;
 use function array_intersect;
@@ -170,5 +172,15 @@ class SetColumnConverter
         };
 
         return self::getItemsInOrder($items, $valueSet);
+    }
+
+    /**
+     * @param class-string<\UnitEnum> $enumClass
+     *
+     * @return array<string>
+     */
+    public static function getItemsFromEnum(string $enumClass): array
+    {
+        return array_map(fn (UnitEnum $case) => (string)($case instanceof BackedEnum ? $case->value : $case->name), $enumClass::cases());
     }
 }

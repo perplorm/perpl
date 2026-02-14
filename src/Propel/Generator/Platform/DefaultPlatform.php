@@ -146,7 +146,7 @@ class DefaultPlatform implements PlatformInterface
     #[\Override]
     public function setGeneratorConfig(GeneratorConfigInterface $generatorConfig): void
     {
-        $this->defaultToNativeEnumeratedColumnTypes = $generatorConfig->getConfigProperty('generator.defaultToNativeEnumeratedColumnTypes') ?? false;
+        $this->defaultToNativeEnumeratedColumnTypes = (bool)($generatorConfig->getConfigProperty('generator.defaultToNativeEnumeratedColumnTypes') ?? false);
         if ($this->defaultToNativeEnumeratedColumnTypes) {
             $this->initializeTypeMap();
         }

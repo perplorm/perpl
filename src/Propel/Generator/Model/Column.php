@@ -349,6 +349,10 @@ class Column extends MappingModel
 
             if ($this->getAttribute('valueSet')) {
                 $this->setValueSet($this->getAttribute('valueSet'));
+            } elseif ($this->getAttribute('valueEnum')) {
+                $valueEnumClass = $this->getAttribute('valueEnum');
+                $valueSet = SetColumnConverter::getItemsFromEnum($valueEnumClass);
+                $this->setValueSet($valueSet);
             }
 
             // Add type, size information to associated Domain object

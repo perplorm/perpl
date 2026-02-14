@@ -12,6 +12,8 @@ use PHPUnit\Framework\TestCase;
 use Propel\Common\Exception\SetColumnConverterException;
 use Propel\Common\Util\SetColumnConverter;
 use Propel\Runtime\Exception\PropelException;
+use Propel\Tests\Helpers\ColorsBackedEnum;
+use Propel\Tests\Helpers\ColorsBasicEnum;
 
 /**
  * Tests for SetColumnConverter class.
@@ -179,7 +181,7 @@ class SetColumnConverterTest extends TestCase
             ['', []],
             ['       ', []],
             ['  a    ', ['a']],
-            ['   a,null , (,ß,    a    ,   ', ['a','null','(','ß','a']],
+            ['   a,null , (,ß,    a    ,   ', ['a', 'null', '(', 'ß', 'a']],
         ];
     }
 
@@ -205,13 +207,13 @@ class SetColumnConverterTest extends TestCase
         return [
             [0, []],
             [4, ['c']],
-            [5, ['a','c']],
+            [5, ['a', 'c']],
             ['', []],
             ['c', ['c']],
-            ['f,c', ['c','f']],
-            [[],[]],
-            [['c'],['c']],
-            [['f','c'],['c','f']],
+            ['f,c', ['c', 'f']],
+            [[], []],
+            [['c'], ['c']],
+            [['f', 'c'], ['c', 'f']],
         ];
     }
 
@@ -227,5 +229,25 @@ class SetColumnConverterTest extends TestCase
     {
         $items = SetColumnConverter::rawInputToSetItems($value, static::$valueSet);
         $this->assertEquals($expected, $items);
+    }
+
+    /**
+     * @return array<class-string<\UnitEnum, string[]>>[]
+     */
+    public function GetEnumItemsDataProvider(): array
+    {
+        return [
+            [ColorsBasicEnum::class, ['Red', 'Blue', 'Yellow']],
+            [ColorsBackedEnum::class, ['red', 'blue', 'yellow']],
+        ];
+    }
+
+    /**
+     * @dataProvider GetEnumItemsDataProvider
+     */
+    public function testGetItemsFromEnum(string $enumClass, array $expected): void
+    {
+        $actual = SetColumnConverter::getItemsFromEnum($enumClass);
+        $this->assertEquals($expected, $actual);
     }
 }

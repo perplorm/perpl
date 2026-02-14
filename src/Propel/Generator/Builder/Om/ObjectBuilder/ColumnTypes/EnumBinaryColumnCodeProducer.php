@@ -111,10 +111,11 @@ class EnumBinaryColumnCodeProducer extends ColumnCodeProducer
         $this->declareGlobalFunction('array_search', 'is_int');
         $col = $this->column;
         $clo = $col->getLowercasedName();
+        $columnConstant = $this->objectBuilder->getColumnConstant($col);
 
         $script .= "
         if (\$v !== null) {
-            \$valueSet = " . $this->getTableMapClassName() . '::getValueSet(' . $this->objectBuilder->getColumnConstant($col) . ");
+            \$valueSet = " . $this->getTableMapClassName() . "::getValueSet($columnConstant);
             \$keyId = array_search(\$v, \$valueSet);
             if (!is_int(\$keyId)) {
                 throw new PropelException(\"Value '\$v' is not accepted in this enumerated column\");
@@ -124,7 +125,7 @@ class EnumBinaryColumnCodeProducer extends ColumnCodeProducer
 
         if (\$this->$clo !== \$v) {
             \$this->$clo = \$v;
-            \$this->modifiedColumns[" . $this->objectBuilder->getColumnConstant($col) . "] = true;
+            \$this->modifiedColumns[$columnConstant] = true;
         }\n";
     }
 

@@ -23,6 +23,8 @@ use Propel\Generator\Platform\OraclePlatform;
 use Propel\Generator\Platform\PgsqlPlatform;
 use Propel\Generator\Platform\PlatformInterface;
 use Propel\Generator\Platform\SqlitePlatform;
+use Propel\Tests\Helpers\ColorsBackedEnum;
+use Propel\Tests\Helpers\ColorsBasicEnum;
 use Propel\Tests\TestCase;
 
 class EnumeratedColumnTypesTest extends TestCase
@@ -173,6 +175,30 @@ class EnumeratedColumnTypesTest extends TestCase
         $column = $this->buildColumnFromSchema(new MysqlPlatform(), false, $columnXml);
 
         $this->assertSame($column->getSqlType(), $expectedSqlType);
+    }
+
+    /**
+     * @return array<class-string<\UnitEnum>, string>[]
+     */
+    public function GetEnumItemsDataProvider(): array
+    {
+        return [
+            [ColorsBasicEnum::class, "`foo` ENUM('Red','Blue','Yellow')"],
+            [ColorsBackedEnum::class, "`foo` ENUM('red','blue','yellow')"],
+        ];
+    }
+
+    /**
+     * @dataProvider GetEnumItemsDataProvider
+     */
+    public function testSetValuesFromPhpEnum(string $enumClass, string $expectedColumnDdl): void
+    {
+        $columnXml = '<column name="foo" type="ENUM_NATIVE" valueEnum="' . $enumClass . '"/>';
+        $platform = new MysqlPlatform();
+        $column = $this->buildColumnFromSchema($platform, false, $columnXml);
+        $ddl = $platform->getColumnDDL($column);
+
+        $this->assertEquals($expectedColumnDdl, $ddl);
     }
 
     /**
