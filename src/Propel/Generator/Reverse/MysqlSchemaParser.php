@@ -369,9 +369,10 @@ class MysqlSchemaParser extends AbstractSchemaParser
         }
         $default = $parsedValue;
 
-        if ($parsedValue !== '' && preg_match('~text~', $nativeType)) {
-            // MariaDB wraps TEXT type default values in extra single quotes, but not other types
-            $default = preg_replace('@^\'(.*)\'$@', '$1', $parsedValue);
+        if ($parsedValue !== '' && preg_match('/text/', $nativeType)) {
+            // MySQL 8.0+ wraps TEXT defaults with a charset prefix like _utf8mb3'value'
+            // MariaDB wraps TEXT type default values in extra single quotes like 'value'
+            $default = preg_replace('~^(?:_\w+)?\'(.*)\'$~', '$1', $parsedValue);
         }
 
         if ($propelType == PropelTypes::BOOLEAN) {
