@@ -1,5 +1,9 @@
  <?php
- /*
+/**
+ * phpcs:ignoreFile
+ */
+
+/*
     Should be same as method in ObjectCollectionWithOutputGroups.php
 
  */

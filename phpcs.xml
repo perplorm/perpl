@@ -29,4 +29,6 @@
             <property name="phpVersion" value="8.1"/>
         </properties>
     </rule>
+
+        <rule ref="SlevomatCodingStandard.TypeHints.DeclareStrictTypes"/>
 </ruleset>

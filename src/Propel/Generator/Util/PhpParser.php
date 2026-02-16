@@ -6,6 +6,8 @@
  * file that was distributed with this source code.
  */
 
+declare(strict_types = 1);
+
 namespace Propel\Generator\Util;
 
 if (!defined('T_ML_COMMENT')) {

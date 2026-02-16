@@ -6,7 +6,9 @@
  * file that was distributed with this source code.
  */
 
- namespace Propel\Runtime\ActiveQuery\ColumnResolver;
+ declare(strict_types = 1);
+
+namespace Propel\Runtime\ActiveQuery\ColumnResolver;
 
  use Propel\Runtime\ActiveQuery\ColumnResolver\ColumnExpression\AbstractColumnExpression;
 

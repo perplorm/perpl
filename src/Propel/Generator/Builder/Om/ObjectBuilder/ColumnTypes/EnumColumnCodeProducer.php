@@ -6,6 +6,8 @@
  * file that was distributed with this source code.
  */
 
+declare(strict_types = 1);
+
 namespace Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes;
 
 use Propel\Generator\Exception\EngineException;

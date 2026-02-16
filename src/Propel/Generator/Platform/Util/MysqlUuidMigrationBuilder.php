@@ -6,6 +6,8 @@
  * file that was distributed with this source code.
  */
 
+declare(strict_types = 1);
+
 namespace Propel\Generator\Platform\Util;
 
 use Propel\Generator\Model\Column;
