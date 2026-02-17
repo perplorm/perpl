@@ -208,7 +208,7 @@ abstract class SyncedTableBehaviorDeclaration extends BehaviorWithParameterAcces
     #[\Override]
     public function addPkAs(): ?string
     {
-        $val = $this->getParameterTrueOrValue(static::PARAMETER_KEY_ADD_PK, false);
+        $val = $this->getParameterTrueOrValue(static::PARAMETER_KEY_ADD_PK);
 
         return $val === true ? 'id' : $val;
     }

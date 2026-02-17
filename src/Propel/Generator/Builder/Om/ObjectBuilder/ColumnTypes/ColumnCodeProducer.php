@@ -131,7 +131,7 @@ class ColumnCodeProducer extends ObjectCodeProducer
             return '';
         }
         $defaultValueDescription = $defaultValue->isExpression()
-            ? '(expression) ' . $defaultValue->getValue()
+            ? '(expression) ' . (string)$defaultValue->getValue()
             : $this->getDefaultValueString();
 
         return "

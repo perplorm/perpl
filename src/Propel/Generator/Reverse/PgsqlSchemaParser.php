@@ -12,7 +12,6 @@ namespace Propel\Generator\Reverse;
 
 use PDO;
 use Propel\Generator\Model\Column;
-use Propel\Generator\Model\ColumnDefaultValue;
 use Propel\Generator\Model\Database;
 use Propel\Generator\Model\ForeignKey;
 use Propel\Generator\Model\Index;
@@ -337,13 +336,11 @@ class PgsqlSchemaParser extends AbstractSchemaParser
             }
 
             if ($default !== null) {
-                if ($this->isColumnDefaultExpression($default)) {
-                    $defaultType = ColumnDefaultValue::TYPE_EXPR;
-                } else {
-                    $defaultType = ColumnDefaultValue::TYPE_VALUE;
+                $isExpression = $this->isColumnDefaultExpression($default);
+                if (!$isExpression) {
                     $default = str_replace("'", '', $strDefault);
                 }
-                $column->getDomain()->setDefaultValue(new ColumnDefaultValue($default, $defaultType));
+                $column->getDomain()->createDefaultValue($default, $isExpression);
             }
 
             $column->setAutoIncrement((bool)$autoincrement);

@@ -9,7 +9,6 @@
 namespace Propel\Tests\Generator\Platform;
 
 use Propel\Generator\Model\Column;
-use Propel\Generator\Model\ColumnDefaultValue;
 use Propel\Generator\Model\Database;
 use Propel\Generator\Model\IdMethod;
 use Propel\Generator\Model\IdMethodParameter;
@@ -554,7 +553,7 @@ DROP SEQUENCE "foo_sequence";
         $c->getDomain()->replaceScale(2);
         $c->getDomain()->replaceSize(3);
         $c->setNotNull(true);
-        $c->getDomain()->setDefaultValue(new ColumnDefaultValue(123, ColumnDefaultValue::TYPE_VALUE));
+        $c->getDomain()->createDefaultValue(123);
         $expected = '"foo" DOUBLE PRECISION DEFAULT 123 NOT NULL';
         $this->assertEquals($expected, $this->getPlatform()->getColumnDDL($c));
     }
@@ -587,7 +586,7 @@ DROP SEQUENCE "foo_sequence";
         $column->getDomain()->replaceScale(2);
         $column->getDomain()->replaceSize(3);
         $column->setNotNull(true);
-        $column->getDomain()->setDefaultValue(new ColumnDefaultValue(123, ColumnDefaultValue::TYPE_VALUE));
+        $column->getDomain()->createDefaultValue(123);
         $column->getDomain()->replaceSqlType('DECIMAL(5,6)');
         $expected = '"foo" DECIMAL(5,6) DEFAULT 123 NOT NULL';
         $this->assertEquals($expected, $this->getPlatform()->getColumnDDL($column));

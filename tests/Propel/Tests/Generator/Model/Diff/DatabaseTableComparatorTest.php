@@ -9,7 +9,6 @@
 namespace Propel\Tests\Generator\Model\Diff;
 
 use Propel\Generator\Model\Column;
-use Propel\Generator\Model\ColumnDefaultValue;
 use Propel\Generator\Model\Database;
 use Propel\Generator\Model\Diff\DatabaseComparator;
 use Propel\Generator\Model\Diff\DatabaseDiff;
@@ -48,7 +47,7 @@ class DatabaseTableComparatorTest extends TestCase
         $c1->getDomain()->replaceScale(2);
         $c1->getDomain()->replaceSize(3);
         $c1->setNotNull(true);
-        $c1->getDomain()->setDefaultValue(new ColumnDefaultValue(123, ColumnDefaultValue::TYPE_VALUE));
+        $c1->getDomain()->createDefaultValue(123);
         $t1->addColumn($c1);
         $d1->addTable($t1);
         $t2 = new Table('Bar');
@@ -61,7 +60,7 @@ class DatabaseTableComparatorTest extends TestCase
         $c3->getDomain()->replaceScale(2);
         $c3->getDomain()->replaceSize(3);
         $c3->setNotNull(true);
-        $c3->getDomain()->setDefaultValue(new ColumnDefaultValue(123, ColumnDefaultValue::TYPE_VALUE));
+        $c3->getDomain()->createDefaultValue(123);
         $t3->addColumn($c3);
         $d2->addTable($t3);
         $t4 = new Table('Bar');
@@ -113,7 +112,7 @@ class DatabaseTableComparatorTest extends TestCase
         $c1->getDomain()->replaceScale(2);
         $c1->getDomain()->replaceSize(3);
         $c1->setNotNull(true);
-        $c1->getDomain()->setDefaultValue(new ColumnDefaultValue(123, ColumnDefaultValue::TYPE_VALUE));
+        $c1->getDomain()->createDefaultValue(123);
         $t1->addColumn($c1);
         $d1->addTable($t1);
 
@@ -124,7 +123,7 @@ class DatabaseTableComparatorTest extends TestCase
         $c3->getDomain()->replaceScale(2);
         $c3->getDomain()->replaceSize(3);
         $c3->setNotNull(true);
-        $c3->getDomain()->setDefaultValue(new ColumnDefaultValue(123, ColumnDefaultValue::TYPE_VALUE));
+        $c3->getDomain()->createDefaultValue(123);
         $t3->addColumn($c3);
         $d2->addTable($t3);
         $t4 = new Table('Bar');
@@ -152,7 +151,7 @@ class DatabaseTableComparatorTest extends TestCase
         $c1->getDomain()->replaceScale(2);
         $c1->getDomain()->replaceSize(3);
         $c1->setNotNull(true);
-        $c1->getDomain()->setDefaultValue(new ColumnDefaultValue(123, ColumnDefaultValue::TYPE_VALUE));
+        $c1->getDomain()->createDefaultValue(123);
         $t1->addColumn($c1);
         $d1->addTable($t1);
 
@@ -163,7 +162,7 @@ class DatabaseTableComparatorTest extends TestCase
         $c3->getDomain()->replaceScale(2);
         $c3->getDomain()->replaceSize(3);
         $c3->setNotNull(true);
-        $c3->getDomain()->setDefaultValue(new ColumnDefaultValue(123, ColumnDefaultValue::TYPE_VALUE));
+        $c3->getDomain()->createDefaultValue(123);
         $t3->addColumn($c3);
         $d2->addTable($t3);
         $t4 = new Table('Bar');
@@ -190,7 +189,7 @@ class DatabaseTableComparatorTest extends TestCase
         $c1->getDomain()->replaceScale(2);
         $c1->getDomain()->replaceSize(3);
         $c1->setNotNull(true);
-        $c1->getDomain()->setDefaultValue(new ColumnDefaultValue(123, ColumnDefaultValue::TYPE_VALUE));
+        $c1->getDomain()->createDefaultValue(123);
         $t1->addColumn($c1);
         $d1->addTable($t1);
 
@@ -224,7 +223,7 @@ class DatabaseTableComparatorTest extends TestCase
         $c1->getDomain()->replaceScale(2);
         $c1->getDomain()->replaceSize(3);
         $c1->setNotNull(true);
-        $c1->getDomain()->setDefaultValue(new ColumnDefaultValue(123, ColumnDefaultValue::TYPE_VALUE));
+        $c1->getDomain()->createDefaultValue(123);
         $t1->addColumn($c1);
         $d1->addTable($t1);
         $t2 = new Table('Bar');
@@ -237,7 +236,7 @@ class DatabaseTableComparatorTest extends TestCase
         $c3->getDomain()->replaceScale(2);
         $c3->getDomain()->replaceSize(3);
         $c3->setNotNull(true);
-        $c3->getDomain()->setDefaultValue(new ColumnDefaultValue(123, ColumnDefaultValue::TYPE_VALUE));
+        $c3->getDomain()->createDefaultValue(123);
         $t3->addColumn($c3);
         $d2->addTable($t3);
 
@@ -263,7 +262,7 @@ class DatabaseTableComparatorTest extends TestCase
         $c1->getDomain()->replaceScale(2);
         $c1->getDomain()->replaceSize(3);
         $c1->setNotNull(true);
-        $c1->getDomain()->setDefaultValue(new ColumnDefaultValue(123, ColumnDefaultValue::TYPE_VALUE));
+        $c1->getDomain()->createDefaultValue(123);
         $t1->addColumn($c1);
         $d1->addTable($t1);
         $t2 = new Table('Bar');
@@ -277,7 +276,7 @@ class DatabaseTableComparatorTest extends TestCase
         $c3->getDomain()->replaceScale(2);
         $c3->getDomain()->replaceSize(3);
         $c3->setNotNull(true);
-        $c3->getDomain()->setDefaultValue(new ColumnDefaultValue(123, ColumnDefaultValue::TYPE_VALUE));
+        $c3->getDomain()->createDefaultValue(123);
         $t3->addColumn($c3);
         $d2->addTable($t3);
 
@@ -301,7 +300,7 @@ class DatabaseTableComparatorTest extends TestCase
         $c1->getDomain()->replaceScale(2);
         $c1->getDomain()->replaceSize(3);
         $c1->setNotNull(true);
-        $c1->getDomain()->setDefaultValue(new ColumnDefaultValue(123, ColumnDefaultValue::TYPE_VALUE));
+        $c1->getDomain()->createDefaultValue(123);
         $t1->addColumn($c1);
         $c2 = new Column('Foo2');
         $c2->getDomain()->copy($this->platform->getDomainForType('INTEGER'));
@@ -317,7 +316,7 @@ class DatabaseTableComparatorTest extends TestCase
         $c3->getDomain()->replaceScale(2);
         $c3->getDomain()->replaceSize(3);
         $c3->setNotNull(true);
-        $c3->getDomain()->setDefaultValue(new ColumnDefaultValue(123, ColumnDefaultValue::TYPE_VALUE));
+        $c3->getDomain()->createDefaultValue(123);
         $t3->addColumn($c3);
         $d2->addTable($t3);
         $t4 = new Table('Bar');
@@ -346,7 +345,7 @@ class DatabaseTableComparatorTest extends TestCase
         $c1->getDomain()->replaceScale(2);
         $c1->getDomain()->replaceSize(3);
         $c1->setNotNull(true);
-        $c1->getDomain()->setDefaultValue(new ColumnDefaultValue(123, ColumnDefaultValue::TYPE_VALUE));
+        $c1->getDomain()->createDefaultValue(123);
         $t1->addColumn($c1);
         $d1->addTable($t1);
         $t2 = new Table('Bar');
@@ -359,7 +358,7 @@ class DatabaseTableComparatorTest extends TestCase
         $c3->getDomain()->replaceScale(2);
         $c3->getDomain()->replaceSize(3);
         $c3->setNotNull(true);
-        $c3->getDomain()->setDefaultValue(new ColumnDefaultValue(123, ColumnDefaultValue::TYPE_VALUE));
+        $c3->getDomain()->createDefaultValue(123);
         $t3->addColumn($c3);
         $d2->addTable($t3);
         $t4 = new Table('Bar');
@@ -390,7 +389,7 @@ class DatabaseTableComparatorTest extends TestCase
         $c1->getDomain()->replaceScale(2);
         $c1->getDomain()->replaceSize(3);
         $c1->setNotNull(true);
-        $c1->getDomain()->setDefaultValue(new ColumnDefaultValue(123, ColumnDefaultValue::TYPE_VALUE));
+        $c1->getDomain()->createDefaultValue(123);
         $t1->addColumn($c1);
         $d1->addTable($t1);
         $t2 = new Table('Bar');
@@ -408,7 +407,7 @@ class DatabaseTableComparatorTest extends TestCase
         $c3->getDomain()->replaceScale(2);
         $c3->getDomain()->replaceSize(3);
         $c3->setNotNull(true);
-        $c3->getDomain()->setDefaultValue(new ColumnDefaultValue(123, ColumnDefaultValue::TYPE_VALUE));
+        $c3->getDomain()->createDefaultValue(123);
         $t3->addColumn($c3);
         $d2->addTable($t3);
         $t4 = new Table('Bar2');

@@ -225,11 +225,11 @@ class TestPrepareCommand extends AbstractCommand
     /**
      * @param \Symfony\Component\Console\Output\OutputInterface $output
      * @param string $vendor
-     * @param string $verbose
+     * @param string|bool $verbose
      *
      * @return void
      */
-    protected function runModelBuildCommand(OutputInterface $output, string $vendor, string $verbose): void
+    protected function runModelBuildCommand(OutputInterface $output, string $vendor, string|bool $verbose): void
     {
         $in = new ArrayInput([
             'command' => 'model:build',
@@ -247,11 +247,11 @@ class TestPrepareCommand extends AbstractCommand
     /**
      * @param \Symfony\Component\Console\Output\OutputInterface $output
      * @param string $vendor
-     * @param string $verbose
+     * @param string|bool $verbose
      *
      * @return void
      */
-    protected function runSqlBuildCommand(OutputInterface $output, string $vendor, string $verbose): void
+    protected function runSqlBuildCommand(OutputInterface $output, string $vendor, string|bool $verbose): void
     {
         $in = new ArrayInput([
             'command' => 'sql:build',
@@ -283,11 +283,11 @@ class TestPrepareCommand extends AbstractCommand
     /**
      * @param \Symfony\Component\Console\Output\OutputInterface $output
      * @param array<string> $connectionStrings
-     * @param string $verbose
+     * @param string|bool $verbose
      *
      * @return void
      */
-    protected function runSqlInsert(OutputInterface $output, array $connectionStrings, string $verbose): void
+    protected function runSqlInsert(OutputInterface $output, array $connectionStrings, string|bool $verbose): void
     {
         $in = new ArrayInput([
             'command' => 'sql:insert',

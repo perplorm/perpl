@@ -199,8 +199,8 @@ class Index extends MappingModel
             $this->columnObjects[] = $column;
         } else {
             $this->columns[] = $name = $data ? $data['name'] : null;
-            if (isset($data['size']) && $data['size'] > 0) {
-                $this->columnsSize[$name] = $data['size'];
+            if (isset($data['size']) && (int)$data['size'] > 0) {
+                $this->columnsSize[$name] = (int)$data['size'];
             }
             if ($this->getTable()) {
                 $this->columnObjects[] = $this->getTable()->getColumn($name);
@@ -257,17 +257,17 @@ class Index extends MappingModel
      */
     public function getColumnSize(string $name, bool $caseInsensitive = false): ?int
     {
-        if ($caseInsensitive) {
-            foreach ($this->columnsSize as $forName => $size) {
-                if (strcasecmp($forName, $name) === 0) {
-                    return $size;
-                }
-            }
-
-            return null;
+        if (!$caseInsensitive) {
+            return $this->columnsSize[$name] ?? null;
         }
 
-        return $this->columnsSize[$name] ?? null;
+        foreach ($this->columnsSize as $forName => $size) {
+            if (strcasecmp($forName, $name) === 0) {
+                return $size;
+            }
+        }
+
+        return null;
     }
 
     /**

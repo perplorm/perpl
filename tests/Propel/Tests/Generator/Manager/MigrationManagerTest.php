@@ -287,19 +287,6 @@ class MigrationManagerTest extends TestCase
      */
     public function testBuildVariableNamesFromConnectionNames(): void
     {
-        $manager = new class () extends MigrationManager {
-            /**
-             * @param array<int|string, string> $migrationsUp
-             * @param array<string, string> $migrationsDown
-             *
-             * @return array<string, string>
-             */
-            public function build(array $migrationsUp, array $migrationsDown): array
-            {
-                return static::buildConnectionToVariableNameMap($migrationsUp, $migrationsDown);
-            }
-        };
-
         $migrationsUp = array_fill_keys(['default', 'with space', '\/', '123'], '');
         $migrationsDown = array_fill_keys(['default', 'connection$', 'connection&', 'connection%'], '');
 
@@ -312,7 +299,7 @@ class MigrationManagerTest extends TestCase
             'connection&' => '$connection_connectionI',
             'connection%' => '$connection_connectionII',
         ];
-        $result = $manager->build($migrationsUp, $migrationsDown);
+        $result = $this->callMethod(MigrationManager::class, 'buildConnectionToVariableNameMap', [$migrationsUp, $migrationsDown]);
         $this->assertEquals($expectedResult, $result);
     }
 

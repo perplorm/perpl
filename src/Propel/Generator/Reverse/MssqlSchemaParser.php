@@ -13,7 +13,6 @@ namespace Propel\Generator\Reverse;
 // TODO: to remove
 use PDO;
 use Propel\Generator\Model\Column;
-use Propel\Generator\Model\ColumnDefaultValue;
 use Propel\Generator\Model\Database;
 use Propel\Generator\Model\ForeignKey;
 use Propel\Generator\Model\Index;
@@ -170,7 +169,7 @@ class MssqlSchemaParser extends AbstractSchemaParser
             $column->getDomain()->replaceSize($size);
             $column->getDomain()->replaceScale($scale);
             if ($default !== null) {
-                $column->getDomain()->setDefaultValue(new ColumnDefaultValue($default, ColumnDefaultValue::TYPE_VALUE));
+                $column->getDomain()->createDefaultValue($default);
             }
             $column->setAutoIncrement($autoincrement);
             $column->setNotNull(!$isNullable);

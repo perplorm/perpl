@@ -305,7 +305,7 @@ class ConfigurationManager
         $orderedConfigFileNames = [];
         foreach ($finder as $file) {
             $realPath = $file->getRealPath();
-            $isExecutable = array_any(['propel', 'perpl'], fn ($cmd) => str_ends_with($realPath, "/bin/{$cmd}.php"));
+            $isExecutable = $realPath && array_any(['propel', 'perpl'], fn ($cmd) => str_ends_with($realPath, "/bin/{$cmd}.php"));
             if ($isExecutable) {
                 continue;
             }

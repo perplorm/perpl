@@ -308,11 +308,11 @@ class DeprecatedCriteriaMethods extends Criteria
      * @param string $name name to combine the criterion later
      * @param \Propel\Runtime\ActiveQuery\FilterExpression\ColumnFilterInterface|\Propel\Runtime\ActiveQuery\ColumnResolver\ColumnExpression\AbstractColumnExpression|string $columnOrClause The column to run the comparison on, or AbstractCriterion object.
      * @param mixed|null $value
-     * @param string|null $comparison A String.
+     * @param string|int|null $comparison A String.
      *
      * @return \Propel\Runtime\ActiveQuery\Criteria A modified Criteria object.
      */
-    public function addCond(string $name, $columnOrClause, $value = null, ?string $comparison = null)
+    public function addCond(string $name, $columnOrClause, $value = null, string|int|null $comparison = null)
     {
         $this->namedCriterions[$name] = $this->criteria->buildFilter($columnOrClause, $value, $comparison);
 

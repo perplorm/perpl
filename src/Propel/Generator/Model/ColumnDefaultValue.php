@@ -10,6 +10,8 @@ declare(strict_types = 1);
 
 namespace Propel\Generator\Model;
 
+use function in_array;
+
 /**
  * A class for holding a column default value.
  *
@@ -29,28 +31,39 @@ class ColumnDefaultValue
     public const TYPE_EXPR = 'expr';
 
     /**
-     * @var string|int|null The default value, as specified in the schema.
+     * @var string The default value, as specified in the schema.
      */
-    private $value;
+    private string $value;
 
     /**
      * @var string The type of value represented by this object (DefaultValue::TYPE_VALUE or DefaultValue::TYPE_EXPR).
      */
-    private $type = self::TYPE_VALUE;
+    private string $type = self::TYPE_VALUE;
 
     /**
      * Creates a new DefaultValue object.
      *
-     * @param string|null $value The default value, as specified in the schema.
+     * @param string|int|bool $value The default value, as specified in the schema.
      * @param string|null $type The type of default value (DefaultValue::TYPE_VALUE or DefaultValue::TYPE_EXPR)
      */
-    public function __construct(?string $value, ?string $type = null)
+    public function __construct(string|int|bool $value, ?string $type = null)
     {
         $this->setValue($value);
 
         if ($type !== null) {
             $this->setType($type);
         }
+    }
+
+    /**
+     * @param string|int|bool $value
+     * @param bool $isExpression
+     *
+     * @return self
+     */
+    public static function build(string|int|bool $value, bool $isExpression = false): self
+    {
+        return new self($value, $isExpression ? static::TYPE_EXPR : static::TYPE_VALUE);
     }
 
     /**
@@ -92,21 +105,21 @@ class ColumnDefaultValue
     }
 
     /**
-     * @return string|int|null The value, as specified in the schema.
+     * @return string The value, as specified in the schema.
      */
-    public function getValue()
+    public function getValue(): string
     {
         return $this->value;
     }
 
     /**
-     * @param string|int|null $value The value, as specified in the schema.
+     * @param string|int|bool $value The value, as specified in the schema.
      *
      * @return void
      */
     public function setValue($value): void
     {
-        $this->value = $value;
+        $this->value = (string)$value;
     }
 
     /**

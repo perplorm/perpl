@@ -367,11 +367,14 @@ class Column extends MappingModel
             $scale = $this->getAttribute('scale') ? (int)$this->getAttribute('scale') : null;
             $domain->replaceScale($scale);
 
-            $defval = $this->getAttribute('defaultValue', $this->getAttribute('default'));
-            if ($defval !== null && strtolower($defval) !== 'null') {
-                $domain->setDefaultValue(new ColumnDefaultValue($defval, ColumnDefaultValue::TYPE_VALUE));
-            } elseif ($this->getAttribute('defaultExpr') !== null) {
-                $domain->setDefaultValue(new ColumnDefaultValue($this->getAttribute('defaultExpr'), ColumnDefaultValue::TYPE_EXPR));
+            foreach (['defaultValue', 'default', 'defaultExpr'] as $key) {
+                $defaultValue = $this->getAttribute($key);
+                if ($defaultValue === null || strtolower((string)$defaultValue) === 'null') {
+                    continue;
+                }
+                $domain->createDefaultValue($defaultValue, $key === 'defaultExpr');
+
+                break;
             }
 
             if ($this->getAttribute('valueSet')) {

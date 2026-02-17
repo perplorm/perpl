@@ -165,6 +165,7 @@ class PropelDateTime extends DateTime
      */
     protected static function createDateTime($value, ?DateTimeZone $timeZone = null, string $dateTimeClass = DateTime::class): DateTimeInterface
     {
+        $value = (string)$value;
         if (static::isTimestamp($value)) { // if it's a unix timestamp
             $format = 'U';
             if (strpos($value, '.')) {

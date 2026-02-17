@@ -562,9 +562,9 @@ class ObjectCollection extends Collection
      *
      * @param mixed $object
      *
-     * @return string
+     * @return string|int
      */
-    protected function getHashCode($object): string
+    protected function getHashCode($object): string|int
     {
         if (is_object($object) && is_callable([$object, 'hashCode'])) {
             return $object->hashCode();

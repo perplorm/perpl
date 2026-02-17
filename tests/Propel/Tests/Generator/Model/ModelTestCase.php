@@ -8,6 +8,11 @@
 
 namespace Propel\Tests\Generator\Model;
 
+use Propel\Generator\Model\Column;
+use Propel\Generator\Model\Database;
+use Propel\Generator\Model\Domain;
+use Propel\Generator\Model\Table;
+use Propel\Generator\Platform\DefaultPlatform;
 use Propel\Tests\TestCase;
 
 /**
@@ -229,7 +234,7 @@ abstract class ModelTestCase extends TestCase
         $options = array_merge($defaults, $options);
 
         $platform = $this
-            ->getMockBuilder('Propel\Generator\Platform\DefaultPlatform')
+            ->getMockBuilder(DefaultPlatform::class)
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -266,7 +271,7 @@ abstract class ModelTestCase extends TestCase
         $options = array_merge($defaults, $options);
 
         $domain = $this
-            ->getMockBuilder('Propel\Generator\Model\Domain')
+            ->getMockBuilder(Domain::class)
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -302,7 +307,7 @@ abstract class ModelTestCase extends TestCase
         $options = array_merge($defaults, $options);
 
         $table = $this
-            ->getMockBuilder('Propel\Generator\Model\Table')
+            ->getMockBuilder(Table::class)
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -371,7 +376,7 @@ abstract class ModelTestCase extends TestCase
         $options = array_merge($defaults, $options);
 
         $database = $this
-            ->getMockBuilder('Propel\Generator\Model\Database')
+            ->getMockBuilder(Database::class)
             ->disableOriginalConstructor()
             ->getMock();
         $database
@@ -403,7 +408,7 @@ abstract class ModelTestCase extends TestCase
         $options = array_merge($defaults, $options);
 
         $column = $this
-            ->getMockBuilder('Propel\Generator\Model\Column')
+            ->getMockBuilder(Column::class)
             ->disableOriginalConstructor()
             ->getMock();
 

@@ -25,6 +25,8 @@ use Propel\Runtime\Adapter\AdapterFactory;
 use Propel\Runtime\Connection\ConnectionFactory;
 use Propel\Runtime\Connection\ConnectionInterface;
 use RuntimeException;
+use function array_key_exists;
+use function in_array;
 
 /**
  * Service class for preparing and executing migrations
@@ -531,8 +533,8 @@ class MigrationManager extends AbstractManager
     /**
      *  * Builds an array mapping connection names to a string that can be used as a php variable name.
      *
-     * @param array $migrationsUp
-     * @param array $migrationsDown
+     * @param array<string> $migrationsUp
+     * @param array<string> $migrationsDown
      *
      * @return array<string, string>
      */
@@ -545,7 +547,7 @@ class MigrationManager extends AbstractManager
                 if (array_key_exists($connectionName, $connectionToVariableName)) {
                     continue;
                 }
-                $alphNums = preg_replace('/\W/', '', $connectionName);
+                $alphNums = preg_replace('/\W/', '', (string)$connectionName);
                 if (strlen($alphNums) === 0) {
                     $alphNums = $index;
                 }

@@ -611,7 +611,7 @@ class XmlDumper implements DumperInterface
 
             $size = $index->getColumnSize($columnName);
             if ($size) {
-                $indexColumnNode->setAttribute('size', $size);
+                $indexColumnNode->setAttribute('size', (string)$size);
             }
         }
 

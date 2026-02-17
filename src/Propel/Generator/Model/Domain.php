@@ -366,6 +366,20 @@ class Domain extends MappingModel
     }
 
     /**
+     * Put a default value on the column
+     *
+     * @param string|int $value
+     * @param bool $isExpression
+     *
+     * @return void
+     */
+    public function createDefaultValue(string|int|null $value, bool $isExpression = false): void
+    {
+        $type = $isExpression ? ColumnDefaultValue::TYPE_EXPR : ColumnDefaultValue::TYPE_VALUE;
+        $this->defaultValue = new ColumnDefaultValue($value, $type);
+    }
+
+    /**
      * Replaces the default value if the new value is not null.
      *
      * @param \Propel\Generator\Model\ColumnDefaultValue|null $value

@@ -380,10 +380,12 @@ class CriteriaTest extends BookstoreTestBase
         $this->c->add('TABLE.COLUMN', true);
 
         $expect = $this->getSql('SELECT  FROM TABLE WHERE TABLE.COLUMN=:p1');
-        $expect_params = [ [
-        'table' => 'TABLE',
-        'column' => 'COLUMN',
-        'value' => true],
+        $expect_params = [
+            [
+                'table' => 'TABLE',
+                'column' => 'COLUMN',
+                'value' => true
+            ],
         ];
         try {
             $params = [];
@@ -757,7 +759,7 @@ class CriteriaTest extends BookstoreTestBase
                 ['TABLE_B.id', 'TABLE_B.BAZ'],
                 Criteria::LEFT_JOIN
             )->
-                addSelectColumn('TABLE_A.id');
+            addSelectColumn('TABLE_A.id');
 
         $expect = $this->getSql('SELECT TABLE_A.id FROM TABLE_A LEFT JOIN TABLE_B ON (TABLE_A.FOO_ID=TABLE_B.id AND TABLE_A.BAR=TABLE_B.BAZ)');
         $params = [];
@@ -779,8 +781,9 @@ class CriteriaTest extends BookstoreTestBase
             clearSelectColumns()->
             addMultipleJoin([
                 ['TABLE_A.FOO_ID', 'TABLE_B.id'],
-                ['TABLE_A.BAR', 'TABLE_B.BAZ']])->
-                addSelectColumn('TABLE_A.id');
+                ['TABLE_A.BAR', 'TABLE_B.BAZ']
+            ])->
+            addSelectColumn('TABLE_A.id');
 
         $expect = $this->getSql('SELECT TABLE_A.id FROM TABLE_A INNER JOIN TABLE_B '
             . 'ON (TABLE_A.FOO_ID=TABLE_B.id AND TABLE_A.BAR=TABLE_B.BAZ)');
@@ -799,12 +802,14 @@ class CriteriaTest extends BookstoreTestBase
     public function testAddJoinMultipleValue()
     {
         $c = new Criteria();
-        $c->
-            clearSelectColumns()->
-            addMultipleJoin([
-                ['TABLE_A.FOO_ID', 'TABLE_B.id'],
-                ['TABLE_A.BAR', 3]])->
-                addSelectColumn('TABLE_A.id');
+        $c->clearSelectColumns()
+            ->addMultipleJoin(
+                [
+                    ['TABLE_A.FOO_ID', 'TABLE_B.id'],
+                    ['TABLE_A.BAR', 3]
+                ]
+            )
+            ->addSelectColumn('TABLE_A.id');
 
         $expect = $this->getSql('SELECT TABLE_A.id FROM TABLE_A INNER JOIN TABLE_B '
             . 'ON (TABLE_A.FOO_ID=TABLE_B.id AND TABLE_A.BAR=3)');
@@ -827,8 +832,9 @@ class CriteriaTest extends BookstoreTestBase
             clearSelectColumns()->
             addMultipleJoin(
                 [
-                ['TABLE_A.FOO_ID', 'TABLE_B.id'],
-                ['TABLE_A.BAR', 'TABLE_B.BAZ']],
+                    ['TABLE_A.FOO_ID', 'TABLE_B.id'],
+                    ['TABLE_A.BAR', 'TABLE_B.BAZ']
+                ],
                 Criteria::LEFT_JOIN
             )->
             addSelectColumn('TABLE_A.id');
@@ -854,8 +860,9 @@ class CriteriaTest extends BookstoreTestBase
             clearSelectColumns()->
             addMultipleJoin([
                 ['TABLE_A.FOO_ID', 'TABLE_B.id', Criteria::GREATER_EQUAL],
-                ['TABLE_A.BAR', 'TABLE_B.BAZ', Criteria::LESS_THAN]])->
-                addSelectColumn('TABLE_A.id');
+                ['TABLE_A.BAR', 'TABLE_B.BAZ', Criteria::LESS_THAN]
+            ])->
+            addSelectColumn('TABLE_A.id');
 
         $expect = $this->getSql('SELECT TABLE_A.id FROM TABLE_A INNER JOIN TABLE_B '
             . 'ON (TABLE_A.FOO_ID>=TABLE_B.id AND TABLE_A.BAR<TABLE_B.BAZ)');
@@ -878,8 +885,9 @@ class CriteriaTest extends BookstoreTestBase
             clearSelectColumns()->
             addMultipleJoin(
                 [
-                ['TABLE_A.FOO_ID', 'TABLE_B.id', Criteria::GREATER_EQUAL],
-                ['TABLE_A.BAR', 'TABLE_B.BAZ', Criteria::LESS_THAN]],
+                    ['TABLE_A.FOO_ID', 'TABLE_B.id', Criteria::GREATER_EQUAL],
+                    ['TABLE_A.BAR', 'TABLE_B.BAZ', Criteria::LESS_THAN]
+                ],
                 Criteria::LEFT_JOIN
             )->
             addSelectColumn('TABLE_A.id');
@@ -1213,7 +1221,7 @@ class CriteriaTest extends BookstoreTestBase
         $this->assertTrue(is_array($c->getNamedCriterions()), 'namedCriterions is an array');
         $this->assertSame(0, count($c->getNamedCriterions()), 'namedCriterions is empty by default');
 
-        $this->assertFalse($this->getObjectPropertyValue($c, 'ignoreCase') , 'ignoreCase is false by default');
+        $this->assertFalse($this->getObjectPropertyValue($c, 'ignoreCase'), 'ignoreCase is false by default');
 
         $this->assertFalse($c->isSingleRecord(), 'singleRecord is false by default');
 

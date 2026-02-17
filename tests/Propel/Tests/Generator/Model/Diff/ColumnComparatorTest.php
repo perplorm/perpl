@@ -42,13 +42,13 @@ class ColumnComparatorTest extends TestCase
         $c1->getDomain()->replaceScale(2);
         $c1->getDomain()->replaceSize(3);
         $c1->setNotNull(true);
-        $c1->getDomain()->setDefaultValue(new ColumnDefaultValue(123, ColumnDefaultValue::TYPE_VALUE));
+        $c1->getDomain()->createDefaultValue(123);
         $c2 = new Column('');
         $c2->getDomain()->copy($this->platform->getDomainForType('DOUBLE'));
         $c2->getDomain()->replaceScale(2);
         $c2->getDomain()->replaceSize(3);
         $c2->setNotNull(true);
-        $c2->getDomain()->setDefaultValue(new ColumnDefaultValue(123, ColumnDefaultValue::TYPE_VALUE));
+        $c2->getDomain()->createDefaultValue(123);
         $this->assertEquals([], ColumnComparator::compareColumns($c1, $c2));
     }
 
@@ -127,7 +127,7 @@ class ColumnComparatorTest extends TestCase
     public function testCompareDefaultValueToNull()
     {
         $c1 = new Column('');
-        $c1->getDomain()->setDefaultValue(new ColumnDefaultValue(123, ColumnDefaultValue::TYPE_VALUE));
+        $c1->getDomain()->createDefaultValue(123);
         $c2 = new Column('');
         $expectedChangedProperties = [
             'defaultValueType' => [ColumnDefaultValue::TYPE_VALUE, null],
@@ -143,7 +143,7 @@ class ColumnComparatorTest extends TestCase
     {
         $c1 = new Column('');
         $c2 = new Column('');
-        $c2->getDomain()->setDefaultValue(new ColumnDefaultValue(123, ColumnDefaultValue::TYPE_VALUE));
+        $c2->getDomain()->createDefaultValue(123);
         $expectedChangedProperties = [
             'defaultValueType' => [null, ColumnDefaultValue::TYPE_VALUE],
             'defaultValueValue' => [null, 123],
@@ -157,9 +157,9 @@ class ColumnComparatorTest extends TestCase
     public function testCompareDefaultValueValue()
     {
         $c1 = new Column('');
-        $c1->getDomain()->setDefaultValue(new ColumnDefaultValue(123, ColumnDefaultValue::TYPE_VALUE));
+        $c1->getDomain()->createDefaultValue(123);
         $c2 = new Column('');
-        $c2->getDomain()->setDefaultValue(new ColumnDefaultValue(456, ColumnDefaultValue::TYPE_VALUE));
+        $c2->getDomain()->createDefaultValue(456);
         $expectedChangedProperties = [
             'defaultValueValue' => [123, 456],
         ];
@@ -172,7 +172,7 @@ class ColumnComparatorTest extends TestCase
     public function testCompareDefaultValueType()
     {
         $c1 = new Column('');
-        $c1->getDomain()->setDefaultValue(new ColumnDefaultValue(123, ColumnDefaultValue::TYPE_VALUE));
+        $c1->getDomain()->createDefaultValue(123);
         $c2 = new Column('');
         $c2->getDomain()->setDefaultValue(new ColumnDefaultValue(123, ColumnDefaultValue::TYPE_EXPR));
         $expectedChangedProperties = [
@@ -221,7 +221,7 @@ class ColumnComparatorTest extends TestCase
         $c2->getDomain()->replaceScale(2);
         $c2->getDomain()->replaceSize(3);
         $c2->setNotNull(true);
-        $c2->getDomain()->setDefaultValue(new ColumnDefaultValue(123, ColumnDefaultValue::TYPE_VALUE));
+        $c2->getDomain()->createDefaultValue(123);
         $expectedChangedProperties = [
             'type' => ['INTEGER', 'DOUBLE'],
             'sqlType' => ['INTEGER', 'DOUBLE'],

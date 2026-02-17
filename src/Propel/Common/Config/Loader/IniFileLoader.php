@@ -12,6 +12,7 @@ namespace Propel\Common\Config\Loader;
 
 use Propel\Common\Config\Exception\IniParseException;
 use Propel\Common\Config\Exception\InvalidArgumentException;
+use function is_int;
 
 /**
  * IniFileLoader loads parameters from INI files.
@@ -135,7 +136,7 @@ class IniFileLoader extends FileLoader
     /**
      * Process a key.
      *
-     * @param string $key
+     * @param string|int $key
      * @param array<array-key, string>|string $rawValue
      * @param array $config
      *
@@ -143,7 +144,7 @@ class IniFileLoader extends FileLoader
      *
      * @return void
      */
-    private function parseKey(string $key, $rawValue, array &$config): void
+    private function parseKey(string|int $key, $rawValue, array &$config): void
     {
         $value = $rawValue;
         if (is_string($rawValue)) {
@@ -155,7 +156,7 @@ class IniFileLoader extends FileLoader
                 $value = (float)$rawValue;
             }
         }
-        $subKeys = explode($this->nestSeparator, $key);
+        $subKeys = is_int($key) ? [$key] : explode($this->nestSeparator, $key);
         $subConfig = &$config;
         $lastIndex = count($subKeys) - 1;
         foreach ($subKeys as $index => $subKey) {

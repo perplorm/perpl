@@ -188,17 +188,18 @@ ALTER TABLE %s ADD %s;
             foreach ($addedCols as $column) {
                 $sqlChangeNotSupported =
                     //The column may not have a PRIMARY KEY or UNIQUE constraint.
-                    $column->isPrimaryKey()
-                    || $column->isUnique()
+                    $column->isPrimaryKey() || $column->isUnique()
 
                     //The column may not have a default value of CURRENT_TIME, CURRENT_DATE, CURRENT_TIMESTAMP,
                     //or an expression in parentheses.
-                    || ($column->getDefaultValue() && in_array(
-                        $column->getDefaultValue()->getValue(),
-                        ['CURRENT_TIME', 'CURRENT_DATE', 'CURRENT_TIMESTAMP'],
-                        true,
+                    || ($column->getDefaultValue() && (
+                        in_array(
+                            $column->getDefaultValue()->getValue(),
+                            ['CURRENT_TIME', 'CURRENT_DATE', 'CURRENT_TIMESTAMP'],
+                            true,
+                        )
+                        || str_starts_with(trim((string)$column->getDefaultValue()->getValue()), '(')
                     ))
-                    || substr(trim($column->getDefaultValue() ? (string)$column->getDefaultValue()->getValue() : ''), 0, 1) === '('
 
                     //If a NOT NULL constraint is specified, then the column must have a default value other than NULL.
                     || ($column->isNotNull() && $column->getDefaultValue()->getValue() === 'NULL');

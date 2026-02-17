@@ -9,7 +9,6 @@
 namespace Propel\Tests\Generator\Model\Diff;
 
 use Propel\Generator\Model\Column;
-use Propel\Generator\Model\ColumnDefaultValue;
 use Propel\Generator\Model\Diff\TableComparator;
 use Propel\Generator\Model\Diff\TableDiff;
 use Propel\Generator\Model\Index;
@@ -47,7 +46,7 @@ class PropelTableIndexComparatorTest extends TestCase
         $c1->getDomain()->replaceScale(2);
         $c1->getDomain()->replaceSize(3);
         $c1->setNotNull(true);
-        $c1->getDomain()->setDefaultValue(new ColumnDefaultValue(123, ColumnDefaultValue::TYPE_VALUE));
+        $c1->getDomain()->createDefaultValue(123);
         $t1->addColumn($c1);
         $i1 = new Index('Foo_Index');
         $i1->addColumn($c1);
@@ -58,7 +57,7 @@ class PropelTableIndexComparatorTest extends TestCase
         $c2->getDomain()->replaceScale(2);
         $c2->getDomain()->replaceSize(3);
         $c2->setNotNull(true);
-        $c2->getDomain()->setDefaultValue(new ColumnDefaultValue(123, ColumnDefaultValue::TYPE_VALUE));
+        $c2->getDomain()->createDefaultValue(123);
         $t2->addColumn($c2);
         $i2 = new Index('Foo_Index');
         $i2->addColumn($c2);
@@ -78,7 +77,7 @@ class PropelTableIndexComparatorTest extends TestCase
         $c1->getDomain()->replaceScale(2);
         $c1->getDomain()->replaceSize(3);
         $c1->setNotNull(true);
-        $c1->getDomain()->setDefaultValue(new ColumnDefaultValue(123, ColumnDefaultValue::TYPE_VALUE));
+        $c1->getDomain()->createDefaultValue(123);
         $t1->addColumn($c1);
         $i1 = new Index('Foo_Index');
         $i1->addColumn($c1);
@@ -89,7 +88,7 @@ class PropelTableIndexComparatorTest extends TestCase
         $c2->getDomain()->replaceScale(2);
         $c2->getDomain()->replaceSize(3);
         $c2->setNotNull(true);
-        $c2->getDomain()->setDefaultValue(new ColumnDefaultValue(123, ColumnDefaultValue::TYPE_VALUE));
+        $c2->getDomain()->createDefaultValue(123);
         $t2->addColumn($c2);
         $i2 = new Unique('Foo_Index');
         $i2->addColumn($c2);
@@ -110,7 +109,7 @@ class PropelTableIndexComparatorTest extends TestCase
         $c1->getDomain()->replaceScale(2);
         $c1->getDomain()->replaceSize(3);
         $c1->setNotNull(true);
-        $c1->getDomain()->setDefaultValue(new ColumnDefaultValue(123, ColumnDefaultValue::TYPE_VALUE));
+        $c1->getDomain()->createDefaultValue(123);
         $t1->addColumn($c1);
         $i1 = new Index('Foo_Index');
         $i1->addColumn($c1);
@@ -122,7 +121,7 @@ class PropelTableIndexComparatorTest extends TestCase
         $c2->getDomain()->replaceScale(2);
         $c2->getDomain()->replaceSize(3);
         $c2->setNotNull(true);
-        $c2->getDomain()->setDefaultValue(new ColumnDefaultValue(123, ColumnDefaultValue::TYPE_VALUE));
+        $c2->getDomain()->createDefaultValue(123);
         $t2->addColumn($c2);
         $i2 = new Index('fOO_iNDEX');
         $i2->addColumn($c2);
@@ -144,7 +143,7 @@ class PropelTableIndexComparatorTest extends TestCase
         $c2->getDomain()->replaceScale(2);
         $c2->getDomain()->replaceSize(3);
         $c2->setNotNull(true);
-        $c2->getDomain()->setDefaultValue(new ColumnDefaultValue(123, ColumnDefaultValue::TYPE_VALUE));
+        $c2->getDomain()->createDefaultValue(123);
         $t2->addColumn($c2);
         $i2 = new Index('Foo_Index');
         $i2->addColumn($c2);
@@ -171,7 +170,7 @@ class PropelTableIndexComparatorTest extends TestCase
         $c1->getDomain()->replaceScale(2);
         $c1->getDomain()->replaceSize(3);
         $c1->setNotNull(true);
-        $c1->getDomain()->setDefaultValue(new ColumnDefaultValue(123, ColumnDefaultValue::TYPE_VALUE));
+        $c1->getDomain()->createDefaultValue(123);
         $t1->addColumn($c1);
         $i1 = new Index('Bar_Index');
         $i1->addColumn($c1);
@@ -208,7 +207,7 @@ class PropelTableIndexComparatorTest extends TestCase
         $c2->getDomain()->replaceScale(2);
         $c2->getDomain()->replaceSize(3);
         $c2->setNotNull(true);
-        $c2->getDomain()->setDefaultValue(new ColumnDefaultValue(123, ColumnDefaultValue::TYPE_VALUE));
+        $c2->getDomain()->createDefaultValue(123);
         $t2->addColumn($c2);
         $i2 = new Unique('Foo_Index');
         $i2->addColumn($c2);
