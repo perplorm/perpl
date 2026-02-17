@@ -15,9 +15,6 @@ use function strtoupper;
 
 /**
  * A class for holding a column default value.
- *
- * @author Hans Lellelid <hans@xmpl.org> (Propel)
- * @author Hugo Hamon <webmaster@apprendre-php.com> (Propel)
  */
 class ColumnDefaultValue
 {
@@ -125,8 +122,6 @@ class ColumnDefaultValue
 
     /**
      * A method to compare if two Default values match
-     *
-     * @author Niklas Närhinen <niklas@narhinen.net>
      *
      * @param \Propel\Generator\Model\ColumnDefaultValue $other The value to compare to
      *

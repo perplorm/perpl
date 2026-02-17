@@ -31,8 +31,6 @@ use const INI_SCANNER_RAW;
  *
  * This class is heavily inspired to Zend\Config component ini reader.
  * http://framework.zend.com/manual/2.1/en/modules/zend.config.reader.html
- *
- * @author Cristiano Cinotti
  */
 class IniFileLoader extends FileLoader
 {

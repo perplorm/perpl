@@ -12,9 +12,6 @@ namespace Propel\Runtime\Adapter\Exception;
 
 use Propel\Runtime\Exception\InvalidArgumentException;
 
-/**
- * @author William Durand <william.durand1@gmail.com>
- */
 class UnsupportedEncodingException extends InvalidArgumentException
 {
 }

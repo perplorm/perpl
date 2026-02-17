@@ -17,8 +17,6 @@ use function strtolower;
 
 /**
  * Behavior to add versionable columns and abilities
- *
- * @author François Zaninotto
  */
 class VersionableBehaviorObjectBuilderModifier
 {

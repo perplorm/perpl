@@ -30,8 +30,6 @@ use function substr;
 
 /**
  * SQLite database schema parser.
- *
- * @author Hans Lellelid <hans@xmpl.org>
  */
 class SqliteSchemaParser extends AbstractSchemaParser
 {

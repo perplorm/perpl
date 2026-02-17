@@ -20,12 +20,6 @@ use function str_replace;
 
 /**
  * A class for holding application data structures.
- *
- * @author Hans Lellelid <hans@xmpl.org> (Propel)
- * @author Leon Messerschmidt <leon@opticode.co.za> (Torque)
- * @author John McNally <jmcnally@collab.net> (Torque)
- * @author Daniel Rall <dlr@finemaltcoding.com> (Torque)
- * @author Hugo Hamon <webmaster@apprendre-php.com> (Propel)
  */
 class Schema
 {

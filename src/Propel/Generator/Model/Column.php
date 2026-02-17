@@ -30,15 +30,6 @@ use function substr;
 
 /**
  * A class for holding data about a column used in an application.
- *
- * @author Hans Lellelid <hans@xmpl.org> (Propel)
- * @author Leon Messerschmidt <leon@opticode.co.za> (Torque)
- * @author Jason van Zyl <jvanzyl@apache.org> (Torque)
- * @author Jon S. Stevens <jon@latchkey.com> (Torque)
- * @author Daniel Rall <dlr@finemaltcoding.com> (Torque)
- * @author Byron Foster <byron_foster@yahoo.com> (Torque)
- * @author Bernd Goldschmidt <bgoldschmidt@rapidsoft.de>
- * @author Hugo Hamon <webmaster@apprendre-php.com> (Propel)
  */
 class Column extends MappingModel
 {

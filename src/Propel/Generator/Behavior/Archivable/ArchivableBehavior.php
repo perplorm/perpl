@@ -18,8 +18,6 @@ use Propel\Generator\Model\Table;
 
 /**
  * Keeps tracks of an ActiveRecord object, even after deletion
- *
- * @author Francois Zaninotto
  */
 class ArchivableBehavior extends SyncedTableBehavior
 {

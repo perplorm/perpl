@@ -12,9 +12,6 @@ namespace Propel\Runtime\ActiveQuery\Criterion\Exception;
 
 use Propel\Runtime\Exception\InvalidArgumentException;
 
-/**
- * @author François Zaninotto
- */
 class InvalidClauseException extends InvalidArgumentException
 {
 }

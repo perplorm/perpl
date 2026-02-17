@@ -31,9 +31,6 @@ use function sys_get_temp_dir;
 use function urlencode;
 use const DIRECTORY_SEPARATOR;
 
-/**
- * @author Marc Scholten <marcphilipscholten@gmail.com>
- */
 class InitCommand extends AbstractCommand
 {
     /**

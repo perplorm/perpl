@@ -33,8 +33,6 @@ use function ucfirst;
  * ActiveQuery classes will extend the related classes of the parent model.
  * Lastly (an optionally), the data from a model with this behavior is copied
  * to the parent model.
- *
- * @author François Zaninotto
  */
 class ConcreteInheritanceBehavior extends Behavior
 {

@@ -15,8 +15,6 @@ use function class_exists;
 
 /**
  * Factory for model queries
- *
- * @author François Zaninotto
  */
 class PropelQuery
 {

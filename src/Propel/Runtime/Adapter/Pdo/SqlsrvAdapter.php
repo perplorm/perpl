@@ -25,8 +25,6 @@ use function strtolower;
 
 /**
  * This is used to connect to a MSSQL database using pdo_sqlsrv driver.
- *
- * @author Benjamin Runnels
  */
 class SqlsrvAdapter extends MssqlAdapter implements SqlAdapterInterface
 {

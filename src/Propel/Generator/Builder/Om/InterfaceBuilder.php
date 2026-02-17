@@ -17,8 +17,6 @@ use LogicException;
  *
  * This class produces the empty stub interface when the interface="" attribute is used
  * in the the schema xml.
- *
- * @author Hans Lellelid <hans@xmpl.org>
  */
 class InterfaceBuilder extends AbstractObjectBuilder
 {

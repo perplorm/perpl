@@ -15,8 +15,6 @@ use function getcwd;
 
 /**
  * Propel file locator class.
- *
- * @author Cristiano Cinotti
  */
 class FileLocator extends BaseFileLocator
 {

@@ -30,8 +30,6 @@ use function ucfirst;
 /**
  * Class for iterating over a list of Propel objects
  *
- * @author Francois Zaninotto
- *
  * @template RowFormat
  * @extends \Propel\Runtime\Collection\Collection<RowFormat>
  */

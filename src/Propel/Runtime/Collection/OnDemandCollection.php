@@ -20,8 +20,6 @@ use Traversable;
 /**
  * Class for iterating over a statement and returning one Propel object at a time
  *
- * @author Francois Zaninotto
- *
  * @template RowFormat of \Propel\Runtime\ActiveRecord\ActiveRecordInterface
  * @extends \Propel\Runtime\Collection\Collection<RowFormat>
  */

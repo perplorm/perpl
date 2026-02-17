@@ -16,8 +16,6 @@ use function substr;
 
 /**
  * Tools to support class & package inclusion and referencing.
- *
- * @author Hans Lellelid <hans@xmpl.org>
  */
 class ClassTools
 {

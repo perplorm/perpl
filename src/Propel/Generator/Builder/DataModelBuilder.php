@@ -46,8 +46,6 @@ use function var_export;
  * to be able to access the propel generator build properties. You should be
  * safe if you always use the GeneratorConfig to get a configured builder class
  * anyway.
- *
- * @author Hans Lellelid <hans@xmpl.org>
  */
 abstract class DataModelBuilder
 {

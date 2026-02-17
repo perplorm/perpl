@@ -16,8 +16,6 @@ use function strtoupper;
 
 /**
  * Behavior to add sortable methods
- *
- * @author Jérémie Augustin
  */
 class SortableBehaviorTableMapBuilderModifier
 {

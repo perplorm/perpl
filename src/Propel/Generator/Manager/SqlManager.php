@@ -28,8 +28,6 @@ use const DIRECTORY_SEPARATOR;
 
 /**
  * Service class for managing SQL.
- *
- * @author William Durand <william.durand1@gmail.com>
  */
 class SqlManager extends AbstractManager
 {

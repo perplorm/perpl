@@ -12,8 +12,6 @@ namespace Propel\Generator\Platform;
 
 /**
  * MS SQL Server using pdo_sqlsrv implementation.
- *
- * @author Benjamin Runnels
  */
 class SqlsrvPlatform extends MssqlPlatform
 {

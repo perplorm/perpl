@@ -10,9 +10,6 @@ declare(strict_types = 1);
 
 namespace Propel\Generator\Exception;
 
-/**
- * @author Cristiano Cinotti <cristianocinotti@gmail.com>
- */
 class ConstraintNotFoundException extends ClassNotFoundException implements ExceptionInterface
 {
 }

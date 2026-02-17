@@ -19,8 +19,6 @@ use function reset;
 
 /**
  * Class ArrayDataFetcher
- *
- * @package Propel\Runtime\Formatter
  */
 class ArrayDataFetcher extends AbstractDataFetcher
 {

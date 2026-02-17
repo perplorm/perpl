@@ -43,8 +43,6 @@ use function unpack;
 
 /**
  * This is used to connect to a MSSQL database.
- *
- * @author Hans Lellelid <hans@xmpl.org> (Propel)
  */
 class MssqlAdapter extends PdoAdapter implements SqlAdapterInterface
 {
@@ -159,8 +157,6 @@ class MssqlAdapter extends PdoAdapter implements SqlAdapterInterface
      *
      * This rewrites the $sql query to apply the offset and limit.
      * some of the ORDER BY logic borrowed from Doctrine MsSqlPlatform
-     *
-     * @author Benjamin Runnels <kraven@kraven.org>
      *
      * @see SqlAdapterInterface::applyLimit()
      *

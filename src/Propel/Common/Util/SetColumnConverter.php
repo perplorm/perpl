@@ -23,8 +23,6 @@ use const ARRAY_FILTER_USE_KEY;
 
 /**
  * Class converts SET column values between integer and string/array representation.
- *
- * @author Moritz Schroeder <moritz.schroeder@molabs.de>
  */
 class SetColumnConverter
 {

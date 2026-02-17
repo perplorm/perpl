@@ -28,8 +28,6 @@ use function substr;
  * This is an "inner" class that describes an object in the criteria.
  *
  * In Torque this is an inner class of the Criteria class.
- *
- * @author Hans Lellelid <hans@xmpl.org> (Propel)
  */
 abstract class AbstractCriterion extends ClauseList implements ColumnFilterInterface
 {

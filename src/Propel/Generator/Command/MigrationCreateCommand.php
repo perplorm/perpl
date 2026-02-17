@@ -20,10 +20,6 @@ use function sprintf;
 use function time;
 use const DIRECTORY_SEPARATOR;
 
-/**
- * @author William Durand <william.durand1@gmail.com>
- * @author Fredrik Wollsén <fredrik@neam.se>
- */
 class MigrationCreateCommand extends AbstractMigrationCommand
 {
     /**

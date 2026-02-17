@@ -38,8 +38,6 @@ use function var_export;
  *
  * This class produces the base query class (e.g. BaseBookQuery) which contains
  * all the custom-built query methods.
- *
- * @author Francois Zaninotto
  */
 class QueryBuilder extends AbstractOMBuilder
 {

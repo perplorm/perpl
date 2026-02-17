@@ -22,8 +22,6 @@ use const DIRECTORY_SEPARATOR;
 
 /**
  * This manager creates the Object Model classes based on the XML schema file.
- *
- * @author Hans Lellelid <hans@xmpl.org>
  */
 class ModelManager extends AbstractManager
 {

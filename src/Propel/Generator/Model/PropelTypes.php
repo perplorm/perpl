@@ -19,9 +19,6 @@ use function strtoupper;
  *
  * Support for Creole types have been removed as this DBAL library is no longer
  * supported by the Propel project.
- *
- * @author Hans Lellelid <hans@xmpl.org> (Propel)
- * @author Hugo Hamon <webmaster@apprendre-php.com> (Propel)
  */
 class PropelTypes
 {

@@ -14,8 +14,6 @@ use function array_intersect;
 
 /**
  * Class represents a query lock
- *
- * @author Tomasz Wójcik <tomasz.prgtw.wojcik@gmail.com>
  */
 class Lock
 {

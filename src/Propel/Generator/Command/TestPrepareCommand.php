@@ -29,9 +29,6 @@ use function substr;
 use function ucfirst;
 use const DIRECTORY_SEPARATOR;
 
-/**
- * @author William Durand <william.durand1@gmail.com>
- */
 class TestPrepareCommand extends AbstractCommand
 {
     /**

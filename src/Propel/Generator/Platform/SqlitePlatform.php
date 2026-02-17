@@ -41,8 +41,6 @@ use const FILTER_VALIDATE_BOOLEAN;
 
 /**
  * SQLite PlatformInterface implementation.
- *
- * @author Hans Lellelid <hans@xmpl.org>
  */
 class SqlitePlatform extends DefaultPlatform
 {

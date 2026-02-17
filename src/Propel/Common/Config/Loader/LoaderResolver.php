@@ -14,8 +14,6 @@ use Symfony\Component\Config\Loader\LoaderResolver as BaseLoaderResolver;
 
 /**
  * Class LoaderResolver
- *
- * @author Cristiano Cinotti
  */
 class LoaderResolver extends BaseLoaderResolver
 {

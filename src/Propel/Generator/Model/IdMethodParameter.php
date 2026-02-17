@@ -12,11 +12,6 @@ namespace Propel\Generator\Model;
 
 /**
  * Information related to an ID method strategy.
- *
- * @author Hans Lellelid <hans@xmpl.org> (Propel)
- * @author John McNally <jmcnally@collab.net> (Torque)
- * @author Daniel Rall <dlr@collab.net> (Torque)
- * @author Hugo Hamon <webmaster@apprendre-php.com> (Propel)
  */
 class IdMethodParameter extends MappingModel
 {

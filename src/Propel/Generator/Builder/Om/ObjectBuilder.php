@@ -48,8 +48,6 @@ use function var_export;
  *
  * This class produces the base object class (e.g. BaseMyTable) which contains
  * all the custom-built accessor and setter methods.
- *
- * @author Hans Lellelid <hans@xmpl.org>
  */
 class ObjectBuilder extends AbstractObjectBuilder
 {
@@ -322,7 +320,6 @@ class ObjectBuilder extends AbstractObjectBuilder
             $timeStampBlock = $this->generateTimestampBlock();
             $script .= "{$timeStampBlock}
  *
- * @package propel.generator.{$this->getPackage()}
  * @phpstan-consistent-constructor
  */";
         }

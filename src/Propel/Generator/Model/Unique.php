@@ -16,11 +16,6 @@ namespace Propel\Generator\Model;
  * are roughly equivalent. For example, adding a unique constraint to
  * a column also creates an index on that column (this is known to be
  * true for MySQL and Oracle).
- *
- * @author Hans Lellelid <hans@xmpl.org> (Propel)
- * @author Jason van Zyl <jvanzyl@apache.org> (Torque)
- * @author Daniel Rall <dlr@collab.net> (Torque)
- * @author Hugo Hamon <webmaster@apprendre-php.com> (Propel)
  */
 class Unique extends Index
 {

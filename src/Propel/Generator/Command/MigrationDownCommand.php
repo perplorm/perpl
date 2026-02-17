@@ -18,9 +18,6 @@ use function array_pop;
 use function count;
 use function sprintf;
 
-/**
- * @author William Durand <william.durand1@gmail.com>
- */
 class MigrationDownCommand extends AbstractMigrationCommand
 {
     /**

@@ -21,10 +21,6 @@ use function substr;
 
 /**
  * Information about indices of a table.
- *
- * @author Jason van Zyl <vanzyl@apache.org>
- * @author Daniel Rall <dlr@finemaltcoding.com>
- * @author Hugo Hamon <webmaster@apprendre-php.com> (Propel)
  */
 class Index extends MappingModel
 {

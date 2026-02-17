@@ -18,8 +18,6 @@ use Propel\Runtime\Exception\PropelException;
  * statement formatter for Propel query
  * format() returns a PDO statement
  *
- * @author Francois Zaninotto
- *
  * @deprecated Use Query::fetch() to get a data fetcher
  *
  * @extends \Propel\Runtime\Formatter\AbstractFormatter<\Propel\Runtime\DataFetcher\DataFetcherInterface, \Propel\Runtime\DataFetcher\DataFetcherInterface>

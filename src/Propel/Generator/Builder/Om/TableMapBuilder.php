@@ -34,8 +34,6 @@ use const PHP_EOL;
 
 /**
  * Generates the table map class for user object model (OM).
- *
- * @author Hans Lellelid <hans@xmpl.org>
  */
 class TableMapBuilder extends AbstractOMBuilder
 {

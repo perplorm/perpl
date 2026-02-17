@@ -21,8 +21,6 @@ use Propel\Generator\Model\Table;
  *
  * This class produces the empty stub class that can be customized with
  * application business logic, custom behavior, etc.
- *
- * @author François Zaninotto
  */
 class QueryInheritanceBuilder extends AbstractOMBuilder implements ExtensionBuilderInterface
 {

@@ -14,8 +14,6 @@ use Propel\Common\Config\XmlToArrayConverter;
 
 /**
  * XmlFileLoader loads configuration parameters from xml file.
- *
- * @author Cristiano Cinotti
  */
 class XmlFileLoader extends FileLoader
 {

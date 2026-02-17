@@ -18,9 +18,6 @@ use function date;
 use function in_array;
 use function sprintf;
 
-/**
- * @author William Durand <william.durand1@gmail.com>
- */
 class MigrationStatusCommand extends AbstractMigrationCommand
 {
     /**

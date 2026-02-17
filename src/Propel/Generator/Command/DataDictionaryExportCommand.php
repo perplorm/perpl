@@ -17,9 +17,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 use function realpath;
 use function sprintf;
 
-/**
- * @author Charles Crossan <crossan007@gmail.com>
- */
 class DataDictionaryExportCommand extends AbstractCommand
 {
     /**

@@ -27,9 +27,6 @@ use function strtolower;
 
 /**
  * Microsoft SQL Server database schema parser.
- *
- * @author Hans Lellelid <hans@xmpl.org>
- * @author Dominic Winkler <d.winkler@flexarts.at> (Flexarts)
  */
 class MssqlSchemaParser extends AbstractSchemaParser
 {

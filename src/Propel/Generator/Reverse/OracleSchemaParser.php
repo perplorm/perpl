@@ -26,9 +26,6 @@ use function substr;
 
 /**
  * Oracle database schema parser.
- *
- * @author Hans Lellelid <hans@xmpl.org>
- * @author Guillermo Gutierrez <ggutierrez@dailycosas.net> (Adaptation)
  */
 class OracleSchemaParser extends AbstractSchemaParser
 {

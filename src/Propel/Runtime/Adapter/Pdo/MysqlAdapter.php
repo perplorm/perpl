@@ -25,11 +25,6 @@ use function strtr;
 
 /**
  * This is used in order to connect to a MySQL database.
- *
- * @author Hans Lellelid <hans@xmpl.org> (Propel)
- * @author Jon S. Stevens <jon@clearink.com> (Torque)
- * @author Brett McLaughlin <bmclaugh@algx.net> (Torque)
- * @author Daniel Rall <dlr@finemaltcoding.com> (Torque)
  */
 class MysqlAdapter extends PdoAdapter implements SqlAdapterInterface
 {

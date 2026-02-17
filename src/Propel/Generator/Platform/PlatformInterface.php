@@ -18,9 +18,6 @@ use Propel\Runtime\Connection\ConnectionInterface;
 
 /**
  * Interface for RDBMS platform specific behaviour.
- *
- * @author Hans Lellelid <hans@xmpl.org> (Propel)
- * @author Martin Poeschl <mpoeschl@marmot.at> (Torque)
  */
 interface PlatformInterface
 {

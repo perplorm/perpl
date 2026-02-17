@@ -34,10 +34,6 @@ use function var_export;
 
 /**
  * DateTime subclass which supports serialization.
- *
- * @author Alan Pinstein
- * @author Soenke Ruempler
- * @author Hans Lellelid
  */
 class PropelDateTime extends DateTime
 {

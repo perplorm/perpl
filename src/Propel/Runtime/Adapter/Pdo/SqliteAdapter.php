@@ -28,8 +28,6 @@ use function sprintf;
 
 /**
  * This is used in order to connect to a SQLite database.
- *
- * @author Hans Lellelid <hans@xmpl.org>
  */
 class SqliteAdapter extends PdoAdapter implements SqlAdapterInterface
 {

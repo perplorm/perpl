@@ -17,10 +17,6 @@ use function substr;
  * A <code>NameGeneratorInterface</code> implementation for table-specific
  * constraints. Conforms to the maximum column name length for the
  * type of database in use.
- *
- * @author Hans Lellelid <hans@xmpl.org> (Propel)
- * @author Daniel Rall <dlr@finemaltcoding.com> (Torque)
- * @author Hugo Hamon <webmaster@apprendre-php.com> (Propel)
  */
 class ConstraintNameGenerator implements NameGeneratorInterface
 {

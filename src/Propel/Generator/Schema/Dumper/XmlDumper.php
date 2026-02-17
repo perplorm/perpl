@@ -30,9 +30,6 @@ use function trim;
 
 /**
  * A class for dumping a schema to an XML representation.
- *
- * @author Hans Lellelid <hans@xmpl.org> (Propel)
- * @author Hugo Hamon <webmaster@apprendre-php.com> (Propel)
  */
 class XmlDumper implements DumperInterface
 {

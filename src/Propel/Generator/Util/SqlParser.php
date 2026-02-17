@@ -25,8 +25,6 @@ use const PHP_EOL;
 
 /**
  * Service class for parsing a large SQL string into an array of SQL statements
- *
- * @author François Zaninotto
  */
 class SqlParser
 {

@@ -19,9 +19,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 use function count;
 use function sprintf;
 
-/**
- * @author William Durand <william.durand1@gmail.com>
- */
 class MigrationUpCommand extends AbstractMigrationCommand
 {
     /**

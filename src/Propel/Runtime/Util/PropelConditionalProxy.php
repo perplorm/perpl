@@ -30,8 +30,6 @@ use Propel\Runtime\ActiveQuery\Criteria;
  *     ->doOtherStuff() // executed
  *   ->_endif(); // returns $c
  * @see Criteria
- *
- * @author Francois Zaninotto
  */
 class PropelConditionalProxy
 {

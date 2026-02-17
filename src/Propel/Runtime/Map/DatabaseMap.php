@@ -34,10 +34,6 @@ use function substr_replace;
  * propel.engine.database.model classes, which are build-time modeling classes.
  * These classes in themselves do not do any database metadata lookups.
  *
- * @author Hans Lellelid <hans@xmpl.org> (Propel)
- * @author John D. McNally <jmcnally@collab.net> (Torque)
- * @author Daniel Rall <dlr@collab.net> (Torque)
- *
  * @psalm-consistent-constructor (instantiated by class name in StandardServiceContainer without arguments)
  *
  * @psalm-type \Propel\Runtime\Map\MapType = 'tablesByName' | 'tablesByPhpName'

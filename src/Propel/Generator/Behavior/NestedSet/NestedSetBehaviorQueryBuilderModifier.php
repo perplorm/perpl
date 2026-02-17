@@ -17,8 +17,6 @@ use function count;
 
 /**
  * Behavior to adds nested set tree structure columns and abilities
- *
- * @author François Zaninotto
  */
 class NestedSetBehaviorQueryBuilderModifier
 {

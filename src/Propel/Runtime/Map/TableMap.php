@@ -21,11 +21,6 @@ use function substr;
 /**
  * TableMap is used to model a table in a database.
  *
- * @author Hans Lellelid <hans@xmpl.org> (Propel)
- * @author John D. McNally <jmcnally@collab.net> (Torque)
- * @author Daniel Rall <dlr@finemaltcoding.com> (Torque)
- * @author William Durand <william.durand1@gmail.com>
- *
  * @method static string getOMClass(array $row, int $column, bool $withPrefix = true)
  * @method static string|null getPrimaryKeyHashFromRow(array $row, int $offset = 0, string $indexType = \Propel\Runtime\Map\TableMap::TYPE_NUM): ?string;getPrimaryKeyHashFromRow(array $row, int $offset = 0, string $indexType = TableMap::TYPE_NUM)
  */

@@ -38,9 +38,6 @@ use function trim;
 use function urldecode;
 use const ARRAY_FILTER_USE_KEY;
 
-/**
- * @author William Durand <william.durand1@gmail.com>
- */
 abstract class AbstractCommand extends Command
 {
     /**

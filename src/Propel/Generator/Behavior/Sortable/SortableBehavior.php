@@ -22,9 +22,6 @@ use function trim;
 /**
  * Gives a model class the ability to be ordered
  * Uses one additional column storing the rank
- *
- * @author Massimiliano Arione
- * @version $Revision$
  */
 class SortableBehavior extends Behavior
 {

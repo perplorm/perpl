@@ -27,8 +27,6 @@ use const PHP_EOL;
 
 /**
  * Manager for Markdown Data Dictionary
- *
- * @author Charles Crossan <crossan007@gmail.com>
  */
 class DataDictionaryExportManager extends AbstractManager
 {

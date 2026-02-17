@@ -19,8 +19,6 @@ use function serialize;
  * Object formatter for Propel query
  * format() returns a ObjectCollection of Propel model objects
  *
- * @author Francois Zaninotto
- *
  * @template RowFormat of \Propel\Runtime\ActiveRecord\ActiveRecordInterface
  * @template ListType of \Propel\Runtime\Collection\Collection
  * @extends \Propel\Runtime\Formatter\AbstractFormatter<RowFormat, ListType>

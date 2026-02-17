@@ -19,8 +19,6 @@ use function array_flip;
 
 /**
  * Base class for reverse engineering a database schema.
- *
- * @author Hans Lellelid <hans@xmpl.org>
  */
 abstract class AbstractSchemaParser implements SchemaParserInterface
 {

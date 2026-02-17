@@ -38,8 +38,6 @@ use const PATHINFO_EXTENSION;
  *
  * The resolve method and correlatives, with parameters between placeholders %name%, are heavily inspired to
  * Symfony\Component\DependencyInjection\ParameterBag class.
- *
- * @author Cristiano Cinotti
  */
 abstract class FileLoader extends BaseFileLoader
 {

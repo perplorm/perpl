@@ -12,9 +12,6 @@ namespace Propel\Runtime\Collection\Exception;
 
 use Propel\Runtime\Exception\RuntimeException;
 
-/**
- * @author William Durand <william.durand1@gmail.com>
- */
 class ModelNotFoundException extends RuntimeException
 {
 }

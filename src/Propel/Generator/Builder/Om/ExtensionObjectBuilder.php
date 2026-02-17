@@ -17,8 +17,6 @@ use const PHP_EOL;
  *
  * This class produces the empty stub class that can be customized with application
  * business logic, custom behavior, etc.
- *
- * @author Hans Lellelid <hans@xmpl.org>
  */
 class ExtensionObjectBuilder extends AbstractObjectBuilder
 {

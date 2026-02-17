@@ -16,9 +16,6 @@ use function in_array;
 
 /**
  * Object to hold vendor specific information.
- *
- * @author Hans Lellelid <hans@xmpl.org> (Propel)
- * @author Hugo Hamon <webmaster@apprendre-php.com> (Propel)
  */
 class VendorInfo extends MappingModel
 {

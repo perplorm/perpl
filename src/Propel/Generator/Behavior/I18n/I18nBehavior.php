@@ -29,8 +29,6 @@ use function trim;
 /**
  * Allows translation of text columns through transparent one-to-many
  * relationship.
- *
- * @author Francois Zaninotto
  */
 class I18nBehavior extends Behavior
 {

@@ -21,8 +21,6 @@ use Propel\Runtime\Propel;
 /**
  * Abstract class for query formatter
  *
- * @author Francois Zaninotto
- *
  * @template RowFormat
  * @template ListType of \Traversable
  */

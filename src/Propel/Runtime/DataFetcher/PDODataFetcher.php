@@ -21,8 +21,6 @@ use function trim;
  * Class PDODataFetcher
  *
  * The PDO dataFetcher for PDOStatement.
- *
- * @package Propel\Runtime\Formatter
  */
 class PDODataFetcher extends AbstractDataFetcher
 {

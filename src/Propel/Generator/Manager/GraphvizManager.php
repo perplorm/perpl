@@ -19,8 +19,6 @@ use const DIRECTORY_SEPARATOR;
 
 /**
  * Manager for Graphviz representation.
- *
- * @author William Durand <william.durand1@gmail.com>
  */
 class GraphvizManager extends AbstractManager
 {

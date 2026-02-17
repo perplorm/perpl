@@ -17,8 +17,6 @@ use function func_num_args;
 /**
  * Class for iterating over a list of Propel objects
  *
- * @author Francois Zaninotto
- *
  * @template RowFormat of array
  * @extends \Propel\Runtime\Collection\ObjectCollection<RowFormat>
  */

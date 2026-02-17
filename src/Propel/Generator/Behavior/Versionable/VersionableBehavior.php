@@ -20,8 +20,6 @@ use function in_array;
 
 /**
  * Keeps tracks of all the modifications in an ActiveRecord object
- *
- * @author Francois Zaninotto
  */
 class VersionableBehavior extends SyncedTableBehavior
 {

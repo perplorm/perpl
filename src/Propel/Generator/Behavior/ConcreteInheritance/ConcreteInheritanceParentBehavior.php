@@ -17,8 +17,6 @@ use Propel\Generator\Model\Behavior;
  * Symmetrical behavior of the concrete_inheritance. When model A extends model B,
  * model A gets the concrete_inheritance behavior, and model B gets the
  * concrete_inheritance_parent
- *
- * @author François Zaninotto
  */
 class ConcreteInheritanceParentBehavior extends Behavior
 {

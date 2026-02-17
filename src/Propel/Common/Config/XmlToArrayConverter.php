@@ -89,8 +89,6 @@ class XmlToArrayConverter
     /**
      * Recursive function that converts an SimpleXML object into an array.
      *
-     * @author Christophe VG (based on code form php.net manual comment)
-     *
      * @param \SimpleXMLElement $xml SimpleXML object.
      *
      * @return array Array representation of SimpleXML object.

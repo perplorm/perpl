@@ -18,8 +18,6 @@ use Propel\Runtime\DataFetcher\DataFetcherInterface;
  * Based on the PDO interface.
  *
  * @see http://php.net/manual/en/book.pdo.php
- *
- * @author Francois Zaninotto
  */
 interface ConnectionInterface
 {

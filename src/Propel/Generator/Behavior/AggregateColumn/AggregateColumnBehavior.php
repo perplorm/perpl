@@ -23,8 +23,6 @@ use function sprintf;
 
 /**
  * Keeps an aggregate column updated with related table
- *
- * @author François Zaninotto
  */
 class AggregateColumnBehavior extends Behavior
 {

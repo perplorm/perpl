@@ -43,8 +43,6 @@ use const PHP_EOL;
  * Class ConfigurationManager
  *
  * Class to load and process configuration files. Supported formats are: php, ini (or .properties), yaml, xml, json.
- *
- * @author Cristiano Cinotti
  */
 class ConfigurationManager
 {

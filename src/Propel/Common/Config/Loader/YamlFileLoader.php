@@ -20,8 +20,6 @@ use function sprintf;
 
 /**
  * YamlFileLoader loads configuration parameters from yaml file.
- *
- * @author Cristiano Cinotti
  */
 class YamlFileLoader extends FileLoader
 {

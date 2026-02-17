@@ -26,8 +26,6 @@ use function ob_start;
  *             .......................
  *         ];
  * </code>
- *
- * @author Cristiano Cinotti
  */
 class PhpFileLoader extends FileLoader
 {

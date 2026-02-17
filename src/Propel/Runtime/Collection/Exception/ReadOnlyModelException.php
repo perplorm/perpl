@@ -12,9 +12,6 @@ namespace Propel\Runtime\Collection\Exception;
 
 use Propel\Runtime\Exception\BadMethodCallException;
 
-/**
- * @author William Durand <william.durand1@gmail.com>
- */
 class ReadOnlyModelException extends BadMethodCallException
 {
 }

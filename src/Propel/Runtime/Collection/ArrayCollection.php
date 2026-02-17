@@ -20,8 +20,6 @@ use function method_exists;
 /**
  * Class for iterating over a list of Propel objects stored as arrays
  *
- * @author Francois Zaninotto
- *
  * @extends \Propel\Runtime\Collection\Collection<array<string, mixed>>
  */
 class ArrayCollection extends Collection

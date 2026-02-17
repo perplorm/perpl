@@ -33,8 +33,6 @@ use function trim;
 
 /**
  * Gives a model class the ability to delegate methods to a relationship.
- *
- * @author François Zaninotto
  */
 class DelegateBehavior extends Behavior
 {

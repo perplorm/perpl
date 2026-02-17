@@ -15,8 +15,6 @@ namespace Propel\Generator\Builder\Om;
  *
  * This class produces the empty stub class that can be customized with application
  * business logic, custom behavior, etc.
- *
- * @author Francois Zaninotto
  */
 class ExtensionQueryBuilder extends AbstractOMBuilder
 {

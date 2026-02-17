@@ -30,9 +30,6 @@ use function sprintf;
  * Implements a pager based on a ModelCriteria
  * The code from this class heavily borrows from symfony's sfPager class
  *
- * @author Fabien Potencier <fabien.potencier@symfony-project.com>
- * @author François Zaninotto
- *
  * @template RowFormat
  *
  * @implements \IteratorAggregate<int|string, RowFormat>

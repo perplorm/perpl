@@ -29,8 +29,6 @@ use function strtolower;
  *   throw new Exception("Invalid schema:\n" . join("\n", $validator->getErrors()));
  * }
  * </code>
- *
- * @author François Zaninotto
  */
 class SchemaValidator
 {

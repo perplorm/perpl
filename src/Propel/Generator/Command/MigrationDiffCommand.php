@@ -29,9 +29,6 @@ use function sprintf;
 use function time;
 use const DIRECTORY_SEPARATOR;
 
-/**
- * @author William Durand <william.durand1@gmail.com>
- */
 class MigrationDiffCommand extends AbstractMigrationCommand
 {
     /**

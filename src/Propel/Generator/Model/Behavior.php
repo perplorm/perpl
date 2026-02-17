@@ -24,9 +24,6 @@ use const CASE_LOWER;
 
 /**
  * Information about behaviors of a table.
- *
- * @author François Zaninotto
- * @author Hugo Hamon <webmaster@apprendre-php.com> (Propel)
  */
 class Behavior extends MappingModel
 {

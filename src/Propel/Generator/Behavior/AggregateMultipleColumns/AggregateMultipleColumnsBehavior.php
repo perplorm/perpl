@@ -27,8 +27,6 @@ use function vsprintf;
 
 /**
  * Keeps an aggregate column updated with related table
- *
- * @author François Zaninotto
  */
 class AggregateMultipleColumnsBehavior extends Behavior
 {

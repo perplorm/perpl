@@ -20,8 +20,6 @@ use function ob_start;
 
 /**
  * Simple templating system to ease behavior writing
- *
- * @author François Zaninotto
  */
 class PropelTemplate
 {

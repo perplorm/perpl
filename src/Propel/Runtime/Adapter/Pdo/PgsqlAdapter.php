@@ -30,9 +30,6 @@ use function strtr;
 
 /**
  * This is used to connect to PostgreSQL databases.
- *
- * @author Hans Lellelid <hans@xmpl.org> (Propel)
- * @author Hakan Tandogan <hakan42@gmx.de> (Torque)
  */
 class PgsqlAdapter extends PdoAdapter implements SqlAdapterInterface
 {

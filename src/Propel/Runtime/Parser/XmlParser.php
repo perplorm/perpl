@@ -30,8 +30,6 @@ use const XML_TEXT_NODE;
 
 /**
  * XML parser. Converts data between associative array and XML formats
- *
- * @author Francois Zaninotto
  */
 class XmlParser extends AbstractParser
 {

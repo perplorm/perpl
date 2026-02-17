@@ -43,10 +43,6 @@ use const DIRECTORY_SEPARATOR;
  * file.
  *
  * Requires PHP XSL extension for XSLT transformations.
- *
- * @author Hans Lellelid <hans@xmpl.org> (Propel)
- * @author Jason van Zyl <jvanzyl@zenplex.com> (Torque)
- * @author Daniel Rall <dlr@finemaltcoding.com> (Torque)
  */
 abstract class AbstractManager
 {

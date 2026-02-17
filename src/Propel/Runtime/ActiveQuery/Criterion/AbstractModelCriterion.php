@@ -14,8 +14,6 @@ use Propel\Runtime\ActiveQuery\Criteria;
 
 /**
  * This is an "inner" class that describes an object in the criteria.
- *
- * @author Francois
  */
 abstract class AbstractModelCriterion extends AbstractCriterion
 {

@@ -18,8 +18,6 @@ use function pathinfo;
 
 /**
  * Useful methods to manipulate virtual filesystem, via vfsStream library
- *
- * @author Cristiano Cinotti
  */
 trait VfsTrait
 {

@@ -22,10 +22,6 @@ use function strtr;
 
 /**
  * MS SQL PlatformInterface implementation.
- *
- * @author Hans Lellelid <hans@xmpl.org> (Propel)
- * @author Martin Poeschl <mpoeschl@marmot.at> (Torque)
- * @author Dominic Winkler <d.winkler@flexarts.at> (Flexarts)
  */
 class MssqlPlatform extends DefaultPlatform
 {

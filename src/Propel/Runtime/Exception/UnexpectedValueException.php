@@ -12,9 +12,6 @@ namespace Propel\Runtime\Exception;
 
 use UnexpectedValueException as CoreUnexpectedValueException;
 
-/**
- * @author William Durand <william.durand1@gmail.com>
- */
 class UnexpectedValueException extends CoreUnexpectedValueException implements ExceptionInterface
 {
 }

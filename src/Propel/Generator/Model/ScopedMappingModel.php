@@ -20,9 +20,6 @@ use function trim;
 /**
  * Data about an element with a name and optional namespace, schema and package
  * attributes.
- *
- * @author Ulf Hermann <ulfhermann@kulturserver.de>
- * @author Hugo Hamon <webmaster@apprendre-php.com> (Propel)
  */
 abstract class ScopedMappingModel extends MappingModel
 {

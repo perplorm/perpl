@@ -46,8 +46,6 @@ use const PREG_SET_ORDER;
  * OM-building classes are those that build a PHP (or other) class to service
  * a single table. This includes Entity classes, Map classes,
  * Node classes, Nested Set classes, etc.
- *
- * @author Hans Lellelid <hans@xmpl.org>
  */
 abstract class AbstractOMBuilder extends DataModelBuilder
 {

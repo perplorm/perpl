@@ -17,10 +17,6 @@ use function strtoupper;
 
 /**
  * A class for information regarding possible objects representing a table.
- *
- * @author Hans Lellelid <hans@xmpl.org> (Propel)
- * @author John McNally <jmcnally@collab.net> (Torque)
- * @author Hugo Hamon <webmaster@apprendre-php.com> (Propel)
  */
 class Inheritance extends MappingModel
 {

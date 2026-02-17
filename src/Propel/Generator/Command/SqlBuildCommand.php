@@ -16,9 +16,6 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use function array_merge;
 
-/**
- * @author William Durand <william.durand1@gmail.com>
- */
 class SqlBuildCommand extends AbstractCommand
 {
     /**

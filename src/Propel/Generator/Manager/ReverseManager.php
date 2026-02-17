@@ -29,9 +29,6 @@ use function str_replace;
 use function var_export;
 use const DIRECTORY_SEPARATOR;
 
-/**
- * @author William Durand <william.durand1@gmail.com>
- */
 class ReverseManager extends AbstractManager
 {
     /**

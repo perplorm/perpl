@@ -61,8 +61,6 @@ use const E_USER_NOTICE;
  * @method string toJSON(bool $usePrefix = true, bool $includeLazyLoadColumns = true) Export the collection to a JSON string
  * @method string toCSV(bool $usePrefix = true, bool $includeLazyLoadColumns = true) Export the collection to a CSV string
  *
- * @author Francois Zaninotto
- *
  * @template RowFormat
  *
  * @implements \ArrayAccess<int|string, RowFormat>

@@ -33,13 +33,6 @@ use function substr;
 
 /**
  * Oracle adapter.
- *
- * @author David Giffin <david@giffin.org> (Propel)
- * @author Hans Lellelid <hans@xmpl.org> (Propel)
- * @author Jon S. Stevens <jon@clearink.com> (Torque)
- * @author Brett McLaughlin <bmclaugh@algx.net> (Torque)
- * @author Bill Schneider <bschneider@vecna.com> (Torque)
- * @author Daniel Rall <dlr@finemaltcoding.com> (Torque)
  */
 class OracleAdapter extends PdoAdapter implements SqlAdapterInterface
 {

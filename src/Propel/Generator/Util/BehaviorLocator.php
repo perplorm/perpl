@@ -30,8 +30,6 @@ use function strpos;
 
 /**
  * Service class to find composer and installed packages
- *
- * @author Thomas Gossmann
  */
 class BehaviorLocator
 {

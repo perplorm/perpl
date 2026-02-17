@@ -13,9 +13,6 @@ namespace Propel\Generator\Model;
 /**
  * Interface for various ID retrieval method types
  * (i.e. auto-increment, sequence, ID broker, etc.).
- *
- * @author Hans Lellelid <hans@xmpl.org> (Propel)
- * @author Daniel Rall <dlr@collab.net> (Torque)
  */
 interface IdMethod
 {

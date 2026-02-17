@@ -18,9 +18,6 @@ use function str_replace;
 
 /**
  * Adds a slug column
- *
- * @author Francois Zaninotto
- * @author Massimiliano Arione
  */
 class SluggableBehavior extends Behavior
 {

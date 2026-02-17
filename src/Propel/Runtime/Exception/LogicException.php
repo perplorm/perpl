@@ -12,9 +12,6 @@ namespace Propel\Runtime\Exception;
 
 use LogicException as CoreLogicException;
 
-/**
- * @author William Durand <william.durand1@gmail.com>
- */
 class LogicException extends CoreLogicException implements ExceptionInterface
 {
 }

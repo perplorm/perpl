@@ -18,8 +18,6 @@ use Propel\Runtime\Exception\LogicException;
  * Array formatter for Propel query
  * format() returns a ArrayCollection of associative arrays
  *
- * @author Francois Zaninotto
- *
  * @extends \Propel\Runtime\Formatter\AbstractFormatterWithHydration<array<string, mixed>, \Propel\Runtime\Collection\ArrayCollection>
  */
 class ArrayFormatter extends AbstractFormatterWithHydration

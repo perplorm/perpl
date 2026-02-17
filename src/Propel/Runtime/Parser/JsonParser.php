@@ -16,8 +16,6 @@ use const JSON_THROW_ON_ERROR;
 
 /**
  * JSON parser. Converts data between associative array and JSON formats
- *
- * @author Francois Zaninotto
  */
 class JsonParser extends AbstractParser
 {

@@ -19,10 +19,6 @@ use function strtoupper;
 
 /**
  * A class for holding data about a domain used in the schema.
- *
- * @author Hans Lellelid <hans@xmpl.org> (Propel)
- * @author Martin Poeschl <mpoeschl@marmot.at> (Torque)
- * @author Hugo Hamon <webmaster@apprendre-php.com> (Propel)
  */
 class Domain extends MappingModel
 {

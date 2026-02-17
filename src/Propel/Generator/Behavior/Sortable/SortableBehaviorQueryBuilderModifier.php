@@ -18,8 +18,6 @@ use function strtoupper;
 
 /**
  * Behavior to add sortable query methods
- *
- * @author François Zaninotto
  */
 class SortableBehaviorQueryBuilderModifier
 {

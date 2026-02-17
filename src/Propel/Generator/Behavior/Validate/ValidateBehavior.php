@@ -25,8 +25,6 @@ use function var_export;
 
 /**
  * Validate a model object using Symfony2 Validator component
- *
- * @author Cristiano Cinotti
  */
 class ValidateBehavior extends Behavior
 {

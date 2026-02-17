@@ -15,8 +15,6 @@ use Propel\Generator\Model\Column;
 
 /**
  * Behavior to adds nested set tree structure columns and abilities
- *
- * @author François Zaninotto
  */
 class NestedSetBehavior extends Behavior
 {

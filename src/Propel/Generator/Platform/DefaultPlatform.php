@@ -47,8 +47,6 @@ use function var_export;
 
 /**
  * Default implementation for the PlatformInterface interface.
- *
- * @author Martin Poeschl <mpoeschl@marmot.at> (Torque)
  */
 class DefaultPlatform implements PlatformInterface
 {

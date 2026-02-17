@@ -53,8 +53,6 @@ use function usort;
 
 /**
  * Service class for preparing and executing migrations
- *
- * @author François Zaninotto
  */
 class MigrationManager extends AbstractManager
 {

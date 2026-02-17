@@ -12,9 +12,6 @@ namespace Propel\Runtime\Adapter\Exception;
 
 use Propel\Runtime\Exception\LogicException;
 
-/**
- * @author William Durand <william.durand1@gmail.com>
- */
 class MalformedClauseException extends LogicException
 {
 }

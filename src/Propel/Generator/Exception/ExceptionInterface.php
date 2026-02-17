@@ -10,9 +10,6 @@ declare(strict_types = 1);
 
 namespace Propel\Generator\Exception;
 
-/**
- * @author William Durand <william.durand1@gmail.com>
- */
 interface ExceptionInterface
 {
 }

@@ -24,9 +24,6 @@ use function count;
 use function property_exists;
 use function sprintf;
 
-/**
- * @author William Durand <william.durand1@gmail.com>
- */
 class MigrationMigrateCommand extends AbstractMigrationCommand
 {
     /**

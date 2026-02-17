@@ -41,9 +41,6 @@ use function var_export;
 /**
  * A class that holds build properties and provide a class loading mechanism for
  * the generator.
- *
- * @author Hans Lellelid <hans@xmpl.org>
- * @author Cristiano Cinotti
  */
 class GeneratorConfig extends ConfigurationManager implements GeneratorConfigInterface
 {

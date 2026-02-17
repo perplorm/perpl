@@ -36,10 +36,6 @@ use const FILTER_VALIDATE_BOOLEAN;
 
 /**
  * Postgresql PlatformInterface implementation.
- *
- * @author Hans Lellelid <hans@xmpl.org> (Propel)
- * @author Martin Poeschl <mpoeschl@marmot.at> (Torque)
- * @author Niklas Närhinen <niklas@narhinen.net>
  */
 class PgsqlPlatform extends DefaultPlatform
 {
@@ -675,8 +671,6 @@ ALTER TABLE %s RENAME TO %s;
     /**
      * Overrides the implementation from DefaultPlatform
      *
-     * @author Niklas Närhinen <niklas@narhinen.net>
-     *
      * @see DefaultPlatform::getModifyColumnDDL
      *
      * @param \Propel\Generator\Model\Diff\ColumnDiff $columnDiff
@@ -863,8 +857,6 @@ DROP SEQUENCE %s CASCADE;
     /**
      * Overrides the implementation from DefaultPlatform
      *
-     * @author Niklas Närhinen <niklas@narhinen.net>
-     *
      * @see DefaultPlatform::getModifyColumnsDDL
      *
      * @param array<\Propel\Generator\Model\Diff\ColumnDiff> $columnDiffs
@@ -885,8 +877,6 @@ DROP SEQUENCE %s CASCADE;
     /**
      * Overrides the implementation from DefaultPlatform
      *
-     * @author Niklas Närhinen <niklas@narhinen.net>
-     *
      * @see DefaultPlatform::getAddColumnsDLL
      *
      * @param array<\Propel\Generator\Model\Column> $columns
@@ -906,8 +896,6 @@ DROP SEQUENCE %s CASCADE;
 
     /**
      * Overrides the implementation from DefaultPlatform
-     *
-     * @author Niklas Närhinen <niklas@narhinen.net>
      *
      * @see DefaultPlatform::getDropIndexDDL
      *

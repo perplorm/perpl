@@ -31,10 +31,6 @@ use function substr;
 
 /**
  * Oracle PlatformInterface implementation.
- *
- * @author Hans Lellelid <hans@xmpl.org> (Propel)
- * @author Martin Poeschl <mpoeschl@marmot.at> (Torque)
- * @author Denis Dalmais
  */
 class OraclePlatform extends DefaultPlatform
 {

@@ -20,9 +20,6 @@ use function sprintf;
 use function strpos;
 use function ucfirst;
 
-/**
- * @author William Durand <william.durand1@gmail.com>
- */
 class DatabaseReverseCommand extends AbstractCommand
 {
     /**

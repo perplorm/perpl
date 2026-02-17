@@ -15,8 +15,6 @@ use function array_merge;
 
 /**
  * Adds a primary key to models defined without one
- *
- * @author François Zaninotto
  */
 class AutoAddPkBehavior extends Behavior
 {

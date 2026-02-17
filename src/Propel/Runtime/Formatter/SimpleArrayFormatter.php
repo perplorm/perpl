@@ -24,8 +24,6 @@ use function str_replace;
  * format() returns a ArrayCollection of associative arrays, a string,
  * or an array
  *
- * @author Benjamin Runnels
- *
  * @extends \Propel\Runtime\Formatter\AbstractFormatter<array<string, mixed>|string, \Propel\Runtime\Collection\ArrayCollection>
  */
 class SimpleArrayFormatter extends AbstractFormatter

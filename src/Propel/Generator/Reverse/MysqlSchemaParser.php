@@ -41,8 +41,6 @@ use function trim;
 
 /**
  * Mysql database schema parser.
- *
- * @author Hans Lellelid <hans@xmpl.org>
  */
 class MysqlSchemaParser extends AbstractSchemaParser
 {

@@ -21,8 +21,6 @@ use function str_replace;
 
 /**
  * Keeps an aggregate column updated with related table
- *
- * @author François Zaninotto
  */
 class AggregateColumnRelationBehavior extends Behavior
 {

@@ -18,8 +18,6 @@ use const JSON_ERROR_NONE;
 
 /**
  * JsonFileLoader loads configuration parameters from json file.
- *
- * @author Cristiano Cinotti
  */
 class JsonFileLoader extends FileLoader
 {

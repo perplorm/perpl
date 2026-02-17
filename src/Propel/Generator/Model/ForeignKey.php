@@ -30,12 +30,6 @@ use function substr;
 
 /**
  * A class for information about table foreign keys.
- *
- * @author Hans Lellelid <hans@xmpl.org> (Propel)
- * @author Fedor <fedor.karpelevitch@home.com>
- * @author Daniel Rall <dlr@finemaltcoding.com>
- * @author Ulf Hermann <ulfhermann@kulturserver.de>
- * @author Hugo Hamon <webmaster@apprendre-php.com> (Propel)
  */
 class ForeignKey extends MappingModel
 {

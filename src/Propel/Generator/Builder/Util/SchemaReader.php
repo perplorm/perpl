@@ -46,13 +46,6 @@ use const XML_OPTION_CASE_FOLDING;
 /**
  * A class that is used to parse an input xml schema file and creates a Schema
  * PHP object.
- *
- * @author Hans Lellelid <hans@xmpl.org> (Propel)
- * @author Leon Messerschmidt <leon@opticode.co.za> (Torque)
- * @author Jason van Zyl <jvanzyl@apache.org> (Torque)
- * @author Martin Poeschl <mpoeschl@marmot.at> (Torque)
- * @author Daniel Rall <dlr@collab.net> (Torque)
- * @author Hugo Hamon <webmaster@apprendre-php.com>
  */
 class SchemaReader
 {

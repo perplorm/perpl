@@ -16,8 +16,6 @@ namespace Propel\Generator\Builder\Om;
  * This class is designed so that it can be extended the "standard" ObjectBuilder
  * and ComplexOMObjectBuilder. Hence, this class should not have any actual
  * template code in it -- simply basic logic & utility methods.
- *
- * @author Hans Lellelid <hans@xmpl.org>
  */
 abstract class AbstractObjectBuilder extends AbstractOMBuilder
 {

@@ -38,8 +38,6 @@ if (!defined('T_ML_COMMENT')) {
  * $parser->replaceMethod('bar', '// bar method was removed');
  * file_put_contents($fileName, $parser->getCode());
  * </code>
- *
- * @author François Zaninotto
  */
 class PhpParser
 {

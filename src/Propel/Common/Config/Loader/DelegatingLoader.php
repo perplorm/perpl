@@ -14,8 +14,6 @@ use Symfony\Component\Config\Loader\DelegatingLoader as BaseDelegatingLoader;
 
 /**
  * Class DelegatingLoader
- *
- * @author Cristiano Cinotti
  */
 class DelegatingLoader extends BaseDelegatingLoader
 {

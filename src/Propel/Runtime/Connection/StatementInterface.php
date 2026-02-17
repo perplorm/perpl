@@ -17,8 +17,6 @@ use PDO;
  * Based on the PDOStatement class.
  *
  * @see http://php.net/manual/en/book.pdo.php
- *
- * @author Aleksandr Bezpiatov
  */
 interface StatementInterface
 {

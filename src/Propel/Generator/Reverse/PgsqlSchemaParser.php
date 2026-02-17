@@ -37,8 +37,6 @@ use function trim;
 
 /**
  * Postgresql database schema parser.
- *
- * @author Hans Lellelid <hans@xmpl.org>
  */
 class PgsqlSchemaParser extends AbstractSchemaParser
 {

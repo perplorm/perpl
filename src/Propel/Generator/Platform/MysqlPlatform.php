@@ -46,9 +46,6 @@ use function var_export;
 
 /**
  * MySql PlatformInterface implementation.
- *
- * @author Hans Lellelid <hans@xmpl.org> (Propel)
- * @author Martin Poeschl <mpoeschl@marmot.at> (Torque)
  */
 class MysqlPlatform extends DefaultPlatform
 {
