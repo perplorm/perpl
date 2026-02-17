@@ -16,6 +16,15 @@ use Propel\Generator\Model\Column;
 use Propel\Generator\Model\CrossRelation;
 use Propel\Generator\Model\ForeignKey;
 use RuntimeException;
+use function array_diff;
+use function array_keys;
+use function array_map;
+use function array_merge;
+use function array_unshift;
+use function count;
+use function implode;
+use function lcfirst;
+use function reset;
 
 class SignatureCollector
 {

@@ -12,6 +12,9 @@ namespace Propel\Runtime\ActiveQuery\Criterion;
 
 use Propel\Runtime\ActiveQuery\Criteria;
 use Traversable;
+use function count;
+use function implode;
+use function iterator_to_array;
 
 /**
  * Specialized Criterion used for IN expressions, e.g. table.column IN (?, ?) or table.column NOT IN (?, ?)

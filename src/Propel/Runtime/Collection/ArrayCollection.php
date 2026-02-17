@@ -14,6 +14,8 @@ use Propel\Runtime\ActiveRecord\ActiveRecordInterface;
 use Propel\Runtime\Collection\Exception\ReadOnlyModelException;
 use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Exception\PropelException;
+use function array_values;
+use function method_exists;
 
 /**
  * Class for iterating over a list of Propel objects stored as arrays

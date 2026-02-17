@@ -18,6 +18,11 @@ use Propel\Runtime\Exception\RuntimeException;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use function array_key_last;
+use function array_pop;
+use function count;
+use function property_exists;
+use function sprintf;
 
 /**
  * @author William Durand <william.durand1@gmail.com>

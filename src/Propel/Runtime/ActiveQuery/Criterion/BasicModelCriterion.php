@@ -11,6 +11,9 @@ declare(strict_types = 1);
 namespace Propel\Runtime\ActiveQuery\Criterion;
 
 use Propel\Runtime\ActiveQuery\Criterion\Exception\InvalidClauseException;
+use function count;
+use function str_replace;
+use function strpos;
 
 /**
  * Specialized ModelCriterion used for traditional expressions,

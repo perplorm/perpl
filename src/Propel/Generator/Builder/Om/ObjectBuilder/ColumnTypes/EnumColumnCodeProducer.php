@@ -11,6 +11,9 @@ declare(strict_types = 1);
 namespace Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes;
 
 use Propel\Generator\Exception\EngineException;
+use function array_search;
+use function in_array;
+use function sprintf;
 
 class EnumColumnCodeProducer extends ColumnCodeProducer
 {

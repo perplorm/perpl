@@ -10,6 +10,8 @@ declare(strict_types = 1);
 
 namespace Propel\Runtime\ActiveQuery;
 
+use function array_intersect;
+
 /**
  * Class represents a query lock
  *

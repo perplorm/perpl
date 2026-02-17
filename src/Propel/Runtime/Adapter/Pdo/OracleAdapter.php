@@ -21,6 +21,15 @@ use Propel\Runtime\Connection\StatementInterface;
 use Propel\Runtime\Exception\InvalidArgumentException;
 use Propel\Runtime\Map\ColumnMap;
 use RuntimeException;
+use function class_exists;
+use function is_array;
+use function is_resource;
+use function rewind;
+use function sprintf;
+use function str_replace;
+use function strlen;
+use function strpos;
+use function substr;
 
 /**
  * Oracle adapter.

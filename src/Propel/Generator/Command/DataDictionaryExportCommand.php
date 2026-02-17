@@ -14,6 +14,8 @@ use Propel\Generator\Manager\DataDictionaryExportManager;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use function realpath;
+use function sprintf;
 
 /**
  * @author Charles Crossan <crossan007@gmail.com>

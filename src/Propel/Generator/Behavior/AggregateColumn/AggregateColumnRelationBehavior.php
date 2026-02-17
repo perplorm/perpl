@@ -15,6 +15,9 @@ use Propel\Generator\Builder\Om\AbstractOMBuilder;
 use Propel\Generator\Model\Behavior;
 use Propel\Generator\Model\ForeignKey;
 use Propel\Generator\Model\Table;
+use function array_shift;
+use function lcfirst;
+use function str_replace;
 
 /**
  * Keeps an aggregate column updated with related table

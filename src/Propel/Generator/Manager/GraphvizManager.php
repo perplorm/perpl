@@ -11,6 +11,11 @@ declare(strict_types = 1);
 namespace Propel\Generator\Manager;
 
 use Propel\Generator\Model\Column;
+use function count;
+use function file_put_contents;
+use function implode;
+use function var_export;
+use const DIRECTORY_SEPARATOR;
 
 /**
  * Manager for Graphviz representation.

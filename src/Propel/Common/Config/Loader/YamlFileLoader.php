@@ -13,6 +13,10 @@ namespace Propel\Common\Config\Loader;
 use Propel\Common\Config\Exception\InputOutputException;
 use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
+use function file_get_contents;
+use function is_array;
+use function is_readable;
+use function sprintf;
 
 /**
  * YamlFileLoader loads configuration parameters from yaml file.

@@ -13,6 +13,7 @@ namespace Propel\Runtime\ActiveQuery\FilterExpression;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\Criterion\Exception\InvalidValueException;
 use Propel\Runtime\Adapter\SqlAdapterInterface;
+use function sprintf;
 
 /**
  * Filter expressions like "<column> <op> <value>".

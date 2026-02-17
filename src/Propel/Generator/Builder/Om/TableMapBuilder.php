@@ -17,6 +17,20 @@ use Propel\Generator\Model\IdMethod;
 use Propel\Generator\Model\PropelTypes;
 use Propel\Generator\Model\Table;
 use Propel\Generator\Platform\PlatformInterface;
+use function addslashes;
+use function array_map;
+use function array_shift;
+use function array_unique;
+use function array_walk;
+use function count;
+use function implode;
+use function is_array;
+use function lcfirst;
+use function preg_replace;
+use function sprintf;
+use function strtoupper;
+use function var_export;
+use const PHP_EOL;
 
 /**
  * Generates the table map class for user object model (OM).

@@ -11,6 +11,7 @@ declare(strict_types = 1);
 namespace Propel\Runtime\ActiveQuery\Criterion;
 
 use Propel\Runtime\ActiveQuery\Criteria;
+use function is_int;
 
 /**
  * Creates Criterion objects, extracted from Criteria class

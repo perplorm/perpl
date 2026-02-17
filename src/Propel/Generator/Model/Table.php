@@ -21,6 +21,22 @@ use Propel\Generator\Platform\PlatformInterface;
 use Propel\Runtime\Collection\ObjectCollection;
 use Propel\Runtime\Exception\RuntimeException;
 use Propel\Runtime\Util\UuidConverter;
+use function array_filter;
+use function array_merge;
+use function array_slice;
+use function array_values;
+use function count;
+use function get_class;
+use function implode;
+use function in_array;
+use function is_array;
+use function is_string;
+use function lcfirst;
+use function sprintf;
+use function strrpos;
+use function strtolower;
+use function strtoupper;
+use function substr_replace;
 
 /**
  * Data about a table used in an application.

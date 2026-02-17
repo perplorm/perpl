@@ -13,6 +13,7 @@ namespace Propel\Generator\Behavior\Versionable;
 use Propel\Generator\Builder\Om\AbstractOMBuilder;
 use Propel\Generator\Exception\SchemaException;
 use Propel\Generator\Model\Column;
+use function strtolower;
 
 /**
  * Behavior to add versionable columns and abilities

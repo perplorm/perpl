@@ -19,6 +19,19 @@ use Propel\Generator\Model\ForeignKey;
 use Propel\Generator\Model\PropelTypes;
 use Propel\Generator\Model\Table;
 use Propel\Runtime\ActiveQuery\FilterExpression\ExistsFilter;
+use function addslashes;
+use function array_filter;
+use function array_map;
+use function array_merge;
+use function array_shift;
+use function array_slice;
+use function count;
+use function implode;
+use function sprintf;
+use function str_replace;
+use function strrpos;
+use function substr;
+use function var_export;
 
 /**
  * Generates a base Query class for user object model (OM).

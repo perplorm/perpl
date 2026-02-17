@@ -13,6 +13,8 @@ namespace Propel\Generator;
 use Symfony\Component\Console\Application as SymfonyApplication;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use function extension_loaded;
+use function in_array;
 
 class Application extends SymfonyApplication
 {

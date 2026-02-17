@@ -11,6 +11,8 @@ declare(strict_types = 1);
 namespace Propel\Generator\Model;
 
 use PDO;
+use function in_array;
+use function strtoupper;
 
 /**
  * A class that maps PropelTypes to PHP native types and PDO types.

@@ -11,6 +11,7 @@ declare(strict_types = 1);
 namespace Propel\Runtime\ActiveQuery\Criterion;
 
 use Propel\Runtime\ActiveQuery\Criteria;
+use function count;
 
 /**
  * Specialized Criterion used for binary expressions, e.g. table.column & 5 = 0 (similar to NOT IN logic)

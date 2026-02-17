@@ -17,6 +17,17 @@ use Propel\Generator\Model\Database;
 use Propel\Generator\Model\IdMethod;
 use Propel\Generator\Schema\Dumper\DumperInterface;
 use Propel\Runtime\Connection\ConnectionInterface;
+use function count;
+use function file_put_contents;
+use function get_class;
+use function implode;
+use function in_array;
+use function is_array;
+use function preg_match;
+use function sprintf;
+use function str_replace;
+use function var_export;
+use const DIRECTORY_SEPARATOR;
 
 /**
  * @author William Durand <william.durand1@gmail.com>

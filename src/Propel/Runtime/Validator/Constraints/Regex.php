@@ -11,6 +11,8 @@ declare(strict_types = 1);
 namespace Propel\Runtime\Validator\Constraints;
 
 use Symfony\Component\Validator\Constraints\Regex as SymfonyRegex;
+use function is_array;
+use function is_string;
 
 /**
  * BC wrapper for Symfony's Regex constraint supporting both Symfony < 8 and 8+

@@ -20,6 +20,14 @@ use Propel\Generator\Model\Index;
 use Propel\Generator\Model\PropelTypes;
 use Propel\Generator\Model\Table;
 use Propel\Generator\Model\Unique;
+use function count;
+use function implode;
+use function is_array;
+use function min;
+use function preg_replace;
+use function sprintf;
+use function strlen;
+use function substr;
 
 /**
  * Oracle PlatformInterface implementation.

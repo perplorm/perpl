@@ -12,6 +12,11 @@ namespace Propel\Generator\Platform\Util;
 
 use Propel\Generator\Model\Table;
 use Propel\Generator\Util\SqlParser;
+use function array_map;
+use function implode;
+use function preg_match;
+use function str_replace;
+use function trim;
 
 /**
  * Merges several ALTER TABLE statements when creating migrations.

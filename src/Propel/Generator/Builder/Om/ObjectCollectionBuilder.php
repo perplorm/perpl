@@ -17,6 +17,9 @@ use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\Collection\ObjectCollection;
 use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Formatter\ObjectFormatter;
+use function strpos;
+use function strrpos;
+use function substr;
 
 class ObjectCollectionBuilder extends AbstractOMBuilder
 {

@@ -12,6 +12,16 @@ namespace Propel\Generator\Behavior\Util;
 
 use Propel\Generator\Exception\SchemaException;
 use Propel\Generator\Model\Behavior;
+use function array_map;
+use function count;
+use function explode;
+use function in_array;
+use function is_array;
+use function is_numeric;
+use function is_string;
+use function reset;
+use function strtolower;
+use function trim;
 
 abstract class BehaviorWithParameterAccess extends Behavior
 {

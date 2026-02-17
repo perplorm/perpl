@@ -11,6 +11,7 @@ declare(strict_types = 1);
 namespace Propel\Generator\Behavior\Versionable;
 
 use Propel\Generator\Builder\Om\AbstractOMBuilder;
+use function strtolower;
 
 /**
  * Behavior to add versionable columns and abilities

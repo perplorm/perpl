@@ -13,6 +13,9 @@ namespace Propel\Generator\Model;
 use DOMDocument;
 use DOMNode;
 use Propel\Generator\Exception\EngineException;
+use function in_array;
+use function sprintf;
+use function strtoupper;
 
 /**
  * A class for holding data about a domain used in the schema.

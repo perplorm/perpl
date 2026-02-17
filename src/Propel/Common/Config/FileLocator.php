@@ -11,6 +11,7 @@ declare(strict_types = 1);
 namespace Propel\Common\Config;
 
 use Symfony\Component\Config\FileLocator as BaseFileLocator;
+use function getcwd;
 
 /**
  * Propel file locator class.

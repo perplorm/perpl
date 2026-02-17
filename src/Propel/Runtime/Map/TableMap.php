@@ -14,6 +14,9 @@ use Propel\Runtime\Collection\ObjectCollection;
 use Propel\Runtime\Exception\LogicException;
 use Propel\Runtime\Map\Exception\ColumnNotFoundException;
 use Propel\Runtime\Map\Exception\RelationNotFoundException;
+use function array_key_exists;
+use function sprintf;
+use function substr;
 
 /**
  * TableMap is used to model a table in a database.

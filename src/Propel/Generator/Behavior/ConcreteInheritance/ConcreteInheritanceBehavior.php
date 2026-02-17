@@ -18,6 +18,14 @@ use Propel\Generator\Model\ForeignKey;
 use Propel\Generator\Model\Table;
 use Propel\Generator\Util\PhpParser;
 use Propel\Runtime\Exception\PropelException;
+use function array_flip;
+use function explode;
+use function get_class;
+use function in_array;
+use function sprintf;
+use function str_replace;
+use function strtolower;
+use function ucfirst;
 
 /**
  * Makes a model inherit another one. The model with this behavior gets a copy

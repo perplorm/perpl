@@ -11,6 +11,9 @@ declare(strict_types = 1);
 namespace Propel\Generator\Model\Diff;
 
 use Propel\Generator\Model\Table;
+use function array_merge;
+use function in_array;
+use function strtolower;
 
 /**
  * Service class for comparing Table objects

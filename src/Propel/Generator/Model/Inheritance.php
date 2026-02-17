@@ -11,6 +11,9 @@ declare(strict_types = 1);
 namespace Propel\Generator\Model;
 
 use LogicException;
+use function preg_replace;
+use function rtrim;
+use function strtoupper;
 
 /**
  * A class for information regarding possible objects representing a table.

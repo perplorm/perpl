@@ -11,6 +11,7 @@ declare(strict_types = 1);
 namespace Propel\Generator\Behavior\OutputGroup;
 
 use Propel\Generator\Builder\Om\ObjectBuilder;
+use function preg_replace_callback;
 
 class OgObjectModifier
 {

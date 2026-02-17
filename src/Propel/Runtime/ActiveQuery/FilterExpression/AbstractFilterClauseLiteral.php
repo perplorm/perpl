@@ -13,6 +13,14 @@ namespace Propel\Runtime\ActiveQuery\FilterExpression;
 use Propel\Runtime\ActiveQuery\ColumnResolver\ColumnExpression\UnresolvedColumnExpression;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\Criterion\Exception\InvalidClauseException;
+use function array_map;
+use function array_values;
+use function count;
+use function explode;
+use function implode;
+use function is_array;
+use function str_replace;
+use function substr_count;
 
 /**
  * A full filter statement given as a string, i.e. `col = ?`, `col1 = col2`, `col IS NULL`, `1=1`

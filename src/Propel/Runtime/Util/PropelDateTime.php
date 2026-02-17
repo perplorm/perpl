@@ -18,6 +18,19 @@ use DateTimeZone;
 use Exception;
 use InvalidArgumentException;
 use Propel\Runtime\Exception\PropelException;
+use function checkdate;
+use function date;
+use function date_default_timezone_get;
+use function is_a;
+use function is_bool;
+use function is_numeric;
+use function microtime;
+use function number_format;
+use function sprintf;
+use function strlen;
+use function strpos;
+use function strtotime;
+use function var_export;
 
 /**
  * DateTime subclass which supports serialization.

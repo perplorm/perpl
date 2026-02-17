@@ -19,6 +19,26 @@ use Propel\Generator\Model\Column;
 use Propel\Generator\Model\ForeignKey;
 use Propel\Generator\Model\Table;
 use Propel\Generator\Model\VendorInfo;
+use function array_merge;
+use function array_pop;
+use function count;
+use function explode;
+use function file_exists;
+use function gmdate;
+use function ltrim;
+use function method_exists;
+use function preg_match_all;
+use function preg_replace;
+use function preg_replace_callback;
+use function sprintf;
+use function str_replace;
+use function strlen;
+use function strpos;
+use function strtoupper;
+use function strtr;
+use function substr;
+use function var_export;
+use const PREG_SET_ORDER;
 
 /**
  * Baseclass for OM-building classes.

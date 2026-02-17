@@ -12,6 +12,11 @@ namespace Propel\Generator\Builder\Om\ObjectBuilder\RelationCodeProducer;
 
 use Propel\Generator\Model\ForeignKey;
 use Propel\Runtime\Collection\ObjectCombinationCollection;
+use function array_map;
+use function array_search;
+use function implode;
+use function lcfirst;
+use function ucfirst;
 
 /**
  * Produces code for cross/many-to-many relations where the middle table is a

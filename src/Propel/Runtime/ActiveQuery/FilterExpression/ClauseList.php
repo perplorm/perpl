@@ -10,6 +10,9 @@ declare(strict_types = 1);
 
 namespace Propel\Runtime\ActiveQuery\FilterExpression;
 
+use function array_merge;
+use function count;
+
 /**
  * List of conditions and combine operators (and/or)
  */

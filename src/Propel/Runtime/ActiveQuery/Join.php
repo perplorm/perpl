@@ -15,6 +15,14 @@ use Propel\Runtime\ActiveQuery\FilterExpression\FilterFactory;
 use Propel\Runtime\ActiveQuery\Join as ActiveQueryJoin;
 use Propel\Runtime\Adapter\AdapterInterface;
 use Propel\Runtime\Exception\LogicException;
+use function count;
+use function explode;
+use function implode;
+use function is_array;
+use function is_string;
+use function sprintf;
+use function strrpos;
+use function var_export;
 
 /**
  * Data object to describe a join between two tables, for example

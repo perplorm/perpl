@@ -12,6 +12,7 @@ namespace Propel\Generator\Behavior\OutputGroup;
 
 use Propel\Generator\Builder\Om\TableMapBuilder;
 use Propel\Generator\Model\Table;
+use function ksort;
 
 class OgTableMapModifier
 {

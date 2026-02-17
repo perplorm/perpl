@@ -17,6 +17,27 @@ use RuntimeException;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException as SymfonyInvalidConfigurationException;
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Finder\Finder;
+use function array_any;
+use function array_filter;
+use function array_key_exists;
+use function array_key_first;
+use function array_keys;
+use function array_merge_recursive;
+use function array_pop;
+use function array_reduce;
+use function array_replace_recursive;
+use function array_reverse;
+use function explode;
+use function file_exists;
+use function getcwd;
+use function implode;
+use function in_array;
+use function is_dir;
+use function is_string;
+use function ksort;
+use function str_ends_with;
+use function var_export;
+use const PHP_EOL;
 
 /**
  * Class ConfigurationManager

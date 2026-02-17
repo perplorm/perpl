@@ -15,6 +15,13 @@ use Propel\Generator\Exception\ConstraintNotFoundException;
 use Propel\Generator\Exception\InvalidArgumentException;
 use Propel\Generator\Model\Behavior;
 use Symfony\Component\Yaml\Parser;
+use function class_exists;
+use function count;
+use function is_array;
+use function is_string;
+use function sprintf;
+use function str_replace;
+use function var_export;
 
 /**
  * Validate a model object using Symfony2 Validator component

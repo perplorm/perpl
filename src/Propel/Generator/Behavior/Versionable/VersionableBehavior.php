@@ -16,6 +16,7 @@ use Propel\Generator\Behavior\SyncedTable\TableSyncer\TableSyncer;
 use Propel\Generator\Model\Column;
 use Propel\Generator\Model\ForeignKey;
 use Propel\Generator\Model\Table;
+use function in_array;
 
 /**
  * Keeps tracks of all the modifications in an ActiveRecord object

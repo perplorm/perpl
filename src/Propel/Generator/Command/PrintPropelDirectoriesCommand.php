@@ -14,6 +14,7 @@ use Propel\Generator\Manager\PrintPropelDirectoriesManager;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use function class_exists;
 
 class PrintPropelDirectoriesCommand extends AbstractCommand
 {

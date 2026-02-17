@@ -13,6 +13,10 @@ namespace Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes;
 use Propel\Generator\Builder\Om\ObjectBuilder;
 use Propel\Generator\Builder\Om\ObjectBuilder\ObjectCodeProducer;
 use Propel\Generator\Model\Column;
+use function array_intersect;
+use function explode;
+use function settype;
+use function var_export;
 
 class ColumnCodeProducer extends ObjectCodeProducer
 {

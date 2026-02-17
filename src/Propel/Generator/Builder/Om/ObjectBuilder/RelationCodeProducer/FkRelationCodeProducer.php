@@ -15,6 +15,13 @@ use Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes\ColumnCodeProducerFact
 use Propel\Generator\Builder\Util\EntityObjectClassNames;
 use Propel\Generator\Model\Column;
 use Propel\Generator\Model\ForeignKey;
+use function count;
+use function implode;
+use function in_array;
+use function ksort;
+use function lcfirst;
+use function reset;
+use function var_export;
 
 class FkRelationCodeProducer extends AbstractRelationCodeProducer
 {

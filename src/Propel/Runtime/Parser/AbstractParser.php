@@ -11,6 +11,14 @@ declare(strict_types = 1);
 namespace Propel\Runtime\Parser;
 
 use Propel\Runtime\Exception\FileNotFoundException;
+use function class_exists;
+use function file_exists;
+use function file_put_contents;
+use function ob_get_clean;
+use function ob_start;
+use function sprintf;
+use function strtolower;
+use function ucfirst;
 
 /**
  * Base class for all parsers. A parser converts data from and to an associative array.

@@ -14,6 +14,10 @@ use Propel\Generator\Builder\Om\ObjectBuilder;
 use Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes\ColumnCodeProducer;
 use Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes\ColumnCodeProducerFactory;
 use Propel\Generator\Model\Column;
+use function implode;
+use function preg_match_all;
+use function preg_replace;
+use function str_replace;
 
 class ColumnCodeProducerAccessor extends ColumnCodeProducer
 {

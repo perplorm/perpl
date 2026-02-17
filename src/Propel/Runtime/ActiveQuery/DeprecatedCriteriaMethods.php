@@ -16,6 +16,15 @@ use Propel\Runtime\ActiveQuery\FilterExpression\ColumnFilterInterface;
 use Propel\Runtime\ActiveQuery\FilterExpression\FilterClauseLiteralWithColumns;
 use Propel\Runtime\Map\ColumnMap;
 use Propel\Runtime\Propel;
+use function array_key_exists;
+use function array_map;
+use function array_merge;
+use function array_shift;
+use function is_array;
+use function sprintf;
+use function strrpos;
+use function strtoupper;
+use function substr;
 
 class DeprecatedCriteriaMethods extends Criteria
 {

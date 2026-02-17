@@ -14,6 +14,8 @@ use Propel\Generator\Builder\Om\TableMapBuilder;
 use Propel\Generator\Exception\DeprecatedUsageException;
 use Propel\Runtime\Collection\Collection;
 use ReflectionClass;
+use function class_exists;
+use function is_subclass_of;
 
 class TableMapBuilderValidation
 {

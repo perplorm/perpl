@@ -12,6 +12,8 @@ namespace Propel\Generator\Behavior\OutputGroup;
 
 use Propel\Generator\Builder\Om\QueryBuilder;
 use Propel\Generator\Model\Column;
+use function array_filter;
+use function preg_replace_callback;
 
 class OgQueryModifier
 {

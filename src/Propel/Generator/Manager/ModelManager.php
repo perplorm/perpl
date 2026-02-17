@@ -14,6 +14,11 @@ use Propel\Generator\Builder\Om\AbstractOMBuilder;
 use Propel\Generator\Builder\Om\TableMapLoaderScriptBuilder;
 use SplFileInfo;
 use Symfony\Component\Filesystem\Filesystem;
+use function file_get_contents;
+use function file_put_contents;
+use function get_class;
+use function sprintf;
+use const DIRECTORY_SEPARATOR;
 
 /**
  * This manager creates the Object Model classes based on the XML schema file.

@@ -16,6 +16,7 @@ use Propel\Runtime\ActiveQuery\ModelCriteria;
 use Propel\Runtime\ActiveQuery\ModelJoin;
 use Propel\Runtime\Exception\PropelException;
 use Propel\Runtime\Map\RelationMap;
+use function trim;
 
 /**
  * Abstract Criterion for nested filter expression, that bind an inner query

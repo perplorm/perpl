@@ -18,6 +18,28 @@ use Propel\Runtime\Adapter\SqlAdapterInterface;
 use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Map\DatabaseMap;
 use RuntimeException;
+use function count;
+use function explode;
+use function fclose;
+use function implode;
+use function is_array;
+use function is_resource;
+use function preg_match;
+use function preg_match_all;
+use function preg_replace;
+use function rewind;
+use function sprintf;
+use function str_ireplace;
+use function str_replace;
+use function stream_get_contents;
+use function stripos;
+use function stristr;
+use function strlen;
+use function strstr;
+use function strtr;
+use function substr;
+use function trim;
+use function unpack;
 
 /**
  * This is used to connect to a MSSQL database.

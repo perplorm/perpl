@@ -14,6 +14,9 @@ use Propel\Generator\Behavior\Util\InsertCodeBehavior;
 use Propel\Generator\Model\Behavior;
 use Propel\Generator\Model\Column;
 use Propel\Generator\Model\Table;
+use function array_map;
+use function array_push;
+use function implode;
 
 /**
  * Adds empty getter and setter for the given columns.

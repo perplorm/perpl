@@ -17,6 +17,14 @@ use Propel\Runtime\Collection\Collection;
 use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Exception\BadMethodCallException;
 use Traversable;
+use function ceil;
+use function count;
+use function floor;
+use function is_array;
+use function max;
+use function method_exists;
+use function min;
+use function sprintf;
 
 /**
  * Implements a pager based on a ModelCriteria

@@ -15,6 +15,18 @@ use DateTimeInterface;
 use DOMDocument;
 use DOMElement;
 use DOMNode;
+use function function_exists;
+use function htmlspecialchars;
+use function htmlspecialchars_decode;
+use function iconv;
+use function is_array;
+use function is_numeric;
+use function is_string;
+use function strcasecmp;
+use function substr;
+use const ENT_COMPAT;
+use const XML_CDATA_SECTION_NODE;
+use const XML_TEXT_NODE;
 
 /**
  * XML parser. Converts data between associative array and XML formats

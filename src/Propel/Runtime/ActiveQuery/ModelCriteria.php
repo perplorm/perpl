@@ -36,6 +36,26 @@ use Propel\Runtime\Map\Exception\ColumnNotFoundException;
 use Propel\Runtime\Map\RelationMap;
 use Propel\Runtime\Propel;
 use Propel\Runtime\Util\PropelModelPager;
+use function array_key_exists;
+use function array_merge;
+use function array_shift;
+use function array_values;
+use function count;
+use function current;
+use function end;
+use function explode;
+use function in_array;
+use function is_array;
+use function key;
+use function lcfirst;
+use function sprintf;
+use function str_replace;
+use function stripos;
+use function strlen;
+use function strpos;
+use function strrpos;
+use function strtoupper;
+use function substr;
 
 /**
  * This class extends the Criteria by adding runtime introspection abilities

@@ -11,6 +11,7 @@ declare(strict_types = 1);
 namespace Propel\Generator\Model\Diff;
 
 use Propel\Generator\Model\Column;
+use function strtoupper;
 
 /**
  * Service class for comparing Column objects.

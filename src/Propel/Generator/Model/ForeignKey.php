@@ -14,6 +14,19 @@ use LogicException;
 use Propel\Common\Pluralizer\PluralizerInterface;
 use Propel\Generator\Platform\PlatformInterface;
 use Propel\Runtime\Exception\RuntimeException;
+use function array_diff;
+use function array_filter;
+use function array_map;
+use function array_search;
+use function count;
+use function implode;
+use function in_array;
+use function is_array;
+use function is_string;
+use function md5;
+use function strtolower;
+use function strtoupper;
+use function substr;
 
 /**
  * A class for information about table foreign keys.

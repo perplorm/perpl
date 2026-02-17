@@ -20,6 +20,10 @@ use Propel\Generator\Model\PropelTypes;
 use Propel\Generator\Model\Table;
 use Propel\Generator\Model\Unique;
 use RuntimeException;
+use function count;
+use function preg_replace;
+use function sprintf;
+use function strtolower;
 
 /**
  * Microsoft SQL Server database schema parser.

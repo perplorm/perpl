@@ -27,6 +27,21 @@ use Propel\Generator\Platform\OraclePlatform;
 use Propel\Generator\Platform\PlatformInterface;
 use Propel\Runtime\ActiveQuery\FilterExpression\FilterCollector;
 use Propel\Runtime\Exception\PropelException;
+use function addslashes;
+use function array_any;
+use function array_intersect;
+use function array_keys;
+use function array_map;
+use function array_values;
+use function count;
+use function implode;
+use function in_array;
+use function lcfirst;
+use function sprintf;
+use function strpos;
+use function strrpos;
+use function strtoupper;
+use function var_export;
 
 /**
  * Generates a base Object class for user object model (OM).

@@ -15,6 +15,7 @@ use Propel\Runtime\DataFetcher\DataFetcherInterface;
 use Propel\Runtime\Exception\PropelException;
 use Propel\Runtime\Formatter\ObjectFormatter;
 use Propel\Runtime\Propel;
+use function is_array;
 
 /**
  * Class for iterating over a statement and returning one Propel object at a time

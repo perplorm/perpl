@@ -10,6 +10,15 @@ declare(strict_types = 1);
 
 namespace Propel\Generator\Model;
 
+use function count;
+use function implode;
+use function in_array;
+use function md5;
+use function sprintf;
+use function strcasecmp;
+use function strtolower;
+use function substr;
+
 /**
  * Information about indices of a table.
  *

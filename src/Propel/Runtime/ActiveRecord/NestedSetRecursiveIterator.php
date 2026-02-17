@@ -11,6 +11,8 @@ declare(strict_types = 1);
 namespace Propel\Runtime\ActiveRecord;
 
 use RecursiveIterator;
+use function implode;
+use function method_exists;
 
 /**
  * Pre-order node iterator for Node objects.

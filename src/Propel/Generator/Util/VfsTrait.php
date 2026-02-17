@@ -13,6 +13,8 @@ namespace Propel\Generator\Util;
 use org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\vfsStreamDirectory;
 use org\bovigo\vfs\vfsStreamFile;
+use function explode;
+use function pathinfo;
 
 /**
  * Useful methods to manipulate virtual filesystem, via vfsStream library

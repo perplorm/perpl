@@ -10,6 +10,11 @@ declare(strict_types = 1);
 
 namespace Propel\Common\Config\Exception;
 
+use function count;
+use const LIBXML_ERR_ERROR;
+use const LIBXML_ERR_FATAL;
+use const LIBXML_ERR_WARNING;
+
 class XmlParseException extends RuntimeException implements ExceptionInterface
 {
     /**

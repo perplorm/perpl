@@ -19,6 +19,14 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Filesystem\Filesystem;
+use function dirname;
+use function file_exists;
+use function file_get_contents;
+use function file_put_contents;
+use function is_writable;
+use function realpath;
+use function sprintf;
+use const DIRECTORY_SEPARATOR;
 
 class ConfigConvertCommand extends AbstractCommand
 {

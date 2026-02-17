@@ -16,6 +16,14 @@ use Propel\Generator\Builder\Om\ObjectBuilder;
 use Propel\Generator\Model\Behavior;
 use Propel\Generator\Model\ForeignKey;
 use Propel\Generator\Model\Table;
+use function array_key_exists;
+use function array_map;
+use function array_shift;
+use function implode;
+use function in_array;
+use function is_string;
+use function sprintf;
+use function vsprintf;
 
 /**
  * Keeps an aggregate column updated with related table

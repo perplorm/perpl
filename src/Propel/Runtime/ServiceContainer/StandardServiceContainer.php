@@ -29,6 +29,10 @@ use Propel\Runtime\Map\DatabaseMap;
 use Propel\Runtime\Util\Profiler;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
+use function get_class;
+use function is_int;
+use function sprintf;
+use const LOG_USER;
 
 /**
  * @psalm-import-type \Propel\Runtime\Map\TableMapDump from \Propel\Runtime\Map\DatabaseMap

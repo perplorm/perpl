@@ -12,6 +12,7 @@ namespace Propel\Runtime\ActiveQuery\Criterion;
 
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\Adapter\Pdo\PgsqlAdapter;
+use function count;
 
 /**
  * Specialized Criterion used for LIKE expressions

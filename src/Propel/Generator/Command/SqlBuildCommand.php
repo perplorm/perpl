@@ -14,6 +14,7 @@ use Propel\Generator\Manager\SqlManager;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use function array_merge;
 
 /**
  * @author William Durand <william.durand1@gmail.com>

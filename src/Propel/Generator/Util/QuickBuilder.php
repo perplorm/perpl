@@ -31,6 +31,37 @@ use Propel\Runtime\Connection\PdoConnection;
 use Propel\Runtime\Connection\StatementInterface;
 use Propel\Runtime\Propel;
 use RuntimeException;
+use function array_filter;
+use function count;
+use function explode;
+use function file_put_contents;
+use function function_exists;
+use function getcwd;
+use function implode;
+use function in_array;
+use function is_array;
+use function is_dir;
+use function is_string;
+use function mkdir;
+use function preg_match;
+use function sha1;
+use function sprintf;
+use function str_contains;
+use function str_replace;
+use function str_starts_with;
+use function strpos;
+use function substr;
+use function sys_get_temp_dir;
+use function token_get_all;
+use const PHP_EOL;
+use const T_COMMENT;
+use const T_DOC_COMMENT;
+use const T_NAME_FULLY_QUALIFIED;
+use const T_NAME_QUALIFIED;
+use const T_NAMESPACE;
+use const T_NS_SEPARATOR;
+use const T_STRING;
+use const T_WHITESPACE;
 
 class QuickBuilder
 {

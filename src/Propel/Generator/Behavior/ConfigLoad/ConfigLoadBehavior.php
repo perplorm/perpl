@@ -13,6 +13,10 @@ namespace Propel\Generator\Behavior\ConfigLoad;
 use Propel\Generator\Behavior\ConfigStore\ConfigOperationBehavior;
 use Propel\Generator\Behavior\ConfigStore\ConfigurationStore;
 use Propel\Generator\Exception\SchemaException;
+use function array_diff_key;
+use function array_merge;
+use function sprintf;
+use function uniqid;
 
 class ConfigLoadBehavior extends ConfigOperationBehavior
 {

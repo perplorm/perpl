@@ -14,6 +14,7 @@ use Propel\Generator\Builder\Om\ObjectBuilder;
 use Propel\Generator\Builder\Util\EntityObjectClassNames;
 use Propel\Generator\Model\CrossRelation;
 use Propel\Generator\Model\ForeignKey;
+use function array_search;
 
 /**
  * Produces code for cross/many-to-many relations that requires only an element

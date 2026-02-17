@@ -11,6 +11,9 @@ declare(strict_types = 1);
 namespace Propel\Runtime\Connection;
 
 use Propel\Runtime\Adapter\AdapterInterface;
+use function array_keys;
+use function count;
+use function mt_rand;
 
 /**
  * Manager for primary/replica connection to a datasource.

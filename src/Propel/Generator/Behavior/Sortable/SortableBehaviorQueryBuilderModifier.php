@@ -12,6 +12,9 @@ namespace Propel\Generator\Behavior\Sortable;
 
 use Propel\Generator\Builder\Om\AbstractOMBuilder;
 use Propel\Generator\Model\Column;
+use function current;
+use function str_replace;
+use function strtoupper;
 
 /**
  * Behavior to add sortable query methods

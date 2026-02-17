@@ -18,6 +18,10 @@ use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Connection\StatementInterface;
 use Propel\Runtime\Map\ColumnMap;
 use Propel\Runtime\Map\DatabaseMap;
+use function is_resource;
+use function rewind;
+use function str_replace;
+use function strtolower;
 
 /**
  * This is used to connect to a MSSQL database using pdo_sqlsrv driver.

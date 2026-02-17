@@ -11,6 +11,8 @@ declare(strict_types = 1);
 namespace Propel\Generator\Builder\Om;
 
 use Propel\Generator\Model\Table;
+use function strrpos;
+use function substr;
 
 /**
  * Tools to support class & package inclusion and referencing.

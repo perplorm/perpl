@@ -13,6 +13,17 @@ namespace Propel\Generator\Manager;
 use Propel\Generator\Model\Column;
 use Propel\Generator\Model\Database;
 use Propel\Generator\Model\Table;
+use function array_map;
+use function count;
+use function file_put_contents;
+use function implode;
+use function preg_replace;
+use function sprintf;
+use function str_repeat;
+use function strcmp;
+use function usort;
+use const DIRECTORY_SEPARATOR;
+use const PHP_EOL;
 
 /**
  * Manager for Markdown Data Dictionary

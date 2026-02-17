@@ -13,6 +13,10 @@ namespace Propel\Runtime\ActiveQuery\ColumnResolver\ColumnExpression\UpdateColum
 use InvalidArgumentException;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\Map\ColumnMap;
+use function count;
+use function is_array;
+use function preg_replace_callback;
+use function substr_count;
 
 class UpdateExpression extends AbstractUpdateColumn
 {

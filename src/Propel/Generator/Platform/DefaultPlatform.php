@@ -28,6 +28,22 @@ use Propel\Generator\Model\Unique;
 use Propel\Generator\Platform\Util\AlterTableStatementMerger;
 use Propel\Runtime\Connection\ConnectionInterface;
 use ReflectionClass;
+use function array_search;
+use function count;
+use function explode;
+use function implode;
+use function in_array;
+use function is_string;
+use function preg_replace;
+use function sprintf;
+use function str_replace;
+use function strlen;
+use function strpos;
+use function strtolower;
+use function strtr;
+use function substr;
+use function trim;
+use function var_export;
 
 /**
  * Default implementation for the PlatformInterface interface.

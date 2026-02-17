@@ -11,7 +11,11 @@ declare(strict_types = 1);
 namespace Propel\Runtime\ActiveQuery;
 
 use Propel\Runtime\ActiveQuery\FilterExpression\FilterFactory;
+use function array_filter;
+use function implode;
 use function is_string;
+use function strrpos;
+use function substr;
 
 /**
  * Extracted from Criteria

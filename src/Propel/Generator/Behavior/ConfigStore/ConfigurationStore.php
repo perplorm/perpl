@@ -11,6 +11,7 @@ declare(strict_types = 1);
 namespace Propel\Generator\Behavior\ConfigStore;
 
 use Propel\Generator\Exception\SchemaException;
+use function array_key_exists;
 
 class ConfigurationStore
 {

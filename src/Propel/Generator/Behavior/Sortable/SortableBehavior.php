@@ -12,6 +12,12 @@ namespace Propel\Generator\Behavior\Sortable;
 
 use InvalidArgumentException;
 use Propel\Generator\Model\Behavior;
+use function count;
+use function explode;
+use function implode;
+use function sprintf;
+use function str_replace;
+use function trim;
 
 /**
  * Gives a model class the ability to be ordered

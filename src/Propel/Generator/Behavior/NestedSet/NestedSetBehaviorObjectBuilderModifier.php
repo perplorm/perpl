@@ -11,6 +11,7 @@ declare(strict_types = 1);
 namespace Propel\Generator\Behavior\NestedSet;
 
 use Propel\Generator\Builder\Om\ObjectBuilder;
+use function strtolower;
 
 /**
  * Behavior to adds nested set tree structure columns and abilities

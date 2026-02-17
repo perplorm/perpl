@@ -10,6 +10,10 @@ declare(strict_types = 1);
 
 namespace Propel\Runtime\Parser;
 
+use function json_decode;
+use function json_encode;
+use const JSON_THROW_ON_ERROR;
+
 /**
  * JSON parser. Converts data between associative array and JSON formats
  *

@@ -14,6 +14,10 @@ use PDO;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\Criterion\Exception\InvalidClauseException;
 use Propel\Runtime\Map\ColumnMap;
+use function count;
+use function sprintf;
+use function str_replace;
+use function substr_count;
 
 /**
  * Specialized Criterion used for custom expressions with a typed binding, e.g. 'foobar = ?'

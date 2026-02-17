@@ -17,6 +17,21 @@ use Propel\Common\Config\Exception\RuntimeException;
 use Propel\Common\Config\FileLocator;
 use Symfony\Component\Config\FileLocatorInterface;
 use Symfony\Component\Config\Loader\FileLoader as BaseFileLoader;
+use function getenv;
+use function gettype;
+use function in_array;
+use function is_array;
+use function is_float;
+use function is_int;
+use function is_readable;
+use function is_string;
+use function pathinfo;
+use function preg_replace_callback;
+use function sprintf;
+use function str_replace;
+use function strpos;
+use function substr;
+use const PATHINFO_EXTENSION;
 
 /**
  * Abstract class used by all file-based loaders.

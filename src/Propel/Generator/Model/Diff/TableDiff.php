@@ -16,6 +16,9 @@ use Propel\Generator\Model\Column;
 use Propel\Generator\Model\ForeignKey;
 use Propel\Generator\Model\Index;
 use Propel\Generator\Model\Table;
+use function array_reverse;
+use function json_encode;
+use function sprintf;
 
 /**
  * Value object for storing Table object diffs

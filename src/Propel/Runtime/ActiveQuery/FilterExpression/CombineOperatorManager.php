@@ -11,6 +11,8 @@ declare(strict_types = 1);
 namespace Propel\Runtime\ActiveQuery\FilterExpression;
 
 use Propel\Runtime\ActiveQuery\Criteria;
+use function array_pop;
+use function end;
 
 class CombineOperatorManager
 {

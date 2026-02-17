@@ -20,6 +20,14 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\Output;
 use Symfony\Component\Console\Output\OutputInterface;
+use function array_merge;
+use function escapeshellarg;
+use function file_put_contents;
+use function implode;
+use function shell_exec;
+use function sprintf;
+use function time;
+use const DIRECTORY_SEPARATOR;
 
 /**
  * @author William Durand <william.durand1@gmail.com>

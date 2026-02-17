@@ -16,6 +16,32 @@ use Propel\Generator\Model\Index;
 use Propel\Generator\Model\Schema;
 use Propel\Generator\Model\Unique;
 use Propel\Generator\Platform\PlatformInterface;
+use function array_keys;
+use function array_pop;
+use function count;
+use function dirname;
+use function end;
+use function file_exists;
+use function file_get_contents;
+use function key;
+use function phpversion;
+use function realpath;
+use function sprintf;
+use function strpos;
+use function strtolower;
+use function version_compare;
+use function vsprintf;
+use function xml_error_string;
+use function xml_get_current_column_number;
+use function xml_get_current_line_number;
+use function xml_get_error_code;
+use function xml_parse;
+use function xml_parser_create;
+use function xml_parser_free;
+use function xml_parser_set_option;
+use function xml_set_element_handler;
+use const DIRECTORY_SEPARATOR;
+use const XML_OPTION_CASE_FOLDING;
 
 /**
  * A class that is used to parse an input xml schema file and creates a Schema

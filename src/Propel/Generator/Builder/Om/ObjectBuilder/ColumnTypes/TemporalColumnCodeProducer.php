@@ -16,6 +16,11 @@ use Exception;
 use Propel\Generator\Exception\EngineException;
 use Propel\Generator\Model\PropelTypes;
 use Propel\Generator\Platform\MysqlPlatform;
+use function date_default_timezone_set;
+use function in_array;
+use function is_subclass_of;
+use function sprintf;
+use function var_export;
 
 class TemporalColumnCodeProducer extends ColumnCodeProducer
 {

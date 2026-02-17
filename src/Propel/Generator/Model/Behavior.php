@@ -15,6 +15,12 @@ use Propel\Common\Util\PathTrait;
 use Propel\Generator\Builder\Util\PropelTemplate;
 use Propel\Generator\Exception\LogicException;
 use ReflectionObject;
+use function array_change_key_case;
+use function array_merge;
+use function dirname;
+use function file_exists;
+use function sprintf;
+use const CASE_LOWER;
 
 /**
  * Information about behaviors of a table.

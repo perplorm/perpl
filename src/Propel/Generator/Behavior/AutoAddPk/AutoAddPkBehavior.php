@@ -11,6 +11,7 @@ declare(strict_types = 1);
 namespace Propel\Generator\Behavior\AutoAddPk;
 
 use Propel\Generator\Model\Behavior;
+use function array_merge;
 
 /**
  * Adds a primary key to models defined without one

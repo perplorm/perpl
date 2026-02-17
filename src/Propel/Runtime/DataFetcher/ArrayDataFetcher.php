@@ -11,6 +11,11 @@ declare(strict_types = 1);
 namespace Propel\Runtime\DataFetcher;
 
 use Propel\Runtime\Map\TableMap;
+use function count;
+use function current;
+use function key;
+use function next;
+use function reset;
 
 /**
  * Class ArrayDataFetcher

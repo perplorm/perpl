@@ -10,6 +10,8 @@ declare(strict_types = 1);
 
 namespace Propel\Runtime\DataFetcher;
 
+use function current;
+
 /**
  * Abstract class for DataFetcher.
  */

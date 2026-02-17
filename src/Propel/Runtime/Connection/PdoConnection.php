@@ -14,6 +14,12 @@ use PDO;
 use Propel\Runtime\DataFetcher\DataFetcherInterface;
 use Propel\Runtime\DataFetcher\PDODataFetcher;
 use Propel\Runtime\Exception\InvalidArgumentException;
+use function constant;
+use function defined;
+use function is_numeric;
+use function is_string;
+use function sprintf;
+use function strpos;
 
 /**
  * PDO extension that implements ConnectionInterface and builds StatementInterface statements.

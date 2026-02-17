@@ -12,6 +12,8 @@ namespace Propel\Runtime\ActiveQuery\FilterExpression;
 
 use Propel\Runtime\ActiveQuery\Criteria;
 use Traversable;
+use function implode;
+use function iterator_to_array;
 
 class InColumnFilter extends AbstractColumnFilter
 {

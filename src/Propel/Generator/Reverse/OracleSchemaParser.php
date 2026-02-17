@@ -18,6 +18,11 @@ use Propel\Generator\Model\IdMethodParameter;
 use Propel\Generator\Model\Index;
 use Propel\Generator\Model\PropelTypes;
 use Propel\Generator\Model\Table;
+use function count;
+use function str_replace;
+use function strpos;
+use function strtoupper;
+use function substr;
 
 /**
  * Oracle database schema parser.

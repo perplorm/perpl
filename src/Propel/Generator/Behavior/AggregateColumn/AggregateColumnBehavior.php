@@ -16,6 +16,10 @@ use Propel\Generator\Model\Behavior;
 use Propel\Generator\Model\Column;
 use Propel\Generator\Model\ForeignKey;
 use Propel\Generator\Model\Table;
+use function array_shift;
+use function implode;
+use function is_string;
+use function sprintf;
 
 /**
  * Keeps an aggregate column updated with related table

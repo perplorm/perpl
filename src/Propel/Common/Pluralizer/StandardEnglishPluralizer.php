@@ -10,6 +10,13 @@ declare(strict_types = 1);
 
 namespace Propel\Common\Pluralizer;
 
+use function ctype_upper;
+use function in_array;
+use function preg_match;
+use function preg_replace;
+use function strtolower;
+use function ucfirst;
+
 /**
  * Standard replacement English pluralizer class. Based on the links below
  *

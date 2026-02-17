@@ -10,6 +10,10 @@ declare(strict_types = 1);
 
 namespace Propel\Runtime\ActiveQuery\Criterion;
 
+use function count;
+use function str_replace;
+use function stripos;
+
 /**
  * Specialized ModelCriterion used for IN or NOT IN model clauses,
  * e.g. 'book.TITLE NOT IN ?'

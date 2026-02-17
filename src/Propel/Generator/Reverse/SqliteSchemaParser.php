@@ -18,6 +18,15 @@ use Propel\Generator\Model\Index;
 use Propel\Generator\Model\PropelTypes;
 use Propel\Generator\Model\Table;
 use Propel\Generator\Model\Unique;
+use function count;
+use function preg_match;
+use function sprintf;
+use function str_contains;
+use function str_replace;
+use function str_starts_with;
+use function strpos;
+use function strtolower;
+use function substr;
 
 /**
  * SQLite database schema parser.

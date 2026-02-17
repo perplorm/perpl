@@ -18,6 +18,13 @@ use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Connection\ConnectionWrapper;
 use Propel\Runtime\Connection\PdoConnection;
 use RuntimeException;
+use function class_exists;
+use function get_class;
+use function mb_ereg;
+use function mb_regex_encoding;
+use function method_exists;
+use function phpversion;
+use function sprintf;
 
 /**
  * This is used in order to connect to a SQLite database.

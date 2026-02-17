@@ -14,6 +14,9 @@ use Propel\Generator\Builder\Om\ObjectCollectionBuilder;
 use Propel\Generator\Model\Behavior;
 use Propel\Generator\Model\MappingModel;
 use Propel\Generator\Model\Table;
+use function array_filter;
+use function array_merge;
+use function in_array;
 
 class OutputGroupBehavior extends Behavior
 {

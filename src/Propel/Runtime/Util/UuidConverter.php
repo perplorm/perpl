@@ -10,6 +10,13 @@ declare(strict_types = 1);
 
 namespace Propel\Runtime\Util;
 
+use function array_map;
+use function bin2hex;
+use function hex2bin;
+use function is_string;
+use function preg_replace;
+use function str_replace;
+
 /**
  * Helps to manually convert UUIDs to byte types
  */

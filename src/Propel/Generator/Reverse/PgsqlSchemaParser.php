@@ -20,6 +20,20 @@ use Propel\Generator\Model\Table;
 use Propel\Generator\Model\Unique;
 use RuntimeException;
 use stdClass;
+use function count;
+use function explode;
+use function implode;
+use function in_array;
+use function is_string;
+use function preg_match;
+use function preg_replace;
+use function sprintf;
+use function str_replace;
+use function strlen;
+use function strpos;
+use function strtoupper;
+use function substr;
+use function trim;
 
 /**
  * Postgresql database schema parser.

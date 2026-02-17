@@ -11,6 +11,9 @@ declare(strict_types = 1);
 namespace Propel\Runtime\Map;
 
 use Propel\Runtime\Exception\PropelException;
+use function array_key_exists;
+use function print_r;
+use function str_replace;
 
 trait TableMapTrait
 {

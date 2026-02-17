@@ -14,6 +14,9 @@ use LogicException;
 use Propel\Runtime\ActiveQuery\ColumnResolver\ColumnExpression\AbstractColumnExpression;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\Criterion\Exception\InvalidClauseException;
+use function is_int;
+use function is_string;
+use function print_r;
 
 class FilterFactory
 {

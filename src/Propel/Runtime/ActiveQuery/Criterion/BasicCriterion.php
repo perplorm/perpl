@@ -12,6 +12,8 @@ namespace Propel\Runtime\ActiveQuery\Criterion;
 
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\Criterion\Exception\InvalidValueException;
+use function count;
+use function sprintf;
 
 /**
  * Specialized Criterion used for traditional expressions,

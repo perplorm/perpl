@@ -11,6 +11,15 @@ declare(strict_types = 1);
 namespace Propel\Common\Util;
 
 use Propel\Common\Exception\SetColumnConverterException;
+use function array_diff;
+use function array_filter;
+use function array_intersect;
+use function array_keys;
+use function array_reduce;
+use function array_values;
+use function count;
+use function sprintf;
+use const ARRAY_FILTER_USE_KEY;
 
 /**
  * Class converts SET column values between integer and string/array representation.

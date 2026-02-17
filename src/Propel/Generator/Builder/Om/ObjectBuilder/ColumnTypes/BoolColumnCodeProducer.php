@@ -11,6 +11,9 @@ declare(strict_types = 1);
 namespace Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes;
 
 use Propel\Generator\Builder\Om\ClassTools;
+use function in_array;
+use function preg_match;
+use function ucfirst;
 
 class BoolColumnCodeProducer extends ColumnCodeProducer
 {

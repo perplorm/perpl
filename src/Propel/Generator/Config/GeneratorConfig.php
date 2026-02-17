@@ -24,6 +24,19 @@ use Propel\Generator\Util\BehaviorLocator;
 use Propel\Runtime\Adapter\AdapterFactory;
 use Propel\Runtime\Connection\ConnectionFactory;
 use Propel\Runtime\Connection\ConnectionInterface;
+use function array_key_exists;
+use function array_keys;
+use function class_exists;
+use function implode;
+use function in_array;
+use function interface_exists;
+use function is_array;
+use function is_int;
+use function is_string;
+use function sprintf;
+use function strtolower;
+use function ucfirst;
+use function var_export;
 
 /**
  * A class that holds build properties and provide a class loading mechanism for

@@ -17,6 +17,7 @@ use Propel\Runtime\Exception\PropelException;
 use Propel\Runtime\Map\TableMap;
 use Propel\Runtime\Propel;
 use Throwable;
+use function reset;
 
 class InsertQueryExecutor extends AbstractQueryExecutor
 {

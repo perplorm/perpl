@@ -12,6 +12,10 @@ namespace Propel\Generator\Model;
 
 use Propel\Generator\Config\GeneratorConfigInterface;
 use Propel\Generator\Exception\LogicException;
+use function rtrim;
+use function str_replace;
+use function substr;
+use function trim;
 
 /**
  * Data about an element with a name and optional namespace, schema and package

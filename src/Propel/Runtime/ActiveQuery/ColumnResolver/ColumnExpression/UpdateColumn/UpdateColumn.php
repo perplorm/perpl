@@ -13,6 +13,8 @@ namespace Propel\Runtime\ActiveQuery\ColumnResolver\ColumnExpression\UpdateColum
 use PDO;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\Map\ColumnMap;
+use function trigger_error;
+use const E_USER_NOTICE;
 
 /**
  * Update column expression with a value.

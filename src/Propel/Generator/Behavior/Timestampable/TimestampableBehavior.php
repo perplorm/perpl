@@ -14,6 +14,7 @@ use DateTime;
 use Propel\Generator\Builder\Om\AbstractOMBuilder;
 use Propel\Generator\Builder\Om\ObjectBuilder;
 use Propel\Generator\Model\Behavior;
+use function strtoupper;
 
 /**
  * Gives a model class the ability to track creation and last modification dates

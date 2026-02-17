@@ -11,6 +11,8 @@ declare(strict_types = 1);
 namespace Propel\Generator\Behavior\ConfigStore;
 
 use Propel\Generator\Exception\SchemaException;
+use function array_diff_key;
+use function sprintf;
 
 class ConfigStoreBehavior extends ConfigOperationBehavior
 {

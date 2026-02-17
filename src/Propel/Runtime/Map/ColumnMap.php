@@ -13,6 +13,14 @@ namespace Propel\Runtime\Map;
 use Propel\Generator\Model\PropelTypes;
 use Propel\Runtime\Adapter\AdapterInterface;
 use Propel\Runtime\Map\Exception\ForeignKeyNotFoundException;
+use function array_key_exists;
+use function array_search;
+use function in_array;
+use function sprintf;
+use function strrpos;
+use function strtoupper;
+use function substr;
+use function trim;
 
 /**
  * ColumnMap is used to model a column of a table in a database.

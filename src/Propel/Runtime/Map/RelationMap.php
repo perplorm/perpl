@@ -10,6 +10,8 @@ declare(strict_types = 1);
 
 namespace Propel\Runtime\Map;
 
+use function count;
+
 /**
  * RelationMap is used to model a database relationship.
  *

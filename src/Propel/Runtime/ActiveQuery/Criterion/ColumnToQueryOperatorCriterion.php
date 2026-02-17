@@ -13,6 +13,8 @@ namespace Propel\Runtime\ActiveQuery\Criterion;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\ModelCriteria;
 use Propel\Runtime\Map\RelationMap;
+use function reset;
+use function trim;
 
 /**
  * Creates filters in the form "column <operator> (SELECT ...)

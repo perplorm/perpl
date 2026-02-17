@@ -11,6 +11,9 @@ declare(strict_types = 1);
 namespace Propel\Generator\Model\Diff;
 
 use Propel\Generator\Model\Column;
+use function array_reverse;
+use function json_encode;
+use function sprintf;
 
 /**
  * Value object for storing Column object diffs.

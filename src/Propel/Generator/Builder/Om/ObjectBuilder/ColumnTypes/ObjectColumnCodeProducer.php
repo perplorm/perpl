@@ -10,6 +10,8 @@ declare(strict_types = 1);
 
 namespace Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes;
 
+use function var_export;
+
 class ObjectColumnCodeProducer extends ColumnCodeProducer
 {
     /**

@@ -15,6 +15,19 @@ use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use function array_map;
+use function chdir;
+use function count;
+use function file_exists;
+use function file_get_contents;
+use function file_put_contents;
+use function is_file;
+use function realpath;
+use function sprintf;
+use function str_replace;
+use function substr;
+use function ucfirst;
+use const DIRECTORY_SEPARATOR;
 
 /**
  * @author William Durand <william.durand1@gmail.com>

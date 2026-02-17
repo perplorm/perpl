@@ -12,6 +12,7 @@ namespace Propel\Generator\Builder\Util;
 
 use Propel\Common\Pluralizer\PluralizerInterface;
 use Propel\Generator\Model\ForeignKey;
+use function lcfirst;
 
 class NameProducer
 {

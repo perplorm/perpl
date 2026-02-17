@@ -13,6 +13,7 @@ namespace Propel\Generator\Model;
 use Propel\Generator\Config\GeneratorConfigInterface;
 use Propel\Generator\Exception\BuildException;
 use Propel\Generator\Util\BehaviorLocator;
+use function sprintf;
 
 /**
  * BehaviorableTrait use it on every model that can hold behaviors

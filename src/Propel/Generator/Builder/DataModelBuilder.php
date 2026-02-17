@@ -30,6 +30,11 @@ use Propel\Generator\Model\Inheritance;
 use Propel\Generator\Model\PropelTypes;
 use Propel\Generator\Model\Table;
 use Propel\Generator\Platform\PlatformInterface;
+use function array_map;
+use function func_get_args;
+use function implode;
+use function is_array;
+use function var_export;
 
 /**
  * This is the base class for any builder class that is using the data model.

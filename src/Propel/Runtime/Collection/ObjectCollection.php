@@ -19,6 +19,13 @@ use Propel\Runtime\Exception\RuntimeException;
 use Propel\Runtime\Map\RelationMap;
 use Propel\Runtime\Map\TableMap;
 use Propel\Runtime\Propel;
+use function end;
+use function is_callable;
+use function is_object;
+use function key;
+use function method_exists;
+use function spl_object_hash;
+use function ucfirst;
 
 /**
  * Class for iterating over a list of Propel objects

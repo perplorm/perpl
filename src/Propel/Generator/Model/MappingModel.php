@@ -10,6 +10,17 @@ declare(strict_types = 1);
 
 namespace Propel\Generator\Model;
 
+use function array_change_key_case;
+use function explode;
+use function implode;
+use function in_array;
+use function is_bool;
+use function is_numeric;
+use function sprintf;
+use function strtolower;
+use function trim;
+use const CASE_LOWER;
+
 /**
  * An abstract model class to represent objects that belongs to a schema like
  * databases, tables, columns, indices, unices, foreign keys...

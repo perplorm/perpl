@@ -12,6 +12,9 @@ namespace Propel\Runtime\ActiveQuery;
 
 use Propel\Runtime\Map\RelationMap;
 use Propel\Runtime\Map\TableMap;
+use function sprintf;
+use function strpos;
+use function substr;
 
 /**
  * Data object to describe a joined hydration in a Model Query

@@ -17,6 +17,11 @@ use Propel\Runtime\Adapter\SqlAdapterInterface;
 use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Connection\StatementInterface;
 use Propel\Runtime\Map\ColumnMap;
+use function class_exists;
+use function is_resource;
+use function rewind;
+use function strpos;
+use function strtr;
 
 /**
  * This is used in order to connect to a MySQL database.

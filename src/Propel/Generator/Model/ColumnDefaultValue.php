@@ -11,6 +11,7 @@ declare(strict_types = 1);
 namespace Propel\Generator\Model;
 
 use function in_array;
+use function strtoupper;
 
 /**
  * A class for holding a column default value.

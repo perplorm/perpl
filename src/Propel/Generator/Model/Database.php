@@ -14,6 +14,18 @@ use Propel\Generator\Config\GeneratorConfigInterface;
 use Propel\Generator\Exception\EngineException;
 use Propel\Generator\Exception\InvalidArgumentException;
 use Propel\Generator\Platform\PlatformInterface;
+use function array_search;
+use function count;
+use function explode;
+use function implode;
+use function in_array;
+use function key;
+use function ksort;
+use function ltrim;
+use function sprintf;
+use function strpos;
+use function strtolower;
+use function strtoupper;
 
 /**
  * A class for holding application data structures.

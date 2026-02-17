@@ -18,6 +18,12 @@ use Propel\Generator\Model\Database;
 use Propel\Generator\Model\Table;
 use Propel\Runtime\Map\DatabaseMap;
 use SplFileInfo;
+use function array_merge_recursive;
+use function array_walk;
+use function is_array;
+use function ksort;
+use const DIRECTORY_SEPARATOR;
+use const SORT_STRING;
 
 /**
  * Generates a database loader file, which is used to register all table maps with the DatabaseMap.

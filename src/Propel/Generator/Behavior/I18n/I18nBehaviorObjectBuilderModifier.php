@@ -13,6 +13,10 @@ namespace Propel\Generator\Behavior\I18n;
 use Propel\Generator\Builder\Om\ObjectBuilder;
 use Propel\Generator\Model\Column;
 use Propel\Generator\Model\PropelTypes;
+use function in_array;
+use function preg_match;
+use function preg_replace;
+use function ucfirst;
 
 /**
  * Allows translation of text columns through transparent one-to-many relationship.

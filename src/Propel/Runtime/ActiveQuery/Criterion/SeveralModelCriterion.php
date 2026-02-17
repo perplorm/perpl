@@ -11,6 +11,11 @@ declare(strict_types = 1);
 namespace Propel\Runtime\ActiveQuery\Criterion;
 
 use Propel\Runtime\ActiveQuery\Criterion\Exception\InvalidValueException;
+use function count;
+use function is_array;
+use function strlen;
+use function strpos;
+use function substr;
 
 /**
  * Specialized ModelCriterion used for ternary model clause, e.G 'book.ID BETWEEN ? AND ?'

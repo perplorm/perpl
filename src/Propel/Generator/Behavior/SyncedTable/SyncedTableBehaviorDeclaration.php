@@ -12,6 +12,12 @@ namespace Propel\Generator\Behavior\SyncedTable;
 
 use Propel\Generator\Behavior\SyncedTable\TableSyncer\TableSyncerConfigInterface;
 use Propel\Generator\Behavior\Util\BehaviorWithParameterAccess;
+use function in_array;
+use function is_array;
+use function is_string;
+use function reset;
+use function sprintf;
+use function strtolower;
 
 /**
  * Declares parameter keys and parameter value accessors.

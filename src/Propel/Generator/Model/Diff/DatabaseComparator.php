@@ -12,6 +12,9 @@ namespace Propel\Generator\Model\Diff;
 
 use Propel\Generator\Model\Database;
 use Propel\Generator\Model\Table;
+use function in_array;
+use function preg_match;
+use function str_replace;
 
 /**
  * Service class for comparing Database objects

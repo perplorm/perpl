@@ -25,6 +25,8 @@ use Propel\Generator\Model\Table;
 use Propel\Generator\Model\Unique;
 use Propel\Generator\Model\VendorInfo;
 use RuntimeException;
+use function count;
+use function trim;
 
 /**
  * A class for dumping a schema to an XML representation.

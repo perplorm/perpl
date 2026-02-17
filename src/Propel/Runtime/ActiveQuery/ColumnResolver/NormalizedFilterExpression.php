@@ -11,6 +11,9 @@
 namespace Propel\Runtime\ActiveQuery\ColumnResolver;
 
  use Propel\Runtime\ActiveQuery\ColumnResolver\ColumnExpression\AbstractColumnExpression;
+use function preg_match;
+use function preg_replace_callback;
+use function strlen;
 
 class NormalizedFilterExpression
 {

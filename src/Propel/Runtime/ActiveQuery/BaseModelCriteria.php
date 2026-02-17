@@ -20,6 +20,13 @@ use Propel\Runtime\Formatter\AbstractFormatter;
 use Propel\Runtime\Map\TableMap;
 use Propel\Runtime\Propel;
 use Traversable;
+use function array_pop;
+use function class_exists;
+use function explode;
+use function is_array;
+use function is_string;
+use function strpos;
+use function substr;
 
 /**
  * @implements \IteratorAggregate<(int|string), mixed>

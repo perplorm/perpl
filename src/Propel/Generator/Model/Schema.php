@@ -14,6 +14,9 @@ use Propel\Generator\Config\GeneratorConfigInterface;
 use Propel\Generator\Exception\EngineException;
 use Propel\Generator\Platform\PlatformInterface;
 use Propel\Generator\Schema\Dumper\XmlDumper;
+use function count;
+use function sprintf;
+use function str_replace;
 
 /**
  * A class for holding application data structures.

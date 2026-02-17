@@ -14,6 +14,19 @@ use Exception;
 use LogicException;
 use Propel\Generator\Exception\EngineException;
 use Propel\Generator\Platform\PlatformInterface;
+use function array_map;
+use function count;
+use function explode;
+use function in_array;
+use function is_string;
+use function lcfirst;
+use function rtrim;
+use function sprintf;
+use function str_replace;
+use function strrpos;
+use function strtolower;
+use function strtoupper;
+use function substr;
 
 /**
  * A class for holding data about a column used in an application.

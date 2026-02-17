@@ -16,6 +16,8 @@ use Propel\Generator\Util\SqlParser;
 use Propel\Runtime\Exception\RuntimeException;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use function count;
+use function sprintf;
 
 /**
  * Service class for executing rollback.

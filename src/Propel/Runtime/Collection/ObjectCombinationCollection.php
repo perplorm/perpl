@@ -11,6 +11,8 @@ declare(strict_types = 1);
 namespace Propel\Runtime\Collection;
 
 use Propel\Runtime\ActiveRecord\ActiveRecordInterface;
+use function func_get_args;
+use function func_num_args;
 
 /**
  * Class for iterating over a list of Propel objects

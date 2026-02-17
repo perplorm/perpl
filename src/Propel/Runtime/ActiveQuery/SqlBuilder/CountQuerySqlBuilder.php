@@ -12,6 +12,7 @@ namespace Propel\Runtime\ActiveQuery\SqlBuilder;
 
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\Exception\LogicException;
+use function in_array;
 
 class CountQuerySqlBuilder extends AbstractSqlQueryBuilder
 {

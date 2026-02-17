@@ -19,6 +19,14 @@ use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Exception\InvalidArgumentException;
 use Propel\Runtime\Propel;
 use RuntimeException;
+use function array_map;
+use function array_search;
+use function array_unique;
+use function class_exists;
+use function implode;
+use function in_array;
+use function sprintf;
+use function strtr;
 
 /**
  * This is used to connect to PostgreSQL databases.

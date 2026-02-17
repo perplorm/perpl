@@ -11,6 +11,9 @@ declare(strict_types = 1);
 namespace Propel\Runtime\ActiveQuery\FilterExpression;
 
 use LogicException;
+use function array_merge;
+use function array_shift;
+use function end;
 
 /**
  * A FilterCollector that can combine with a nested FilterCollector to create

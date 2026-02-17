@@ -12,7 +12,19 @@ namespace Propel\Common\Config\Loader;
 
 use Propel\Common\Config\Exception\IniParseException;
 use Propel\Common\Config\Exception\InvalidArgumentException;
+use function array_merge_recursive;
+use function array_reverse;
+use function count;
+use function explode;
+use function in_array;
+use function is_array;
 use function is_int;
+use function is_string;
+use function parse_ini_file;
+use function sprintf;
+use function strlen;
+use function strtolower;
+use const INI_SCANNER_RAW;
 
 /**
  * IniFileLoader loads parameters from INI files.

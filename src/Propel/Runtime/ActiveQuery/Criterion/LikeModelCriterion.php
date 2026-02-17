@@ -12,6 +12,7 @@ namespace Propel\Runtime\ActiveQuery\Criterion;
 
 use Propel\Runtime\ActiveQuery\Criterion\Exception\InvalidClauseException;
 use Propel\Runtime\Adapter\Pdo\PgsqlAdapter;
+use function preg_replace;
 
 /**
  * Specialized ModelCriterion used for LIKE expressions

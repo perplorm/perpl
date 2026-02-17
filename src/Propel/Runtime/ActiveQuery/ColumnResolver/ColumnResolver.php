@@ -22,6 +22,12 @@ use Propel\Runtime\ActiveQuery\Exception\UnknownModelException;
 use Propel\Runtime\ActiveQuery\ModelCriteria;
 use Propel\Runtime\ActiveQuery\ModelJoin;
 use Propel\Runtime\Exception\PropelException;
+use function array_pop;
+use function count;
+use function explode;
+use function implode;
+use function sprintf;
+use function strpos;
 
 class ColumnResolver
 {

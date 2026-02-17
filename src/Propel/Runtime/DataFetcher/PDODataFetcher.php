@@ -12,6 +12,10 @@ namespace Propel\Runtime\DataFetcher;
 
 use PDO;
 use Propel\Runtime\Map\TableMap;
+use function sprintf;
+use function strtoupper;
+use function substr;
+use function trim;
 
 /**
  * Class PDODataFetcher

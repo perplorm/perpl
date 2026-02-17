@@ -13,6 +13,7 @@ namespace Propel\Runtime\Formatter;
 use Propel\Runtime\ActiveRecord\ActiveRecordInterface;
 use Propel\Runtime\DataFetcher\DataFetcherInterface;
 use Propel\Runtime\Exception\LogicException;
+use function serialize;
 
 /**
  * Object formatter for Propel query

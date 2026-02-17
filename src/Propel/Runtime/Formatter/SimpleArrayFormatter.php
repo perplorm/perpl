@@ -13,6 +13,9 @@ namespace Propel\Runtime\Formatter;
 use Propel\Runtime\ActiveRecord\ActiveRecordInterface;
 use Propel\Runtime\DataFetcher\DataFetcherInterface;
 use Propel\Runtime\Exception\LogicException;
+use function array_keys;
+use function count;
+use function str_replace;
 
 /**
  * @deprecated class is not type-safe.

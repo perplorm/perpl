@@ -44,6 +44,25 @@ use Propel\Runtime\Map\DatabaseMap;
 use Propel\Runtime\Map\TableMap;
 use Propel\Runtime\Propel;
 use Propel\Runtime\Util\PropelConditionalProxy;
+use function array_diff;
+use function array_intersect_key;
+use function array_map;
+use function array_merge;
+use function array_unique;
+use function array_values;
+use function count;
+use function implode;
+use function in_array;
+use function is_array;
+use function is_string;
+use function print_r;
+use function sprintf;
+use function strrpos;
+use function substr;
+use function trigger_deprecation;
+use function trigger_error;
+use function var_export;
+use const E_USER_WARNING;
 
 /**
  * This is a utility class for holding criteria information for a query.

@@ -10,6 +10,8 @@ declare(strict_types = 1);
 
 namespace Propel\Generator\Builder\Om;
 
+use const PHP_EOL;
+
 /**
  * Generates the empty stub object class for user object model (OM).
  *

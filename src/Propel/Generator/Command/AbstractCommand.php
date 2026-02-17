@@ -21,6 +21,22 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
+use function array_filter;
+use function array_flip;
+use function array_map;
+use function array_merge_recursive;
+use function count;
+use function explode;
+use function iterator_to_array;
+use function preg_match;
+use function sprintf;
+use function str_starts_with;
+use function strpos;
+use function strtolower;
+use function substr;
+use function trim;
+use function urldecode;
+use const ARRAY_FILTER_USE_KEY;
 
 /**
  * @author William Durand <william.durand1@gmail.com>

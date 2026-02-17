@@ -12,6 +12,20 @@ namespace Propel\Generator\Manager;
 
 use RuntimeException;
 use Symfony\Component\Filesystem\Path;
+use function array_key_exists;
+use function array_key_first;
+use function array_pop;
+use function count;
+use function current;
+use function explode;
+use function getcwd;
+use function is_array;
+use function is_object;
+use function is_string;
+use function ksort;
+use function sort;
+use function var_export;
+use const DIRECTORY_SEPARATOR;
 
 /**
  * Build list of files that model:build would create

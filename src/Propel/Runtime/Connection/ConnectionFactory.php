@@ -14,6 +14,12 @@ use Propel\Runtime\Adapter\AdapterInterface;
 use Propel\Runtime\Adapter\Exception\AdapterException;
 use Propel\Runtime\Connection\Exception\ConnectionException;
 use Propel\Runtime\Exception\InvalidArgumentException;
+use function constant;
+use function defined;
+use function is_array;
+use function is_string;
+use function sprintf;
+use function strpos;
 
 class ConnectionFactory
 {

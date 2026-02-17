@@ -10,6 +10,14 @@ declare(strict_types = 1);
 
 namespace Propel\Generator\Config;
 
+use function array_keys;
+use function count;
+use function implode;
+use function is_array;
+use function preg_replace;
+use function var_export;
+use const PHP_EOL;
+
 /**
  * Runtime configuration converter
  * From array to PHP string

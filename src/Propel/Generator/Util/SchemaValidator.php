@@ -13,6 +13,10 @@ namespace Propel\Generator\Util;
 use Propel\Generator\Model\Database;
 use Propel\Generator\Model\Schema;
 use Propel\Generator\Model\Table;
+use function count;
+use function in_array;
+use function sprintf;
+use function strtolower;
 
 /**
  * Service class for validating XML schemas.

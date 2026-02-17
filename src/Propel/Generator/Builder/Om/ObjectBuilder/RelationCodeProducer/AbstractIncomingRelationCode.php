@@ -15,6 +15,7 @@ use Propel\Generator\Builder\Om\ObjectBuilder;
 use Propel\Generator\Builder\Util\EntityObjectClassNames;
 use Propel\Generator\Model\ForeignKey;
 use Propel\Runtime\Collection\ObjectCollection;
+use function lcfirst;
 
 /**
  * An incoming relation ("refFK"), to a single row (incoming one-to-one)

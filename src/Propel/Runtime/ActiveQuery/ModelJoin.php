@@ -16,6 +16,7 @@ use Propel\Runtime\ActiveQuery\FilterExpression\JoinCondition;
 use Propel\Runtime\Exception\LogicException;
 use Propel\Runtime\Map\RelationMap;
 use Propel\Runtime\Map\TableMap;
+use function get_class;
 
 /**
  * A ModelJoin is a Join object tied to a RelationMap object

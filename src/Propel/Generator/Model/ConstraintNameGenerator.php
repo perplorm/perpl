@@ -10,6 +10,9 @@ declare(strict_types = 1);
 
 namespace Propel\Generator\Model;
 
+use function strlen;
+use function substr;
+
 /**
  * A <code>NameGeneratorInterface</code> implementation for table-specific
  * constraints. Conforms to the maximum column name length for the

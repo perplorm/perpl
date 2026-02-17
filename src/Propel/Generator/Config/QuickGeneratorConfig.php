@@ -20,6 +20,7 @@ use Propel\Generator\Platform\PlatformInterface;
 use Propel\Generator\Reverse\SchemaParserInterface;
 use Propel\Generator\Util\BehaviorLocator;
 use Propel\Runtime\Connection\ConnectionInterface;
+use function array_replace_recursive;
 
 class QuickGeneratorConfig extends ConfigurationManager implements GeneratorConfigInterface
 {

@@ -25,8 +25,31 @@ use Propel\Runtime\Adapter\AdapterFactory;
 use Propel\Runtime\Connection\ConnectionFactory;
 use Propel\Runtime\Connection\ConnectionInterface;
 use RuntimeException;
+use function addcslashes;
+use function array_diff;
+use function array_flip;
+use function array_intersect;
 use function array_key_exists;
+use function array_keys;
+use function array_map;
+use function array_pop;
+use function array_search;
+use function array_shift;
+use function array_slice;
+use function date;
+use function function_exists;
 use function in_array;
+use function is_dir;
+use function posix_getpwuid;
+use function posix_getuid;
+use function preg_match;
+use function preg_replace;
+use function scandir;
+use function sort;
+use function sprintf;
+use function strlen;
+use function ucfirst;
+use function usort;
 
 /**
  * Service class for preparing and executing migrations

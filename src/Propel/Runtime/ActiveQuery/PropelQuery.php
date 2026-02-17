@@ -11,6 +11,7 @@ declare(strict_types = 1);
 namespace Propel\Runtime\ActiveQuery;
 
 use Propel\Runtime\Exception\ClassNotFoundException;
+use function class_exists;
 
 /**
  * Factory for model queries

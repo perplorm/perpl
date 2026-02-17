@@ -14,6 +14,7 @@ use Propel\Generator\Builder\Om\AbstractOMBuilder;
 use Propel\Generator\Model\Behavior;
 use Propel\Generator\Model\Table;
 use Propel\Generator\Model\Unique;
+use function str_replace;
 
 /**
  * Adds a slug column

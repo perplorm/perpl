@@ -16,6 +16,9 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use function sprintf;
+use function strpos;
+use function ucfirst;
 
 /**
  * @author William Durand <william.durand1@gmail.com>

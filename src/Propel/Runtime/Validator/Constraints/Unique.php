@@ -11,6 +11,7 @@ declare(strict_types = 1);
 namespace Propel\Runtime\Validator\Constraints;
 
 use Symfony\Component\Validator\Constraint;
+use function is_array;
 
 class Unique extends Constraint
 {

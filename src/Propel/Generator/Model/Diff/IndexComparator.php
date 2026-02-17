@@ -11,6 +11,7 @@ declare(strict_types = 1);
 namespace Propel\Generator\Model\Diff;
 
 use Propel\Generator\Model\Index;
+use function count;
 
 /**
  * Service class for comparing Index objects

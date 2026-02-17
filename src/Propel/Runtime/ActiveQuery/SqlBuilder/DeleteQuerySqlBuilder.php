@@ -11,6 +11,7 @@ declare(strict_types = 1);
 namespace Propel\Runtime\ActiveQuery\SqlBuilder;
 
 use Propel\Runtime\ActiveQuery\Criteria;
+use function implode;
 
 class DeleteQuerySqlBuilder extends AbstractSqlQueryBuilder
 {

@@ -12,6 +12,7 @@ namespace Propel\Runtime\ActiveQuery\FilterExpression;
 
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\Criterion\Exception\InvalidValueException;
+use function count;
 
 /**
  * Filter statement with given PDO type

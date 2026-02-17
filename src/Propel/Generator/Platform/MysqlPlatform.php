@@ -25,6 +25,24 @@ use Propel\Generator\Model\PropelTypes;
 use Propel\Generator\Model\Table;
 use Propel\Generator\Model\Unique;
 use Propel\Generator\Platform\Util\MysqlUuidMigrationBuilder;
+use function addslashes;
+use function array_flip;
+use function array_map;
+use function array_search;
+use function array_unshift;
+use function implode;
+use function in_array;
+use function is_array;
+use function is_numeric;
+use function sprintf;
+use function str_replace;
+use function stripos;
+use function strpos;
+use function strtolower;
+use function strtoupper;
+use function strtr;
+use function substr;
+use function var_export;
 
 /**
  * MySql PlatformInterface implementation.

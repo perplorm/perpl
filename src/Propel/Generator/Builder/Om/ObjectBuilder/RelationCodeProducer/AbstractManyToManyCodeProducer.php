@@ -16,6 +16,9 @@ use Propel\Generator\Config\GeneratorConfigInterface;
 use Propel\Generator\Model\CrossRelation;
 use Propel\Generator\Model\ForeignKey;
 use Propel\Generator\Model\Table;
+use function implode;
+use function lcfirst;
+use function str_replace;
 
 /**
  * Generates a database loader file, which is used to register all table maps with the DatabaseMap.

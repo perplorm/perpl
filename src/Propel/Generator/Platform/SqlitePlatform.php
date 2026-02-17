@@ -25,6 +25,19 @@ use Propel\Generator\Model\Unique;
 use Propel\Runtime\Connection\PdoConnection;
 use RuntimeException;
 use SQLite3;
+use function array_keys;
+use function class_exists;
+use function filter_var;
+use function implode;
+use function in_array;
+use function sprintf;
+use function str_replace;
+use function str_starts_with;
+use function strtr;
+use function trim;
+use function uniqid;
+use function version_compare;
+use const FILTER_VALIDATE_BOOLEAN;
 
 /**
  * SQLite PlatformInterface implementation.

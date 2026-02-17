@@ -17,6 +17,16 @@ use Propel\Generator\Exception\BuildException;
 use Propel\Generator\Model\PhpNameGenerator;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
+use function array_key_exists;
+use function array_merge;
+use function class_exists;
+use function count;
+use function dirname;
+use function file_exists;
+use function getcwd;
+use function json_decode;
+use function sprintf;
+use function strpos;
 
 /**
  * Service class to find composer and installed packages

@@ -10,6 +10,17 @@ declare(strict_types = 1);
 
 namespace Propel\Generator\Util;
 
+use function define;
+use function defined;
+use function is_string;
+use function str_replace;
+use function strpos;
+use function substr;
+use function token_get_all;
+use const T_COMMENT;
+use const T_FUNCTION;
+use const T_ML_COMMENT;
+
 if (!defined('T_ML_COMMENT')) {
     define('T_ML_COMMENT', T_COMMENT);
 } else {

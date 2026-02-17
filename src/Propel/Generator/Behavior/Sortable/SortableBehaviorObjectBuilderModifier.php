@@ -12,6 +12,12 @@ namespace Propel\Generator\Behavior\Sortable;
 
 use Propel\Generator\Builder\Om\AbstractOMBuilder;
 use Propel\Generator\Model\Column;
+use function current;
+use function implode;
+use function preg_replace;
+use function str_replace;
+use function strtolower;
+use function strtoupper;
 
 /**
  * Behavior to add sortable columns and abilities

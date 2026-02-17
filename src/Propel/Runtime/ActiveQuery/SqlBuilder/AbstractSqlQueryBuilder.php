@@ -13,6 +13,8 @@ namespace Propel\Runtime\ActiveQuery\SqlBuilder;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\FilterExpression\ColumnFilterInterface;
 use Propel\Runtime\Propel;
+use function strrpos;
+use function substr;
 
 /**
  * This class produces the base object class (e.g. BaseMyTable) which contains

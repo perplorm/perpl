@@ -15,6 +15,11 @@ use PDO;
 use PDOStatement;
 use Propel\Runtime\DataFetcher\DataFetcherInterface;
 use Traversable;
+use function func_get_args;
+use function func_num_args;
+use function preg_replace_callback;
+use function sprintf;
+use function var_export;
 
 /**
  * Wraps a Statement class, providing logging.

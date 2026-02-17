@@ -10,6 +10,14 @@ declare(strict_types = 1);
 
 namespace Propel\Generator\Model;
 
+use function count;
+use function preg_match_all;
+use function strlen;
+use function strtok;
+use function strtolower;
+use function substr;
+use function ucfirst;
+
 /**
  * A <code>NameGeneratorInterface</code> implementation for PHP-esque names.
  *

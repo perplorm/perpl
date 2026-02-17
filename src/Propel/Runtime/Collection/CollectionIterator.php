@@ -11,6 +11,10 @@ declare(strict_types = 1);
 namespace Propel\Runtime\Collection;
 
 use ArrayIterator;
+use function array_flip;
+use function array_keys;
+use function count;
+use const SORT_REGULAR;
 
 /**
  * Iterator class for iterating over Collection data

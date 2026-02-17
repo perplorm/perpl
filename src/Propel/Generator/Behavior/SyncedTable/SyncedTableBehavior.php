@@ -13,6 +13,10 @@ namespace Propel\Generator\Behavior\SyncedTable;
 use Propel\Generator\Behavior\SyncedTable\TableSyncer\TableSyncer;
 use Propel\Generator\Model\ForeignKey;
 use Propel\Generator\Model\Table;
+use function array_merge;
+use function in_array;
+use function is_string;
+use function strtolower;
 
 /**
  * Syncs another table definition to the one holding this behavior.

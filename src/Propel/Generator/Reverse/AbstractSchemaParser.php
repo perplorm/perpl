@@ -15,6 +15,7 @@ use Propel\Generator\Model\VendorInfo;
 use Propel\Generator\Platform\PlatformInterface;
 use Propel\Runtime\Connection\ConnectionInterface;
 use RuntimeException;
+use function array_flip;
 
 /**
  * Base class for reverse engineering a database schema.

@@ -17,6 +17,12 @@ use Propel\Runtime\ActiveQuery\FilterExpression\ColumnFilterInterface;
 use Propel\Runtime\Adapter\SqlAdapterInterface;
 use Propel\Runtime\Map\ColumnMap;
 use Propel\Runtime\Propel;
+use function array_unshift;
+use function count;
+use function str_repeat;
+use function strlen;
+use function strrpos;
+use function substr;
 
 /**
  * This is an "inner" class that describes an object in the criteria.

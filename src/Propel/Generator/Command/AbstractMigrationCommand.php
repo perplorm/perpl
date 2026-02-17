@@ -14,6 +14,7 @@ use Propel\Generator\Config\GeneratorConfig;
 use Propel\Generator\Exception\RuntimeException;
 use Propel\Generator\Manager\MigrationManager;
 use Symfony\Component\Console\Input\InputInterface;
+use function array_merge;
 
 abstract class AbstractMigrationCommand extends AbstractCommand
 {

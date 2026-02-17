@@ -23,6 +23,16 @@ use Propel\Generator\Model\Index;
 use Propel\Generator\Model\PropelTypes;
 use Propel\Generator\Model\Table;
 use Propel\Generator\Model\Unique;
+use function filter_var;
+use function implode;
+use function in_array;
+use function preg_replace;
+use function sprintf;
+use function strpos;
+use function strtolower;
+use function strtoupper;
+use function substr;
+use const FILTER_VALIDATE_BOOLEAN;
 
 /**
  * Postgresql PlatformInterface implementation.

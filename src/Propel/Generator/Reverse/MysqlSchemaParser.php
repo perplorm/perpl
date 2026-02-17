@@ -23,6 +23,21 @@ use Propel\Generator\Model\Unique;
 use Propel\Generator\Platform\MysqlPlatform;
 use Propel\Runtime\Connection\ConnectionInterface;
 use RuntimeException;
+use function array_keys;
+use function count;
+use function explode;
+use function implode;
+use function in_array;
+use function is_array;
+use function preg_match;
+use function preg_match_all;
+use function sprintf;
+use function str_replace;
+use function strpos;
+use function strtolower;
+use function strtoupper;
+use function substr;
+use function trim;
 
 /**
  * Mysql database schema parser.

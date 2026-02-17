@@ -16,6 +16,9 @@ use Propel\Generator\Model\ForeignKey;
 use Propel\Generator\Model\PropelTypes;
 use Propel\Generator\Model\Table;
 use Propel\Generator\Model\Unique;
+use function in_array;
+use function sprintf;
+use function strtr;
 
 /**
  * MS SQL PlatformInterface implementation.

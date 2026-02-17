@@ -19,6 +19,7 @@ use Propel\Runtime\Propel;
 use Propel\Runtime\ServiceContainer\ServiceContainerInterface;
 use RuntimeException;
 use Throwable;
+use const PHP_EOL;
 
 abstract class AbstractQueryExecutor
 {
