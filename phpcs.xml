@@ -16,6 +16,11 @@
         <exclude name="SprykerStrict.TypeHints.ParameterTypeHint"/>
         <exclude name="SprykerStrict.TypeHints.PropertyTypeHint"/>
         <exclude name="SprykerStrict.TypeHints.ReturnTypeHint"/>
+        <exclude name="Spryker.Internal.SprykerBridge"/>
+        <exclude name="Spryker.Internal.SprykerFacade"/>
+        <exclude name="Spryker.Internal.SprykerNoDemoshop"/>
+        <exclude name="Spryker.Internal.SprykerPreferStaticOverSelf"/>
+        <exclude name="Spryker.Commenting.DocBlockApiAnnotation"/> <!-- Another Spryker internal function. -->
     </rule>
 
     <rule ref="Spryker.Internal.SprykerDisallowFunctions">
