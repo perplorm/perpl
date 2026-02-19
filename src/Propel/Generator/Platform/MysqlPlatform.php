@@ -22,6 +22,7 @@ use Propel\Generator\Platform\Util\MysqlUuidMigrationBuilder;
 use function addslashes;
 use function array_flip;
 use function array_map;
+use function array_push;
 use function array_search;
 use function array_unshift;
 use function implode;
