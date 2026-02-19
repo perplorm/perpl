@@ -91,11 +91,7 @@ abstract class ScopedMappingModel extends MappingModel
      */
     public function getNamespace(bool $getAbsoluteNamespace = false): ?string
     {
-        if ($getAbsoluteNamespace) {
-            return $this->makeNamespaceAbsolute($this->namespace);
-        }
-
-        return $this->namespace;
+        return $getAbsoluteNamespace && $this->namespace ? $this->makeNamespaceAbsolute($this->namespace) : $this->namespace;
     }
 
     /**
@@ -162,15 +158,28 @@ abstract class ScopedMappingModel extends MappingModel
      *
      * A namespace with a backslash is considered absolute.
      *
-     * @param string|null $namespace
+     * @param string $namespace
      *
-     * @return string|null
+     * @return string
      */
-    protected function makeNamespaceAbsolute(?string $namespace): ?string
+    protected function makeNamespaceAbsolute(string $namespace): string
     {
-        $prependBackslash = $namespace && !$this->isAbsoluteNamespace($namespace);
+        return $this->isAbsoluteNamespace($namespace) ? $namespace : "\\$namespace";
+    }
 
-        return ($prependBackslash) ? "\\$namespace" : $namespace;
+    /**
+     * Typesafe version of {@see static::makeNamespaceAbsolute()}
+     *
+     * @param class-string $className
+     *
+     * @return class-string
+     */
+    protected function makeClassNameAbsolute(string $className): string
+    {
+        /** @var class-string $absoluteClassName */
+        $absoluteClassName = $this->makeNamespaceAbsolute($className);
+
+        return $absoluteClassName;
     }
 
     /**

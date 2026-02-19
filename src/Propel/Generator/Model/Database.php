@@ -51,7 +51,7 @@ class Database extends ScopedMappingModel
     private $baseClass;
 
     /**
-     * @var string|null
+     * @var class-string|null
      */
     private $baseQueryClass;
 
@@ -250,7 +250,7 @@ class Database extends ScopedMappingModel
      * Returns the name of the base super class inherited by query
      * objects. This parameter is overridden at the table level.
      *
-     * @return string|null
+     * @return class-string|null
      */
     public function getBaseQueryClass(): ?string
     {
@@ -261,26 +261,26 @@ class Database extends ScopedMappingModel
      * Sets the name of the base super class inherited by active record objects.
      * This parameter is overridden at the table level.
      *
-     * @param string $class
+     * @param class-string $class
      *
      * @return void
      */
     public function setBaseClass(string $class): void
     {
-        $this->baseClass = $this->makeNamespaceAbsolute($class);
+        $this->baseClass = $this->makeClassNameAbsolute($class);
     }
 
     /**
      * Sets the name of the base super class inherited by query objects.
      * This parameter is overridden at the table level.
      *
-     * @param string $class
+     * @param class-string $class
      *
      * @return void
      */
     public function setBaseQueryClass(string $class): void
     {
-        $this->baseQueryClass = $this->makeNamespaceAbsolute($class);
+        $this->baseQueryClass = $this->makeClassNameAbsolute($class);
     }
 
     /**
