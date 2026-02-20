@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes;
 
+use Propel\Common\Exception\SetColumnConverterException;
 use Propel\Common\Util\SetColumnConverter;
 
 class SetColumnCodeProducer extends AbstractArrayColumnCodeProducer
@@ -173,15 +174,15 @@ class SetColumnCodeProducer extends AbstractArrayColumnCodeProducer
     #[\Override]
     protected function addMutatorBody(string &$script): void
     {
+        $this->declareClasses(
+            SetColumnConverter::class,
+            SetColumnConverterException::class,
+        );
+        $this->declareGlobalFunction('array_diff', 'count', 'sprintf');
+
         $col = $this->column;
         $clo = $col->getLowercasedName();
         $cloConverted = $clo . '_converted';
-
-        $this->declareClasses(
-            'Propel\Common\Util\SetColumnConverter',
-            'Propel\Common\Exception\SetColumnConverterException',
-        );
-
         $script .= "
         if (\$this->$cloConverted === null || count(array_diff(\$this->$cloConverted, \$v)) > 0 || count(array_diff(\$v, \$this->$cloConverted)) > 0) {
             \$valueSet = " . $this->getTableMapClassName() . '::getValueSet(' . $this->objectBuilder->getColumnConstant($col) . ");

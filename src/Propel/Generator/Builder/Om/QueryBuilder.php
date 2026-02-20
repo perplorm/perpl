@@ -457,7 +457,6 @@ class QueryBuilder extends AbstractOMBuilder
     protected function addFindPkSimple(string &$script): void
     {
         $table = $this->getTable();
-
         if (!$table->hasPrimaryKey()) {
             return;
         }
@@ -475,6 +474,7 @@ class QueryBuilder extends AbstractOMBuilder
         }
 
         $this->declareClasses('\PDO');
+        $this->declareGlobalFunction('is_bool', 'sprintf');
 
         $objectClassName = $this->tableNames->useObjectStubClassName();
         $isBulkLoad = $table->isBulkLoadTable();
@@ -567,10 +567,12 @@ class QueryBuilder extends AbstractOMBuilder
         if ($numberOfPks === 0) {
             throw new LogicException("PoolKeyStatement cannot be created for table without PKs (in {$this->getQualifiedClassName()}).");
         }
+        if ($numberOfPks === 1) {
+            return "(string)$varLiteral";
+        }
+        $this->declareGlobalFunction('serialize', 'array_map');
 
-        return $numberOfPks === 1
-            ? "(string)$varLiteral"
-            : "serialize(array_map(fn (\$k) => (string)\$k, $varLiteral))";
+        return "serialize(array_map(fn (\$k) => (string)\$k, $varLiteral))";
     }
 
     /**
@@ -799,6 +801,7 @@ class QueryBuilder extends AbstractOMBuilder
         \$resolvedColumn = \$this->resolveLocalColumnByName('$colName');";
 
         if ($col->isNumericType() || $col->isTemporalType()) {
+            $this->declareGlobalFunction('is_array');
             $script .= "
         if (is_array(\$$variableName)) {
             \$useMinMax = false;
@@ -818,11 +821,13 @@ class QueryBuilder extends AbstractOMBuilder
             }
         }";
         } elseif ($col->getType() == PropelTypes::OBJECT) {
+            $this->declareGlobalFunction('is_object', 'serialize');
             $script .= "
         if (is_object(\$$variableName)) {
             \$$variableName = serialize(\$$variableName);
         }";
         } elseif ($col->getType() == PropelTypes::PHP_ARRAY) {
+            $this->declareGlobalFunction('in_array');
             $script .= "
         \$arrayOps = [null, Criteria::CONTAINS_ALL, Criteria::CONTAINS_SOME, Criteria::CONTAINS_NONE];
         if (in_array(\$comparison, \$arrayOps, true)) {
@@ -873,32 +878,33 @@ class QueryBuilder extends AbstractOMBuilder
             return \$this;
         }";
         } elseif ($col->getType() == PropelTypes::ENUM) {
+            $this->declareGlobalFunction('in_array', 'is_scalar', 'array_search');
             $script .= "
         \$valueSet = " . $this->getTableMapClassName() . '::getValueSet(' . $this->getColumnConstant($col) . ");
         if (is_scalar(\$$variableName)) {
             if (!in_array(\$$variableName, \$valueSet)) {
-                throw new PropelException(sprintf('Value \"%s\" is not accepted in this enumerated column', \$$variableName));
+                throw new PropelException(\"Value '\$$variableName' is not accepted in this enumerated column\");
             }
             \$$variableName = array_search(\$$variableName, \$valueSet);
         } elseif (is_array(\$$variableName)) {
             \$convertedValues = [];
             foreach (\$$variableName as \$value) {
                 if (!in_array(\$value, \$valueSet)) {
-                    throw new PropelException(sprintf('Value \"%s\" is not accepted in this enumerated column', \$value));
+                    throw new PropelException(\"Value '\$value' is not accepted in this enumerated column\");
                 }
                 \$convertedValues[] = array_search(\$value, \$valueSet);
             }
             \$$variableName = \$convertedValues;
-            if (\$comparison === null) {
-                \$comparison = Criteria::IN;
-            }
+            \$comparison ??= Criteria::IN;
         }";
         } elseif ($col->isTextType()) {
+            $this->declareGlobalFunction('is_array');
             $script .= "
         if (\$comparison === null && is_array(\$$variableName)) {
             \$comparison = Criteria::IN;
         }";
         } elseif ($col->isBooleanType()) {
+            $this->declareGlobalFunction('is_string', 'in_array', 'strtolower');
             $script .= "
         if (is_string(\$$variableName)) {
             \$$variableName = in_array(strtolower(\$$variableName), ['false', 'off', '-', 'no', 'n', '0', ''], true) ? false : true;

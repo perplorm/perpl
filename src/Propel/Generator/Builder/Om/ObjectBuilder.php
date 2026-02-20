@@ -637,9 +637,15 @@ abstract class {$this->getUnqualifiedClassName()}$parentClass implements ActiveR
             'ReflectionClass',
             'ReflectionProperty',
         );
+        $this->declareGlobalFunction('array_diff', 'array_key_exists', 'array_keys');
+        $hasArrayKey = count($this->getTable()->getPrimaryKey()) > 1;
+        if ($hasArrayKey) {
+            $this->declareGlobalFunction('array_all');
+        }
+
         $script .= $this->renderTemplate('baseObjectMethods', [
             'className' => $this->getUnqualifiedClassName(),
-            'hasArrayKey' => count($this->getTable()->getPrimaryKey()) > 1,
+            'hasArrayKey' => $hasArrayKey,
             'hasFks' => $this->getTable()->hasRelations(),
         ]);
     }
@@ -975,6 +981,7 @@ abstract class {$this->getUnqualifiedClassName()}$parentClass implements ActiveR
             $clo = $col->getLowercasedName();
             if ($col->getType() === PropelTypes::CLOB_EMU && $this->getPlatform() instanceof OraclePlatform) {
                 // PDO_OCI returns a stream for CLOB objects, while other PDO adapters return a string...
+                $this->declareGlobalFunction('stream_get_contents');
                 $script .= "
             \$this->$clo = stream_get_contents(\$columnValue);";
             } elseif ($col->isLobType() && !$platform->hasStreamBlobImpl()) {
@@ -1002,6 +1009,7 @@ abstract class {$this->getUnqualifiedClassName()}$parentClass implements ActiveR
                 $script .= "
             \$this->$clo = (\$columnValue !== null) ? PropelDateTime::newInstance(\$columnValue, null, '$dateTimeClass') : null;";
             } elseif ($col->isUuidBinaryType()) {
+                $this->declareGlobalFunction('is_resource', 'stream_get_contents');
                 $uuidSwapFlag = $this->getUuidSwapFlagLiteral();
                 $script .= "
             if (is_resource(\$columnValue)) {
@@ -1566,6 +1574,7 @@ $indent};";
      */
     protected function addFromArray(string &$script): void
     {
+        $this->declareGlobalFunction('array_key_exists');
         $defaultKeyType = $this->getDefaultKeyType();
         $table = $this->getTable();
         $script .= "
@@ -1881,6 +1890,8 @@ $indent};";
     protected function addHashCode(string &$script): void
     {
         $this->declareClass('\RuntimeException');
+        $this->declareGlobalFunction('crc32', 'json_encode', 'spl_object_hash');
+        $this->declareGlobalConstant('JSON_UNESCAPED_UNICODE');
         $primaryKeyFKNames = [];
         $foreignKeyPKCount = 0;
         foreach ($this->getTable()->getForeignKeys() as $foreignKey) {
@@ -1923,8 +1934,7 @@ $indent};";
             }
 
             return crc32(\$json);
-        }
-";
+        }\n";
         }
 
         // use foreign object hashes if available
@@ -1943,8 +1953,7 @@ $indent};";
             }
             \$primaryKeyFKs[] = spl_object_hash(\$fkObject);
         }
-";
-            $script .= "
+
         if (\$foreignPksAreValid) {
             \$json = json_encode(\$primaryKeyFKs, JSON_UNESCAPED_UNICODE);
             if (\$json === false) {
@@ -2298,6 +2307,7 @@ $indent};";
         foreach ($table->getColumns() as $col) {
             $clo = $col->getLowercasedName();
             if ($col->isLobType()) {
+                $this->declareGlobalFunction('is_resource', 'rewind');
                 $script .= "
             // Rewind the $clo LOB column, since PDO does not rewind after inserting value.
             if (\$this->$clo !== null && is_resource(\$this->$clo)) {
@@ -2463,6 +2473,8 @@ $indent};";
             '\Propel\Runtime\Propel',
             'PDO',
         );
+        $this->declareGlobalFunction('implode', 'array_keys', 'sprintf');
+
         $table = $this->getTable();
         /** @var \Propel\Generator\Platform\DefaultPlatform $platform */
         $platform = $this->getPlatform();
@@ -2567,7 +2579,7 @@ $indent};";
         } catch (Exception \$e) {
             Propel::log(\$e->getMessage(), Propel::LOG_ERR);
 
-            throw new PropelException(sprintf('Unable to execute INSERT statement [%s]', \$sql), 0, \$e);
+            throw new PropelException(\"Unable to execute INSERT statement [\$sql]\", 0, \$e);
         }
 ";
 
@@ -2895,46 +2907,32 @@ $indent};";
     {
         $table = $this->getTable();
 
-        $script .= "
-    /**
-     * Checks and repairs the internal consistency of the object.
-     *
-     * This method is executed after an already-instantiated object is re-hydrated
-     * from the database. It exists to check any foreign keys to make sure that
-     * the objects related to the current object are correct based on foreign key.
-     *
-     * You can override this method in the stub class, but you should always invoke
-     * the base method from the overridden method (i.e. parent::ensureConsistency()),
-     * in case your model changes.
-     *
-     * @return void
-     */
-    public function ensureConsistency(): void
-    {";
+        /**
+         * @var array<array{foreignObjectVar:string, columnVarName:string, getterId:string}> $fkProperties
+         */
+        $fkProperties = [];
         foreach ($table->getColumns() as $col) {
+            if (!$col->isForeignKey()) {
+                continue;
+            }
             $clo = $col->getLowercasedName();
-
-            if ($col->isForeignKey()) {
-                foreach ($col->getForeignKeys() as $fk) {
-                    $tblFK = $table->getDatabase()->getTable($fk->getForeignTableName());
-                    $colFK = $tblFK->getColumn($fk->getMappedForeignColumn($col->getName()));
-                    $attributeName = $this->getFKVarName($fk);
-
-                    if (!$colFK) {
-                        continue;
-                    }
-
-                    $script .= "
-        if (\$this->" . $attributeName . " !== null && \$this->$clo !== \$this->" . $attributeName . '->get' . $colFK->getPhpName() . "()) {
-            \$this->$attributeName = null;
-        }";
+            foreach ($col->getForeignKeys() as $fk) {
+                $foreignTable = $table->getDatabase()->getTable($fk->getForeignTableName());
+                $colFK = $foreignTable->getColumn($fk->getMappedForeignColumn($col->getName()));
+                if (!$colFK) {
+                    continue;
                 }
+                $fkProperties[] = [
+                    'foreignObjectVar' => $this->getFKVarName($fk),
+                    'columnVarName' => $clo,
+                    'getterId' => $colFK->getPhpName(),
+                ];
             }
         }
 
-        $script .= "
-    }
-";
+        $script .= $this->renderTemplate('baseObjectEnsureConsistency', [
+            'fkProperties' => $fkProperties,
+        ]);
     }
 
     /**
@@ -2948,28 +2946,9 @@ $indent};";
     {
         $this->addCopyInto($script);
 
-        $script .= "
-    /**
-     * Makes a copy of this object that will be inserted as a new row in table when saved.
-     * It creates a new object filling in the simple attributes, but skipping any primary
-     * keys that are defined for the table.
-     *
-     * If desired, this method can also make copies of all associated (fkey referrers)
-     * objects.
-     *
-     * @param bool \$deepCopy Whether to also copy all rows that refer (by fkey) to the current row.
-     *
-     * @return static Clone of current object.
-     */
-    public function copy(bool \$deepCopy = false)
-    {
-        \$clazz = static::class;
-        " . $this->buildObjectInstanceCreationCode('$copyObj', '$clazz') . "
-        \$this->copyInto(\$copyObj, \$deepCopy);
-
-        return \$copyObj;
-    }
-";
+        $script .= $this->renderTemplate('baseObjectCopy', [
+            'objectInstanceCreationCode' => $this->buildObjectInstanceCreationCode('$copyObj', '$clazz'),
+        ]);
     }
 
     /**
@@ -3275,6 +3254,8 @@ $indent};";
         $behaviorCallScript = '';
         $this->applyBehaviorModifier('objectCall', $behaviorCallScript, '        ');
 
+        $this->declareGlobalFunction('strpos', 'substr', 'lcfirst');
+
         $script .= $this->renderTemplate('baseObjectMethodMagicCall', [
             'behaviorCallScript' => $behaviorCallScript,
             'hasGenericMutators' => $this->isAddGenericMutators(),
@@ -3289,29 +3270,9 @@ $indent};";
     protected function addWriteResource(string &$script)
     {
         $this->declareClass('\RuntimeException');
+        $this->declareGlobalFunction('fopen', 'fwrite', 'is_bool', 'is_string', 'rewind');
 
-        $script .= "
-    /**
-     * @param resource|string|null \$value
-     *
-     * @throws \RuntimeException
-     *
-     * @return resource|null
-     */
-    protected function writeResource(\$value)
-    {
-        if (!is_string(\$value)) {
-            return \$value;
-        }
-        \$stream = fopen('php://memory', 'r+');
-        if (is_bool(\$stream)) {
-            throw new RuntimeException('Could not open memory stream');
-        }
-        fwrite(\$stream, \$value);
-        rewind(\$stream);
-
-        return \$stream;
-    }\n";
+        $script .= $this->renderTemplate('baseObjectWriteResource');
     }
 
     /**
@@ -3345,6 +3306,7 @@ $indent};";
             $valueExpression = '$value';
 
             if ($col->getType() === PropelTypes::PHP_ARRAY) {
+                $this->declareGlobalFunction('is_array');
                 $valueExpression = "is_array($valueExpression) ? $valueExpression : static::unserializeArray($valueExpression)";
             } elseif ($col->getType() === PropelTypes::ENUM) {
                 $tableMapClassName = $this->getTableMapClassName();
@@ -3376,27 +3338,7 @@ $indent};";
      */
     protected function addArraySerializationMethods(string &$script): void
     {
-        $script .= "
-    /**
-     * @param array \$array
-     *
-     * @return string
-     */
-    public static function serializeArray(array \$array): string
-    {
-        return '| ' . implode(' | ', \$array) . ' |';
-    }
-
-    /**
-     * @param string \$serializedArray
-     *
-     * @return array<string>
-     */
-    public static function unserializeArray(string \$serializedArray): array
-    {
-        \$unboundString = trim(substr(\$serializedArray, 2, -2));
-
-        return \$unboundString ? explode(' | ', \$unboundString) : [];
-    }\n";
+        $this->declareGlobalFunction('implode', 'explode', 'substr', 'trim');
+        $script .= $this->renderTemplate('baseObjectArraySerializationMethods');
     }
 }

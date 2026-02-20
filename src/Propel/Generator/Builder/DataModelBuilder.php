@@ -25,7 +25,6 @@ use Propel\Generator\Model\PropelTypes;
 use Propel\Generator\Model\Table;
 use Propel\Generator\Platform\PlatformInterface;
 use function array_map;
-use function func_get_args;
 use function implode;
 use function is_array;
 use function var_export;
@@ -683,14 +682,35 @@ abstract class DataModelBuilder
     }
 
     /**
+     * @param string ...$classNames
+     *
      * @return void
      */
-    public function declareClasses(): void
+    public function declareClasses(string ...$classNames): void
     {
-        $args = func_get_args();
-        foreach ($args as $class) {
+        foreach ($classNames as $class) {
             $this->declareClass($class);
         }
+    }
+
+    /**
+     * @param string ...$functionName
+     *
+     * @return void
+     */
+    public function declareGlobalFunction(string ...$functionName): void
+    {
+        $this->referencedClasses->registerFunction(...$functionName);
+    }
+
+    /**
+     * @param string ...$constantName
+     *
+     * @return void
+     */
+    public function declareGlobalConstant(string ...$constantName): void
+    {
+        $this->referencedClasses->registerConstant(...$constantName);
     }
 
     /**
