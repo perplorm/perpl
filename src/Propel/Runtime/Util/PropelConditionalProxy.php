@@ -8,6 +8,7 @@
 
 namespace Propel\Runtime\Util;
 
+use BadMethodCallException;
 use Propel\Runtime\ActiveQuery\Criteria;
 
 /**
@@ -171,13 +172,31 @@ class PropelConditionalProxy
     }
 
     /**
+     * Catches calls to non-conditional methods when the conditional state is false.
+     *
+     * Most method calls are silently skipped (the condition is false, so they
+     * should not execute). However, calling a conditional flow method without
+     * the underscore prefix (e.g. endif() instead of _endif()) is always a bug
+     * that breaks the entire query chain — so we catch that specific mistake.
+     *
      * @param string $name
      * @param array $arguments
+     *
+     * @throws \BadMethodCallException if the method name matches a conditional flow method without underscore prefix
      *
      * @return $this
      */
     public function __call(string $name, array $arguments)
     {
+        if (in_array($name, ['if', 'elseif', 'else', 'endif'], true)) {
+            throw new BadMethodCallException(sprintf(
+                'Call to undefined method %s::%s(). Did you mean "_%s" (with underscore prefix)?',
+                get_class($this->criteria),
+                $name,
+                $name,
+            ));
+        }
+
         return $this;
     }
 }
