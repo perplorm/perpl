@@ -116,6 +116,7 @@ class EnumColumnCodeProducer extends ColumnCodeProducer
     #[\Override]
     protected function addMutatorBody(string &$script): void
     {
+        $this->declareGlobalFunction('array_search', 'is_int');
         $col = $this->column;
         $clo = $col->getLowercasedName();
 
@@ -124,7 +125,7 @@ class EnumColumnCodeProducer extends ColumnCodeProducer
             \$valueSet = " . $this->getTableMapClassName() . '::getValueSet(' . $this->objectBuilder->getColumnConstant($col) . ");
             \$keyId = array_search(\$v, \$valueSet);
             if (!is_int(\$keyId)) {
-                throw new PropelException(sprintf('Value \"%s\" is not accepted in this enumerated column', \$v));
+                throw new PropelException(\"Value '\$v' is not accepted in this enumerated column\");
             }
             \$v = \$keyId;
         }

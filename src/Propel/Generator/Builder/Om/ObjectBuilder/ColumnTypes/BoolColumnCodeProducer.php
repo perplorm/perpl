@@ -120,6 +120,7 @@ class BoolColumnCodeProducer extends ColumnCodeProducer
     #[\Override]
     protected function addMutatorBody(string &$script): void
     {
+        $this->declareGlobalFunction('in_array', 'is_string', 'strtolower');
         $col = $this->column;
         $clo = $col->getLowercasedName();
         $columnConstant = $this->objectBuilder->getColumnConstant($col);

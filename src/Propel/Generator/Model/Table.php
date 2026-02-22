@@ -109,8 +109,14 @@ class Table extends ScopedMappingModel implements IdMethod
 
     private ?string $interface = null;
 
+    /**
+     * @var class-string|null
+     */
     private ?string $baseClass = null;
 
+    /**
+     * @var class-string|null
+     */
     private ?string $baseQueryClass = null;
 
     /**
@@ -517,7 +523,7 @@ class Table extends ScopedMappingModel implements IdMethod
      * Returns the name of the base query class used for superclass of all query objects
      * of this table.
      *
-     * @return string|null
+     * @return class-string|null
      */
     public function getBaseQueryClass(): ?string
     {
@@ -531,25 +537,25 @@ class Table extends ScopedMappingModel implements IdMethod
     /**
      * Sets the base class name.
      *
-     * @param string $class
+     * @param class-string $class
      *
      * @return void
      */
     public function setBaseClass(string $class): void
     {
-        $this->baseClass = $this->makeNamespaceAbsolute($class);
+        $this->baseClass = $this->makeClassNameAbsolute($class);
     }
 
     /**
      * Sets the base query class name.
      *
-     * @param string $class
+     * @param class-string $class
      *
      * @return void
      */
     public function setBaseQueryClass(string $class): void
     {
-        $this->baseQueryClass = $this->makeNamespaceAbsolute($class);
+        $this->baseQueryClass = $this->makeClassNameAbsolute($class);
     }
 
     /**
@@ -2390,11 +2396,14 @@ class Table extends ScopedMappingModel implements IdMethod
     }
 
     /**
-     * @return string
+     * @return class-string
      */
     public function getQualifiedClassName(): string
     {
-        return $this->makeNamespaceAbsolute($this->namespace) . '\\' . $this->getPhpName();
+        /** @var class-string $className */
+        $className = "{$this->namespace}\\{$this->getPhpName()}";
+
+        return $this->makeClassNameAbsolute($className);
     }
 
     /**

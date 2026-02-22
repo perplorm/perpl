@@ -273,6 +273,8 @@ class OneToManyRelationCodeProducer extends AbstractIncomingRelationCode
      */
     protected function addCount(string &$script): void
     {
+        $this->declareGlobalFunction('count');
+
         $targetQueryClassName = $this->targetTableNames->useQueryStubClassName();
         $targetClassName = $this->relation->getForeignTable()->getName();
         $relCol = $this->getRefFKPhpNameAffix($this->relation, true);
@@ -325,6 +327,8 @@ class OneToManyRelationCodeProducer extends AbstractIncomingRelationCode
      */
     protected function addGet(string &$script): void
     {
+        $this->declareGlobalFunction('count');
+
         $attributeName = $this->getAttributeName();
         $targetModelClassName = $this->relation->getForeignTableName();
         $targetModelClassNameFqcn = $this->targetTableNames->useObjectBaseClassName(false);

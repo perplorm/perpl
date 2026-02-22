@@ -19,6 +19,7 @@ abstract class AbstractArrayColumnCodeProducer extends ColumnCodeProducer
      */
     protected function addHasArrayElement(string &$script, string $typeDescription): void
     {
+        $this->declareGlobalFunction('in_array');
         $clo = $this->column->getLowercasedName();
         $cfc = $this->column->getPhpName();
         $visibility = $this->column->getAccessorVisibility();

@@ -1,4 +1,4 @@
-<?php if ($behaviorCallScript) :?>
+<?php if ($behaviorCallScript): ?>
     /**
      * Catches calls to undefined methods.
      *
@@ -63,5 +63,5 @@
             return $this->exportTo($format, $includeLazyLoadColumns, $keyType);
         }
 
-        throw new BadMethodCallException(sprintf('Call to undefined method: %s.', $name));
+        throw new BadMethodCallException("Call to undefined method: $name");
     }

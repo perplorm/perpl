@@ -47,4 +47,32 @@ class ReferencedClassesTest extends TestCase
         $this->assertSame($expectedTypeHint, $actualTypeHint, 'Type hint string should match');
         $this->assertSame($expectedDeclarations, $actualDeclarations, 'Type declaration should match');
     }
+
+    public function testBuildUseStatements(): void
+    {
+        $referencedClasses = new ReferencedClasses($this->createMock(ObjectBuilder::class));
+        $referencedClasses->registerConstant('CONST_3', 'CONST_1');
+        $referencedClasses->registerConstant('CONST_2');
+        $referencedClasses->registerFunction('function_c', 'function_a');
+        $referencedClasses->registerFunction('function_b');
+        $referencedClasses->registerClassByFullyQualifiedName('\Your\Namespace\ClassEol');
+        $referencedClasses->registerClassByFullyQualifiedName('\My\Namespace\ClassFoo');
+        $referencedClasses->registerClassByFullyQualifiedName('\My\Namespace\ClassBar');
+        $referencedClasses->registerClassByFullyQualifiedName('\My\Namespace\ClassEol', 'Eol');
+
+        $useStatements = $referencedClasses->buildUseStatements('', '');
+        $expected = "use My\Namespace\ClassBar;
+use My\Namespace\ClassEol as EolClassEol;
+use My\Namespace\ClassFoo;
+use Your\Namespace\ClassEol;
+use function function_a;
+use function function_b;
+use function function_c;
+use const CONST_1;
+use const CONST_2;
+use const CONST_3;
+";
+
+        $this->assertEquals($expected, $useStatements);
+    }
 }

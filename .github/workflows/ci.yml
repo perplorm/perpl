@@ -152,7 +152,7 @@ jobs:
             check: ['PHPCS', 'Stan']
             include:
               - check: PHPCS
-                command: 'cs-check -- --exclude=SlevomatCodingStandard.TypeHints.DeclareStrictTypes,SlevomatCodingStandard.Namespaces.ReferenceUsedNamesOnly'
+                command: 'cs-check -- --exclude=SlevomatCodingStandard.TypeHints.DeclareStrictTypes'
               - check: Stan
                 command: 'stan -- -a autoload.php.dist'
               - type: query

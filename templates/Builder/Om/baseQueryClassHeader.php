@@ -84,7 +84,7 @@
  * @method array<<?= $modelClass ?>>|\Propel\Runtime\Util\PropelModelPager<mixed> paginate($page = 1, $maxPerPage = 10, \Propel\Runtime\Connection\ConnectionInterface|null $con = null) Issue a SELECT query based on the current ModelCriteria and uses a page and a maximum number of results per page to compute an offset and a limit
  *
  * @template ParentQuery of \Propel\Runtime\ActiveQuery\ModelCriteria|null = null
- * @extends <?= $parentClassFq ?><ParentQuery>
+ * @extends \<?= $parentClassFq ?><ParentQuery>
  */
 abstract class <?= $unqualifiedClassName ?> extends <?= $parentClass ?> 
 {<?php
