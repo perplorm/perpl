@@ -189,7 +189,7 @@ class PropelConditionalProxy
     public function __call(string $name, array $arguments)
     {
         if (in_array($name, ['if', 'elseif', 'else', 'endif', 'or', 'and'], true)) {
-            $criteriaClass = $this->criteria::class;
+            $criteriaClass = get_class($this->criteria);
             throw new BadMethodCallException(
                 "Call to undefined method {$criteriaClass}::{$name}(). Did you mean '_{$name}' (with underscore prefix)?",
             );
