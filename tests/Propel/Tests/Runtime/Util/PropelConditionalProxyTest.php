@@ -94,7 +94,7 @@ class PropelConditionalProxyTest extends BaseTestCase
         $p = new TestPropelConditionalProxy($criteria, false);
 
         $this->expectException(BadMethodCallException::class);
-        $this->expectExceptionMessage(sprintf('Did you mean "_%s"', $method));
+        $this->expectExceptionMessage("Did you mean '_{$method}'");
 
         $p->$method();
     }
