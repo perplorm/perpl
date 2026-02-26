@@ -168,7 +168,7 @@ class ManyToManyRelationCodeTest extends AbstractManyToManyCodeTest
     {
         $expected = '
     /**
-     * Gets a collection of Team objects related by a many-to-many relationship
+     * Gets a collection of ChildTeam objects related by a many-to-many relationship
      * to the current object by way of the team_user cross-reference table.
      *
      * If the $criteria is not null, it is used to always fetch the results from the database.
@@ -228,7 +228,7 @@ class ManyToManyRelationCodeTest extends AbstractManyToManyCodeTest
      * It will also schedule objects for deletion based on a diff between old objects (aka persisted)
      * and new objects from the given Propel collection.
      *
-     * @param \Propel\Runtime\Collection\Collection<\Base\Team> $teams A Propel collection.
+     * @param \Propel\Runtime\Collection\Collection<\Team> $teams A Propel collection.
      * @param \Propel\Runtime\Connection\ConnectionInterface|null $con Optional connection object
      *
      * @return static
@@ -307,11 +307,11 @@ class ManyToManyRelationCodeTest extends AbstractManyToManyCodeTest
     /**
      * Associate a Team with this object through the team_user cross reference table.
      *
-     * @param \Base\Team $team
+     * @param \Team $team
      *
      * @return static
      */
-    public function addTeam(Team $team): static
+    public function addTeam(ChildTeam $team): static
     {
         if ($this->collTeams === null) {
             $this->initTeams();
@@ -333,11 +333,11 @@ class ManyToManyRelationCodeTest extends AbstractManyToManyCodeTest
     {
         $expected = '
     /**
-     * @param \Base\Team $team
+     * @param \Team $team
      *
      * @return void
      */
-    protected function doAddTeam(Team $team): void
+    protected function doAddTeam(ChildTeam $team): void
     {
         $teamUser = new ChildTeamUser();
         $teamUser->setTeam($team);
@@ -364,11 +364,11 @@ class ManyToManyRelationCodeTest extends AbstractManyToManyCodeTest
     /**
      * Remove team of this object through the team_user cross reference table.
      *
-     * @param \Base\Team $team
+     * @param \Team $team
      *
      * @return static
      */
-    public function removeTeam(Team $team): static
+    public function removeTeam(ChildTeam $team): static
     {
         if (!$this->getTeams()->contains($team)) {
             return $this;

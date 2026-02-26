@@ -228,7 +228,7 @@ class ManyToManyRelationWithParameterCodeTest extends AbstractManyToManyCodeTest
     {
         $expected = '
     /**
-     * Gets a combined collection of array{\Base\Team, string, int} objects related by a many-to-many relationship
+     * Gets a combined collection of array{\Team, string, int} objects related by a many-to-many relationship
      * to the current object by way of the team_user cross-reference table.
      *
      * If the $criteria is not null, it is used to always fetch the results from the database.
@@ -240,7 +240,7 @@ class ManyToManyRelationWithParameterCodeTest extends AbstractManyToManyCodeTest
      * @param \Propel\Runtime\ActiveQuery\Criteria|null $criteria Optional query object to filter the query
      * @param \Propel\Runtime\Connection\ConnectionInterface|null $con Optional connection object
      *
-     * @return \Propel\Runtime\Collection\ObjectCombinationCollection<array{\Base\Team, string, int}>
+     * @return \Propel\Runtime\Collection\ObjectCombinationCollection<array{\Team, string, int}>
      */
     public function getTeamDayTypes(?Criteria $criteria = null, ?ConnectionInterface $con = null): ObjectCombinationCollection
     {
@@ -295,8 +295,8 @@ class ManyToManyRelationWithParameterCodeTest extends AbstractManyToManyCodeTest
     }
 
     /**
-     * Returns a not cached ObjectCollection of Team objects. This will hit always the databases.
-     * If you have attached new Team object to this object you need to call `save` first to get
+     * Returns a not cached ObjectCollection of ChildTeam objects. This will hit always the databases.
+     * If you have attached new ChildTeam object to this object you need to call `save` first to get
      * the correct return value. Use getTeamDayTypes() to get the current internal state.
      *
      * @param string|null $day
@@ -326,7 +326,7 @@ class ManyToManyRelationWithParameterCodeTest extends AbstractManyToManyCodeTest
      * It will also schedule objects for deletion based on a diff between old objects (aka persisted)
      * and new objects from the given Propel collection.
      *
-     * @param \Propel\Runtime\Collection\Collection<array{\Base\Team, string, int}> $teamDayTypes A Propel collection.
+     * @param \Propel\Runtime\Collection\Collection<array{\Team, string, int}> $teamDayTypes A Propel collection.
      * @param \Propel\Runtime\Connection\ConnectionInterface|null $con Optional connection object
      *
      * @return static
@@ -400,8 +400,8 @@ class ManyToManyRelationWithParameterCodeTest extends AbstractManyToManyCodeTest
     }
 
     /**
-     * Returns the not cached count of Team objects. This will hit always the databases.
-     * If you have attached new Team object to this object you need to call `save` first to get
+     * Returns the not cached count of ChildTeam objects. This will hit always the databases.
+     * If you have attached new ChildTeam object to this object you need to call `save` first to get
      * the correct return value. Use getTeamDayTypes() to get the current internal state.
      *
      * @param string|null $day
@@ -428,13 +428,13 @@ class ManyToManyRelationWithParameterCodeTest extends AbstractManyToManyCodeTest
     /**
      * Associate a Team with this object through the team_user cross reference table.
      *
-     * @param \Base\Team $team
+     * @param \Team $team
      * @param string $day
      * @param int $type
      *
      * @return static
      */
-    public function addTeam(Team $team, string $day, int $type): static
+    public function addTeam(ChildTeam $team, string $day, int $type): static
     {
         if ($this->combinationTeamDayTypes === null) {
             $this->initTeamDayTypes();
@@ -459,13 +459,13 @@ class ManyToManyRelationWithParameterCodeTest extends AbstractManyToManyCodeTest
     {
         $expected = '
     /**
-     * @param \Base\Team $team
+     * @param \Team $team
      * @param string $day
      * @param int $type
      *
      * return void
      */
-    protected function doAddTeamDayType(Team $team, string $day, int $type): void
+    protected function doAddTeamDayType(ChildTeam $team, string $day, int $type): void
     {
         $teamUser = new ChildTeamUser();
         $teamUser->setTeam($team);
@@ -498,13 +498,13 @@ class ManyToManyRelationWithParameterCodeTest extends AbstractManyToManyCodeTest
     /**
      * Remove team, day, type of this object through the team_user cross reference table.
      *
-     * @param \Base\Team $team
+     * @param \Team $team
      * @param string $day
      * @param int $type
      *
      * @return static
      */
-    public function removeTeamDayType(Team $team, string $day, int $type): static
+    public function removeTeamDayType(ChildTeam $team, string $day, int $type): static
     {
         if (!$this->getTeamDayTypes()->contains([$team, $day, $type])) {
             return $this;
