@@ -236,7 +236,7 @@ class ObjectCollectionBuilder extends AbstractOMBuilder
             return $collectionClassNameFq;
         }
 
-        $modelClassName = $this->codeBuilderStore->getObjectBuilder()->getFullyQualifiedClassName();
+        $modelClassName = $this->codeBuilderStore->getStubObjectBuilder()->getFullyQualifiedClassName();
 
         return '\\' . ObjectCollection::class . "<$modelClassName>";
     }
@@ -271,7 +271,7 @@ class ObjectCollectionBuilder extends AbstractOMBuilder
             return $className;
         }
 
-        $modelClassName = $this->referencedClasses->resolveClassNameForTable(GeneratorConfig::KEY_OBJECT_BASE, $table ?? $this->getTable());
+        $modelClassName = $this->referencedClasses->resolveClassNameForTable(GeneratorConfig::KEY_OBJECT_STUB, $table ?? $this->getTable());
 
         return '\\' . ObjectCollection::class . "<$modelClassName>";
     }

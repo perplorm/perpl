@@ -165,6 +165,7 @@ class FkRelationCodeProducer extends AbstractRelationCodeProducer
         $relationIdentifierSingular = $this->relation->getIdentifier();
         $varName = '$' . lcfirst($relationIdentifierSingular);
         $reverseIdentifierSingular = $this->relation->getIdentifierReversed();
+        $ownStubClassFqcn = $this->getStubObjectBuilder()->getFullyQualifiedClassName();
 
         [$targetClassName, $targetType] = $this->getTargetClassNameOrInterface();
 
@@ -203,6 +204,7 @@ class FkRelationCodeProducer extends AbstractRelationCodeProducer
         $script .= "
 
         \$this->$attributeName = $varName;
+        assert(\$this instanceof $ownStubClassFqcn);
         {$varName}?->{$setAdd}{$reverseIdentifierSingular}(\$this);
 
         return \$this;
@@ -221,6 +223,7 @@ class FkRelationCodeProducer extends AbstractRelationCodeProducer
         $fk = $this->relation;
         $varName = $this->getAttributeName();
         $relationIdentifierSingular = $fk->getIdentifier();
+        $ownStubClassFqcn = $this->getStubObjectBuilder()->getFullyQualifiedClassName();
 
         $relationIdentifierReversedSingular = $fk->getIdentifierReversed();
         $relationIdentifierReversedPlural = $fk->getIdentifierReversed($this->getPluralizer());
@@ -259,6 +262,7 @@ class FkRelationCodeProducer extends AbstractRelationCodeProducer
         if ($fk->isLocalPrimaryKey()) {
             $script .= "
             // Because this foreign key represents a one-to-one relationship, we will create a bi-directional association.
+            assert(\$this instanceof $ownStubClassFqcn);
             \$this->{$varName}->set{$relationIdentifierReversedSingular}(\$this);";
         } else {
             $script .= "

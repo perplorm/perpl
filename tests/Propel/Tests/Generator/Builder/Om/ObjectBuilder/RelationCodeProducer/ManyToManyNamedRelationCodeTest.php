@@ -339,6 +339,7 @@ class ManyToManyNamedRelationCodeTest extends AbstractManyToManyCodeTest
     {
         $teamUser = new ChildTeamUser();
         $teamUser->setLeTeam($leTeam);
+        assert($this instanceof \User);
         $teamUser->setLeUser($this);
 
         $this->addTeamUser($teamUser);
@@ -371,6 +372,8 @@ class ManyToManyNamedRelationCodeTest extends AbstractManyToManyCodeTest
         if (!$this->getLeTeams()->contains($leTeam)) {
             return $this;
         }
+
+        assert($this instanceof \User);
 
         $teamUser = new ChildTeamUser();
         $teamUser->setLeTeam($leTeam);

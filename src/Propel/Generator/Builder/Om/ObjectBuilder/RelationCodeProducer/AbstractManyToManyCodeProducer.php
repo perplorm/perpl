@@ -599,6 +599,8 @@ abstract class AbstractManyToManyCodeProducer extends AbstractRelationCodeProduc
             $inputArgs = "[$inputArgs]";
         }
 
+        $ownStubClassFqcn = $this->getStubObjectBuilder()->getFullyQualifiedClassName();
+
         $script .= "
     /**
      * Remove $names of this object through the {$middleTableName->getName()} cross reference table.
@@ -611,6 +613,8 @@ abstract class AbstractManyToManyCodeProducer extends AbstractRelationCodeProduc
         if (!\$this->get{$targetIdentifierPlural}()->contains({$inputArgs})) {
             return \$this;
         }
+
+        assert(\$this instanceof $ownStubClassFqcn);
 
         {$middleModelName} = new {$middleModelClassName}();";
 

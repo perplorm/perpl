@@ -289,6 +289,7 @@ class ManyToManyRelationCodeProducer extends AbstractManyToManyCodeProducer
 
         $ownIdentifierSingular = $this->names->getSourceIdentifier(false);
         $ownIdentifierPlural = $this->names->getSourceIdentifier(true);
+        $ownStubClassFqcn = $this->getStubObjectBuilder()->getFullyQualifiedClassName();
 
         $script .= "
     /**{$phpDoc}
@@ -299,6 +300,7 @@ class ManyToManyRelationCodeProducer extends AbstractManyToManyCodeProducer
     {
         {$middleTableObject} = new $middleTableModelClass();
         {$middleTableObject}->set{$targetIdentifierSingular}($targetObject);
+        assert(\$this instanceof $ownStubClassFqcn);
         {$middleTableObject}->set{$ownIdentifierSingular}(\$this);
 
         \$this->add{$middleTableIdentifierSingular}($middleTableObject);

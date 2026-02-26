@@ -494,6 +494,7 @@ class OneToManyRelationCodeProducer extends AbstractIncomingRelationCode
         $lowerRelatedObjectClassName = lcfirst($relatedObjectClassName);
         $varName = $this->getAttributeName();
         $reversedRelationIdentifier = $this->relation->getIdentifier();
+        $ownStubClassFqcn = $this->getStubObjectBuilder()->getFullyQualifiedClassName();
 
         $script .= "
     /**
@@ -504,6 +505,7 @@ class OneToManyRelationCodeProducer extends AbstractIncomingRelationCode
     protected function doAdd{$relatedObjectClassName}($targetClassName \${$lowerRelatedObjectClassName}): void
     {
         \$this->{$varName}->append(\${$lowerRelatedObjectClassName});
+        assert(\$this instanceof $ownStubClassFqcn);
         \${$lowerRelatedObjectClassName}->set{$reversedRelationIdentifier}(\$this);
     }
 ";

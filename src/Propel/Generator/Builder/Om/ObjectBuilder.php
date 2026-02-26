@@ -3133,6 +3133,21 @@ $indent};";
     public function clear()
     {";
 
+        $hasFkBackReference = false;
+        foreach ($table->getForeignKeys() as $fk) {
+            if (!$fk->isOneToOne()) {
+                $hasFkBackReference = true;
+
+                break;
+            }
+        }
+
+        if ($hasFkBackReference) {
+            $ownStubClassFqcn = $this->getStubObjectBuilder()->getFullyQualifiedClassName();
+            $script .= "
+        assert(\$this instanceof $ownStubClassFqcn);";
+        }
+
         foreach ($table->getForeignKeys() as $fk) {
             $attributeName = $this->getFKVarName($fk);
             $relationIdentifier = $fk->getIdentifierReversed();

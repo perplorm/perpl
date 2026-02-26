@@ -140,6 +140,7 @@ class RelationFromOneCodeProducer extends AbstractIncomingRelationCode
         $referrer = $this->relation;
         $modelClassName = $this->targetTableNames->useObjectStubClassName();
         $modelClassNameFq = $this->targetTableNames->useObjectStubClassName(false);
+        $ownStubClassFqcn = $this->getStubObjectBuilder()->getFullyQualifiedClassName();
 
         $ownIdentifier = $referrer->getIdentifier();
         $relationIdentifier = $referrer->getIdentifierReversed();
@@ -160,6 +161,7 @@ class RelationFromOneCodeProducer extends AbstractIncomingRelationCode
 
         // Make sure that that the passed-in $modelClassName isn't already associated with this object
         if (\$v && \$v->get{$ownIdentifier}() === null) {
+            assert(\$this instanceof $ownStubClassFqcn);
             \$v->set{$ownIdentifier}(\$this);
         }
 
