@@ -226,8 +226,8 @@ class OneToManyRelationCodeProducer extends AbstractIncomingRelationCode
      */
     protected function addAdd(string &$script): void
     {
-        $className = $this->targetTableNames->useObjectBaseClassName();
-        $classNameFq = $this->targetTableNames->useObjectBaseClassName(false);
+        $className = $this->targetTableNames->useObjectStubClassName();
+        $classNameFq = $this->targetTableNames->useObjectStubClassName(false);
 
         $modelVar = '$' . lcfirst($className);
 
@@ -330,7 +330,7 @@ class OneToManyRelationCodeProducer extends AbstractIncomingRelationCode
     {
         $attributeName = $this->getAttributeName();
         $targetModelClassName = $this->relation->getForeignTableName();
-        $targetModelClassNameFqcn = $this->targetTableNames->useObjectBaseClassName(false);
+        $targetModelClassNameFqcn = $this->targetTableNames->useObjectStubClassName(false);
         $relationIdentifierSingular = $this->relation->getIdentifier();
         $relationIdentifierPlural = $this->relation->getIdentifierReversed($this->getPluralizer());
         $relationQueryClassName = $this->targetTableNames->useQueryStubClassName();
@@ -427,7 +427,7 @@ class OneToManyRelationCodeProducer extends AbstractIncomingRelationCode
         $inputCollectionItem = lcfirst($relationIdentifierSingular);
 
         $targetModelClassName = $this->relation->getForeignTableName();
-        $targetModelClassNameFq = $this->targetTableNames->useObjectBaseClassName(false);
+        $targetModelClassNameFq = $this->targetTableNames->useObjectStubClassName(false);
         $targetCollectionType = $this->targetTableNames->useCollectionClassName();
 
         $attributeName = $this->getAttributeName();
@@ -488,8 +488,8 @@ class OneToManyRelationCodeProducer extends AbstractIncomingRelationCode
      */
     protected function addDoAdd(string &$script): void
     {
-        $targetClassName = $this->targetTableNames->useObjectBaseClassName();
-        $targetClassNameFq = $this->targetTableNames->useObjectBaseClassName(false);
+        $targetClassName = $this->targetTableNames->useObjectStubClassName();
+        $targetClassNameFq = $this->targetTableNames->useObjectStubClassName(false);
         $relatedObjectClassName = $this->relation->getIdentifierReversed();
         $lowerRelatedObjectClassName = lcfirst($relatedObjectClassName);
         $varName = $this->getAttributeName();
@@ -516,8 +516,8 @@ class OneToManyRelationCodeProducer extends AbstractIncomingRelationCode
      */
     protected function addRemove(string &$script): void
     {
-        $targetClassName = $this->targetTableNames->useObjectBaseClassName();
-        $targetClassNameFq = $this->targetTableNames->useObjectBaseClassName(false);
+        $targetClassName = $this->targetTableNames->useObjectStubClassName();
+        $targetClassNameFq = $this->targetTableNames->useObjectStubClassName(false);
 
         $relationIdentifierPlural = $this->relation->getIdentifierReversed($this->getPluralizer());
         $relationIdentifierSingular = $this->relation->getIdentifierReversed();

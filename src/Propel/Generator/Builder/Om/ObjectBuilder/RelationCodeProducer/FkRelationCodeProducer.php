@@ -66,8 +66,8 @@ class FkRelationCodeProducer extends AbstractRelationCodeProducer
      */
     protected function getTargetClassNameOrInterface(): array
     {
-        $className = $this->targetTableNames->useObjectBaseClassName();
-        $classNameFq = $this->targetTableNames->useObjectBaseClassName(false);
+        $className = $this->targetTableNames->useObjectStubClassName();
+        $classNameFq = $this->targetTableNames->useObjectStubClassName(false);
 
         /*
         $interface = $this->relation->getInterface();
@@ -90,7 +90,7 @@ class FkRelationCodeProducer extends AbstractRelationCodeProducer
     #[\Override]
     public function addAttributes(string &$script): void
     {
-        $className = $this->targetTableNames->useObjectBaseClassName();
+        $className = $this->targetTableNames->useObjectStubClassName();
         $relationIdentifier = $this->relation->getIdentifier();
         $varName = '$' . $this->getAttributeName();
 

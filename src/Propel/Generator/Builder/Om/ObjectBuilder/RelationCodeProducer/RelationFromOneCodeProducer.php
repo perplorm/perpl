@@ -49,7 +49,7 @@ class RelationFromOneCodeProducer extends AbstractIncomingRelationCode
     public function addAttributes(string &$script): void
     {
         $varName = '$' . $this->getAttributeName();
-        $className = $this->targetTableNames->useObjectBaseClassName();
+        $className = $this->targetTableNames->useObjectStubClassName();
         $relationIdentifier = $this->relation->getIdentifierReversed();
 
         $script .= "
@@ -103,8 +103,8 @@ class RelationFromOneCodeProducer extends AbstractIncomingRelationCode
      */
     protected function addGet(string &$script): void
     {
-        $modelClassName = $this->targetTableNames->useObjectBaseClassName();
-        $modelClassNameFq = $this->targetTableNames->useObjectBaseClassName(false);
+        $modelClassName = $this->targetTableNames->useObjectStubClassName();
+        $modelClassNameFq = $this->targetTableNames->useObjectStubClassName(false);
         $queryClassName = $this->targetTableNames->useQueryStubClassName();
         $varName = $this->getAttributeName();
         $relationIdentifier = $this->relation->getIdentifierReversed();
@@ -138,8 +138,8 @@ class RelationFromOneCodeProducer extends AbstractIncomingRelationCode
     protected function addSet(string &$script): void
     {
         $referrer = $this->relation;
-        $modelClassName = $this->targetTableNames->useObjectBaseClassName();
-        $modelClassNameFq = $this->targetTableNames->useObjectBaseClassName(false);
+        $modelClassName = $this->targetTableNames->useObjectStubClassName();
+        $modelClassNameFq = $this->targetTableNames->useObjectStubClassName(false);
 
         $ownIdentifier = $referrer->getIdentifier();
         $relationIdentifier = $referrer->getIdentifierReversed();

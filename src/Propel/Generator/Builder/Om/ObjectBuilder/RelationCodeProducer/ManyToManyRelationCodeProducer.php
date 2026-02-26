@@ -128,7 +128,7 @@ class ManyToManyRelationCodeProducer extends AbstractManyToManyCodeProducer
 
         $targetIdentifierPlural = $this->names->getTargetIdentifier(true);
 
-        $targetModelClassName = $this->targetTableNames->useObjectBaseClassName();
+        $targetModelClassName = $this->targetTableNames->useObjectStubClassName();
         $targetQueryClassName = $this->targetTableNames->useQueryStubClassName();
 
         $attributeName = $this->names->getAttributeWithCollectionName();

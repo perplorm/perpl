@@ -115,7 +115,7 @@ protected \$old{$relationName}{$aggregateName};
         $relationName = $this->getRelationName($builder);
         $varName = '$' . lcfirst($relationName);
         $aggregateName = $this->getParameter('aggregate_name');
-        $relatedClass = $builder->getClassNameFromBuilder($builder->getNewObjectBuilder($this->getForeignTable()));
+        $relatedClass = $builder->getClassNameFromBuilder($builder->getNewStubObjectBuilder($this->getForeignTable()));
         $search = "    public function set{$relationName}(?{$relatedClass} $varName = null)
     {";
         $replace = $search . "
