@@ -484,10 +484,10 @@ class TernaryRelationCodeProducer extends AbstractManyToManyCodeProducer
         {$foreignObjectName}->set{$primaryKey->getPhpName()}(\$$paramName);";
         }
 
-        $ownStubClassFqcn = $this->getStubObjectBuilder()->getFullyQualifiedClassName();
+        $ownStubClassName = $this->referencedClasses->useEntityObjectClassNames($this->getTable())->useObjectStubClassName();
 
         $script .= "
-        assert(\$this instanceof $ownStubClassFqcn);
+        assert(\$this instanceof $ownStubClassName);
         {$foreignObjectName}->set{$sourceIdentifierSingular}(\$this);
 
         \$this->add{$refKObjectClassName}({$foreignObjectName});\n";

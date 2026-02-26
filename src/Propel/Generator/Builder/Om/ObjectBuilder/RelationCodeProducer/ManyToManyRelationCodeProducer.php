@@ -289,7 +289,7 @@ class ManyToManyRelationCodeProducer extends AbstractManyToManyCodeProducer
 
         $ownIdentifierSingular = $this->names->getSourceIdentifier(false);
         $ownIdentifierPlural = $this->names->getSourceIdentifier(true);
-        $ownStubClassFqcn = $this->getStubObjectBuilder()->getFullyQualifiedClassName();
+        $ownStubClassName = $this->referencedClasses->useEntityObjectClassNames($this->getTable())->useObjectStubClassName();
 
         $script .= "
     /**{$phpDoc}
@@ -300,7 +300,7 @@ class ManyToManyRelationCodeProducer extends AbstractManyToManyCodeProducer
     {
         {$middleTableObject} = new $middleTableModelClass();
         {$middleTableObject}->set{$targetIdentifierSingular}($targetObject);
-        assert(\$this instanceof $ownStubClassFqcn);
+        assert(\$this instanceof $ownStubClassName);
         {$middleTableObject}->set{$ownIdentifierSingular}(\$this);
 
         \$this->add{$middleTableIdentifierSingular}($middleTableObject);

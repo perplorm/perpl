@@ -599,7 +599,7 @@ abstract class AbstractManyToManyCodeProducer extends AbstractRelationCodeProduc
             $inputArgs = "[$inputArgs]";
         }
 
-        $ownStubClassFqcn = $this->getStubObjectBuilder()->getFullyQualifiedClassName();
+        $ownStubClassName = $this->referencedClasses->useEntityObjectClassNames($this->getTable())->useObjectStubClassName();
 
         $script .= "
     /**
@@ -614,7 +614,7 @@ abstract class AbstractManyToManyCodeProducer extends AbstractRelationCodeProduc
             return \$this;
         }
 
-        assert(\$this instanceof $ownStubClassFqcn);
+        assert(\$this instanceof $ownStubClassName);
 
         {$middleModelName} = new {$middleModelClassName}();";
 

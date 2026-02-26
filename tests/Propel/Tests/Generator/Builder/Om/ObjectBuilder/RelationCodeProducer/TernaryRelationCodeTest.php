@@ -544,7 +544,7 @@ class TernaryRelationCodeTest extends AbstractManyToManyCodeTest
         $teamUser = new ChildTeamUser();
         $teamUser->setTeam($team);
         $teamUser->setEvent($event);
-        assert($this instanceof \User);
+        assert($this instanceof ChildUser);
         $teamUser->setUser($this);
 
         $this->addTeamUser($teamUser);
@@ -592,7 +592,7 @@ class TernaryRelationCodeTest extends AbstractManyToManyCodeTest
             return $this;
         }
 
-        assert($this instanceof \User);
+        assert($this instanceof ChildUser);
 
         $teamUser = new ChildTeamUser();
         $teamUser->setTeam($team);

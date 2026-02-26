@@ -3143,9 +3143,9 @@ $indent};";
         }
 
         if ($hasFkBackReference) {
-            $ownStubClassFqcn = $this->getStubObjectBuilder()->getFullyQualifiedClassName();
+            $ownStubClassName = $this->referencedClasses->useEntityObjectClassNames($this->getTable())->useObjectStubClassName();
             $script .= "
-        assert(\$this instanceof $ownStubClassFqcn);";
+        assert(\$this instanceof $ownStubClassName);";
         }
 
         foreach ($table->getForeignKeys() as $fk) {
