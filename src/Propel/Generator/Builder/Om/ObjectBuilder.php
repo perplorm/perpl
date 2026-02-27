@@ -1949,13 +1949,12 @@ $indent};";
             $checkExpression = implode(" &&\n$offset", $checks);
             $script .= "
         \$pkIsValid = $checkExpression;
-        
         if (\$pkIsValid) {
             \$json = json_encode(\$this->getPrimaryKey(), JSON_UNESCAPED_UNICODE);
             if (\$json === false) {
                 throw new RuntimeException('Failed to encode PK as JSON.');
             }
- 
+
             return crc32(\$json);
         }
 ";
@@ -3133,17 +3132,9 @@ $indent};";
     public function clear()
     {";
 
-        $hasFkBackReference = false;
-        foreach ($table->getForeignKeys() as $fk) {
-            if (!$fk->isOneToOne()) {
-                $hasFkBackReference = true;
-
-                break;
-            }
-        }
-
+        $hasFkBackReference = array_any($table->getForeignKeys(), fn (ForeignKey $fk) => !$fk->isOneToOne());
         if ($hasFkBackReference) {
-            $ownStubClassName = $this->referencedClasses->useEntityObjectClassNames($this->getTable())->useObjectStubClassName();
+            $ownStubClassName = $this->getObjectClassName();
             $script .= "
         assert(\$this instanceof $ownStubClassName);";
         }

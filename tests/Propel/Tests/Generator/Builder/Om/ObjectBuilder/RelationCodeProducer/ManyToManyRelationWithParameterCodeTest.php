@@ -295,8 +295,8 @@ class ManyToManyRelationWithParameterCodeTest extends AbstractManyToManyCodeTest
     }
 
     /**
-     * Returns a not cached ObjectCollection of ChildTeam objects. This will hit always the databases.
-     * If you have attached new ChildTeam object to this object you need to call `save` first to get
+     * Returns a not cached ObjectCollection of Team objects. This will hit always the databases.
+     * If you have attached new Team object to this object you need to call `save` first to get
      * the correct return value. Use getTeamDayTypes() to get the current internal state.
      *
      * @param string|null $day
@@ -400,8 +400,8 @@ class ManyToManyRelationWithParameterCodeTest extends AbstractManyToManyCodeTest
     }
 
     /**
-     * Returns the not cached count of ChildTeam objects. This will hit always the databases.
-     * If you have attached new ChildTeam object to this object you need to call `save` first to get
+     * Returns the not cached count of Team objects. This will hit always the databases.
+     * If you have attached new Team object to this object you need to call `save` first to get
      * the correct return value. Use getTeamDayTypes() to get the current internal state.
      *
      * @param string|null $day

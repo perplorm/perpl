@@ -165,7 +165,7 @@ class FkRelationCodeProducer extends AbstractRelationCodeProducer
         $relationIdentifierSingular = $this->relation->getIdentifier();
         $varName = '$' . lcfirst($relationIdentifierSingular);
         $reverseIdentifierSingular = $this->relation->getIdentifierReversed();
-        $ownStubClassName = $this->referencedClasses->useEntityObjectClassNames($this->getTable())->useObjectStubClassName();
+        $ownStubClassName = $this->objectBuilder->getObjectClassName();
 
         [$targetClassName, $targetType] = $this->getTargetClassNameOrInterface();
 
@@ -223,7 +223,7 @@ class FkRelationCodeProducer extends AbstractRelationCodeProducer
         $fk = $this->relation;
         $varName = $this->getAttributeName();
         $relationIdentifierSingular = $fk->getIdentifier();
-        $ownStubClassName = $this->referencedClasses->useEntityObjectClassNames($this->getTable())->useObjectStubClassName();
+        $ownStubClassName = $this->objectBuilder->getObjectClassName();
 
         $relationIdentifierReversedSingular = $fk->getIdentifierReversed();
         $relationIdentifierReversedPlural = $fk->getIdentifierReversed($this->getPluralizer());

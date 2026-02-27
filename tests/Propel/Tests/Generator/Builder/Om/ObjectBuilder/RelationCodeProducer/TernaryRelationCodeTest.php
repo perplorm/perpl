@@ -318,8 +318,8 @@ class TernaryRelationCodeTest extends AbstractManyToManyCodeTest
     }
 
     /**
-     * Returns a not cached ObjectCollection of ChildTeam objects. This will hit always the databases.
-     * If you have attached new ChildTeam object to this object you need to call `save` first to get
+     * Returns a not cached ObjectCollection of Team objects. This will hit always the databases.
+     * If you have attached new Team object to this object you need to call `save` first to get
      * the correct return value. Use getTeamEvents() to get the current internal state.
      *
      * @param \Event $event
@@ -334,8 +334,8 @@ class TernaryRelationCodeTest extends AbstractManyToManyCodeTest
     }
 
     /**
-     * Returns a not cached ObjectCollection of ChildEvent objects. This will hit always the databases.
-     * If you have attached new ChildEvent object to this object you need to call `save` first to get
+     * Returns a not cached ObjectCollection of Event objects. This will hit always the databases.
+     * If you have attached new Event object to this object you need to call `save` first to get
      * the correct return value. Use getTeamEvents() to get the current internal state.
      *
      * @param \Team $team
@@ -438,8 +438,8 @@ class TernaryRelationCodeTest extends AbstractManyToManyCodeTest
     }
 
     /**
-     * Returns the not cached count of ChildTeam objects. This will hit always the databases.
-     * If you have attached new ChildTeam object to this object you need to call `save` first to get
+     * Returns the not cached count of Team objects. This will hit always the databases.
+     * If you have attached new Team object to this object you need to call `save` first to get
      * the correct return value. Use getTeamEvents() to get the current internal state.
      *
      * @param \Event $event
@@ -454,8 +454,8 @@ class TernaryRelationCodeTest extends AbstractManyToManyCodeTest
     }
 
     /**
-     * Returns the not cached count of ChildEvent objects. This will hit always the databases.
-     * If you have attached new ChildEvent object to this object you need to call `save` first to get
+     * Returns the not cached count of Event objects. This will hit always the databases.
+     * If you have attached new Event object to this object you need to call `save` first to get
      * the correct return value. Use getTeamEvents() to get the current internal state.
      *
      * @param \Team $team

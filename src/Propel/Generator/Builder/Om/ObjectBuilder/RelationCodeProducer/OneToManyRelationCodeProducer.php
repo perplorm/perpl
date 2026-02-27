@@ -494,7 +494,7 @@ class OneToManyRelationCodeProducer extends AbstractIncomingRelationCode
         $lowerRelatedObjectClassName = lcfirst($relatedObjectClassName);
         $varName = $this->getAttributeName();
         $reversedRelationIdentifier = $this->relation->getIdentifier();
-        $ownStubClassName = $this->referencedClasses->useEntityObjectClassNames($this->getTable())->useObjectStubClassName();
+        $ownStubClassName = $this->objectBuilder->getObjectClassName();
 
         $script .= "
     /**

@@ -166,7 +166,7 @@ class ManyToManyNamedRelationCodeTest extends AbstractManyToManyCodeTest
     {
         $expected = '
     /**
-     * Gets a collection of ChildTeam objects related by a many-to-many relationship
+     * Gets a collection of Team objects related by a many-to-many relationship
      * to the current object by way of the team_user cross-reference table.
      *
      * If the $criteria is not null, it is used to always fetch the results from the database.
