@@ -8,6 +8,7 @@
 
 namespace Propel\Tests\Runtime\Util;
 
+use BadMethodCallException;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\Util\PropelConditionalProxy;
 use Propel\Tests\Helpers\BaseTestCase;
@@ -51,6 +52,64 @@ class PropelConditionalProxyTest extends BaseTestCase
         $this->assertEquals($p->_elseif(false), $p, '_elseif returns fluid interface');
 
         $this->assertEquals($p->_else(), $criteria, '_else returns fluid interface');
+    }
+
+    /**
+     * @return void
+     */
+    public function testValidMethodCallsAreSkippedSilently()
+    {
+        $criteria = new ProxyTestCriteria();
+        $p = new TestPropelConditionalProxy($criteria, false);
+
+        // Methods that exist on the criteria should be silently skipped
+        $this->assertSame($p, $p->test(), 'Valid method calls should return $this when condition is false');
+        $this->assertSame($p, $p->dummy(), 'Valid method calls should return $this when condition is false');
+        $this->assertFalse($criteria->getTest(), 'Method should not have been executed on criteria');
+    }
+
+    /**
+     * @return void
+     */
+    public function testArbitraryMethodCallsAreSkippedSilently()
+    {
+        $criteria = new ProxyTestCriteria();
+        $p = new TestPropelConditionalProxy($criteria, false);
+
+        // Arbitrary method names should be silently skipped, since Criteria
+        // subclasses use __call for virtual methods (filterByX, orderByX, etc.)
+        $this->assertSame($p, $p->filterBySomething('value'));
+        $this->assertSame($p, $p->orderByName());
+        $this->assertSame($p, $p->anyOtherMethod());
+    }
+
+    /**
+     * @dataProvider conditionalFlowMethodsWithoutUnderscoreProvider
+     *
+     * @return void
+     */
+    public function testConditionalFlowMethodsWithoutUnderscoreThrowException(string $method)
+    {
+        $criteria = new ProxyTestCriteria();
+        $p = new TestPropelConditionalProxy($criteria, false);
+
+        $this->expectException(BadMethodCallException::class);
+        $this->expectExceptionMessage("Did you mean '_{$method}'");
+
+        $p->$method();
+    }
+
+    /**
+     * @return array<array<string>>
+     */
+    public static function conditionalFlowMethodsWithoutUnderscoreProvider(): array
+    {
+        return [
+            ['if'],
+            ['elseif'],
+            ['else'],
+            ['endif'],
+        ];
     }
 
     /**

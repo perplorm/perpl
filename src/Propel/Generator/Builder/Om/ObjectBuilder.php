@@ -1926,7 +1926,6 @@ $indent};";
             $checkExpression = implode(" &&\n$offset", $checks);
             $script .= "
         \$pkIsValid = $checkExpression;
-
         if (\$pkIsValid) {
             \$json = json_encode(\$this->getPrimaryKey(), JSON_UNESCAPED_UNICODE);
             if (\$json === false) {
@@ -3077,6 +3076,13 @@ $indent};";
      */
     public function clear()
     {";
+
+        $hasFkBackReference = array_any($table->getForeignKeys(), fn (ForeignKey $fk) => !$fk->isOneToOne());
+        if ($hasFkBackReference) {
+            $ownStubClassName = $this->getObjectClassName();
+            $script .= "
+        assert(\$this instanceof $ownStubClassName);";
+        }
 
         foreach ($table->getForeignKeys() as $fk) {
             $attributeName = $this->getFKVarName($fk);

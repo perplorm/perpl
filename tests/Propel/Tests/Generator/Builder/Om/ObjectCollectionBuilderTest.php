@@ -116,7 +116,7 @@ class ObjectCollectionBuilderTest extends AgnosticBuilderTestCase
                 </database>',
                 'user',
                 '\Propel\Runtime\Collection\ObjectCollection',
-                '\Propel\Runtime\Collection\ObjectCollection<\Base\User>'
+                '\Propel\Runtime\Collection\ObjectCollection<\User>'
             ], [
                 'set by collection-class parameter on table',
                 '<database collection-class="\Not\Foo\Collection">

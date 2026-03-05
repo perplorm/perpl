@@ -145,7 +145,7 @@ abstract class AbstractIncomingRelationCode extends AbstractRelationCodeProducer
         $this->declareClass(ObjectCollection::class);
 
         $refFK = $this->relation;
-        $classNameFq = $this->targetTableNames->useObjectBaseClassName(false);
+        $classNameFq = $this->targetTableNames->useObjectStubClassName(false);
 
         $relationIdentifier = $this->getRefFKPhpNameAffix($refFK, true);
         $relationIdentifierLc = lcfirst($relationIdentifier);

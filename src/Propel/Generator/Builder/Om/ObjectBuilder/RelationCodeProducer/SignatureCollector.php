@@ -157,7 +157,7 @@ class SignatureCollector
         $identifierOrder = $this->arrangeArgumentOrder($opts);
         foreach ($identifierOrder as $identifier) {
             $nameImporter = $this->nameImporters[$identifier];
-            $phpTypeHint = $nameImporter->useObjectBaseClassName();
+            $phpTypeHint = $nameImporter->useObjectStubClassName();
             $arguments[] = $this->buildArgumentDeclarationStatement($identifier, $phpTypeHint);
         }
 
@@ -234,7 +234,7 @@ class SignatureCollector
         foreach ($identifierOrder as $identifier) {
             $argumentName = '$' . lcfirst($identifier);
             $nameImporter = $this->nameImporters[$identifier];
-            $qualifiedType = $nameImporter->useObjectBaseClassName(false);
+            $qualifiedType = $nameImporter->useObjectStubClassName(false);
             $declarations[] = "\n     * @param $qualifiedType $argumentName";
         }
 
@@ -285,7 +285,7 @@ class SignatureCollector
      */
     public function buildCombinedType(): string
     {
-        $relationTargetTypes = array_map(fn ($imp) => $imp->useObjectBaseClassName(false), $this->nameImporters);
+        $relationTargetTypes = array_map(fn ($imp) => $imp->useObjectStubClassName(false), $this->nameImporters);
         $columnTypes = array_map(fn ($col) => $col->getPhpType(), $this->relation->getUnclassifiedPrimaryKeys());
         $types = array_merge($relationTargetTypes, $columnTypes);
 

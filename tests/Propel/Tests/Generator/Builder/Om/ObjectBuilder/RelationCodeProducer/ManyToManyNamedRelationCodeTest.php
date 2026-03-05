@@ -226,7 +226,7 @@ class ManyToManyNamedRelationCodeTest extends AbstractManyToManyCodeTest
      * It will also schedule objects for deletion based on a diff between old objects (aka persisted)
      * and new objects from the given Propel collection.
      *
-     * @param \Propel\Runtime\Collection\Collection<\Base\Team> $leTeams A Propel collection.
+     * @param \Propel\Runtime\Collection\Collection<\Team> $leTeams A Propel collection.
      * @param \Propel\Runtime\Connection\ConnectionInterface|null $con Optional connection object
      *
      * @return static
@@ -305,11 +305,11 @@ class ManyToManyNamedRelationCodeTest extends AbstractManyToManyCodeTest
     /**
      * Associate a LeTeam with this object through the team_user cross reference table.
      *
-     * @param \Base\Team $leTeam
+     * @param \Team $leTeam
      *
      * @return static
      */
-    public function addLeTeam(Team $leTeam): static
+    public function addLeTeam(ChildTeam $leTeam): static
     {
         if ($this->collLeTeams === null) {
             $this->initLeTeams();
@@ -331,14 +331,15 @@ class ManyToManyNamedRelationCodeTest extends AbstractManyToManyCodeTest
     {
         $expected = '
     /**
-     * @param \Base\Team $leTeam
+     * @param \Team $leTeam
      *
      * @return void
      */
-    protected function doAddLeTeam(Team $leTeam): void
+    protected function doAddLeTeam(ChildTeam $leTeam): void
     {
         $teamUser = new ChildTeamUser();
         $teamUser->setLeTeam($leTeam);
+        assert($this instanceof ChildUser);
         $teamUser->setLeUser($this);
 
         $this->addTeamUser($teamUser);
@@ -362,15 +363,17 @@ class ManyToManyNamedRelationCodeTest extends AbstractManyToManyCodeTest
     /**
      * Remove leTeam of this object through the team_user cross reference table.
      *
-     * @param \Base\Team $leTeam
+     * @param \Team $leTeam
      *
      * @return static
      */
-    public function removeLeTeam(Team $leTeam): static
+    public function removeLeTeam(ChildTeam $leTeam): static
     {
         if (!$this->getLeTeams()->contains($leTeam)) {
             return $this;
         }
+
+        assert($this instanceof ChildUser);
 
         $teamUser = new ChildTeamUser();
         $teamUser->setLeTeam($leTeam);
