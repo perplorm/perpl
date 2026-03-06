@@ -127,6 +127,8 @@ class ArrayColumnCodeProducer extends AbstractArrayColumnCodeProducer
     #[\Override]
     public function buildCreateFromFilterValueExpression(string $valueExpression): string
     {
+        $this->referencedClasses->registerFunction('is_array');
+
         return "is_array($valueExpression) ? $valueExpression : static::unserializeArray($valueExpression)";
     }
 }

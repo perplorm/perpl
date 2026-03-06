@@ -15,21 +15,19 @@
         $valueSet = TableTableMap::getValueSet(TableTableMap::COL_ENUMERATED_COLUMN);
         if (is_scalar($enumeratedColumn)) {
             if (!in_array($enumeratedColumn, $valueSet)) {
-                throw new PropelException(sprintf('Value "%s" is not accepted in this enumerated column', $enumeratedColumn));
+                throw new PropelException("Value '$enumeratedColumn' is not accepted in this enumerated column");
             }
             $enumeratedColumn = array_search($enumeratedColumn, $valueSet);
         } elseif (is_array($enumeratedColumn)) {
             $convertedValues = [];
             foreach ($enumeratedColumn as $value) {
                 if (!in_array($value, $valueSet)) {
-                    throw new PropelException(sprintf('Value "%s" is not accepted in this enumerated column', $value));
+                    throw new PropelException("Value '$value' is not accepted in this enumerated column");
                 }
                 $convertedValues[] = array_search($value, $valueSet);
             }
             $enumeratedColumn = $convertedValues;
-            if ($comparison === null) {
-                $comparison = Criteria::IN;
-            }
+            $comparison ??= Criteria::IN;
         }
         $this->addUsingOperator($resolvedColumn, $enumeratedColumn, $comparison);
 

@@ -12,10 +12,15 @@ use function array_diff;
 use function array_filter;
 use function array_intersect;
 use function array_keys;
+use function array_map;
 use function array_reduce;
 use function array_values;
 use function count;
+use function explode;
+use function gettype;
+use function implode;
 use function sprintf;
+use function trim;
 use const ARRAY_FILTER_USE_KEY;
 
 /**

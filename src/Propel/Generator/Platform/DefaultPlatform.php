@@ -30,6 +30,7 @@ use function in_array;
 use function is_string;
 use function preg_replace;
 use function sprintf;
+use function str_contains;
 use function str_replace;
 use function strlen;
 use function strpos;
@@ -530,10 +531,10 @@ DROP TABLE IF EXISTS " . $this->quoteIdentifier($table->getName()) . ";
             $value = $this->getBooleanString($value);
         } elseif ($col->isBinaryEnumType()) {
             $value = array_search($value, $col->getValueSet());
-        } elseif ($col->isBinarySetType() && is_string($value)) {
+        } elseif ($col->isBinarySetType()) {
             $items = SetColumnConverter::itemsCsvToArray($value);
             $value = SetColumnConverter::convertToBitmask($items, $col->getValueSet());
-        } elseif ($col->getType() === PropelTypes::SET_NATIVE && is_string($value)) {
+        } elseif ($col->getType() === PropelTypes::SET_NATIVE) {
             if (str_contains($value, ',')) {
                 return ''; // MySQL does not allow multiple values as default
             }

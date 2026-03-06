@@ -21,6 +21,7 @@ use function array_merge;
 use function array_slice;
 use function count;
 use function implode;
+use function in_array;
 use function sprintf;
 use function str_replace;
 use function strrpos;

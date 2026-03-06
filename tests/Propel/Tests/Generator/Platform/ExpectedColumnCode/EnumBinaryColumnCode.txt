@@ -39,7 +39,7 @@
             $valueSet = TableTableMap::getValueSet(TableTableMap::COL_ENUMERATED_COLUMN);
             $keyId = array_search($v, $valueSet);
             if (!is_int($keyId)) {
-                throw new PropelException(sprintf('Value "%s" is not accepted in this enumerated column', $v));
+                throw new PropelException("Value '$v' is not accepted in this enumerated column");
             }
             $v = $keyId;
         }
