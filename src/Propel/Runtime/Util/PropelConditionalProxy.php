@@ -26,16 +26,17 @@ use function in_array;
  *     ->doOtherStuff() // executed
  *   ->_endif(); // returns $c
  * @see Criteria
+ * @template QueryClass of \Propel\Runtime\ActiveQuery\Criteria
  */
 class PropelConditionalProxy
 {
     /**
-     * @var \Propel\Runtime\ActiveQuery\Criteria
+     * @var QueryClass
      */
     protected $criteria;
 
     /**
-     * @var \Propel\Runtime\Util\PropelConditionalProxy|null
+     * @var \Propel\Runtime\Util\PropelConditionalProxy<QueryClass>|null
      */
     protected $parent;
 
@@ -55,22 +56,18 @@ class PropelConditionalProxy
     protected $parentState;
 
     /**
-     * @param \Propel\Runtime\ActiveQuery\Criteria $criteria
+     * @param QueryClass $criteria
      * @param mixed $cond
-     * @param self|null $proxy
+     * @param \Propel\Runtime\Util\PropelConditionalProxy<QueryClass>|null $proxy
      */
-    public function __construct(Criteria $criteria, $cond, ?self $proxy = null)
+    public function __construct(Criteria $criteria, $cond, ?PropelConditionalProxy $proxy = null)
     {
         $this->criteria = $criteria;
         $this->wasTrue = false;
         $this->setConditionalState($cond);
         $this->parent = $proxy;
 
-        if ($proxy === null) {
-            $this->parentState = true;
-        } else {
-            $this->parentState = $proxy->getConditionalState();
-        }
+        $this->parentState = $proxy?->getConditionalState() ?? true;
     }
 
     /**
@@ -79,12 +76,10 @@ class PropelConditionalProxy
      *
      * @param mixed $cond Casts to bool for variable evaluation
      *
-     * @return \Propel\Runtime\ActiveQuery\Criteria|\Propel\Runtime\Util\PropelConditionalProxy
+     * @return QueryClass|\Propel\Runtime\Util\PropelConditionalProxy<QueryClass>
      */
     public function _if($cond)
     {
-        $cond = (bool)$cond; // Intentionally not typing the param to allow for evaluation inside this function
-
         return $this->criteria->_if($cond);
     }
 
@@ -93,7 +88,7 @@ class PropelConditionalProxy
      *
      * @param mixed $cond Casts to bool for variable evaluation
      *
-     * @return $this|\Propel\Runtime\ActiveQuery\Criteria
+     * @return $this|QueryClass
      */
     public function _elseif($cond)
     {
@@ -105,7 +100,7 @@ class PropelConditionalProxy
     /**
      * Allows for conditional statements in a fluid interface.
      *
-     * @return $this|\Propel\Runtime\ActiveQuery\Criteria
+     * @return $this|QueryClass
      */
     public function _else()
     {
@@ -116,7 +111,7 @@ class PropelConditionalProxy
      * Returns the parent object
      * Allows for conditional statements in a fluid interface.
      *
-     * @return \Propel\Runtime\ActiveQuery\Criteria|\Propel\Runtime\Util\PropelConditionalProxy
+     * @return QueryClass|\Propel\Runtime\Util\PropelConditionalProxy<QueryClass>
      */
     public function _endif()
     {
@@ -136,7 +131,7 @@ class PropelConditionalProxy
     /**
      * @param mixed $cond
      *
-     * @return $this|\Propel\Runtime\ActiveQuery\Criteria
+     * @return $this|QueryClass
      */
     protected function setConditionalState($cond)
     {
@@ -147,7 +142,7 @@ class PropelConditionalProxy
     }
 
     /**
-     * @return self|null
+     * @return self<QueryClass>|null
      */
     public function getParentProxy(): ?self
     {
@@ -155,15 +150,13 @@ class PropelConditionalProxy
     }
 
     /**
-     * @return $this|\Propel\Runtime\ActiveQuery\Criteria
+     * @return $this|QueryClass
      */
     public function getCriteriaOrProxy()
     {
-        if ($this->state && $this->parentState) {
-            return $this->criteria;
-        }
-
-        return $this;
+        return $this->state && $this->parentState
+            ? $this->criteria
+            : $this;
     }
 
     /**

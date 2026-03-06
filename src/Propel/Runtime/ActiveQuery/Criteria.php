@@ -393,7 +393,7 @@ class Criteria
     protected CombineOperatorManager $filterOperatorManager;
 
     /**
-     * @var \Propel\Runtime\Util\PropelConditionalProxy|null
+     * @var \Propel\Runtime\Util\PropelConditionalProxy<static>|null
      */
     protected $conditionalProxy;
 
@@ -2273,7 +2273,9 @@ class Criteria
      *
      * @param mixed $cond Casts to bool for variable evaluation
      *
-     * @return \Propel\Runtime\ActiveQuery\Criteria|\Propel\Runtime\Util\PropelConditionalProxy
+     * @return static Actual return is static|PropelConditionalProxy<static>,
+     *                 but the proxy is transparent (delegates via __call),
+     *                 so we annotate as static for IDE/DX purposes.
      */
     public function _if($cond)
     {
@@ -2281,7 +2283,10 @@ class Criteria
 
         $this->conditionalProxy = new PropelConditionalProxy($this, $cond, $this->conditionalProxy);
 
-        return $this->conditionalProxy->getCriteriaOrProxy();
+        /** @var static $queryOrProxy */
+        $queryOrProxy = $this->conditionalProxy->getCriteriaOrProxy();
+
+        return $queryOrProxy;
     }
 
     /**
@@ -2292,7 +2297,9 @@ class Criteria
      *
      * @throws \Propel\Runtime\Exception\LogicException
      *
-     * @return \Propel\Runtime\ActiveQuery\Criteria|\Propel\Runtime\Util\PropelConditionalProxy
+     * @return static Actual return is static|PropelConditionalProxy<static>,
+     *                 but the proxy is transparent (delegates via __call),
+     *                 so we annotate as static for IDE/DX purposes.
      */
     public function _elseif($cond)
     {
@@ -2301,8 +2308,10 @@ class Criteria
         if (!$this->conditionalProxy) {
             throw new LogicException(__METHOD__ . ' must be called after _if()');
         }
+        /** @var static $queryOrProxy */
+        $queryOrProxy = $this->conditionalProxy->_elseif($cond);
 
-        return $this->conditionalProxy->_elseif($cond);
+        return $queryOrProxy;
     }
 
     /**
@@ -2311,15 +2320,19 @@ class Criteria
      *
      * @throws \Propel\Runtime\Exception\LogicException
      *
-     * @return \Propel\Runtime\ActiveQuery\Criteria|\Propel\Runtime\Util\PropelConditionalProxy
+     * @return static Actual return is static|PropelConditionalProxy<static>,
+     *                 but the proxy is transparent (delegates via __call),
+     *                 so we annotate as static for IDE/DX purposes.
      */
     public function _else()
     {
         if (!$this->conditionalProxy) {
             throw new LogicException(__METHOD__ . ' must be called after _if()');
         }
+        /** @var static $queryOrProxy */
+        $queryOrProxy = $this->conditionalProxy->_else();
 
-        return $this->conditionalProxy->_else();
+        return $queryOrProxy;
     }
 
     /**
@@ -2328,7 +2341,9 @@ class Criteria
      *
      * @throws \Propel\Runtime\Exception\LogicException
      *
-     * @return \Propel\Runtime\ActiveQuery\Criteria|\Propel\Runtime\Util\PropelConditionalProxy
+     * @return static Actual return is static|PropelConditionalProxy<static>,
+     *                 but the proxy is transparent (delegates via __call),
+     *                 so we annotate as static for IDE/DX purposes.
      */
     public function _endif()
     {
@@ -2337,13 +2352,10 @@ class Criteria
         }
 
         $this->conditionalProxy = $this->conditionalProxy->getParentProxy();
+        /** @var static $queryOrNestedProxy */
+        $queryOrNestedProxy = $this->conditionalProxy?->getCriteriaOrProxy() ?? $this;
 
-        if ($this->conditionalProxy) {
-            return $this->conditionalProxy->getCriteriaOrProxy();
-        }
-
-        // reached last level
-        return $this;
+        return $queryOrNestedProxy;
     }
 
     /**
