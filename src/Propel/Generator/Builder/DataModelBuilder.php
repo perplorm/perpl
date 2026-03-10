@@ -5,6 +5,7 @@ declare(strict_types = 1);
 namespace Propel\Generator\Builder;
 
 use Propel\Common\Pluralizer\PluralizerInterface;
+use Propel\Generator\Builder\Om\AbstractObjectBuilder;
 use Propel\Generator\Builder\Om\AbstractOMBuilder;
 use Propel\Generator\Builder\Om\ExtensionObjectBuilder;
 use Propel\Generator\Builder\Om\ExtensionQueryBuilder;
@@ -642,5 +643,101 @@ abstract class DataModelBuilder
         }
 
         return $this->getBuildPropertyString('generator.dateTime.dateTimeClass') ?: '\DateTime';
+    }
+
+    /**
+     * @deprecated Use {@see static::getObjectBuilder()}
+     *
+     * @param \Propel\Generator\Model\Table $table
+     *
+     * @return \Propel\Generator\Builder\Om\ObjectBuilder
+     */
+    public function getNewObjectBuilder(Table $table): ObjectBuilder
+    {
+        return $this->getObjectBuilder($table);
+    }
+
+    /**
+     * @deprecated Use {@see static::getStubObjectBuilder()}
+     *
+     * @param \Propel\Generator\Model\Table $table
+     *
+     * @return \Propel\Generator\Builder\Om\AbstractObjectBuilder
+     */
+    public function getNewStubObjectBuilder(Table $table): AbstractObjectBuilder
+    {
+        return $this->getStubObjectBuilder($table);
+    }
+
+    /**
+     * @deprecated Use {@see static::getQueryBuilder()}
+     *
+     * @param \Propel\Generator\Model\Table $table
+     *
+     * @return \Propel\Generator\Builder\Om\QueryBuilder
+     */
+    public function getNewQueryBuilder(Table $table): QueryBuilder
+    {
+        return $this->getQueryBuilder($table);
+    }
+
+    /**
+     * @deprecated Use {@see static::getStubQueryBuilder()}
+     *
+     * @param \Propel\Generator\Model\Table $table
+     *
+     * @return \Propel\Generator\Builder\Om\AbstractOMBuilder
+     */
+    public function getNewStubQueryBuilder(Table $table): AbstractOMBuilder
+    {
+        return $this->getStubQueryBuilder($table);
+    }
+
+    /**
+     * @deprecated Use {@see static::getObjectCollectionBuilder()}
+     *
+     * @param \Propel\Generator\Model\Table $table
+     *
+     * @return \Propel\Generator\Builder\Om\TableMapBuilder
+     */
+    public function getNewTableMapBuilder(Table $table): TableMapBuilder
+    {
+        return $this->getTableMapBuilder($table);
+    }
+
+    /**
+     * @deprecated Use {@see static::getObjectCollectionBuilder()}
+     *
+     * @param \Propel\Generator\Model\Table $table
+     *
+     * @return \Propel\Generator\Builder\Om\ObjectCollectionBuilder
+     */
+    public function getNewObjectCollectionBuilder(Table $table): ObjectCollectionBuilder
+    {
+        return $this->getObjectCollectionBuilder($table);
+    }
+
+    /**
+     * @deprecated Use {@see static::getQueryInheritanceBuilder()}
+     *
+     * @param \Propel\Generator\Model\Inheritance $child
+     *
+     * @return \Propel\Generator\Builder\Om\AbstractOMBuilder
+     */
+    public function getNewQueryInheritanceBuilder(Inheritance $child): AbstractOMBuilder
+    {
+        return $this->getQueryInheritanceBuilder($child);
+    }
+
+    /**
+     * @deprecated Use {@see static::getStubQueryInheritanceBuilder()}
+     *
+     * @param \Propel\Generator\Model\Inheritance $child
+     *
+     * @return \Propel\Generator\Builder\Om\AbstractOMBuilder
+     */
+    public function getNewStubQueryInheritanceBuilder(Inheritance $child): AbstractOMBuilder
+    {
+        return $this->getStubQueryInheritanceBuilder($child);
     }
 }
