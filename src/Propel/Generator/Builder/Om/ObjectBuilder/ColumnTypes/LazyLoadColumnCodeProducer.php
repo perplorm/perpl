@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes;
 
@@ -222,6 +218,7 @@ class LazyLoadColumnCodeProducer extends ColumnCodeProducer
      */
     protected function addLazyLoaderBody(string &$script): void
     {
+        $this->declareGlobalFunction('current');
         $platform = $this->getPlatform();
         $clo = $this->column->getLowercasedName();
         $columnConstant = $this->objectBuilder->getColumnConstant($this->column);
@@ -255,6 +252,7 @@ class LazyLoadColumnCodeProducer extends ColumnCodeProducer
 
         if ($this->column->getType() === PropelTypes::CLOB && $platform instanceof OraclePlatform) {
             // PDO_OCI returns a stream for CLOB objects, while other PDO adapters return a string...
+            $this->declareGlobalFunction('stream_get_contents');
             $script .= "
             if (\$firstColumn) {
                 \$this->$clo = stream_get_contents(\$firstColumn);
@@ -270,6 +268,7 @@ class LazyLoadColumnCodeProducer extends ColumnCodeProducer
             \$this->$clo = (\$firstColumn !== null) ? new " . $this->column->getPhpType() . '($firstColumn) : null;';
         } elseif ($this->column->getType() === PropelTypes::UUID_BINARY) {
             $uuidSwapFlag = $this->objectBuilder->getUuidSwapFlagLiteral();
+            $this->declareGlobalFunction('is_resource', 'stream_get_contents');
             $script .= "
             if (is_resource(\$firstColumn)) {
                 \$firstColumn = stream_get_contents(\$firstColumn);
@@ -334,7 +333,7 @@ class LazyLoadColumnCodeProducer extends ColumnCodeProducer
     {
         $clo = $this->column->getLowercasedName();
         $cfc = $this->column->getPhpName();
-            $script .= "
+        $script .= "
         // explicitly set the is-loaded flag to true for this lazy load col;
         // it doesn't matter if the value is actually set or not (logic below) as
         // any attempt to set the value means that no db lookup should be performed

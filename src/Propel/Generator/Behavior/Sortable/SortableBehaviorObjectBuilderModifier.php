@@ -1,21 +1,20 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Behavior\Sortable;
 
 use Propel\Generator\Builder\Om\AbstractOMBuilder;
 use Propel\Generator\Model\Column;
+use function current;
+use function implode;
+use function preg_replace;
+use function str_replace;
+use function strtolower;
+use function strtoupper;
 
 /**
  * Behavior to add sortable columns and abilities
- *
- * @author François Zaninotto
- * @author heltem <heltem@o2php.com>
  */
 class SortableBehaviorObjectBuilderModifier
 {
@@ -373,16 +372,16 @@ public function getScopeValue(\$returnNulls = true)
 
     return \$onlyNulls && \$returnNulls ? null : \$result;
 ";
-        } elseif ($this->behavior->getColumnForParameter('scope_column')->isEnumType()) {
+        } elseif ($this->behavior->getColumnForParameter('scope_column')->isBinaryEnumType()) {
             $columnConstant = strtoupper(preg_replace('/[^a-zA-Z0-9_\x7f-\xff]/', '_', $this->getColumnAttribute('scope_column')));
             $script .= "
     return array_search(\$this->{$this->getColumnGetter('scope_column')}(), {$this->tableMapClassName}::getValueSet({$this->tableMapClassName}::COL_{$columnConstant}));
             ";
-        } elseif ($this->behavior->getColumnForParameter('scope_column')->isSetType()) {
+        } elseif ($this->behavior->getColumnForParameter('scope_column')->isBinarySetType()) {
             $columnConstant = strtoupper(preg_replace('/[^a-zA-Z0-9_\x7f-\xff]/', '_', $this->getColumnAttribute('scope_column')));
             $script .= "
     try {
-        return SetColumnConverter::convertToInt(\$this->{$this->getColumnGetter('scope_column')}(), {$this->tableMapClassName}::getValueSet({$this->tableMapClassName}::COL_{$columnConstant}));
+        return SetColumnConverter::convertToBitmask(\$this->{$this->getColumnGetter('scope_column')}(), {$this->tableMapClassName}::getValueSet({$this->tableMapClassName}::COL_{$columnConstant}));
     } catch (SetColumnConverterException \$e) {
         throw new PropelException(sprintf('Value `%s` is not accepted in this set column', \$e->getValue()), \$e->getCode(), \$e);
     }

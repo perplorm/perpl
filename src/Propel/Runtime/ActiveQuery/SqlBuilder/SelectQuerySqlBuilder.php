@@ -1,16 +1,23 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Runtime\ActiveQuery\SqlBuilder;
 
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\FilterExpression\ColumnFilterInterface;
 use Propel\Runtime\ActiveQuery\ModelCriteria;
+use function array_diff;
+use function array_filter;
+use function array_map;
+use function array_unique;
+use function count;
+use function implode;
+use function in_array;
+use function method_exists;
+use function strpos;
+use function strrpos;
+use function substr;
 
 /**
  * This class produces the base object class (e.g. BaseMyTable) which contains

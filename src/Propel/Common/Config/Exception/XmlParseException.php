@@ -1,12 +1,13 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Common\Config\Exception;
+
+use function count;
+use const LIBXML_ERR_ERROR;
+use const LIBXML_ERR_FATAL;
+use const LIBXML_ERR_WARNING;
 
 class XmlParseException extends RuntimeException implements ExceptionInterface
 {

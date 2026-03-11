@@ -1,15 +1,16 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Runtime\ActiveQuery;
 
 use Countable;
 use Propel\Runtime\Propel;
+use function count;
+use function is_array;
+use function is_object;
+use function is_scalar;
+use function serialize;
 
 trait InstancePoolTrait
 {

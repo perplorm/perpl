@@ -1,16 +1,11 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Reverse;
 
 use PDO;
 use Propel\Generator\Model\Column;
-use Propel\Generator\Model\ColumnDefaultValue;
 use Propel\Generator\Model\Database;
 use Propel\Generator\Model\ForeignKey;
 use Propel\Generator\Model\Index;
@@ -19,11 +14,23 @@ use Propel\Generator\Model\Table;
 use Propel\Generator\Model\Unique;
 use RuntimeException;
 use stdClass;
+use function count;
+use function explode;
+use function implode;
+use function in_array;
+use function is_string;
+use function preg_match;
+use function preg_replace;
+use function sprintf;
+use function str_replace;
+use function strlen;
+use function strpos;
+use function strtoupper;
+use function substr;
+use function trim;
 
 /**
  * Postgresql database schema parser.
- *
- * @author Hans Lellelid <hans@xmpl.org>
  */
 class PgsqlSchemaParser extends AbstractSchemaParser
 {
@@ -335,13 +342,11 @@ class PgsqlSchemaParser extends AbstractSchemaParser
             }
 
             if ($default !== null) {
-                if ($this->isColumnDefaultExpression($default)) {
-                    $defaultType = ColumnDefaultValue::TYPE_EXPR;
-                } else {
-                    $defaultType = ColumnDefaultValue::TYPE_VALUE;
+                $isExpression = $this->isColumnDefaultExpression($default);
+                if (!$isExpression) {
                     $default = str_replace("'", '', $strDefault);
                 }
-                $column->getDomain()->setDefaultValue(new ColumnDefaultValue($default, $defaultType));
+                $column->getDomain()->createDefaultValue($default, $isExpression);
             }
 
             $column->setAutoIncrement((bool)$autoincrement);

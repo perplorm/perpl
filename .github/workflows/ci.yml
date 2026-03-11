@@ -8,6 +8,11 @@ on:
   pull_request:
   workflow_dispatch:
 
+env:
+  DB_NAME: 'perpl_tests'
+  DB_USER: 'perpl'
+  DB_PW: 'perpl'
+
 jobs:
     testsuite:
         name: "Test Suite"
@@ -15,57 +20,49 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                php-version: [ '8.1', '8.4' ]
+                php-version: [ '8.1', '8.5' ]
                 db-type: [ sqlite, mysql, pgsql, agnostic ]
-                symfony-version: [ '5-min', '5-max', '6-min', '6-max', '7-min', '7-max']
+                symfony-version: [ '6-min', '6-max', '7-min', '7-max', '8-min', '8-max']
                 exclude:
-                  - symfony-version: '6-min'
-                    php-version: '8.1'
-                  - symfony-version: '6-max'
-                    php-version: '8.1'
                   - symfony-version: '7-min'
                     php-version: '8.1'
                   - symfony-version: '7-max'
                     php-version: '8.1'
-        env:
-            DB_NAME: 'propel_tests'
-            DB_USER: 'propel'
-            DB_PW: 'propel'
+                  - symfony-version: '8-min'
+                    php-version: '8.1'
+                  - symfony-version: '8-max'
+                    php-version: '8.1'
+        services:
+            postgres:
+                image: ${{ matrix.db-type != 'pgsql' && '' || (matrix.php-version == '8.1' && 'postgres:9' || 'postgres:latest') }}
+                env:
+                    POSTGRES_DB: ${{ env.DB_NAME }}
+                    POSTGRES_USER: ${{ env.DB_USER }}
+                    POSTGRES_PASSWORD: ${{ env.DB_PW }}
+                ports:
+                    - 5432:5432
+                options: >-
+                    --health-cmd pg_isready
+                    --health-interval 10s
+                    --health-timeout 5s
+                    --health-retries 5
+            mysql:
+                image: ${{ matrix.db-type != 'mysql' && '' || (matrix.php-version == '8.1' && 'mariadb:10.2' || 'mysql:latest') }}
+                env:
+                    MYSQL_ROOT_PASSWORD: ${{ env.DB_PW }}
+                    MYSQL_DATABASE: ${{ env.DB_NAME }}
+                    MYSQL_USER: ${{ env.DB_USER }}
+                    MYSQL_PASSWORD: ${{ env.DB_PW }}
+                ports:
+                    - 3306:3306
+                options: >-
+                    --health-cmd="mysqladmin ping"
+                    --health-interval=10s
+                    --health-timeout=5s
+                    --health-retries=3
+
         steps:
-            - name: Install PostgreSQL latest
-              if: matrix.db-type == 'pgsql' && matrix.php-version != '8.1'
-              uses: CasperWA/postgresql-action@v1.2
-              with:
-                  postgresql db: $DB_NAME
-                  postgresql user: $DB_USER
-                  postgresql password: $DB_PW
-
-            - name: Install PostgreSQL min
-              if: matrix.db-type == 'pgsql' && matrix.php-version == '8.1'
-              uses: CasperWA/postgresql-action@v1.2
-              with:
-                  postgresql version: 9
-                  postgresql db: $DB_NAME
-                  postgresql user: $DB_USER
-                  postgresql password: $DB_PW
-
-            - name: Install MySQL latest
-              if: matrix.db-type == 'mysql' && matrix.php-version != '8.1'
-              uses: mirromutth/mysql-action@v1.1
-              with:
-                  mysql root password: $DB_PW
-
-            - name: Install MariaDb min
-              if: matrix.db-type == 'mysql' && matrix.php-version == '8.1'
-              uses: getong/mariadb-action@v1.1
-              with:
-                  mariadb version: '10.2'
-                  mysql root password: $DB_PW
-
             - uses: actions/checkout@v3
-
-            - name: Move specific composer.json (Symfony version ${{ matrix.symfony-version }})
-              run: mv tests/composer/composer-symfony${{ matrix.symfony-version }}.json composer.json
 
             - id: build-container
               uses: ./.github/actions/setup-php
@@ -74,28 +71,11 @@ jobs:
                 symfony-version: ${{ matrix.symfony-version }}
                 cache-key-suffix: ${{ matrix.db-type}}
 
-            - name: Wait for MySQL server to load
-              if: matrix.db-type == 'mysql'
-              run: |
-                bash -c "
-                for i in {1..10}; do
-                  mysqladmin -h 127.0.0.1 -u root status >/dev/null 2>&1 && exit 0 || sleep 6
-                  echo 'trying again'
-                done;
-                echo 'could not establish connection after 10 tries'
-                exit 1
-                "
-              env:
-                MYSQL_PWD: ${{ env.DB_PW }}
-
-            - name: Create MySQL Propel user
+            - name: Grant MySQL privileges to DB user
               if: matrix.db-type == 'mysql'
               run: |
                 mysql -h 127.0.0.1 -u root -e "
-                  CREATE USER '$DB_USER'@'localhost' IDENTIFIED BY '$DB_PW';
-                  CREATE USER '$DB_USER'@'%' IDENTIFIED BY '$DB_PW';
-                  GRANT ALL PRIVILEGES ON *.* TO '$DB_USER'@'localhost';
-                  GRANT ALL PRIVILEGES ON *.* TO '$DB_USER'@'%';
+                  GRANT ALL PRIVILEGES ON *.* TO '${{ env.DB_USER }}'@'%';
                   FLUSH PRIVILEGES;
                 "
               env:
@@ -106,9 +86,9 @@ jobs:
               run: tests/bin/setup.${{ matrix.db-type }}.sh
 
             - name: Run tests
-              shell: 'script -q -e -c "bash {0}"'
+              shell: bash
               run: |
-                if [[ ${{ matrix.php-version }} == '8.1' && ${{ matrix.symfony-version }} == '5-max' ]]; then
+                if [[ ${{ matrix.php-version }} == '8.1' && ${{ matrix.symfony-version }} == '6-max' ]]; then
                   export CODECOVERAGE=1 && vendor/bin/phpunit -c tests/${{ matrix.db-type }}.phpunit.xml --verbose --coverage-clover=tests/coverage.xml
                 else
                   vendor/bin/phpunit -c tests/${{ matrix.db-type }}.phpunit.xml
@@ -117,21 +97,30 @@ jobs:
                 SYMFONY_VERSION: ${{ matrix.symfony-version }}
 
             - name: Code Coverage Report
-              if: success() && matrix.php-version == '8.1' && matrix.symfony-version == '5-max'
+              if: success() && matrix.php-version == '8.1' && matrix.symfony-version == '6-max'
               uses: codecov/codecov-action@v1
               with:
                   flags: ${{ matrix.php-version }}, ${{ matrix.db-type }}, ${{ matrix.symfony-version }}
                   file: tests/coverage.xml
 
     static-analysis:
+        name: 'Stan & Psalm'
         runs-on: ubuntu-24.04
+        strategy:
+          fail-fast: false
+          matrix:
+            include:
+              - php-version: '8.1'
+                symfony-version: '6-max'
+              - php-version: '8.5'
+                symfony-version: '8-max'
         steps:
             - uses: actions/checkout@v3
             - id: build-container
               uses: ./.github/actions/setup-php
               with:
-                php-version: 8.1
-                symfony-version: 6-max
+                php-version: ${{ matrix.php-version }}
+                symfony-version: ${{ matrix.symfony-version }}
                 cache-key-suffix: sa
             - name: PHPStan
               env:
@@ -141,6 +130,7 @@ jobs:
               run: composer psalm -- --php-version=${{ steps.build-container.outputs.php-version }}
 
     code-style:
+        name: 'Code Style (PHPCS)'
         runs-on: ubuntu-24.04
         steps:
             - uses: actions/checkout@v3
@@ -153,8 +143,23 @@ jobs:
             - name: Code Style
               run: composer cs-check
 
-    model-code-style:
+    generated-code-style:
         runs-on: ubuntu-24.04
+        strategy:
+          fail-fast: false
+          matrix:
+            type: ['query', 'model']
+            check: ['PHPCS', 'Stan']
+            include:
+              - check: PHPCS
+                command: 'cs-check -- --exclude=SlevomatCodingStandard.TypeHints.DeclareStrictTypes'
+              - check: Stan
+                command: 'stan -- -a autoload.php.dist'
+              - type: query
+                file-pattern: '*Query.php'
+              - type: model
+                file-pattern: '*[^Query].php'
+        name: '${{ matrix.check }} on ${{ matrix.type }} code'
         steps:
             - uses: actions/checkout@v3
             - id: build-container
@@ -163,52 +168,7 @@ jobs:
                 php-version: 8.4
                 symfony-version: 6-max
                 cache-key-suffix: cs
-            - name: Lint Model Code
+            - name: Run checks on generated code
               run: |
-                bin/propel test:prepare --vendor=sqlite --dsn='sqlite:/tmp/perpl.sq3' --exclude-database \
-                && composer cs-check tests/Fixtures/bookstore/build/classes/Propel/Tests/Bookstore/Base/*[^Query].php
-
-    model-static-analysis:
-        runs-on: ubuntu-24.04
-        steps:
-            - uses: actions/checkout@v3
-            - id: build-container
-              uses: ./.github/actions/setup-php
-              with:
-                php-version: 8.4
-                symfony-version: 6-max
-                cache-key-suffix: cs
-            - name: Analyze Model Code
-              run: |
-                bin/propel test:prepare --vendor=sqlite --dsn='sqlite:/tmp/perpl.sq3' --exclude-database \
-                && composer stan -- -a autoload.php.dist tests/Fixtures/bookstore/build/classes/Propel/Tests/Bookstore/Base/*[^Query].php
- 
-    query-code-style:
-        runs-on: ubuntu-24.04
-        steps:
-            - uses: actions/checkout@v3
-            - id: build-container
-              uses: ./.github/actions/setup-php
-              with:
-                php-version: 8.4
-                symfony-version: 6-max
-                cache-key-suffix: cs
-            - name: Lint Query Code
-              run: |
-                bin/propel test:prepare --vendor=sqlite --dsn='sqlite:/tmp/perpl.sq3' --exclude-database \
-                && composer cs-check tests/Fixtures/bookstore/build/classes/Propel/Tests/Bookstore/Base/*Query.php
-
-    query-static-analysis:
-        runs-on: ubuntu-24.04
-        steps:
-            - uses: actions/checkout@v3
-            - id: build-container
-              uses: ./.github/actions/setup-php
-              with:
-                php-version: 8.4
-                symfony-version: 6-max
-                cache-key-suffix: cs
-            - name: Analyze Query Code
-              run: |
-                bin/propel test:prepare --vendor=sqlite --dsn='sqlite:/tmp/perpl.sq3' --exclude-database \
-                && composer stan -- -a autoload.php.dist tests/Fixtures/bookstore/build/classes/Propel/Tests/Bookstore/Base/*Query.php
+                bin/perpl test:prepare --vendor=sqlite --dsn='sqlite:/tmp/perpl.sq3' --exclude-database \
+                && composer ${{ matrix.command }} tests/Fixtures/bookstore/build/classes/Propel/Tests/Bookstore/Base/${{ matrix.file-pattern }}

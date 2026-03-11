@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Builder\Om\ObjectBuilder\RelationCodeProducer;
 
@@ -13,6 +9,13 @@ use Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes\ColumnCodeProducerFact
 use Propel\Generator\Builder\Util\EntityObjectClassNames;
 use Propel\Generator\Model\Column;
 use Propel\Generator\Model\ForeignKey;
+use function count;
+use function implode;
+use function in_array;
+use function ksort;
+use function lcfirst;
+use function reset;
+use function var_export;
 
 class FkRelationCodeProducer extends AbstractRelationCodeProducer
 {
@@ -162,6 +165,7 @@ class FkRelationCodeProducer extends AbstractRelationCodeProducer
      */
     protected function addMutator(string &$script): void
     {
+        $this->referencedClasses->registerFunction('assert');
         $relationIdentifierSingular = $this->relation->getIdentifier();
         $varName = '$' . lcfirst($relationIdentifierSingular);
         $reverseIdentifierSingular = $this->relation->getIdentifierReversed();
@@ -260,6 +264,7 @@ class FkRelationCodeProducer extends AbstractRelationCodeProducer
                 ->findOne(\$con);";
         }
         if ($fk->isLocalPrimaryKey()) {
+            $this->referencedClasses->registerFunction('assert');
             $script .= "
             // Because this foreign key represents a one-to-one relationship, we will create a bi-directional association.
             assert(\$this instanceof $ownStubClassName);

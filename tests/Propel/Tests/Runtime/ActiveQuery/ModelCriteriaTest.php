@@ -45,7 +45,7 @@ class ModelCriteriaTest extends BookstoreTestBase
     /**
      * @return void
      */
-    protected function assertCriteriaTranslation($criteria, $expectedSql, $expectedParams, $message = '')
+    protected function assertSelectStatement($criteria, $expectedSql, $expectedParams, $message = '')
     {
         $params = [];
         $result = $criteria->createSelectSql($params);
@@ -103,7 +103,7 @@ class ModelCriteriaTest extends BookstoreTestBase
         $params = [
             ['table' => 'book', 'column' => 'title', 'value' => 'foo'],
         ];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'setModelAlias() allows the definition of the alias after construction');
+        $this->assertSelectStatement($c, $sql, $params, 'setModelAlias() allows the definition of the alias after construction');
 
         $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\Book', 'b');
         $c->where('b.Title = ?', 'foo');
@@ -112,7 +112,7 @@ class ModelCriteriaTest extends BookstoreTestBase
         $params = [
             ['table' => 'book', 'column' => 'title', 'value' => 'foo'],
         ];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'A ModelCriteria accepts a model name with an alias');
+        $this->assertSelectStatement($c, $sql, $params, 'A ModelCriteria accepts a model name with an alias');
     }
 
     /**
@@ -132,7 +132,7 @@ class ModelCriteriaTest extends BookstoreTestBase
             ['table' => 'book', 'column' => 'title', 'value' => 'foo'],
             ['table' => 'author', 'column' => 'first_name', 'value' => 'john'],
         ];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'setModelAlias() allows the definition of a true SQL alias after construction');
+        $this->assertSelectStatement($c, $sql, $params, 'setModelAlias() allows the definition of a true SQL alias after construction');
     }
 
     /**
@@ -152,7 +152,7 @@ class ModelCriteriaTest extends BookstoreTestBase
             ['table' => 'book', 'column' => 'title', 'value' => 'foo'],
             ['table' => 'author', 'column' => 'first_name', 'value' => 'john'],
         ];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'setModelAlias() allows the definition of a true SQL alias after construction');
+        $this->assertSelectStatement($c, $sql, $params, 'setModelAlias() allows the definition of a true SQL alias after construction');
     }
 
     /**
@@ -171,7 +171,7 @@ class ModelCriteriaTest extends BookstoreTestBase
             ['table' => 'book', 'column' => 'title', 'value' => 'foo'],
             ['table' => 'book', 'column' => 'title', 'value' => '%bar%'],
         ];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'condition() can store condition for later combination');
+        $this->assertSelectStatement($c, $sql, $params, 'condition() can store condition for later combination');
     }
 
     /**
@@ -191,7 +191,7 @@ class ModelCriteriaTest extends BookstoreTestBase
             ['table' => 'book', 'column' => 'title', 'value' => 'foo'],
             ['table' => null, 'type' => PDO::PARAM_STR, 'value' => '%bar%'],
         ];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'condition() accepts RAW sql parameters');
+        $this->assertSelectStatement($c, $sql, $params, 'condition() accepts RAW sql parameters');
     }
 
     public static function conditionsForTestWhere()
@@ -223,7 +223,7 @@ class ModelCriteriaTest extends BookstoreTestBase
 
         $sql = $this->getSql('SELECT  FROM book WHERE ' . $sql);
 
-        $this->assertCriteriaTranslation($c, $sql, $params, 'where() accepts a string clause');
+        $this->assertSelectStatement($c, $sql, $params, 'where() accepts a string clause');
     }
 
     /**
@@ -242,7 +242,7 @@ class ModelCriteriaTest extends BookstoreTestBase
             ['table' => 'book', 'column' => 'id', 'value' => '12'],
             ['table' => 'book', 'column' => 'title', 'value' => 'foo'],
         ];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'where() uses the default operator');
+        $this->assertSelectStatement($c, $sql, $params, 'where() uses the default operator');
     }
 
     /**
@@ -262,7 +262,7 @@ class ModelCriteriaTest extends BookstoreTestBase
 
         $sql = $this->getSql('SELECT  FROM book WHERE (book.id IN (:p1,:p2,:p3) AND book.id <> :p4)');
 
-        $this->assertCriteriaTranslation($c, $sql, $params, 'where() adds clauses on the same column correctly');
+        $this->assertSelectStatement($c, $sql, $params, 'where() adds clauses on the same column correctly');
     }
 
     /**
@@ -281,7 +281,7 @@ class ModelCriteriaTest extends BookstoreTestBase
             ['table' => 'book', 'column' => 'title', 'value' => 'foo'],
             ['table' => 'book', 'column' => 'title', 'value' => '%bar%'],
         ];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'where() accepts an array of named conditions');
+        $this->assertSelectStatement($c, $sql, $params, 'where() accepts an array of named conditions');
 
         $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\Book');
         $c->condition('cond1', 'Propel\Tests\Bookstore\Book.Title <> ?', 'foo');
@@ -290,7 +290,7 @@ class ModelCriteriaTest extends BookstoreTestBase
 
         $sql = $this->getSql('SELECT  FROM book WHERE (book.title <> :p1 OR book.title like :p2)');
 
-        $this->assertCriteriaTranslation($c, $sql, $params, 'where() accepts an array of named conditions with operator');
+        $this->assertSelectStatement($c, $sql, $params, 'where() accepts an array of named conditions with operator');
     }
 
     /**
@@ -307,7 +307,7 @@ class ModelCriteriaTest extends BookstoreTestBase
         $params = [
             ['table' => 'book', 'column' => 'title', 'value' => 'foo'],
         ];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'where() results in a Criteria::CUSTOM if no column name is matched');
+        $this->assertSelectStatement($c, $sql, $params, 'where() results in a Criteria::CUSTOM if no column name is matched');
 
         $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\Book');
         try {
@@ -331,7 +331,7 @@ class ModelCriteriaTest extends BookstoreTestBase
         $params = [
             ['table' => 'book', 'column' => 'title', 'value' => 'foo'],
         ];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'where() accepts a complex calculation');
+        $this->assertSelectStatement($c, $sql, $params, 'where() accepts a complex calculation');
     }
 
     /**
@@ -349,7 +349,7 @@ class ModelCriteriaTest extends BookstoreTestBase
         $params = [
             ['table' => null, 'type' => PDO::PARAM_BOOL, 'value' => true],
         ];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'where() accepts a complex calculation');
+        $this->assertSelectStatement($c, $sql, $params, 'where() accepts a complex calculation');
         $c->find($this->con);
 
         $expected = $this->getSql("SELECT book.id, book.title, book.isbn, book.price, book.publisher_id, book.author_id FROM book WHERE LOCATE('foo', book.title) = true");
@@ -372,7 +372,7 @@ class ModelCriteriaTest extends BookstoreTestBase
             ['table' => 'book', 'column' => 'title', 'value' => 'foo'],
             ['table' => 'book', 'column' => 'title', 'value' => '%bar%'],
         ];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'orWhere() combines the clause with the previous one using  OR');
+        $this->assertSelectStatement($c, $sql, $params, 'orWhere() combines the clause with the previous one using  OR');
     }
 
     /**
@@ -393,7 +393,7 @@ class ModelCriteriaTest extends BookstoreTestBase
             ['table' => 'book', 'column' => 'title', 'value' => 'foo'],
             ['table' => 'book', 'column' => 'title', 'value' => '%bar%'],
         ];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'orWhere() accepts an array of named conditions');
+        $this->assertSelectStatement($c, $sql, $params, 'orWhere() accepts an array of named conditions');
 
         $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\Book');
         $c->where('Propel\Tests\Bookstore\Book.Id = ?', 12);
@@ -403,7 +403,7 @@ class ModelCriteriaTest extends BookstoreTestBase
 
         $sql = $this->getSql('SELECT  FROM book WHERE (book.id = :p1 OR (book.title <> :p2 OR book.title like :p3))');
 
-        $this->assertCriteriaTranslation($c, $sql, $params, 'orWhere() accepts an array of named conditions with operator');
+        $this->assertSelectStatement($c, $sql, $params, 'orWhere() accepts an array of named conditions with operator');
     }
 
     /**
@@ -422,7 +422,7 @@ class ModelCriteriaTest extends BookstoreTestBase
             ['table' => 'book', 'column' => 'id', 'value' => 1],
             ['table' => 'book', 'column' => 'id', 'value' => 2],
         ];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'ModelCriteria accepts Criteria operators');
+        $this->assertSelectStatement($c, $sql, $params, 'ModelCriteria accepts Criteria operators');
     }
 
     /**
@@ -438,7 +438,7 @@ class ModelCriteriaTest extends BookstoreTestBase
         $params = [
             ['table' => 'book', 'column' => 'title', 'value' => 'foo'],
         ];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'filterBy() accepts a simple column name');
+        $this->assertSelectStatement($c, $sql, $params, 'filterBy() accepts a simple column name');
     }
 
     /**
@@ -454,7 +454,7 @@ class ModelCriteriaTest extends BookstoreTestBase
         $params = [
             ['table' => 'book', 'column' => 'title', 'value' => 'foo'],
         ];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'filterBy() accepts a custom comparator');
+        $this->assertSelectStatement($c, $sql, $params, 'filterBy() accepts a custom comparator');
     }
 
     /**
@@ -470,7 +470,7 @@ class ModelCriteriaTest extends BookstoreTestBase
         $params = [
             ['table' => 'book', 'column' => 'title', 'value' => 'foo'],
         ];
-        $this->assertCriteriaTranslation(
+        $this->assertSelectStatement(
             $c,
             $sql,
             $params,
@@ -503,7 +503,7 @@ class ModelCriteriaTest extends BookstoreTestBase
         $params = [
             ['table' => 'author', 'column' => 'age', 'value' => '40'],
         ];
-        $this->assertCriteriaTranslation($c, $sql, $params, $description);
+        $this->assertSelectStatement($c, $sql, $params, $description);
     }
 
 
@@ -520,7 +520,7 @@ class ModelCriteriaTest extends BookstoreTestBase
         $sql = $this->getSql($expectedQuery);
 
         $params = [];
-        $this->assertCriteriaTranslation($c, $sql, $params, '');
+        $this->assertSelectStatement($c, $sql, $params, '');
     }
 
     /**
@@ -561,7 +561,7 @@ class ModelCriteriaTest extends BookstoreTestBase
         $params = [
             ['table' => 'book', 'column' => 'title', 'value' => 'foo'],
         ];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'having() accepts a string clause');
+        $this->assertSelectStatement($c, $sql, $params, 'having() accepts a string clause');
     }
 
     /**
@@ -579,7 +579,7 @@ class ModelCriteriaTest extends BookstoreTestBase
             ['table' => 'book', 'column' => 'title', 'value' => 'foo'],
             ['table' => 'book', 'column' => 'title', 'value' => '%bar%'],
         ];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'having() accepts an array of named conditions');
+        $this->assertSelectStatement($c, $sql, $params, 'having() accepts an array of named conditions');
 
         $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\Book');
         $c->condition('cond1', 'Propel\Tests\Bookstore\Book.Title <> ?', 'foo');
@@ -587,7 +587,7 @@ class ModelCriteriaTest extends BookstoreTestBase
         $c->having(['cond1', 'cond2'], Criteria::LOGICAL_OR);
 
         $sql = 'SELECT  FROM book HAVING (book.title <> :p1 OR book.title like :p2)';
-        $this->assertCriteriaTranslation($c, $sql, $params, 'having() accepts an array of named conditions with an operator');
+        $this->assertSelectStatement($c, $sql, $params, 'having() accepts an array of named conditions with an operator');
     }
 
     /**
@@ -606,7 +606,7 @@ class ModelCriteriaTest extends BookstoreTestBase
         $params = [
             ['table' => null, 'type' => PDO::PARAM_STR, 'value' => 'foo'],
         ];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'having() accepts a string clause');
+        $this->assertSelectStatement($c, $sql, $params, 'having() accepts a string clause');
         $c->find($this->con);
 
         $expected = $this->getSql('SELECT book.id, book.title, book.isbn, book.price, book.publisher_id, book.author_id, SUBSTRING(book.title, 1, 4) AS title_start FROM book HAVING title_start = \'foo\'');
@@ -624,13 +624,13 @@ class ModelCriteriaTest extends BookstoreTestBase
 
         $sql = 'SELECT  FROM book ORDER BY book.title ASC';
         $params = [];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'orderBy() accepts a column name and adds an ORDER BY clause');
+        $this->assertSelectStatement($c, $sql, $params, 'orderBy() accepts a column name and adds an ORDER BY clause');
 
         $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\Book');
         $c->orderBy('Propel\Tests\Bookstore\Book.Title', 'desc');
 
         $sql = 'SELECT  FROM book ORDER BY book.title DESC';
-        $this->assertCriteriaTranslation($c, $sql, $params, 'orderBy() accepts an order parameter');
+        $this->assertSelectStatement($c, $sql, $params, 'orderBy() accepts an order parameter');
 
         $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\Book');
         try {
@@ -658,7 +658,7 @@ class ModelCriteriaTest extends BookstoreTestBase
 
         $sql = 'SELECT  FROM book ORDER BY book.title ASC';
         $params = [];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'orderBy() accepts a simple column name and adds an ORDER BY clause');
+        $this->assertSelectStatement($c, $sql, $params, 'orderBy() accepts a simple column name and adds an ORDER BY clause');
     }
 
     /**
@@ -672,7 +672,7 @@ class ModelCriteriaTest extends BookstoreTestBase
 
         $sql = 'SELECT book.title AS t FROM book ORDER BY t ASC';
         $params = [];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'orderBy() accepts a column alias and adds an ORDER BY clause');
+        $this->assertSelectStatement($c, $sql, $params, 'orderBy() accepts a column alias and adds an ORDER BY clause');
     }
 
     /**
@@ -685,7 +685,7 @@ class ModelCriteriaTest extends BookstoreTestBase
 
         $sql = 'SELECT  FROM book GROUP BY book.author_id';
         $params = [];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'groupBy() accepts a column name and adds a GROUP BY clause');
+        $this->assertSelectStatement($c, $sql, $params, 'groupBy() accepts a column name and adds a GROUP BY clause');
 
         $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\Book');
         try {
@@ -706,7 +706,7 @@ class ModelCriteriaTest extends BookstoreTestBase
 
         $sql = 'SELECT  FROM book GROUP BY book.author_id';
         $params = [];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'groupBy() accepts a simple column name and adds a GROUP BY clause');
+        $this->assertSelectStatement($c, $sql, $params, 'groupBy() accepts a simple column name and adds a GROUP BY clause');
     }
 
     /**
@@ -720,7 +720,7 @@ class ModelCriteriaTest extends BookstoreTestBase
 
         $sql = 'SELECT book.title AS t FROM book GROUP BY t';
         $params = [];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'groupBy() accepts a column alias and adds a GROUP BY clause');
+        $this->assertSelectStatement($c, $sql, $params, 'groupBy() accepts a column alias and adds a GROUP BY clause');
     }
 
     /**
@@ -744,7 +744,7 @@ class ModelCriteriaTest extends BookstoreTestBase
 
         $sql = 'SELECT  FROM book GROUP BY book.id,book.title,book.isbn,book.price,book.publisher_id,book.author_id';
         $params = [];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'groupByClass() accepts a class name and adds a GROUP BY clause for all columns of the class');
+        $this->assertSelectStatement($c, $sql, $params, 'groupByClass() accepts a class name and adds a GROUP BY clause for all columns of the class');
     }
 
     /**
@@ -757,7 +757,7 @@ class ModelCriteriaTest extends BookstoreTestBase
 
         $sql = 'SELECT  FROM book GROUP BY book.id,book.title,book.isbn,book.price,book.publisher_id,book.author_id';
         $params = [];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'groupByClass() accepts a class alias and adds a GROUP BY clause for all columns of the class');
+        $this->assertSelectStatement($c, $sql, $params, 'groupByClass() accepts a class alias and adds a GROUP BY clause for all columns of the class');
     }
 
     /**
@@ -771,7 +771,7 @@ class ModelCriteriaTest extends BookstoreTestBase
 
         $sql = 'SELECT  FROM book b GROUP BY b.id,b.title,b.isbn,b.price,b.publisher_id,b.author_id';
         $params = [];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'groupByClass() accepts a true class alias and adds a GROUP BY clause for all columns of the class');
+        $this->assertSelectStatement($c, $sql, $params, 'groupByClass() accepts a true class alias and adds a GROUP BY clause for all columns of the class');
     }
 
     /**
@@ -785,7 +785,7 @@ class ModelCriteriaTest extends BookstoreTestBase
 
         $sql = $this->getSql('SELECT  FROM author INNER JOIN book ON (author.id=book.author_id) GROUP BY book.id,book.title,book.isbn,book.price,book.publisher_id,book.author_id');
         $params = [];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'groupByClass() accepts the class name of a joined model');
+        $this->assertSelectStatement($c, $sql, $params, 'groupByClass() accepts the class name of a joined model');
     }
 
     /**
@@ -799,7 +799,7 @@ class ModelCriteriaTest extends BookstoreTestBase
 
         $sql = $this->getSql('SELECT  FROM author INNER JOIN book b ON (author.id=b.author_id) GROUP BY b.id,b.title,b.isbn,b.price,b.publisher_id,b.author_id');
         $params = [];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'groupByClass() accepts the alias of a joined model');
+        $this->assertSelectStatement($c, $sql, $params, 'groupByClass() accepts the alias of a joined model');
     }
 
     /**
@@ -811,7 +811,7 @@ class ModelCriteriaTest extends BookstoreTestBase
         $c->distinct();
         $sql = 'SELECT DISTINCT  FROM book';
         $params = [];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'distinct() adds a DISTINCT clause');
+        $this->assertSelectStatement($c, $sql, $params, 'distinct() adds a DISTINCT clause');
     }
 
     /**
@@ -823,12 +823,12 @@ class ModelCriteriaTest extends BookstoreTestBase
         $c->limit(10);
         $sql = 'SELECT  FROM book LIMIT 10';
         $params = [];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'limit() adds a LIMIT clause');
+        $this->assertSelectStatement($c, $sql, $params, 'limit() adds a LIMIT clause');
         //test that limit 0 also works
         $c->limit(0);
         $sql = 'SELECT  FROM book LIMIT 0';
         $params = [];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'limit() adds a LIMIT clause');
+        $this->assertSelectStatement($c, $sql, $params, 'limit() adds a LIMIT clause');
     }
 
     /**
@@ -845,7 +845,7 @@ class ModelCriteriaTest extends BookstoreTestBase
             $sql = 'SELECT  FROM book LIMIT 50 OFFSET 10';
         }
         $params = [];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'offset() adds an OFFSET clause');
+        $this->assertSelectStatement($c, $sql, $params, 'offset() adds an OFFSET clause');
     }
 
     /**
@@ -858,7 +858,7 @@ class ModelCriteriaTest extends BookstoreTestBase
         $c->addJoin(BookTableMap::COL_PUBLISHER_ID, PublisherTableMap::COL_ID);
         $sql = $this->getSql('SELECT  FROM book INNER JOIN author ON (book.author_id=author.id) INNER JOIN publisher ON (book.publisher_id=publisher.id)');
         $params = [];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'addJoin() works the same as in Criteria');
+        $this->assertSelectStatement($c, $sql, $params, 'addJoin() works the same as in Criteria');
     }
 
     /**
@@ -870,7 +870,7 @@ class ModelCriteriaTest extends BookstoreTestBase
         $c->join('Propel\Tests\Bookstore\Book.Author');
         $sql = $this->getSql('SELECT  FROM book INNER JOIN author ON (book.author_id=author.id)');
         $params = [];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'join() uses a relation to guess the columns');
+        $this->assertSelectStatement($c, $sql, $params, 'join() uses a relation to guess the columns');
 
         $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\Book');
         try {
@@ -887,7 +887,7 @@ class ModelCriteriaTest extends BookstoreTestBase
         $params = [
             ['table' => 'author', 'column' => 'first_name', 'value' => 'Leo'],
         ];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'join() uses a relation to guess the columns');
+        $this->assertSelectStatement($c, $sql, $params, 'join() uses a relation to guess the columns');
 
         $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\Book');
         $c->join('Author');
@@ -896,7 +896,7 @@ class ModelCriteriaTest extends BookstoreTestBase
         $params = [
             ['table' => 'author', 'column' => 'first_name', 'value' => 'Leo'],
         ];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'join() uses the current model name when given a simple relation name');
+        $this->assertSelectStatement($c, $sql, $params, 'join() uses the current model name when given a simple relation name');
     }
 
     /**
@@ -927,7 +927,7 @@ class ModelCriteriaTest extends BookstoreTestBase
         $c->join('Propel\Tests\Bookstore\BookstoreEmployee.Supervisor');
         $sql = $this->getSql('SELECT  FROM bookstore_employee INNER JOIN bookstore_employee ON (bookstore_employee.supervisor_id=bookstore_employee.id)');
         $params = [];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'join() uses relation names as defined in schema.xml');
+        $this->assertSelectStatement($c, $sql, $params, 'join() uses relation names as defined in schema.xml');
     }
 
     /**
@@ -939,7 +939,7 @@ class ModelCriteriaTest extends BookstoreTestBase
         $c->join('Propel\Tests\Bookstore\ReaderFavorite.BookOpinion');
         $sql = $this->getSql('SELECT  FROM reader_favorite INNER JOIN book_opinion ON (reader_favorite.book_id=book_opinion.book_id AND reader_favorite.reader_id=book_opinion.reader_id)');
         $params = [];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'join() knows how to create a JOIN clause for relationships with composite fkeys');
+        $this->assertSelectStatement($c, $sql, $params, 'join() knows how to create a JOIN clause for relationships with composite fkeys');
     }
 
     /**
@@ -951,31 +951,31 @@ class ModelCriteriaTest extends BookstoreTestBase
         $c->join('Propel\Tests\Bookstore\Book.Author');
         $sql = $this->getSql('SELECT  FROM book INNER JOIN author ON (book.author_id=author.id)');
         $params = [];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'join() adds an INNER JOIN by default');
+        $this->assertSelectStatement($c, $sql, $params, 'join() adds an INNER JOIN by default');
 
         $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\Book');
         $c->join('Propel\Tests\Bookstore\Book.Author', Criteria::INNER_JOIN);
         $sql = $this->getSql('SELECT  FROM book INNER JOIN author ON (book.author_id=author.id)');
         $params = [];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'join() adds an INNER JOIN by default');
+        $this->assertSelectStatement($c, $sql, $params, 'join() adds an INNER JOIN by default');
 
         $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\Book');
         $c->join('Propel\Tests\Bookstore\Book.Author', Criteria::LEFT_JOIN);
         $sql = $this->getSql('SELECT  FROM book LEFT JOIN author ON (book.author_id=author.id)');
         $params = [];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'join() can add a LEFT JOIN');
+        $this->assertSelectStatement($c, $sql, $params, 'join() can add a LEFT JOIN');
 
         $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\Book');
         $c->join('Propel\Tests\Bookstore\Book.Author', Criteria::RIGHT_JOIN);
         $sql = $this->getSql('SELECT  FROM book RIGHT JOIN author ON (book.author_id=author.id)');
         $params = [];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'join() can add a RIGHT JOIN');
+        $this->assertSelectStatement($c, $sql, $params, 'join() can add a RIGHT JOIN');
 
         $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\Book');
         $c->join('Propel\Tests\Bookstore\Book.Author', 'incorrect join');
         $sql = $this->getSql('SELECT  FROM book incorrect join author ON (book.author_id=author.id)');
         $params = [];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'join() accepts any join string');
+        $this->assertSelectStatement($c, $sql, $params, 'join() accepts any join string');
     }
 
     /**
@@ -987,25 +987,25 @@ class ModelCriteriaTest extends BookstoreTestBase
         $c->join('Propel\Tests\Bookstore\Book.Author');
         $sql = $this->getSql('SELECT  FROM book INNER JOIN author ON (book.author_id=author.id)');
         $params = [];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'join() adds a JOIN clause correctly for many to one relationship');
+        $this->assertSelectStatement($c, $sql, $params, 'join() adds a JOIN clause correctly for many to one relationship');
 
         $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\Author');
         $c->join('Propel\Tests\Bookstore\Author.Book');
         $sql = $this->getSql('SELECT  FROM author INNER JOIN book ON (author.id=book.author_id)');
         $params = [];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'join() adds a JOIN clause correctly for one to many relationship');
+        $this->assertSelectStatement($c, $sql, $params, 'join() adds a JOIN clause correctly for one to many relationship');
 
         $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\BookstoreEmployee');
         $c->join('Propel\Tests\Bookstore\BookstoreEmployee.BookstoreEmployeeAccount');
         $sql = $this->getSql('SELECT  FROM bookstore_employee INNER JOIN bookstore_employee_account ON (bookstore_employee.id=bookstore_employee_account.employee_id)');
         $params = [];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'join() adds a JOIN clause correctly for one to one relationship');
+        $this->assertSelectStatement($c, $sql, $params, 'join() adds a JOIN clause correctly for one to one relationship');
 
         $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\BookstoreEmployeeAccount');
         $c->join('Propel\Tests\Bookstore\BookstoreEmployeeAccount.BookstoreEmployee');
         $sql = $this->getSql('SELECT  FROM bookstore_employee_account INNER JOIN bookstore_employee ON (bookstore_employee_account.employee_id=bookstore_employee.id)');
         $params = [];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'join() adds a JOIN clause correctly for one to one relationship');
+        $this->assertSelectStatement($c, $sql, $params, 'join() adds a JOIN clause correctly for one to one relationship');
     }
 
     /**
@@ -1021,7 +1021,7 @@ class ModelCriteriaTest extends BookstoreTestBase
         $params = [
             ['table' => 'publisher', 'column' => 'name', 'value' => 'foo'],
         ];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'join() can guess relationships from related tables');
+        $this->assertSelectStatement($c, $sql, $params, 'join() can guess relationships from related tables');
     }
 
     /**
@@ -1033,25 +1033,25 @@ class ModelCriteriaTest extends BookstoreTestBase
         $c->join('b.Author');
         $sql = $this->getSql('SELECT  FROM book INNER JOIN author ON (book.author_id=author.id)');
         $params = [];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'join() supports relation on main alias');
+        $this->assertSelectStatement($c, $sql, $params, 'join() supports relation on main alias');
 
         $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\Book', 'b');
         $c->join('Author');
         $sql = $this->getSql('SELECT  FROM book INNER JOIN author ON (book.author_id=author.id)');
         $params = [];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'join() can use a simple relation name when the model has an alias');
+        $this->assertSelectStatement($c, $sql, $params, 'join() can use a simple relation name when the model has an alias');
 
         $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\Book');
         $c->join('Propel\Tests\Bookstore\Book.Author a');
         $sql = $this->getSql('SELECT  FROM book INNER JOIN author a ON (book.author_id=a.id)');
         $params = [];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'join() supports relation alias');
+        $this->assertSelectStatement($c, $sql, $params, 'join() supports relation alias');
 
         $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\Book', 'b');
         $c->join('b.Author a');
         $sql = $this->getSql('SELECT  FROM book INNER JOIN author a ON (book.author_id=a.id)');
         $params = [];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'join() supports relation alias on main alias');
+        $this->assertSelectStatement($c, $sql, $params, 'join() supports relation alias on main alias');
 
         $con = Propel::getServiceContainer()->getConnection(BookTableMap::DATABASE_NAME);
         $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\Book', 'b');
@@ -1061,7 +1061,7 @@ class ModelCriteriaTest extends BookstoreTestBase
         $params = [
             ['table' => 'author', 'column' => 'first_name', 'value' => 'Leo'],
         ];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'join() allows the use of relation alias in where()');
+        $this->assertSelectStatement($c, $sql, $params, 'join() allows the use of relation alias in where()');
 
         $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\Author', 'a');
         $c->join('a.Book b');
@@ -1071,7 +1071,7 @@ class ModelCriteriaTest extends BookstoreTestBase
         $params = [
             ['table' => 'publisher', 'column' => 'name', 'value' => 'foo'],
         ];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'join() allows the use of relation alias in further join()');
+        $this->assertSelectStatement($c, $sql, $params, 'join() allows the use of relation alias in further join()');
     }
 
     /**
@@ -1084,14 +1084,14 @@ class ModelCriteriaTest extends BookstoreTestBase
         $c->join('b.Author');
         $sql = $this->getSql('SELECT  FROM book b INNER JOIN author ON (b.author_id=author.id)');
         $params = [];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'join() supports relation on true table alias');
+        $this->assertSelectStatement($c, $sql, $params, 'join() supports relation on true table alias');
 
         $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\Book');
         $c->setModelAlias('b', true);
         $c->join('Author');
         $sql = $this->getSql('SELECT  FROM book b INNER JOIN author ON (b.author_id=author.id)');
         $params = [];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'join() supports relation without alias name on true table alias');
+        $this->assertSelectStatement($c, $sql, $params, 'join() supports relation without alias name on true table alias');
     }
 
     /**
@@ -1107,7 +1107,7 @@ class ModelCriteriaTest extends BookstoreTestBase
         $params = [
             ['table' => 'bookstore_employee', 'column' => 'name', 'value' => 'Foo'],
         ];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'join() allows two joins on the same table thanks to aliases');
+        $this->assertSelectStatement($c, $sql, $params, 'join() allows two joins on the same table thanks to aliases');
     }
 
     /**
@@ -1584,7 +1584,7 @@ class ModelCriteriaTest extends BookstoreTestBase
         $c->withColumn($clause, $alias);
         $sql = $this->getSql('SELECT book.id, book.title, book.isbn, book.price, book.publisher_id, book.author_id, ' . $selectTranslation . ' FROM book');
         $params = [];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'withColumn() adds a calculated column to the select clause');
+        $this->assertSelectStatement($c, $sql, $params, 'withColumn() adds a calculated column to the select clause');
     }
 
     public static function conditionsForTestWithColumnAndQuotes()
@@ -1614,7 +1614,7 @@ class ModelCriteriaTest extends BookstoreTestBase
         $c->withColumn($clause, $alias);
         $sql = $this->getSql('SELECT author.id, author.first_name, author.last_name, author.email, author.age, ' . $selectTranslation . ' FROM author');
         $params = [];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'withColumn() adds a calculated column using quotes to the select clause');
+        $this->assertSelectStatement($c, $sql, $params, 'withColumn() adds a calculated column using quotes to the select clause');
     }
 
     /**
@@ -1626,14 +1626,14 @@ class ModelCriteriaTest extends BookstoreTestBase
         $c->withColumn('UPPER(Propel\Tests\Bookstore\Book.Title)', 'foo');
         $sql = $this->getSql('SELECT book.id, book.title, book.isbn, book.price, book.publisher_id, book.author_id, UPPER(book.title) AS foo FROM book');
         $params = [];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'withColumn() adds the object columns if the criteria has no select columns');
+        $this->assertSelectStatement($c, $sql, $params, 'withColumn() adds the object columns if the criteria has no select columns');
 
         $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\Book');
         $c->addSelectColumn('book.id');
         $c->withColumn('UPPER(Propel\Tests\Bookstore\Book.Title)', 'foo');
         $sql = $this->getSql('SELECT book.id, UPPER(book.title) AS foo FROM book');
         $params = [];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'withColumn() does not add the object columns if the criteria already has select columns');
+        $this->assertSelectStatement($c, $sql, $params, 'withColumn() does not add the object columns if the criteria already has select columns');
 
         $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\Book');
         $c->addSelectColumn('book.id');
@@ -1641,7 +1641,7 @@ class ModelCriteriaTest extends BookstoreTestBase
         $c->addSelectColumn('book.title');
         $sql = $this->getSql('SELECT book.id, book.title, UPPER(book.title) AS foo FROM book');
         $params = [];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'withColumn() does adds as column after the select columns even though the withColumn() method was called first');
+        $this->assertSelectStatement($c, $sql, $params, 'withColumn() does adds as column after the select columns even though the withColumn() method was called first');
 
         $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\Book');
         $c->addSelectColumn('book.id');
@@ -1649,7 +1649,7 @@ class ModelCriteriaTest extends BookstoreTestBase
         $c->withColumn('UPPER(Propel\Tests\Bookstore\Book.isbn)', 'isbn');
         $sql = $this->getSql('SELECT book.id, UPPER(book.title) AS foo, UPPER(book.isbn) AS isbn FROM book');
         $params = [];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'withColumn() called repeatedly adds several as columns');
+        $this->assertSelectStatement($c, $sql, $params, 'withColumn() called repeatedly adds several as columns');
     }
 
     /**

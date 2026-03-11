@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Runtime\Adapter\Pdo;
 
@@ -15,17 +11,29 @@ use Propel\Runtime\Adapter\SqlAdapterInterface;
 use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Connection\StatementInterface;
 use Propel\Runtime\Map\ColumnMap;
+use function class_exists;
+use function is_resource;
+use function rewind;
+use function strpos;
+use function strtr;
 
 /**
  * This is used in order to connect to a MySQL database.
- *
- * @author Hans Lellelid <hans@xmpl.org> (Propel)
- * @author Jon S. Stevens <jon@clearink.com> (Torque)
- * @author Brett McLaughlin <bmclaugh@algx.net> (Torque)
- * @author Daniel Rall <dlr@finemaltcoding.com> (Torque)
  */
 class MysqlAdapter extends PdoAdapter implements SqlAdapterInterface
 {
+    /**
+     * @return class-string<\PDO>
+     */
+    #[\Override]
+    public function getPdoSubclass(): string
+    {
+        /** @var class-string<\PDO> $class */
+        $class = class_exists('\PDO\Mysql') ? '\PDO\Mysql' : PDO::class;
+
+        return $class;
+    }
+
     /**
      * Returns SQL which concatenates the second string to the first.
      *

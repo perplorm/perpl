@@ -1,20 +1,14 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Behavior\NestedSet;
 
 use Propel\Generator\Builder\Om\ObjectBuilder;
+use function strtolower;
 
 /**
  * Behavior to adds nested set tree structure columns and abilities
- *
- * @author François Zaninotto
- * @author heltem <heltem@o2php.com>
  */
 class NestedSetBehaviorObjectBuilderModifier
 {

@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Runtime\ActiveQuery\Criterion;
 
@@ -15,13 +11,17 @@ use Propel\Runtime\ActiveQuery\FilterExpression\ColumnFilterInterface;
 use Propel\Runtime\Adapter\SqlAdapterInterface;
 use Propel\Runtime\Map\ColumnMap;
 use Propel\Runtime\Propel;
+use function array_unshift;
+use function count;
+use function str_repeat;
+use function strlen;
+use function strrpos;
+use function substr;
 
 /**
  * This is an "inner" class that describes an object in the criteria.
  *
  * In Torque this is an inner class of the Criteria class.
- *
- * @author Hans Lellelid <hans@xmpl.org> (Propel)
  */
 abstract class AbstractCriterion extends ClauseList implements ColumnFilterInterface
 {

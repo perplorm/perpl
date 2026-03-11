@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Builder\Om\TableMapBuilder;
 
@@ -12,6 +8,8 @@ use Propel\Generator\Builder\Om\TableMapBuilder;
 use Propel\Generator\Exception\DeprecatedUsageException;
 use Propel\Runtime\Collection\Collection;
 use ReflectionClass;
+use function class_exists;
+use function is_subclass_of;
 
 class TableMapBuilderValidation
 {

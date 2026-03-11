@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Behavior\Timestampable;
 
@@ -12,12 +8,11 @@ use DateTime;
 use Propel\Generator\Builder\Om\AbstractOMBuilder;
 use Propel\Generator\Builder\Om\ObjectBuilder;
 use Propel\Generator\Model\Behavior;
+use function strtoupper;
 
 /**
  * Gives a model class the ability to track creation and last modification dates
  * Uses two additional columns storing the creation and update date
- *
- * @author François Zaninotto
  */
 class TimestampableBehavior extends Behavior
 {

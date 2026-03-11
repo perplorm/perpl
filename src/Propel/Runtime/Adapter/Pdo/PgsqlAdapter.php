@@ -1,13 +1,10 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Runtime\Adapter\Pdo;
 
+use PDO;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\Lock;
 use Propel\Runtime\Adapter\AdapterInterface;
@@ -16,15 +13,32 @@ use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Exception\InvalidArgumentException;
 use Propel\Runtime\Propel;
 use RuntimeException;
+use function array_map;
+use function array_search;
+use function array_unique;
+use function class_exists;
+use function implode;
+use function in_array;
+use function sprintf;
+use function strtr;
 
 /**
  * This is used to connect to PostgreSQL databases.
- *
- * @author Hans Lellelid <hans@xmpl.org> (Propel)
- * @author Hakan Tandogan <hakan42@gmx.de> (Torque)
  */
 class PgsqlAdapter extends PdoAdapter implements SqlAdapterInterface
 {
+    /**
+     * @return class-string<\PDO>
+     */
+    #[\Override]
+    public function getPdoSubclass(): string
+    {
+        /** @var class-string<\PDO> $class */
+        $class = class_exists('\PDO\Pgsql') ? '\PDO\Pgsql' : PDO::class;
+
+        return $class;
+    }
+
     /**
      * @see PdoAdapter::SUPPORTS_ALIASES_IN_DELETE
      *

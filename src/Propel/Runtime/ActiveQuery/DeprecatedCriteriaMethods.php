@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Runtime\ActiveQuery;
 
@@ -14,6 +10,15 @@ use Propel\Runtime\ActiveQuery\FilterExpression\ColumnFilterInterface;
 use Propel\Runtime\ActiveQuery\FilterExpression\FilterClauseLiteralWithColumns;
 use Propel\Runtime\Map\ColumnMap;
 use Propel\Runtime\Propel;
+use function array_key_exists;
+use function array_map;
+use function array_merge;
+use function array_shift;
+use function is_array;
+use function sprintf;
+use function strrpos;
+use function strtoupper;
+use function substr;
 
 class DeprecatedCriteriaMethods extends Criteria
 {
@@ -306,11 +311,11 @@ class DeprecatedCriteriaMethods extends Criteria
      * @param string $name name to combine the criterion later
      * @param \Propel\Runtime\ActiveQuery\FilterExpression\ColumnFilterInterface|\Propel\Runtime\ActiveQuery\ColumnResolver\ColumnExpression\AbstractColumnExpression|string $columnOrClause The column to run the comparison on, or AbstractCriterion object.
      * @param mixed|null $value
-     * @param string|null $comparison A String.
+     * @param string|int|null $comparison A String.
      *
      * @return \Propel\Runtime\ActiveQuery\Criteria A modified Criteria object.
      */
-    public function addCond(string $name, $columnOrClause, $value = null, ?string $comparison = null)
+    public function addCond(string $name, $columnOrClause, $value = null, string|int|null $comparison = null)
     {
         $this->namedCriterions[$name] = $this->criteria->buildFilter($columnOrClause, $value, $comparison);
 

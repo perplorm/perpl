@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Behavior\I18n;
 
@@ -12,6 +8,10 @@ use Propel\Generator\Builder\Om\ObjectBuilder;
 use Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes\ColumnCodeProducer;
 use Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes\ColumnCodeProducerFactory;
 use Propel\Generator\Model\Column;
+use function implode;
+use function preg_match_all;
+use function preg_replace;
+use function str_replace;
 
 class ColumnCodeProducerAccessor extends ColumnCodeProducer
 {

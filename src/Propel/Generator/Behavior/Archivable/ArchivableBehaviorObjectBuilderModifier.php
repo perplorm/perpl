@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Behavior\Archivable;
 
@@ -12,8 +8,6 @@ use Propel\Generator\Builder\Om\AbstractOMBuilder;
 
 /**
  * Keeps tracks of an ActiveRecord object, even after deletion
- *
- * @author François Zaninotto
  */
 class ArchivableBehaviorObjectBuilderModifier
 {
@@ -127,7 +121,7 @@ class ArchivableBehaviorObjectBuilderModifier
         if ($this->behavior->isArchiveOnDelete()) {
             return $this->behavior->renderTemplate('objectPreDelete', [
                 'queryClassName' => $builder->getQueryClassName(),
-                'isAddHooks' => $builder->getGeneratorConfig()->get()['generator']['objectModel']['addHooks'],
+                'isAddHooks' => (bool)$builder->getGeneratorConfig()->getConfigProperty('generator.objectModel.addHooks'),
             ]);
         }
 

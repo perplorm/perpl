@@ -1,14 +1,22 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Runtime\Util;
 
 use Propel\Common\Config\Exception\InvalidConfigurationException;
+use function abs;
+use function count;
+use function floor;
+use function log10;
+use function memory_get_peak_usage;
+use function memory_get_usage;
+use function microtime;
+use function number_format;
+use function pow;
+use function round;
+use function str_pad;
+use const STR_PAD_LEFT;
 
 /**
  * Profiler for Propel

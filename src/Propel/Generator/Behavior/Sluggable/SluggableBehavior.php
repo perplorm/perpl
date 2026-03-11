@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Behavior\Sluggable;
 
@@ -12,12 +8,10 @@ use Propel\Generator\Builder\Om\AbstractOMBuilder;
 use Propel\Generator\Model\Behavior;
 use Propel\Generator\Model\Table;
 use Propel\Generator\Model\Unique;
+use function str_replace;
 
 /**
  * Adds a slug column
- *
- * @author Francois Zaninotto
- * @author Massimiliano Arione
  */
 class SluggableBehavior extends Behavior
 {

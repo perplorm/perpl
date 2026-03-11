@@ -1,21 +1,26 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Manager;
 
 use Propel\Generator\Model\Column;
 use Propel\Generator\Model\Database;
 use Propel\Generator\Model\Table;
+use function array_map;
+use function count;
+use function file_put_contents;
+use function implode;
+use function preg_replace;
+use function sprintf;
+use function str_repeat;
+use function strcmp;
+use function usort;
+use const DIRECTORY_SEPARATOR;
+use const PHP_EOL;
 
 /**
  * Manager for Markdown Data Dictionary
- *
- * @author Charles Crossan <crossan007@gmail.com>
  */
 class DataDictionaryExportManager extends AbstractManager
 {

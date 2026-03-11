@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Manager;
 
@@ -12,11 +8,14 @@ use Propel\Generator\Builder\Om\AbstractOMBuilder;
 use Propel\Generator\Builder\Om\TableMapLoaderScriptBuilder;
 use SplFileInfo;
 use Symfony\Component\Filesystem\Filesystem;
+use function file_get_contents;
+use function file_put_contents;
+use function get_class;
+use function sprintf;
+use const DIRECTORY_SEPARATOR;
 
 /**
  * This manager creates the Object Model classes based on the XML schema file.
- *
- * @author Hans Lellelid <hans@xmpl.org>
  */
 class ModelManager extends AbstractManager
 {

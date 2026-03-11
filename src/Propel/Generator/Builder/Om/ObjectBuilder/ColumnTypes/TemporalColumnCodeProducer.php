@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes;
 
@@ -14,6 +10,11 @@ use Exception;
 use Propel\Generator\Exception\EngineException;
 use Propel\Generator\Model\PropelTypes;
 use Propel\Generator\Platform\MysqlPlatform;
+use function date_default_timezone_set;
+use function in_array;
+use function is_subclass_of;
+use function sprintf;
+use function var_export;
 
 class TemporalColumnCodeProducer extends ColumnCodeProducer
 {
@@ -24,6 +25,22 @@ class TemporalColumnCodeProducer extends ColumnCodeProducer
     protected function getQualifiedTypeString(): string
     {
         return $this->resolveColumnDateTimeClass($this->column);
+    }
+
+    /**
+     * Build statement used in Model::applyDefaultValues()
+     *
+     * @return string
+     */
+    #[\Override]
+    public function getApplyDefaultValueStatement(): string
+    {
+        $clo = $this->column->getLowercasedName();
+        $defaultValue = $this->getDefaultValueString();
+        $dateTimeClass = $this->resolveColumnDateTimeClass($this->column);
+
+        return "
+        \$this->{$clo} = PropelDateTime::newInstance($defaultValue, null, '$dateTimeClass');";
     }
 
     /**
@@ -119,7 +136,7 @@ class TemporalColumnCodeProducer extends ColumnCodeProducer
     {
         $configKey = $this->getTemporalTypeDefaultFormatConfigKey();
 
-        return $configKey ? $this->getBuildProperty($configKey) : null;
+        return $configKey ? $this->getBuildPropertyString($configKey) : null;
     }
 
     /**

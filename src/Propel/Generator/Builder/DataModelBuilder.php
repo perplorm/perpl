@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Builder;
 
@@ -28,6 +24,10 @@ use Propel\Generator\Model\Inheritance;
 use Propel\Generator\Model\PropelTypes;
 use Propel\Generator\Model\Table;
 use Propel\Generator\Platform\PlatformInterface;
+use function array_map;
+use function implode;
+use function is_array;
+use function var_export;
 
 /**
  * This is the base class for any builder class that is using the data model.
@@ -39,8 +39,6 @@ use Propel\Generator\Platform\PlatformInterface;
  * to be able to access the propel generator build properties. You should be
  * safe if you always use the GeneratorConfig to get a configured builder class
  * anyway.
- *
- * @author Hans Lellelid <hans@xmpl.org>
  */
 abstract class DataModelBuilder
 {
@@ -176,16 +174,26 @@ abstract class DataModelBuilder
      * <code>'database.adapter.mysql.tableType</code>
      *
      * @param string $name
+     * @param bool $isRequired
+     *
+     * @return array|scalar|null
+     */
+    public function getBuildProperty(string $name, bool $isRequired = false): mixed
+    {
+        return $this->getGeneratorConfig()?->getConfigProperty($name, $isRequired);
+    }
+
+    /**
+     * @psalm-return ($isRequired ? string : string|null)
+     *
+     * @param string $name
+     * @param bool $isRequired
      *
      * @return string|null
      */
-    public function getBuildProperty(string $name): ?string
+    public function getBuildPropertyString(string $name, bool $isRequired = false): string|null
     {
-        if ($this->getGeneratorConfig()) {
-            return $this->getGeneratorConfig()->getConfigProperty($name);
-        }
-
-        return null;
+        return $this->getGeneratorConfig()->getConfigPropertyString($name, $isRequired);
     }
 
     /**
@@ -325,7 +333,7 @@ abstract class DataModelBuilder
      */
     public function prefixClassName(string $identifier): string
     {
-        return $this->getBuildProperty('generator.objectModel.classPrefix') . $identifier;
+        return $this->getBuildPropertyString('generator.objectModel.classPrefix', true) . $identifier;
     }
 
     /**
@@ -674,14 +682,35 @@ abstract class DataModelBuilder
     }
 
     /**
+     * @param string ...$classNames
+     *
      * @return void
      */
-    public function declareClasses(): void
+    public function declareClasses(string ...$classNames): void
     {
-        $args = func_get_args();
-        foreach ($args as $class) {
+        foreach ($classNames as $class) {
             $this->declareClass($class);
         }
+    }
+
+    /**
+     * @param string ...$functionName
+     *
+     * @return void
+     */
+    public function declareGlobalFunction(string ...$functionName): void
+    {
+        $this->referencedClasses->registerFunction(...$functionName);
+    }
+
+    /**
+     * @param string ...$constantName
+     *
+     * @return void
+     */
+    public function declareGlobalConstant(string ...$constantName): void
+    {
+        $this->referencedClasses->registerConstant(...$constantName);
     }
 
     /**
@@ -707,6 +736,6 @@ abstract class DataModelBuilder
             return $column->getPhpType();
         }
 
-        return $this->getBuildProperty('generator.dateTime.dateTimeClass') ?: '\DateTime';
+        return $this->getBuildPropertyString('generator.dateTime.dateTimeClass') ?: '\DateTime';
     }
 }

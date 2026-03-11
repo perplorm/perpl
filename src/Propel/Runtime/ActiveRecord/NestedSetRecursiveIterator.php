@@ -1,19 +1,15 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Runtime\ActiveRecord;
 
 use RecursiveIterator;
+use function implode;
+use function method_exists;
 
 /**
  * Pre-order node iterator for Node objects.
- *
- * @author Heltem <heltem@o2php.com>
  *
  * @implements \RecursiveIterator<(int|string), mixed>
  */

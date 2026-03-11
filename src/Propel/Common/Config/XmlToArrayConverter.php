@@ -1,16 +1,27 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Common\Config;
 
 use Propel\Common\Config\Exception\InvalidArgumentException;
 use Propel\Common\Config\Exception\XmlParseException;
 use SimpleXMLElement;
+use function array_key_exists;
+use function count;
+use function ctype_digit;
+use function dom_import_simplexml;
+use function file_exists;
+use function file_get_contents;
+use function is_array;
+use function is_numeric;
+use function libxml_clear_errors;
+use function libxml_get_errors;
+use function libxml_use_internal_errors;
+use function simplexml_load_file;
+use function simplexml_load_string;
+use function strlen;
+use function strtolower;
 
 /**
  * Class to convert an xml string to array
@@ -71,8 +82,6 @@ class XmlToArrayConverter
 
     /**
      * Recursive function that converts an SimpleXML object into an array.
-     *
-     * @author Christophe VG (based on code form php.net manual comment)
      *
      * @param \SimpleXMLElement $xml SimpleXML object.
      *

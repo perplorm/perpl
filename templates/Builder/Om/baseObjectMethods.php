@@ -160,7 +160,7 @@
     public function getVirtualColumn(string $name)
     {
         if (!$this->hasVirtualColumn($name)) {
-            throw new PropelException(sprintf('Cannot get value of nonexistent virtual column `%s`.', $name));
+            throw new PropelException("Cannot get value of nonexistent virtual column `$name`");
         }
 
         return $this->virtualColumns[$name];

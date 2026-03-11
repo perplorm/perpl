@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Platform;
 
@@ -23,11 +19,22 @@ use Propel\Generator\Model\Unique;
 use Propel\Runtime\Connection\PdoConnection;
 use RuntimeException;
 use SQLite3;
+use function array_keys;
+use function class_exists;
+use function filter_var;
+use function implode;
+use function in_array;
+use function sprintf;
+use function str_replace;
+use function str_starts_with;
+use function strtr;
+use function trim;
+use function uniqid;
+use function version_compare;
+use const FILTER_VALIDATE_BOOLEAN;
 
 /**
  * SQLite PlatformInterface implementation.
- *
- * @author Hans Lellelid <hans@xmpl.org>
  */
 class SqlitePlatform extends DefaultPlatform
 {
@@ -81,12 +88,12 @@ class SqlitePlatform extends DefaultPlatform
         $this->setSchemaDomainMapping(new Domain(PropelTypes::CLOB, 'LONGTEXT'));
         $this->setSchemaDomainMapping(new Domain(PropelTypes::OBJECT, 'BLOB'));
         $this->setSchemaDomainMapping(new Domain(PropelTypes::PHP_ARRAY, 'MEDIUMTEXT'));
-        $this->setSchemaDomainMapping(new Domain(PropelTypes::ENUM, 'TINYINT'));
-        $this->setSchemaDomainMapping(new Domain(PropelTypes::SET, 'INT'));
         $this->setSchemaDomainMapping(new Domain(PropelTypes::UUID_BINARY, 'BLOB'));
 
         // no native UUID type, use UUID_BINARY
         $this->schemaDomainMap[PropelTypes::UUID] = $this->schemaDomainMap[PropelTypes::UUID_BINARY];
+
+        $this->setSetTypesMapping(false);
     }
 
     /**
@@ -186,17 +193,18 @@ ALTER TABLE %s ADD %s;
             foreach ($addedCols as $column) {
                 $sqlChangeNotSupported =
                     //The column may not have a PRIMARY KEY or UNIQUE constraint.
-                    $column->isPrimaryKey()
-                    || $column->isUnique()
+                    $column->isPrimaryKey() || $column->isUnique()
 
                     //The column may not have a default value of CURRENT_TIME, CURRENT_DATE, CURRENT_TIMESTAMP,
                     //or an expression in parentheses.
-                    || ($column->getDefaultValue() && in_array(
-                        $column->getDefaultValue()->getValue(),
-                        ['CURRENT_TIME', 'CURRENT_DATE', 'CURRENT_TIMESTAMP'],
-                        true,
+                    || ($column->getDefaultValue() && (
+                        in_array(
+                            $column->getDefaultValue()->getValue(),
+                            ['CURRENT_TIME', 'CURRENT_DATE', 'CURRENT_TIMESTAMP'],
+                            true,
+                        )
+                        || str_starts_with(trim((string)$column->getDefaultValue()->getValue()), '(')
                     ))
-                    || substr(trim($column->getDefaultValue() ? (string)$column->getDefaultValue()->getValue() : ''), 0, 1) === '('
 
                     //If a NOT NULL constraint is specified, then the column must have a default value other than NULL.
                     || ($column->isNotNull() && $column->getDefaultValue()->getValue() === 'NULL');

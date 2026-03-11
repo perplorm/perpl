@@ -1,22 +1,17 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Runtime\Formatter;
 
 use Propel\Runtime\ActiveRecord\ActiveRecordInterface;
 use Propel\Runtime\DataFetcher\DataFetcherInterface;
 use Propel\Runtime\Exception\LogicException;
+use function serialize;
 
 /**
  * Object formatter for Propel query
  * format() returns a ObjectCollection of Propel model objects
- *
- * @author Francois Zaninotto
  *
  * @template RowFormat of \Propel\Runtime\ActiveRecord\ActiveRecordInterface
  * @template ListType of \Propel\Runtime\Collection\Collection

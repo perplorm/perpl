@@ -1,19 +1,33 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Runtime\Parser;
+
+use function array_combine;
+use function array_keys;
+use function array_pad;
+use function array_shift;
+use function count;
+use function explode;
+use function implode;
+use function is_scalar;
+use function preg_match;
+use function preg_match_all;
+use function preg_quote;
+use function range;
+use function reset;
+use function serialize;
+use function str_replace;
+use function str_split;
+use function strpos;
+use function trim;
+use function unserialize;
 
 /**
  * CSV parser. Converts data between associative array and CSV formats.
  * CSV parsing code borrowed from php-csv-utils by Luke Visinoni
  * http://code.google.com/p/php-csv-utils/
- *
- * @author Francois Zaninotto
  */
 class CsvParser extends AbstractParser
 {

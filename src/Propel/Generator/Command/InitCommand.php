@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Command;
 
@@ -18,10 +14,17 @@ use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Finder\Finder;
+use function dirname;
+use function file_exists;
+use function file_get_contents;
+use function getcwd;
+use function is_dir;
+use function print_r;
+use function sprintf;
+use function sys_get_temp_dir;
+use function urlencode;
+use const DIRECTORY_SEPARATOR;
 
-/**
- * @author Marc Scholten <marcphilipscholten@gmail.com>
- */
 class InitCommand extends AbstractCommand
 {
     /**

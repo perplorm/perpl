@@ -1,23 +1,17 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
-
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace Propel\Generator\Util;
 
 use org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\vfsStreamDirectory;
 use org\bovigo\vfs\vfsStreamFile;
+use function explode;
+use function pathinfo;
 
 /**
  * Useful methods to manipulate virtual filesystem, via vfsStream library
- *
- * @author Cristiano Cinotti
  */
 trait VfsTrait
 {

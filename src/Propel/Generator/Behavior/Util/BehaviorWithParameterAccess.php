@@ -1,15 +1,21 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Behavior\Util;
 
+use Propel\Common\Util\SetColumnConverter;
 use Propel\Generator\Exception\SchemaException;
 use Propel\Generator\Model\Behavior;
+use function array_map;
+use function count;
+use function in_array;
+use function is_array;
+use function is_numeric;
+use function is_string;
+use function reset;
+use function strtolower;
+use function trim;
 
 abstract class BehaviorWithParameterAccess extends Behavior
 {
@@ -124,9 +130,7 @@ abstract class BehaviorWithParameterAccess extends Behavior
      */
     protected function explodeCsv(string $stringValue): ?array
     {
-        $stringValue = trim($stringValue);
-
-        return trim($stringValue) ? array_map('trim', explode(',', $stringValue)) : null;
+        return SetColumnConverter::itemsCsvToArray($stringValue) ?: null;
     }
 
     /**

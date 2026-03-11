@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Runtime\Collection;
 
@@ -17,11 +13,16 @@ use Propel\Runtime\Exception\RuntimeException;
 use Propel\Runtime\Map\RelationMap;
 use Propel\Runtime\Map\TableMap;
 use Propel\Runtime\Propel;
+use function end;
+use function is_callable;
+use function is_object;
+use function key;
+use function method_exists;
+use function spl_object_hash;
+use function ucfirst;
 
 /**
  * Class for iterating over a list of Propel objects
- *
- * @author Francois Zaninotto
  *
  * @template RowFormat
  * @extends \Propel\Runtime\Collection\Collection<RowFormat>
@@ -281,7 +282,8 @@ class ObjectCollection extends Collection
         $keyGetterMethod = 'get' . $keyColumn;
         $valueGetterMethod = ($valueColumn === null) ? '__toString' : ('get' . $valueColumn);
         foreach ($this as $obj) {
-            $ret[$obj->$keyGetterMethod()] = $obj->$valueGetterMethod();
+            $key = $obj->$keyGetterMethod();
+            $ret[$key ?? 'null'] = $obj->$valueGetterMethod();
         }
 
         return $ret;
@@ -559,9 +561,9 @@ class ObjectCollection extends Collection
      *
      * @param mixed $object
      *
-     * @return string
+     * @return string|int
      */
-    protected function getHashCode($object): string
+    protected function getHashCode($object): string|int
     {
         if (is_object($object) && is_callable([$object, 'hashCode'])) {
             return $object->hashCode();

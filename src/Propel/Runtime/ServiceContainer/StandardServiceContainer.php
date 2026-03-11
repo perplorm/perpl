@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Runtime\ServiceContainer;
 
@@ -27,6 +23,10 @@ use Propel\Runtime\Map\DatabaseMap;
 use Propel\Runtime\Util\Profiler;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
+use function get_class;
+use function is_int;
+use function sprintf;
+use const LOG_USER;
 
 /**
  * @psalm-import-type \Propel\Runtime\Map\TableMapDump from \Propel\Runtime\Map\DatabaseMap

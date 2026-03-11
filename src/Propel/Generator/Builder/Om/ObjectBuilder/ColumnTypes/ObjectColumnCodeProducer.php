@@ -1,12 +1,10 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes;
+
+use function var_export;
 
 class ObjectColumnCodeProducer extends ColumnCodeProducer
 {
@@ -46,6 +44,7 @@ class ObjectColumnCodeProducer extends ColumnCodeProducer
     #[\Override]
     protected function addAccessorBody(string &$script): void
     {
+        $this->declareGlobalFunction('is_resource', 'stream_get_contents', 'unserialize');
         $clo = $this->column->getLowercasedName();
         $cloUnserialized = $clo . '_unserialized';
         $typeHint = $this->column->getTypeHint();
@@ -76,6 +75,7 @@ class ObjectColumnCodeProducer extends ColumnCodeProducer
     #[\Override]
     protected function addMutatorBody(string &$script): void
     {
+        $this->declareGlobalFunction('serialize', 'stream_get_contents');
         $col = $this->column;
         $clo = $col->getLowercasedName();
         $cloUnserialized = $clo . '_unserialized';

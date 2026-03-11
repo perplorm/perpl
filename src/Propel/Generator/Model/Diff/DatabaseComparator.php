@@ -1,15 +1,14 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Model\Diff;
 
 use Propel\Generator\Model\Database;
 use Propel\Generator\Model\Table;
+use function in_array;
+use function preg_match;
+use function str_replace;
 
 /**
  * Service class for comparing Database objects

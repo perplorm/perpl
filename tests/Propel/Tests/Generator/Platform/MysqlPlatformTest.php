@@ -11,7 +11,6 @@ namespace Propel\Tests\Generator\Platform;
 use Propel\Generator\Builder\Util\SchemaReader;
 use Propel\Generator\Config\GeneratorConfig;
 use Propel\Generator\Model\Column;
-use Propel\Generator\Model\ColumnDefaultValue;
 use Propel\Generator\Model\IdMethod;
 use Propel\Generator\Model\IdMethodParameter;
 use Propel\Generator\Model\Index;
@@ -476,10 +475,52 @@ DROP TABLE IF EXISTS `Woopah`.`foo`;
         $column->getDomain()->replaceScale(2);
         $column->getDomain()->replaceSize(3);
         $column->setNotNull(true);
-        $column->getDomain()->setDefaultValue(new ColumnDefaultValue(123, ColumnDefaultValue::TYPE_VALUE));
+        $column->getDomain()->createDefaultValue(123);
         $expected = '`foo` DOUBLE(3,2) DEFAULT 123 NOT NULL';
         $this->assertEquals($expected, $this->getPlatform()->getColumnDDL($column));
     }
+
+    /**
+     * @return array{string, bool, string}[]
+     */
+    public function IntegerTypesDataProvider(): array
+    {
+        $integerTypes = [PropelTypes::INTEGER, PropelTypes::BIGINT, PropelTypes::SMALLINT, PropelTypes::TINYINT];
+
+        return array_merge([
+                [PropelTypes::DECIMAL, true, "`foo` DECIMAL(3)"],
+                [PropelTypes::DECIMAL, false, "`foo` DECIMAL(3)"],
+            ],
+            array_map(fn($type) => [$type, true, "`foo` $type"], $integerTypes),
+            array_map(fn($type) => [$type, false, "`foo` {$type}(3)"], $integerTypes),
+            
+        );
+    }
+
+    /**
+     * @dataProvider IntegerTypesDataProvider
+     *
+     * @param string $integerType
+     * @param bool $ignoreSize
+     * @param string $expectedDdl
+     *
+     * @return void
+     */
+    public function testGetColumnDDLIgnoresSizeOnInteger(string $integerType, bool $ignoreSize, string $expectedDdl)
+    {
+        $platform = new MysqlPlatform();
+        $this->setObjectPropertyValue($platform, 'ignoreSizeOnIntegerTypes', $ignoreSize);
+        $domain = clone $platform->getDomainForType($integerType);
+        $domain->replaceSize(3);
+
+        $column = new Column('foo');
+        $column->setDomain($domain);
+
+        $actual = $platform->getColumnDDL($column);
+
+        $this->assertEquals($expectedDdl, $actual);
+    }
+
 
     /**
      * @return void
@@ -554,7 +595,7 @@ DROP TABLE IF EXISTS `Woopah`.`foo`;
         $column->getDomain()->replaceScale(2);
         $column->getDomain()->replaceSize(3);
         $column->setNotNull(true);
-        $column->getDomain()->setDefaultValue(new ColumnDefaultValue(123, ColumnDefaultValue::TYPE_VALUE));
+        $column->getDomain()->createDefaultValue(123);
         $column->getDomain()->replaceSqlType('DECIMAL(5,6)');
         $expected = '`foo` DECIMAL(5,6) DEFAULT 123 NOT NULL';
         $this->assertEquals($expected, $this->getPlatform()->getColumnDDL($column));

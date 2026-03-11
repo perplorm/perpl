@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Builder\Util;
 
@@ -14,17 +10,36 @@ use Propel\Generator\Model\Index;
 use Propel\Generator\Model\Schema;
 use Propel\Generator\Model\Unique;
 use Propel\Generator\Platform\PlatformInterface;
+use function array_keys;
+use function array_pop;
+use function count;
+use function dirname;
+use function end;
+use function file_exists;
+use function file_get_contents;
+use function key;
+use function phpversion;
+use function realpath;
+use function sprintf;
+use function strpos;
+use function strtolower;
+use function version_compare;
+use function vsprintf;
+use function xml_error_string;
+use function xml_get_current_column_number;
+use function xml_get_current_line_number;
+use function xml_get_error_code;
+use function xml_parse;
+use function xml_parser_create;
+use function xml_parser_free;
+use function xml_parser_set_option;
+use function xml_set_element_handler;
+use const DIRECTORY_SEPARATOR;
+use const XML_OPTION_CASE_FOLDING;
 
 /**
  * A class that is used to parse an input xml schema file and creates a Schema
  * PHP object.
- *
- * @author Hans Lellelid <hans@xmpl.org> (Propel)
- * @author Leon Messerschmidt <leon@opticode.co.za> (Torque)
- * @author Jason van Zyl <jvanzyl@apache.org> (Torque)
- * @author Martin Poeschl <mpoeschl@marmot.at> (Torque)
- * @author Daniel Rall <dlr@collab.net> (Torque)
- * @author Hugo Hamon <webmaster@apprendre-php.com>
  */
 class SchemaReader
 {
@@ -178,7 +193,7 @@ class SchemaReader
         }
 
         // store current schema file path
-        $this->schemasTagsStack[$xmlFile] = [];
+        $this->schemasTagsStack[$xmlFile ?? ''] = []; // HACK - fixes "Using null as an array offset is deprecated", but can $xmlString really be null?
         $this->currentXmlFile = $xmlFile;
 
         $parserStash = $this->parser;
@@ -195,7 +210,9 @@ class SchemaReader
                 ),
             );
         }
-        xml_parser_free($this->parser);
+        if (version_compare(phpversion(), '8.1', '<')) {
+            xml_parser_free($this->parser);
+        }
         $this->parser = $parserStash;
 
         array_pop($this->schemasTagsStack);

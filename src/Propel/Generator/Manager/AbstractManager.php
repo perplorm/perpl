@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Manager;
 
@@ -18,18 +14,29 @@ use Propel\Generator\Exception\BuildException;
 use Propel\Generator\Exception\EngineException;
 use Propel\Generator\Model\Database;
 use Propel\Generator\Model\Schema;
+use Propel\Generator\Platform\PlatformInterface;
 use RuntimeException;
+use Symfony\Component\Finder\SplFileInfo;
 use XSLTProcessor;
+use function array_shift;
+use function class_exists;
+use function count;
+use function dirname;
+use function file;
+use function in_array;
+use function is_readable;
+use function realpath;
+use function sprintf;
+use function strpos;
+use function substr;
+use function trim;
+use const DIRECTORY_SEPARATOR;
 
 /**
  * An abstract base Propel manager to perform work related to the XML schema
  * file.
  *
  * Requires PHP XSL extension for XSLT transformations.
- *
- * @author Hans Lellelid <hans@xmpl.org> (Propel)
- * @author Jason van Zyl <jvanzyl@zenplex.com> (Torque)
- * @author Daniel Rall <dlr@finemaltcoding.com> (Torque)
  */
 abstract class AbstractManager
 {
@@ -72,7 +79,7 @@ abstract class AbstractManager
     /**
      * The XSD schema file to use for validation.
      *
-     * @var mixed
+     * @var string
      */
     protected $xsd;
 
@@ -86,7 +93,7 @@ abstract class AbstractManager
     /**
      * Gets list of all used xml schemas
      *
-     * @var array
+     * @var array<\Symfony\Component\Finder\SplFileInfo>
      */
     protected $schemas = [];
 
@@ -117,7 +124,7 @@ abstract class AbstractManager
     /**
      * Returns the list of schemas.
      *
-     * @return array
+     * @return array<\Symfony\Component\Finder\SplFileInfo>
      */
     public function getSchemas(): array
     {
@@ -127,7 +134,7 @@ abstract class AbstractManager
     /**
      * Sets the schemas list.
      *
-     * @param array $schemas
+     * @param array<\Symfony\Component\Finder\SplFileInfo> $schemas
      *
      * @return void
      */
@@ -196,15 +203,17 @@ abstract class AbstractManager
             $databases = [];
             foreach ($this->getDataModels() as $dataModel) {
                 foreach ($dataModel->getDatabases() as $database) {
-                    if (!isset($databases[$database->getName()])) {
-                        $databases[$database->getName()] = $database;
+                    $databaseName = $database->getName();
+                    $existingDatabase = $databases[$databaseName] ?? null;
+                    if (!$existingDatabase) {
+                        $databases[$databaseName] = $database;
                     } else {
-                        $tables = $database->getTables();
-                        // Merge tables from different schema.xml to the same database
-                        foreach ($tables as $table) {
-                            if (!$databases[$database->getName()]->hasTable($table->getName(), true)) {
-                                $databases[$database->getName()]->addTable($table);
+                        $newTables = $database->getTables();
+                        foreach ($newTables as $newTable) {
+                            if ($existingDatabase->hasTable($newTable->getName(), true)) {
+                                continue;
                             }
+                            $existingDatabase->addTable($newTable);
                         }
                     }
                 }
@@ -293,8 +302,6 @@ abstract class AbstractManager
      * Returns all matching XML schema files and loads them into data models for
      * class.
      *
-     * @throws \Propel\Generator\Exception\EngineException
-     * @throws \RuntimeException
      * @throws \Propel\Generator\Exception\BuildException
      *
      * @return void
@@ -306,55 +313,16 @@ abstract class AbstractManager
         $dataModelFiles = $this->getSchemas();
         $defaultPlatform = $this->getGeneratorConfig()->getConfiguredPlatform();
 
-        // Make a transaction for each file
-        foreach ($dataModelFiles as $schema) {
-            $dmFilename = $schema->getPathName();
-            $this->log('Processing: ' . $schema->getFileName());
-
-            $dom = new DOMDocument('1.0', 'UTF-8');
-            $dom->load($dmFilename);
-
-            $this->includeExternalSchemas($dom, $schema->getPath());
-
-            // normalize (or transform) the XML document using XSLT
-            if ($this->getGeneratorConfig()->get()['generator']['schema']['transform'] && $this->xsl) {
-                $this->log('Transforming ' . $dmFilename . ' using stylesheet ' . $this->xsl->getPath());
-
-                if (!class_exists('\XSLTProcessor')) {
-                    $this->log('Could not perform XLST transformation. Make sure PHP has been compiled/configured to support XSLT.');
-                } else {
-                    // normalize the document using normalizer stylesheet
-                    $xslDom = new DOMDocument('1.0', 'UTF-8');
-                    $xslDom->load($this->xsl->getAbsolutePath());
-                    $xsl = new XSLTProcessor();
-                    $xsl->importStylesheet($xslDom);
-                    $dom = $xsl->transformToDoc($dom);
-
-                    if ($dom === false) {
-                        throw new RuntimeException('XSLTProcessor transformation to a DOMDocument failed.');
-                    }
-                }
+        foreach ($dataModelFiles as $schemaFile) {
+            $schema = $this->processSchemaFile($schemaFile, $defaultPlatform);
+            if (!$schema) {
+                continue;
             }
+            $schemas[] = $schema;
 
-            // validate the XML document using XSD schema
-            if ($this->validate && $this->xsd) {
-                $this->log('  Validating XML using schema ' . $this->xsd->getPath());
-
-                if (!$dom->schemaValidate($this->xsd->getAbsolutePath())) {
-                    throw new EngineException(sprintf("XML schema file (%s) does not validate. See warnings above for reasons validation failed (make sure error_reporting is set to show E_WARNING if you don't see any).", $dmFilename), $this->getLocation());
-                }
-            }
-
-            $xmlParser = new SchemaReader($defaultPlatform, $this->dbEncoding);
-            $xmlParser->setGeneratorConfig($this->getGeneratorConfig());
-            $schema = $xmlParser->parseString((string)$dom->saveXML(), $dmFilename);
             $nbTables = $schema->getDatabase(null, false)->countTables();
             $totalNbTables += $nbTables;
-
-            $this->log(sprintf('  %d tables processed successfully', $nbTables));
-
-            $schema->setName($dmFilename);
-            $schemas[] = $schema;
+            $this->log("  $nbTables tables processed successfully in {$schemaFile->getPathname()}");
         }
 
         $this->log(sprintf('%d tables found in %d schema files.', $totalNbTables, count($dataModelFiles)));
@@ -368,7 +336,7 @@ abstract class AbstractManager
             $this->dataModelDbMap[$schema->getName()] = $schema->getDatabase(null, false)->getName();
         }
 
-        if (count($schemas) > 1 && $this->getGeneratorConfig()->get()['generator']['packageObjectModel']) {
+        if (count($schemas) > 1 && $this->getGeneratorConfig()->getConfigProperty('generator.packageObjectModel')) {
             $schema = $this->joinDataModels($schemas);
             $this->dataModels = [$schema];
         } else {
@@ -380,6 +348,76 @@ abstract class AbstractManager
         }
 
         $this->dataModelsLoaded = true;
+    }
+
+    /**
+     * @param \Symfony\Component\Finder\SplFileInfo $schemaFile
+     * @param \Propel\Generator\Platform\PlatformInterface $defaultPlatform
+     *
+     * @throws \Propel\Generator\Exception\EngineException
+     *
+     * @return \Propel\Generator\Model\Schema|null
+     */
+    protected function processSchemaFile(SplFileInfo $schemaFile, PlatformInterface $defaultPlatform): Schema|null
+    {
+        $dmFilename = $schemaFile->getPathname();
+        $this->log('Processing: ' . $schemaFile->getFilename());
+
+        $dom = new DOMDocument('1.0', 'UTF-8');
+        $dom->load($dmFilename);
+
+        $this->includeExternalSchemas($dom, $schemaFile->getPath());
+
+        // normalize/transform XML document using XSLT
+        if ($this->getGeneratorConfig()->getConfigProperty('generator.schema.transform') && $this->xsl) {
+            $this->log('Transforming ' . $dmFilename . ' using stylesheet ' . $this->xsl->getPath());
+            $this->applyXlsTransformation($dom);
+        }
+
+        // validate the XML document using XSD schema
+        if ($this->validate && $this->xsd) {
+            $this->log('  Validating XML using schema ' . $this->xsd);
+
+            if (!$dom->schemaValidate($this->xsd)) {
+                throw new EngineException("XML schema file ($dmFilename) does not validate. See warnings above for reasons validation failed (make sure error_reporting is set to show E_WARNING if you don't see any).");
+            }
+        }
+
+        $xmlParser = new SchemaReader($defaultPlatform, $this->dbEncoding);
+        $xmlParser->setGeneratorConfig($this->getGeneratorConfig());
+        $schema = $xmlParser->parseString((string)$dom->saveXML(), $dmFilename);
+        $schema?->setName($dmFilename);
+
+        return $schema;
+    }
+
+    /**
+     * @param \DOMDocument $dom
+     *
+     * @throws \RuntimeException
+     *
+     * @return \DOMDocument
+     */
+    protected function applyXlsTransformation(DOMDocument $dom): DOMDocument
+    {
+        if (!class_exists('\XSLTProcessor')) {
+            $this->log('Skipping XLST transformation. Make sure PHP has been compiled/configured to support XSLT.');
+
+            return $dom;
+        }
+
+        // normalize the document using normalizer stylesheet
+        $xslDom = new DOMDocument('1.0', 'UTF-8');
+        $xslDom->load($this->xsl->getAbsolutePath());
+        $xsl = new XSLTProcessor();
+        $xsl->importStylesheet($xslDom);
+        $dom = $xsl->transformToDoc($dom);
+
+        if ($dom === false) {
+            throw new RuntimeException('XSLTProcessor transformation to a DOMDocument failed.');
+        }
+
+        return $dom;
     }
 
     /**

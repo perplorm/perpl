@@ -90,25 +90,6 @@ class TableTest extends ModelTestCase
     /**
      * @return void
      */
-    public function testGetBuildProperty()
-    {
-        $table = new Table('');
-        $this->assertEmpty($table->getBuildProperty('propel.foo.bar'));
-
-        $database = $this->getDatabaseMock('bookstore');
-        $database
-            ->expects($this->once())
-            ->method('getBuildProperty')
-            ->with('propel.foo.bar')
-            ->will($this->returnValue('baz'));
-
-        $table->setDatabase($database);
-        $this->assertSame('baz', $table->getBuildProperty('propel.foo.bar'));
-    }
-
-    /**
-     * @return void
-     */
     public function testApplyBehaviors()
     {
         $behavior = $this->getBehaviorMock('foo');

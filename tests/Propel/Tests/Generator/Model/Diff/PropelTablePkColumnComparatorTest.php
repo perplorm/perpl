@@ -131,7 +131,7 @@ class PropelTablePkColumnComparatorTest extends TestCase
         $c1->getDomain()->replaceScale(2);
         $c1->getDomain()->replaceSize(3);
         $c1->setNotNull(true);
-        $c1->getDomain()->setDefaultValue(new ColumnDefaultValue(123, ColumnDefaultValue::TYPE_VALUE));
+        $c1->getDomain()->createDefaultValue(123);
         $c1->setPrimaryKey(true);
         $t1->addColumn($c1);
         $t2 = new Table('');
@@ -140,7 +140,7 @@ class PropelTablePkColumnComparatorTest extends TestCase
         $c2->getDomain()->replaceScale(2);
         $c2->getDomain()->replaceSize(3);
         $c2->setNotNull(true);
-        $c2->getDomain()->setDefaultValue(new ColumnDefaultValue(123, ColumnDefaultValue::TYPE_VALUE));
+        $c2->getDomain()->createDefaultValue(123);
         $c2->setPrimaryKey(true);
         $t2->addColumn($c2);
 
@@ -184,7 +184,7 @@ class PropelTablePkColumnComparatorTest extends TestCase
         $c4->getDomain()->replaceScale(2);
         $c4->getDomain()->replaceSize(3);
         $c4->setNotNull(true);
-        $c4->getDomain()->setDefaultValue(new ColumnDefaultValue(123, ColumnDefaultValue::TYPE_VALUE));
+        $c4->getDomain()->createDefaultValue(123);
         $t2->addColumn($c4);
         $c5 = new Column('col22');
         $c5->getDomain()->copy($this->platform->getDomainForType('INTEGER'));

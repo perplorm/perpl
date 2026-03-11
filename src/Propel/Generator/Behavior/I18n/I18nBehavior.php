@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Behavior\I18n;
 
@@ -16,12 +12,17 @@ use Propel\Generator\Model\Column;
 use Propel\Generator\Model\ForeignKey;
 use Propel\Generator\Model\PropelTypes;
 use Propel\Generator\Model\Table;
+use function array_merge;
+use function count;
+use function explode;
+use function in_array;
+use function sprintf;
+use function strtr;
+use function trim;
 
 /**
  * Allows translation of text columns through transparent one-to-many
  * relationship.
- *
- * @author Francois Zaninotto
  */
 class I18nBehavior extends Behavior
 {

@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Runtime\Collection;
 
@@ -24,6 +20,26 @@ use Propel\Runtime\Parser\AbstractParser;
 use Propel\Runtime\Propel;
 use Serializable;
 use Traversable;
+use function array_pop;
+use function array_search;
+use function array_shift;
+use function array_unshift;
+use function count;
+use function current;
+use function end;
+use function in_array;
+use function is_object;
+use function method_exists;
+use function reset;
+use function serialize;
+use function spl_object_hash;
+use function sprintf;
+use function strpos;
+use function strrpos;
+use function substr;
+use function trigger_error;
+use function unserialize;
+use const E_USER_NOTICE;
 
 /**
  * Class for iterating over a list of Propel elements
@@ -38,8 +54,6 @@ use Traversable;
  * @method string toYAML(bool $usePrefix = true, bool $includeLazyLoadColumns = true) Export the collection to a YAML string
  * @method string toJSON(bool $usePrefix = true, bool $includeLazyLoadColumns = true) Export the collection to a JSON string
  * @method string toCSV(bool $usePrefix = true, bool $includeLazyLoadColumns = true) Export the collection to a CSV string
- *
- * @author Francois Zaninotto
  *
  * @template RowFormat
  *

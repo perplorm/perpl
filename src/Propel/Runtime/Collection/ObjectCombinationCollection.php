@@ -1,19 +1,15 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Runtime\Collection;
 
 use Propel\Runtime\ActiveRecord\ActiveRecordInterface;
+use function func_get_args;
+use function func_num_args;
 
 /**
  * Class for iterating over a list of Propel objects
- *
- * @author Francois Zaninotto
  *
  * @template RowFormat of array
  * @extends \Propel\Runtime\Collection\ObjectCollection<RowFormat>

@@ -1,12 +1,10 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes;
+
+use function var_export;
 
 class ArrayColumnCodeProducer extends AbstractArrayColumnCodeProducer
 {
@@ -75,8 +73,7 @@ class ArrayColumnCodeProducer extends AbstractArrayColumnCodeProducer
             \$this->$cloUnserialized = [];
         }
         if (!\$this->$cloUnserialized && \$this->$clo !== null) {
-            \$$cloUnserialized = substr(\$this->$clo, 2, -2);
-            \$this->$cloUnserialized = \$$cloUnserialized !== '' ? explode(' | ', \$$cloUnserialized) : [];
+            \$this->$cloUnserialized = static::unserializeArray(\$this->$clo);
         }
 
         return \$this->$cloUnserialized;";
@@ -115,8 +112,23 @@ class ArrayColumnCodeProducer extends AbstractArrayColumnCodeProducer
         $script .= "
         if (\$this->$cloUnserialized !== \$v) {
             \$this->$cloUnserialized = \$v;
-            \$this->$clo = '| ' . implode(' | ', \$v) . ' |';
+            \$this->$clo = static::serializeArray(\$v);
             \$this->modifiedColumns[" . $this->objectBuilder->getColumnConstant($col) . "] = true;
         }\n";
+    }
+
+    /**
+     * @see \Propel\Generator\Builder\Om\ObjectBuilder::addCreateFromFilter()
+     *
+     * @param string $valueExpression The variable expression holding the value (i.e. '$value')
+     *
+     * @return string
+     */
+    #[\Override]
+    public function buildCreateFromFilterValueExpression(string $valueExpression): string
+    {
+        $this->referencedClasses->registerFunction('is_array');
+
+        return "is_array($valueExpression) ? $valueExpression : static::unserializeArray($valueExpression)";
     }
 }

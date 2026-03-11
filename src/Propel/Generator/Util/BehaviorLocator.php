@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Util;
 
@@ -15,11 +11,19 @@ use Propel\Generator\Exception\BuildException;
 use Propel\Generator\Model\PhpNameGenerator;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
+use function array_key_exists;
+use function array_merge;
+use function class_exists;
+use function count;
+use function dirname;
+use function file_exists;
+use function getcwd;
+use function json_decode;
+use function sprintf;
+use function strpos;
 
 /**
  * Service class to find composer and installed packages
- *
- * @author Thomas Gossmann
  */
 class BehaviorLocator
 {
@@ -46,7 +50,7 @@ class BehaviorLocator
     public function __construct(?GeneratorConfigInterface $config = null)
     {
         if ($config !== null) {
-            $this->composerDir = $config->get()['paths']['composerDir'];
+            $this->composerDir = $config->getConfigPropertyString('paths.composerDir');
         }
     }
 

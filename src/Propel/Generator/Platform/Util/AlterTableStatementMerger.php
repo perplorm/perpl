@@ -1,15 +1,16 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Platform\Util;
 
 use Propel\Generator\Model\Table;
 use Propel\Generator\Util\SqlParser;
+use function array_map;
+use function implode;
+use function preg_match;
+use function str_replace;
+use function trim;
 
 /**
  * Merges several ALTER TABLE statements when creating migrations.

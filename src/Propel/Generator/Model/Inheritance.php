@@ -1,21 +1,16 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Model;
 
 use LogicException;
+use function preg_replace;
+use function rtrim;
+use function strtoupper;
 
 /**
  * A class for information regarding possible objects representing a table.
- *
- * @author Hans Lellelid <hans@xmpl.org> (Propel)
- * @author John McNally <jmcnally@collab.net> (Torque)
- * @author Hugo Hamon <webmaster@apprendre-php.com> (Propel)
  */
 class Inheritance extends MappingModel
 {

@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Common\Exception;
 
@@ -13,8 +9,6 @@ use InvalidArgumentException;
 
 /**
  * Exception for Propel\Common\Util\SetColumnConverter class.
- *
- * @author Moritz Schroeder <moritz.schroeder@molabs.de>
  */
 class SetColumnConverterException extends InvalidArgumentException
 {

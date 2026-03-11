@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Builder\Om;
 
@@ -14,8 +10,6 @@ namespace Propel\Generator\Builder\Om;
  * This class is designed so that it can be extended the "standard" ObjectBuilder
  * and ComplexOMObjectBuilder. Hence, this class should not have any actual
  * template code in it -- simply basic logic & utility methods.
- *
- * @author Hans Lellelid <hans@xmpl.org>
  */
 abstract class AbstractObjectBuilder extends AbstractOMBuilder
 {

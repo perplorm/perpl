@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Runtime\ActiveQuery;
 
@@ -42,18 +38,28 @@ use Propel\Runtime\Map\DatabaseMap;
 use Propel\Runtime\Map\TableMap;
 use Propel\Runtime\Propel;
 use Propel\Runtime\Util\PropelConditionalProxy;
+use function array_diff;
+use function array_intersect_key;
+use function array_map;
+use function array_merge;
+use function array_unique;
+use function array_values;
+use function count;
+use function implode;
+use function in_array;
+use function is_array;
+use function is_string;
+use function print_r;
+use function sprintf;
+use function strrpos;
+use function substr;
+use function trigger_deprecation;
+use function trigger_error;
+use function var_export;
+use const E_USER_WARNING;
 
 /**
  * This is a utility class for holding criteria information for a query.
- *
- * @author Hans Lellelid <hans@xmpl.org> (Propel)
- * @author Kaspars Jaudzems <kaspars.jaudzems@inbox.lv> (Propel)
- * @author Frank Y. Kim <frank.kim@clearink.com> (Torque)
- * @author John D. McNally <jmcnally@collab.net> (Torque)
- * @author Brett McLaughlin <bmclaugh@algx.net> (Torque)
- * @author Eric Dobbs <eric@dobbse.net> (Torque)
- * @author Henning P. Schmiedehausen <hps@intermeta.de> (Torque)
- * @author Sam Joseph <sam@neurogrid.com> (Torque)
  */
 class Criteria
 {
@@ -387,7 +393,7 @@ class Criteria
     protected CombineOperatorManager $filterOperatorManager;
 
     /**
-     * @var \Propel\Runtime\Util\PropelConditionalProxy|null
+     * @var \Propel\Runtime\Util\PropelConditionalProxy<static>|null
      */
     protected $conditionalProxy;
 
@@ -785,7 +791,7 @@ class Criteria
     }
 
     /**
-     * @deprecated use aptly named {@see static::addFilter()} or {@see static::setUpdateValue()}/{@see static::setUpdateExpression()}.
+     * @deprecated use aptly named {@see static::addAnd()} or {@see static::setUpdateValue()}/{@see static::setUpdateExpression()}.
      * Defaults to {@see static::addFilter}.
      *
      * @param \Propel\Runtime\ActiveQuery\FilterExpression\ColumnFilterInterface|\Propel\Runtime\ActiveQuery\ColumnResolver\ColumnExpression\AbstractColumnExpression|string|null $columnOrClause The column to run the comparison on, or a Criterion object.
@@ -2267,7 +2273,9 @@ class Criteria
      *
      * @param mixed $cond Casts to bool for variable evaluation
      *
-     * @return \Propel\Runtime\ActiveQuery\Criteria|\Propel\Runtime\Util\PropelConditionalProxy
+     * @return static Actual return is static|PropelConditionalProxy<static>,
+     *                 but the proxy is transparent (delegates via __call),
+     *                 so we annotate as static for IDE/DX purposes.
      */
     public function _if($cond)
     {
@@ -2275,7 +2283,10 @@ class Criteria
 
         $this->conditionalProxy = new PropelConditionalProxy($this, $cond, $this->conditionalProxy);
 
-        return $this->conditionalProxy->getCriteriaOrProxy();
+        /** @var static $queryOrProxy */
+        $queryOrProxy = $this->conditionalProxy->getCriteriaOrProxy();
+
+        return $queryOrProxy;
     }
 
     /**
@@ -2286,7 +2297,9 @@ class Criteria
      *
      * @throws \Propel\Runtime\Exception\LogicException
      *
-     * @return \Propel\Runtime\ActiveQuery\Criteria|\Propel\Runtime\Util\PropelConditionalProxy
+     * @return static Actual return is static|PropelConditionalProxy<static>,
+     *                 but the proxy is transparent (delegates via __call),
+     *                 so we annotate as static for IDE/DX purposes.
      */
     public function _elseif($cond)
     {
@@ -2295,8 +2308,10 @@ class Criteria
         if (!$this->conditionalProxy) {
             throw new LogicException(__METHOD__ . ' must be called after _if()');
         }
+        /** @var static $queryOrProxy */
+        $queryOrProxy = $this->conditionalProxy->_elseif($cond);
 
-        return $this->conditionalProxy->_elseif($cond);
+        return $queryOrProxy;
     }
 
     /**
@@ -2305,15 +2320,19 @@ class Criteria
      *
      * @throws \Propel\Runtime\Exception\LogicException
      *
-     * @return \Propel\Runtime\ActiveQuery\Criteria|\Propel\Runtime\Util\PropelConditionalProxy
+     * @return static Actual return is static|PropelConditionalProxy<static>,
+     *                 but the proxy is transparent (delegates via __call),
+     *                 so we annotate as static for IDE/DX purposes.
      */
     public function _else()
     {
         if (!$this->conditionalProxy) {
             throw new LogicException(__METHOD__ . ' must be called after _if()');
         }
+        /** @var static $queryOrProxy */
+        $queryOrProxy = $this->conditionalProxy->_else();
 
-        return $this->conditionalProxy->_else();
+        return $queryOrProxy;
     }
 
     /**
@@ -2322,7 +2341,9 @@ class Criteria
      *
      * @throws \Propel\Runtime\Exception\LogicException
      *
-     * @return \Propel\Runtime\ActiveQuery\Criteria|\Propel\Runtime\Util\PropelConditionalProxy
+     * @return static Actual return is static|PropelConditionalProxy<static>,
+     *                 but the proxy is transparent (delegates via __call),
+     *                 so we annotate as static for IDE/DX purposes.
      */
     public function _endif()
     {
@@ -2331,13 +2352,10 @@ class Criteria
         }
 
         $this->conditionalProxy = $this->conditionalProxy->getParentProxy();
+        /** @var static $queryOrNestedProxy */
+        $queryOrNestedProxy = $this->conditionalProxy?->getCriteriaOrProxy() ?? $this;
 
-        if ($this->conditionalProxy) {
-            return $this->conditionalProxy->getCriteriaOrProxy();
-        }
-
-        // reached last level
-        return $this;
+        return $queryOrNestedProxy;
     }
 
     /**

@@ -1,22 +1,20 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Behavior\I18n;
 
 use Propel\Generator\Builder\Om\ObjectBuilder;
 use Propel\Generator\Model\Column;
 use Propel\Generator\Model\PropelTypes;
+use function in_array;
+use function preg_match;
+use function preg_replace;
+use function ucfirst;
 
 /**
  * Allows translation of text columns through transparent one-to-many relationship.
  * Modifier for the object builder.
- *
- * @author François Zaninotto
  */
 class I18nBehaviorObjectBuilderModifier
 {

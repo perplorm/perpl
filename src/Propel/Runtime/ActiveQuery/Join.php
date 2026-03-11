@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Runtime\ActiveQuery;
 
@@ -13,22 +9,20 @@ use Propel\Runtime\ActiveQuery\FilterExpression\FilterFactory;
 use Propel\Runtime\ActiveQuery\Join as ActiveQueryJoin;
 use Propel\Runtime\Adapter\AdapterInterface;
 use Propel\Runtime\Exception\LogicException;
+use function count;
+use function explode;
+use function implode;
+use function is_array;
+use function is_string;
+use function sprintf;
+use function strrpos;
+use function var_export;
 
 /**
  * Data object to describe a join between two tables, for example
  * <pre>
  * table_a LEFT JOIN table_b ON table_a.id = table_b.a_id
  * </pre>
- *
- * @author Francois Zaninotto (Propel)
- * @author Hans Lellelid <hans@xmpl.org> (Propel)
- * @author Kaspars Jaudzems <kaspars.jaudzems@inbox.lv> (Propel)
- * @author Frank Y. Kim <frank.kim@clearink.com> (Torque)
- * @author John D. McNally <jmcnally@collab.net> (Torque)
- * @author Brett McLaughlin <bmclaugh@algx.net> (Torque)
- * @author Eric Dobbs <eric@dobbse.net> (Torque)
- * @author Henning P. Schmiedehausen <hps@intermeta.de> (Torque)
- * @author Sam Joseph <sam@neurogrid.com> (Torque)
  */
 class Join
 {

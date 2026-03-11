@@ -1,14 +1,11 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Platform;
 
 use PDO;
+use Propel\Common\Config\Exception\InvalidConfigurationException;
 use Propel\Generator\Config\GeneratorConfigInterface;
 use Propel\Generator\Exception\EngineException;
 use Propel\Generator\Model\Column;
@@ -22,34 +19,55 @@ use Propel\Generator\Model\PropelTypes;
 use Propel\Generator\Model\Table;
 use Propel\Generator\Model\Unique;
 use Propel\Generator\Platform\Util\MysqlUuidMigrationBuilder;
+use function addslashes;
+use function array_flip;
+use function array_map;
+use function array_push;
+use function array_search;
+use function array_unshift;
+use function implode;
+use function in_array;
+use function is_array;
+use function is_numeric;
+use function sprintf;
+use function str_replace;
+use function stripos;
+use function strpos;
+use function strtolower;
+use function strtoupper;
+use function strtr;
+use function substr;
+use function var_export;
 
 /**
  * MySql PlatformInterface implementation.
- *
- * @author Hans Lellelid <hans@xmpl.org> (Propel)
- * @author Martin Poeschl <mpoeschl@marmot.at> (Torque)
  */
 class MysqlPlatform extends DefaultPlatform
 {
     /**
      * @var string
      */
-    protected $tableEngineKeyword = 'ENGINE';
+    protected string $tableEngineKeyword = 'ENGINE';
 
     /**
      * @var string
      */
-    protected $defaultTableEngine = 'InnoDB';
+    protected string $defaultTableEngine = 'InnoDB';
 
     /**
      * @var string|null
      */
-    protected $serverVersion;
+    protected string|null $serverVersion = null;
 
     /**
      * @var bool
      */
-    protected $useUuidNativeType = false;
+    protected bool $useUuidNativeType = false;
+
+    /**
+     * @var bool
+     */
+    protected bool $ignoreSizeOnIntegerTypes = true;
 
     /**
      * Initializes db specific domain mapping.
@@ -69,16 +87,18 @@ class MysqlPlatform extends DefaultPlatform
         $this->setSchemaDomainMapping(new Domain(PropelTypes::CLOB, 'LONGTEXT'));
         $this->setSchemaDomainMapping(new Domain(PropelTypes::OBJECT, 'MEDIUMBLOB'));
         $this->setSchemaDomainMapping(new Domain(PropelTypes::PHP_ARRAY, 'TEXT'));
-        $this->setSchemaDomainMapping(new Domain(PropelTypes::ENUM, 'TINYINT'));
-        $this->setSchemaDomainMapping(new Domain(PropelTypes::SET, 'INT'));
         $this->setSchemaDomainMapping(new Domain(PropelTypes::REAL, 'DOUBLE'));
         $this->setSchemaDomainMapping(new Domain(PropelTypes::UUID_BINARY, 'BINARY', 16));
 
         $this->setUuidTypeMapping();
+
+        $this->setSetTypesMapping(true);
     }
 
     /**
      * @param \Propel\Generator\Config\GeneratorConfigInterface $generatorConfig
+     *
+     * @throws \Propel\Common\Config\Exception\InvalidConfigurationException
      *
      * @return void
      */
@@ -87,7 +107,11 @@ class MysqlPlatform extends DefaultPlatform
     {
         parent::setGeneratorConfig($generatorConfig);
 
-        $mysqlConfig = $generatorConfig->get()['database']['adapters']['mysql'];
+        $configProp = 'database.adapters.mysql';
+        $mysqlConfig = $generatorConfig->getConfigProperty($configProp, true);
+        if (!is_array($mysqlConfig)) {
+            throw new InvalidConfigurationException("Config property `$configProp` is supposed to be an array, but is " . var_export($mysqlConfig, true));
+        }
 
         $defaultTableEngine = $mysqlConfig['tableType'];
         if ($defaultTableEngine) {
@@ -104,6 +128,8 @@ class MysqlPlatform extends DefaultPlatform
             $enable = strtolower($uuidColumnType) === 'native';
             $this->setUuidNativeType($enable);
         }
+
+        $this->ignoreSizeOnIntegerTypes = $mysqlConfig['ignoreSizeOnIntegerTypes'];
     }
 
     /**
@@ -1015,13 +1041,25 @@ ALTER TABLE %s ADD %s %s;
     #[\Override]
     public function hasSize(string $sqlType): bool
     {
-        return !in_array($sqlType, [
+        $unSizedTypes = [
             'MEDIUMTEXT',
             'LONGTEXT',
             'BLOB',
             'MEDIUMBLOB',
             'LONGBLOB',
-        ], true);
+        ];
+
+        if ($this->ignoreSizeOnIntegerTypes) {
+            array_push(
+                $unSizedTypes,
+                PropelTypes::BIGINT,
+                PropelTypes::INTEGER,
+                PropelTypes::SMALLINT,
+                PropelTypes::TINYINT,
+            );
+        }
+
+        return !in_array($sqlType, $unSizedTypes, true);
     }
 
     /**

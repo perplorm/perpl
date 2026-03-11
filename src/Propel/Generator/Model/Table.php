@@ -1,12 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
-
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace Propel\Generator\Model;
 
@@ -21,18 +15,25 @@ use Propel\Generator\Platform\PlatformInterface;
 use Propel\Runtime\Collection\ObjectCollection;
 use Propel\Runtime\Exception\RuntimeException;
 use Propel\Runtime\Util\UuidConverter;
+use function array_filter;
+use function array_merge;
+use function array_slice;
+use function array_values;
+use function count;
+use function get_class;
+use function implode;
+use function in_array;
+use function is_array;
+use function is_string;
+use function lcfirst;
+use function sprintf;
+use function strrpos;
+use function strtolower;
+use function strtoupper;
+use function substr_replace;
 
 /**
  * Data about a table used in an application.
- *
- * @author Hans Lellelid <hans@xmpl.org> (Propel)
- * @author Leon Messerschmidt <leon@opticode.co.za> (Torque)
- * @author Jason van Zyl <jvanzyl@apache.org> (Torque)
- * @author Martin Poeschl <mpoeschl@marmot.at> (Torque)
- * @author John McNally <jmcnally@collab.net> (Torque)
- * @author Daniel Rall <dlr@collab.net> (Torque)
- * @author Byron Foster <byron_foster@yahoo.com> (Torque)
- * @author Hugo Hamon <webmaster@apprendre-php.com> (Propel)
  */
 class Table extends ScopedMappingModel implements IdMethod
 {
@@ -108,8 +109,14 @@ class Table extends ScopedMappingModel implements IdMethod
 
     private ?string $interface = null;
 
+    /**
+     * @var class-string|null
+     */
     private ?string $baseClass = null;
 
+    /**
+     * @var class-string|null
+     */
     private ?string $baseQueryClass = null;
 
     /**
@@ -251,19 +258,6 @@ class Table extends ScopedMappingModel implements IdMethod
         $this->defaultStringFormat = $this->getAttribute('defaultStringFormat');
         $this->defaultAccessorVisibility = $this->getAttribute('defaultAccessorVisibility', $this->database->getAttribute('defaultAccessorVisibility', static::VISIBILITY_PUBLIC));
         $this->defaultMutatorVisibility = $this->getAttribute('defaultMutatorVisibility', $this->database->getAttribute('defaultMutatorVisibility', static::VISIBILITY_PUBLIC));
-    }
-
-    /**
-     * Returns a build property value for the database this table belongs to.
-     *
-     * @param string $name
-     *
-     * @return string
-     */
-    #[\Override]
-    public function getBuildProperty(string $name): string
-    {
-        return $this->database ? $this->database->getBuildProperty($name) : '';
     }
 
     /**
@@ -529,7 +523,7 @@ class Table extends ScopedMappingModel implements IdMethod
      * Returns the name of the base query class used for superclass of all query objects
      * of this table.
      *
-     * @return string|null
+     * @return class-string|null
      */
     public function getBaseQueryClass(): ?string
     {
@@ -543,25 +537,25 @@ class Table extends ScopedMappingModel implements IdMethod
     /**
      * Sets the base class name.
      *
-     * @param string $class
+     * @param class-string $class
      *
      * @return void
      */
     public function setBaseClass(string $class): void
     {
-        $this->baseClass = $this->makeNamespaceAbsolute($class);
+        $this->baseClass = $this->makeClassNameAbsolute($class);
     }
 
     /**
      * Sets the base query class name.
      *
-     * @param string $class
+     * @param class-string $class
      *
      * @return void
      */
     public function setBaseQueryClass(string $class): void
     {
-        $this->baseQueryClass = $this->makeNamespaceAbsolute($class);
+        $this->baseQueryClass = $this->makeClassNameAbsolute($class);
     }
 
     /**
@@ -945,7 +939,7 @@ class Table extends ScopedMappingModel implements IdMethod
         /** @var array<\Propel\Generator\Model\Column> $pks */
         $pks = [];
         foreach ($this->getPrimaryKey() as $primaryKey) {
-            if ($primaryKey->isNotNull() && !$primaryKey->hasDefaultValue() && !in_array($primaryKey, $primaryKeys, true)) {
+            if ($primaryKey->isNotNull() && !$primaryKey->hasDefault() && !in_array($primaryKey, $primaryKeys, true)) {
                 $pks[] = $primaryKey;
             }
         }
@@ -1147,9 +1141,9 @@ class Table extends ScopedMappingModel implements IdMethod
      * @return \Propel\Generator\Config\GeneratorConfigInterface|null
      */
     #[\Override]
-    public function getGeneratorConfig(): ?GeneratorConfigInterface
+    public function getGeneratorConfig(): GeneratorConfigInterface|null
     {
-        return $this->database->getGeneratorConfig();
+        return $this->database?->getGeneratorConfig();
     }
 
     /**
@@ -1603,6 +1597,16 @@ class Table extends ScopedMappingModel implements IdMethod
     public function getColumns(): array
     {
         return $this->columns;
+    }
+
+    /**
+     * Get columns that are not lazy-load.
+     *
+     * @return array<\Propel\Generator\Model\Column>
+     */
+    public function getEagerColumns(): array
+    {
+        return array_filter($this->columns, fn (Column $col) => !$col->isLazyLoad());
     }
 
     /**
@@ -2392,11 +2396,14 @@ class Table extends ScopedMappingModel implements IdMethod
     }
 
     /**
-     * @return string
+     * @return class-string
      */
     public function getQualifiedClassName(): string
     {
-        return $this->makeNamespaceAbsolute($this->namespace) . '\\' . $this->getPhpName();
+        /** @var class-string $className */
+        $className = "{$this->namespace}\\{$this->getPhpName()}";
+
+        return $this->makeClassNameAbsolute($className);
     }
 
     /**

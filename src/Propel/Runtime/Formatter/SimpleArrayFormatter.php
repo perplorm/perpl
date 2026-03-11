@@ -1,16 +1,15 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Runtime\Formatter;
 
 use Propel\Runtime\ActiveRecord\ActiveRecordInterface;
 use Propel\Runtime\DataFetcher\DataFetcherInterface;
 use Propel\Runtime\Exception\LogicException;
+use function array_keys;
+use function count;
+use function str_replace;
 
 /**
  * @deprecated class is not type-safe.
@@ -18,8 +17,6 @@ use Propel\Runtime\Exception\LogicException;
  * Array formatter for Propel select query
  * format() returns a ArrayCollection of associative arrays, a string,
  * or an array
- *
- * @author Benjamin Runnels
  *
  * @extends \Propel\Runtime\Formatter\AbstractFormatter<array<string, mixed>|string, \Propel\Runtime\Collection\ArrayCollection>
  */

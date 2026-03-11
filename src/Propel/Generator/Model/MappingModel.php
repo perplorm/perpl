@@ -1,19 +1,24 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Model;
+
+use Propel\Common\Util\SetColumnConverter;
+use function array_change_key_case;
+use function explode;
+use function implode;
+use function in_array;
+use function is_bool;
+use function is_numeric;
+use function sprintf;
+use function strtolower;
+use function trim;
+use const CASE_LOWER;
 
 /**
  * An abstract model class to represent objects that belongs to a schema like
  * databases, tables, columns, indices, unices, foreign keys...
- *
- * @author Hans Lellelid <hans@xmpl.org> (Propel)
- * @author Hugo Hamon <webmaster@apprendre-php.com> (Propel)
  */
 abstract class MappingModel implements MappingModelInterface
 {
@@ -148,18 +153,7 @@ abstract class MappingModel implements MappingModelInterface
      */
     protected function getDefaultValueForSet(string $stringValue): ?array
     {
-        $stringValue = trim($stringValue);
-
-        if (!$stringValue) {
-            return null;
-        }
-
-        $values = [];
-        foreach (explode(',', $stringValue) as $v) {
-            $values[] = trim($v);
-        }
-
-        return $values;
+        return SetColumnConverter::itemsCsvToArray($stringValue) ?: null;
     }
 
     /**

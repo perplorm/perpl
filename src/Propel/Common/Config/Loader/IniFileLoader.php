@@ -1,23 +1,30 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Common\Config\Loader;
 
 use Propel\Common\Config\Exception\IniParseException;
 use Propel\Common\Config\Exception\InvalidArgumentException;
+use function array_merge_recursive;
+use function array_reverse;
+use function count;
+use function explode;
+use function in_array;
+use function is_array;
+use function is_int;
+use function is_string;
+use function parse_ini_file;
+use function sprintf;
+use function strlen;
+use function strtolower;
+use const INI_SCANNER_RAW;
 
 /**
  * IniFileLoader loads parameters from INI files.
  *
  * This class is heavily inspired to Zend\Config component ini reader.
  * http://framework.zend.com/manual/2.1/en/modules/zend.config.reader.html
- *
- * @author Cristiano Cinotti
  */
 class IniFileLoader extends FileLoader
 {
@@ -133,7 +140,7 @@ class IniFileLoader extends FileLoader
     /**
      * Process a key.
      *
-     * @param string $key
+     * @param string|int $key
      * @param array<array-key, string>|string $rawValue
      * @param array $config
      *
@@ -141,7 +148,7 @@ class IniFileLoader extends FileLoader
      *
      * @return void
      */
-    private function parseKey(string $key, $rawValue, array &$config): void
+    private function parseKey(string|int $key, $rawValue, array &$config): void
     {
         $value = $rawValue;
         if (is_string($rawValue)) {
@@ -153,7 +160,7 @@ class IniFileLoader extends FileLoader
                 $value = (float)$rawValue;
             }
         }
-        $subKeys = explode($this->nestSeparator, $key);
+        $subKeys = is_int($key) ? [$key] : explode($this->nestSeparator, $key);
         $subConfig = &$config;
         $lastIndex = count($subKeys) - 1;
         foreach ($subKeys as $index => $subKey) {

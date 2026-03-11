@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Config;
 
@@ -18,6 +14,7 @@ use Propel\Generator\Platform\PlatformInterface;
 use Propel\Generator\Reverse\SchemaParserInterface;
 use Propel\Generator\Util\BehaviorLocator;
 use Propel\Runtime\Connection\ConnectionInterface;
+use function array_replace_recursive;
 
 class QuickGeneratorConfig extends ConfigurationManager implements GeneratorConfigInterface
 {
@@ -78,7 +75,7 @@ class QuickGeneratorConfig extends ConfigurationManager implements GeneratorConf
     #[\Override]
     public function getConfiguredBuilder(Table $table, string $type): AbstractOMBuilder
     {
-        $class = $this->getConfigProperty('generator.objectModel.builders.' . $type);
+        $class = $this->getConfigPropertyString('generator.objectModel.builders.' . $type);
 
         if ($class === null) {
             throw new InvalidArgumentException("Invalid data model builder type `$type`");

@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Command;
 
@@ -14,10 +10,10 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use function sprintf;
+use function strpos;
+use function ucfirst;
 
-/**
- * @author William Durand <william.durand1@gmail.com>
- */
 class DatabaseReverseCommand extends AbstractCommand
 {
     /**
@@ -39,7 +35,7 @@ class DatabaseReverseCommand extends AbstractCommand
      * @inheritDoc
      */
     #[\Override]
-    protected function configure()
+    protected function configure(): void
     {
         parent::configure();
 
@@ -86,7 +82,7 @@ class DatabaseReverseCommand extends AbstractCommand
                 $input->setOption('database-name', self::DEFAULT_DATABASE_NAME);
             }
         }
-        $generatorConfig = $this->getGeneratorConfig($configOptions, $input);
+        $generatorConfig = $this->buildGeneratorConfig($configOptions, $input);
 
         $this->createDirectory($input->getOption('output-dir'));
 

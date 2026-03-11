@@ -10,7 +10,6 @@ namespace Propel\Tests\Generator\Platform;
 
 use Propel\Generator\Builder\Util\SchemaReader;
 use Propel\Generator\Model\Column;
-use Propel\Generator\Model\ColumnDefaultValue;
 use Propel\Generator\Model\Diff\ColumnComparator;
 use Propel\Generator\Model\Table;
 use Propel\Generator\Platform\PgsqlPlatform;
@@ -294,7 +293,7 @@ ALTER TABLE "foo" ALTER COLUMN "bar" TYPE DOUBLE PRECISION;
         $c2 = new Column('bar');
         $c2->getDomain()->copy($this->getPlatform()->getDomainForType('DOUBLE'));
         $c2->getDomain()->replaceSize(3);
-        $c2->getDomain()->setDefaultValue(new ColumnDefaultValue(-100, ColumnDefaultValue::TYPE_VALUE));
+        $c2->getDomain()->createDefaultValue(-100);
         $t2->addColumn($c2);
         $columnDiff = ColumnComparator::computeDiff($c1, $c2);
         $expected = <<<END

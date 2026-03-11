@@ -1,31 +1,25 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Command;
 
 use Exception;
-use Propel\Generator\Manager\MigrationManager;
 use Propel\Generator\Util\SqlParser;
 use Propel\Runtime\Exception\RuntimeException;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use function count;
+use function sprintf;
 
-/**
- * @author William Durand <william.durand1@gmail.com>
- */
-class MigrationUpCommand extends AbstractCommand
+class MigrationUpCommand extends AbstractMigrationCommand
 {
     /**
      * @inheritDoc
      */
     #[\Override]
-    protected function configure()
+    protected function configure(): void
     {
         parent::configure();
 
@@ -48,37 +42,11 @@ class MigrationUpCommand extends AbstractCommand
     #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $configOptions = [];
+        $this->setUp($input);
+        $manager = $this->getMigrationManager();
 
-        if ($this->hasInputOption('output-dir', $input)) {
-            $configOptions['propel']['paths']['migrationDir'] = $input->getOption('output-dir');
-        }
-
-        if ($this->hasInputOption('migration-table', $input)) {
-            $configOptions['propel']['migrations']['tableName'] = $input->getOption('migration-table');
-        }
-
-        $generatorConfig = $this->getGeneratorConfig($configOptions, $input);
-
-        $this->createDirectory($generatorConfig->getSection('paths')['migrationDir']);
-
-        $manager = new MigrationManager();
-        $manager->setGeneratorConfig($generatorConfig);
-
-        $connections = [];
-        $optionConnections = $input->getOption('connection');
-        if (!$optionConnections) {
-            $connections = $generatorConfig->getBuildConnections();
-        } else {
-            foreach ($optionConnections as $connection) {
-                [$name, $dsn, $infos] = $this->parseConnection($connection);
-                $connections[$name] = array_merge(['dsn' => $dsn], $infos);
-            }
-        }
-
-        $manager->setConnections($connections);
-        $manager->setMigrationTable($generatorConfig->getSection('migrations')['tableName']);
-        $manager->setWorkingDirectory($generatorConfig->getSection('paths')['migrationDir']);
+        $customConnectionData = $input->getOption('connection');
+        $this->setUpMigrationManagerAccess($customConnectionData);
 
         $nextMigrationTimestamp = $manager->getFirstUpMigrationTimestamp();
         if (!$nextMigrationTimestamp) {

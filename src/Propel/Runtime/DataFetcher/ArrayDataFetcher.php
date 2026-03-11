@@ -1,19 +1,18 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Runtime\DataFetcher;
 
 use Propel\Runtime\Map\TableMap;
+use function count;
+use function current;
+use function key;
+use function next;
+use function reset;
 
 /**
  * Class ArrayDataFetcher
- *
- * @package Propel\Runtime\Formatter
  */
 class ArrayDataFetcher extends AbstractDataFetcher
 {

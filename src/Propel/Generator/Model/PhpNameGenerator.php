@@ -1,21 +1,19 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Model;
 
+use function count;
+use function preg_match_all;
+use function strlen;
+use function strtok;
+use function strtolower;
+use function substr;
+use function ucfirst;
+
 /**
  * A <code>NameGeneratorInterface</code> implementation for PHP-esque names.
- *
- * @author Hans Lellelid <hans@xmpl.org> (Propel)
- * @author Daniel Rall <dlr@finemaltcoding.com> (Torque)
- * @author Byron Foster <byron_foster@yahoo.com> (Torque)
- * @author Bernd Goldschmidt <bgoldschmidt@rapidsoft.de>
- * @author Hugo Hamon <webmaster@apprendre-php.com> (Propel)
  */
 class PhpNameGenerator implements NameGeneratorInterface
 {

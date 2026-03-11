@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Model;
 
@@ -12,15 +8,12 @@ use Propel\Generator\Config\GeneratorConfigInterface;
 use Propel\Generator\Exception\EngineException;
 use Propel\Generator\Platform\PlatformInterface;
 use Propel\Generator\Schema\Dumper\XmlDumper;
+use function count;
+use function sprintf;
+use function str_replace;
 
 /**
  * A class for holding application data structures.
- *
- * @author Hans Lellelid <hans@xmpl.org> (Propel)
- * @author Leon Messerschmidt <leon@opticode.co.za> (Torque)
- * @author John McNally <jmcnally@collab.net> (Torque)
- * @author Daniel Rall <dlr@finemaltcoding.com> (Torque)
- * @author Hugo Hamon <webmaster@apprendre-php.com> (Propel)
  */
 class Schema
 {

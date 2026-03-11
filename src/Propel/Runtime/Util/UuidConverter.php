@@ -1,12 +1,15 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Runtime\Util;
+
+use function array_map;
+use function bin2hex;
+use function hex2bin;
+use function is_string;
+use function preg_replace;
+use function str_replace;
 
 /**
  * Helps to manually convert UUIDs to byte types

@@ -473,7 +473,10 @@ class ColumnTest extends ModelTestCase
             ['BOOLEAN_EMU', PDO::PARAM_INT],
             ['OBJECT', PDO::PARAM_LOB],
             ['ARRAY', PDO::PARAM_STR],
-            ['ENUM', PDO::PARAM_INT],
+            [PropelTypes::ENUM_BINARY, PDO::PARAM_INT],
+            [PropelTypes::SET_BINARY, PDO::PARAM_INT],
+            [PropelTypes::ENUM_NATIVE, PDO::PARAM_STR],
+            [PropelTypes::SET_NATIVE, PDO::PARAM_STR],
             ['BU_DATE', PDO::PARAM_STR],
             ['BU_TIMESTAMP', PDO::PARAM_STR],
             [PropelTypes::UUID, PDO::PARAM_STR],
@@ -484,22 +487,22 @@ class ColumnTest extends ModelTestCase
     /**
      * @return void
      */
-    public function testEnumType()
+    public function testBinaryEnumType()
     {
         $domain = $this->getDomainMock();
         $domain
             ->expects($this->any())
             ->method('getType')
-            ->will($this->returnValue('ENUM'));
+            ->will($this->returnValue(PropelTypes::ENUM_BINARY));
 
         $column = new Column('');
         $column->setDomain($domain);
-        $column->setType('ENUM');
+        $column->setType(PropelTypes::ENUM_BINARY);
         $column->setValueSet(['FOO', 'BAR']);
 
         $this->assertSame('int', $column->getPhpType());
         $this->assertTrue($column->isPhpPrimitiveType());
-        $this->assertTrue($column->isEnumType());
+        $this->assertTrue($column->isBinaryEnumType());
         $this->assertContains('FOO', $column->getValueSet());
         $this->assertContains('BAR', $column->getValueSet());
     }
@@ -507,22 +510,22 @@ class ColumnTest extends ModelTestCase
     /**
      * @return void
      */
-    public function testSetType()
+    public function testBinarySetType()
     {
         $domain = $this->getDomainMock();
         $domain
             ->expects($this->any())
             ->method('getType')
-            ->will($this->returnValue('SET'));
+            ->will($this->returnValue(PropelTypes::SET_BINARY));
 
         $column = new Column('');
         $column->setDomain($domain);
-        $column->setType('SET');
+        $column->setType(PropelTypes::SET_BINARY);
         $column->setValueSet(['FOO', 'BAR']);
 
         $this->assertSame('int', $column->getPhpType());
         $this->assertTrue($column->isPhpPrimitiveType());
-        $this->assertTrue($column->isSetType());
+        $this->assertTrue($column->isBinarySetType());
         $this->assertContains('FOO', $column->getValueSet());
         $this->assertContains('BAR', $column->getValueSet());
     }

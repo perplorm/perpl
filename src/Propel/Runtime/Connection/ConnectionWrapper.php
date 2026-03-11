@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Runtime\Connection;
 
@@ -15,6 +11,14 @@ use Propel\Runtime\Exception\InvalidArgumentException;
 use Propel\Runtime\Propel;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
+use function constant;
+use function count;
+use function debug_backtrace;
+use function defined;
+use function in_array;
+use function is_string;
+use function sprintf;
+use function strpos;
 
 /**
  * Wraps a Connection class, providing nested transactions, statement cache, and logging.

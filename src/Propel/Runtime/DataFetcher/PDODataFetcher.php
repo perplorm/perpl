@@ -1,22 +1,20 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Runtime\DataFetcher;
 
 use PDO;
 use Propel\Runtime\Map\TableMap;
+use function sprintf;
+use function strtoupper;
+use function substr;
+use function trim;
 
 /**
  * Class PDODataFetcher
  *
  * The PDO dataFetcher for PDOStatement.
- *
- * @package Propel\Runtime\Formatter
  */
 class PDODataFetcher extends AbstractDataFetcher
 {

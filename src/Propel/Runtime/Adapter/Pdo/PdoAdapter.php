@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Runtime\Adapter\Pdo;
 
@@ -22,6 +18,25 @@ use Propel\Runtime\Exception\InvalidArgumentException;
 use Propel\Runtime\Map\ColumnMap;
 use Propel\Runtime\Map\DatabaseMap;
 use Propel\Runtime\Util\PropelDateTime;
+use function array_keys;
+use function array_map;
+use function array_push;
+use function constant;
+use function defined;
+use function explode;
+use function implode;
+use function in_array;
+use function is_array;
+use function is_resource;
+use function is_string;
+use function preg_replace;
+use function rewind;
+use function sprintf;
+use function str_replace;
+use function strpos;
+use function strrpos;
+use function strtolower;
+use function substr;
 
 /**
  * Base for PDO database adapters.
@@ -59,31 +74,58 @@ abstract class PdoAdapter
         $dsn = $params['dsn'];
         $user = $params['user'] ?? null;
         $password = $params['password'] ?? null;
+        $driverOptions = is_array($params['options'] ?? null) ? $this->buildDriverOptions($params['options'], $dsn) : [];
 
-        // load any driver options from the config file
-        // driver options are those PDO settings that have to be passed during the connection construction
-        $driverOptions = [];
-        if (isset($params['options']) && is_array($params['options'])) {
-            foreach ($params['options'] as $option => $optiondata) {
-                $value = $optiondata;
-                if (is_string($value) && strpos($value, '::') !== false) {
-                    if (!defined($value)) {
-                        throw new InvalidArgumentException(sprintf('Error processing driver options for dsn "%s"', $dsn));
-                    }
-                    $value = constant($value);
-                }
-                $driverOptions[$option] = $value;
-            }
-        }
+        $pdoSubclass = $this->getPdoSubclass();
 
         try {
-            $con = new PdoConnection($dsn, $user, $password, $driverOptions);
+            $con = new PdoConnection($dsn, $user, $password, $driverOptions, $pdoSubclass);
             $this->initConnection($con, isset($params['settings']) && is_array($params['settings']) ? $params['settings'] : []);
         } catch (PDOException $e) {
             throw new AdapterException('Unable to open PDO connection', 0, $e);
         }
 
         return $con;
+    }
+
+    /**
+     * @return class-string<\PDO>
+     */
+    public function getPdoSubclass(): string
+    {
+        return PDO::class;
+    }
+
+    /**
+     * Load driver options from the config file parameters.
+     *
+     * Driver options are those PDO settings that have to be passed during the connection construction.
+     *
+     * @param array $options
+     * @param string $dsn
+     *
+     * @throws \Propel\Runtime\Exception\InvalidArgumentException
+     *
+     * @return array
+     */
+    protected function buildDriverOptions(array $options, string $dsn): array
+    {
+        $driverOptions = [];
+        foreach ($options as $option => $value) {
+            if (!is_string($value) || strpos($value, '::') === false) {
+                $driverOptions[$option] = $value;
+
+                continue;
+            }
+
+            if (!defined($value)) {
+                throw new InvalidArgumentException(sprintf('Error processing driver options for dsn "%s"', $dsn));
+            }
+
+            $driverOptions[$option] = constant($value);
+        }
+
+        return $driverOptions;
     }
 
     /**

@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Command;
 
@@ -13,10 +9,20 @@ use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use function array_map;
+use function chdir;
+use function count;
+use function file_exists;
+use function file_get_contents;
+use function file_put_contents;
+use function is_file;
+use function realpath;
+use function sprintf;
+use function str_replace;
+use function substr;
+use function ucfirst;
+use const DIRECTORY_SEPARATOR;
 
-/**
- * @author William Durand <william.durand1@gmail.com>
- */
 class TestPrepareCommand extends AbstractCommand
 {
     /**
@@ -74,7 +80,7 @@ class TestPrepareCommand extends AbstractCommand
      * @inheritDoc
      */
     #[\Override]
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setDefinition([
@@ -94,18 +100,15 @@ class TestPrepareCommand extends AbstractCommand
     #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $result = static::CODE_SUCCESS;
+        $exitCode = static::CODE_SUCCESS;
         foreach ($this->fixtures as $fixturesDir => $connections) {
             $this->resetCounters();
-
-            $run = $this->buildFixtures(sprintf('%s/%s', self::FIXTURES_DIR, $fixturesDir), $connections, $input, $output);
-            if ($run !== static::CODE_SUCCESS) {
-                $result = $run;
-            }
+            $buildDir = self::FIXTURES_DIR . DIRECTORY_SEPARATOR . $fixturesDir;
+            $exitCode |= $this->buildFixtures($buildDir, $connections, $input, $output);
         }
         chdir($this->root);
 
-        return $result;
+        return $exitCode;
     }
 
     /**
@@ -124,94 +127,39 @@ class TestPrepareCommand extends AbstractCommand
             return static::CODE_ERROR;
         }
 
-        $output->writeln(sprintf('Building fixtures in <info>%-40s</info> ' . ($input->getOption('exclude-database') ? '(exclude-database)' : ''), $fixturesDir));
+        $vendor = $input->getOption('vendor');
+        $dsn = $input->getOption('dsn');
+        $user = $input->getOption('user');
+        $password = $input->getOption('password');
+        $verbose = $input->getOption('verbose');
+        $excludeDataBase = (bool)$input->getOption('exclude-database');
+
+        $output->writeln(sprintf('Building fixtures in <info>%-40s</info> %s', $fixturesDir, $excludeDataBase ? '(exclude-database)' : ''));
 
         chdir($this->root . '/' . $fixturesDir);
 
-        if (is_file('propel.yaml.dist')) {
-            $content = (string)file_get_contents('propel.yaml.dist');
-
-            $content = str_replace('##DATABASE_VENDOR##', $input->getOption('vendor'), $content);
-            $content = str_replace('##DATABASE_URL##', $input->getOption('dsn'), $content);
-            $content = str_replace('##DATABASE_USER##', $input->getOption('user'), $content);
-            $content = str_replace('##DATABASE_PASSWORD##', $input->getOption('password'), $content);
-
-            file_put_contents('propel.yaml', $content);
-        } else {
+        if (!$this->updatePropelYamlDistFile($vendor, $dsn, $user, $password)) {
             $output->writeln('<comment>No "propel.yaml.dist" file found, skipped.</comment>');
         }
 
-        if (is_file('propel.yaml')) {
-            $in = new ArrayInput([
-                'command' => 'config:convert',
-                '--output-dir' => './build/conf',
-                '--output-file' => sprintf('%s-conf.php', $connections[0]), // the first connection is the main one
-                '--loader-script-dir' => './build/conf',
-            ]);
+        $mainConnection = $connections[0];
+        $this->runConfigConvertCommand($output, $mainConnection);
 
-            $command = $this->getApplication()->find('config:convert');
-            $command->run($in, $output);
-        }
-
-        if (0 < count($this->getSchemas('.'))) {
-            $in = new ArrayInput([
-                'command' => 'model:build',
-                '--schema-dir' => '.',
-                '--output-dir' => 'build/classes/',
-                '--loader-script-dir' => './build/conf',
-                '--platform' => ucfirst($input->getOption('vendor')) . 'Platform',
-                '--verbose' => $input->getOption('verbose'),
-            ]);
-
-            $command = $this->getApplication()->find('model:build');
-            $command->run($in, $output);
-        }
-
-        if ($input->getOption('exclude-database')) {
+        $hasSchemasInCurrentDir = count($this->findSchemasInDirectory('.')) > 0;
+        if (!$hasSchemasInCurrentDir) {
             return static::CODE_SUCCESS;
         }
 
-        if (0 < count($this->getSchemas('.'))) {
-            $in = new ArrayInput([
-                'command' => 'sql:build',
-                '--schema-dir' => '.',
-                '--output-dir' => 'build/sql/',
-                '--platform' => ucfirst($input->getOption('vendor')) . 'Platform',
-                '--verbose' => $input->getOption('verbose'),
-            ]);
+        $this->runModelBuildCommand($output, $vendor, $verbose);
 
-            $command = $this->getApplication()->find('sql:build');
-            $command->run($in, $output);
-
-            $conParams = [];
-            foreach ($connections as $con) {
-                if (substr($input->getOption('dsn'), 0, 6) === 'sqlite') {
-                    $conParams[] = sprintf(
-                        '%s=%s',
-                        $con,
-                        $input->getOption('dsn'),
-                    );
-                } else {
-                    $conParams[] = sprintf(
-                        '%s=%s;user=%s;password=%s',
-                        $con,
-                        $input->getOption('dsn'),
-                        $input->getOption('user'),
-                        $input->getOption('password'),
-                    );
-                }
-            }
-
-            $in = new ArrayInput([
-                'command' => 'sql:insert',
-                '--sql-dir' => 'build/sql/',
-                '--connection' => $conParams,
-                '--verbose' => $input->getOption('verbose'),
-            ]);
-
-            $command = $this->getApplication()->find('sql:insert');
-            $command->run($in, $output);
+        if ($excludeDataBase) {
+            return static::CODE_SUCCESS;
         }
+
+        $this->runSqlBuildCommand($output, $vendor, $verbose);
+
+        $connectionStrings = $this->buildConnectionString($connections, $dsn, $user, $password);
+        $this->runSqlInsert($output, $connectionStrings, $verbose);
 
         return static::CODE_SUCCESS;
     }
@@ -224,5 +172,135 @@ class TestPrepareCommand extends AbstractCommand
     protected function resetCounters(): void
     {
         AggregateMultipleColumnsBehavior::resetInsertedAggregationNames();
+    }
+
+    /**
+     * Updates connection information in propel.yaml.dist in current working directory.
+     *
+     * @param string $vendor
+     * @param string $dsn
+     * @param string $user
+     * @param string $password
+     *
+     * @return bool
+     */
+    protected function updatePropelYamlDistFile(string $vendor, string $dsn, string $user, string $password): bool
+    {
+        if (!is_file('propel.yaml.dist')) {
+            return false;
+        }
+
+        $content = (string)file_get_contents('propel.yaml.dist');
+
+        $content = str_replace('##DATABASE_VENDOR##', $vendor, $content);
+        $content = str_replace('##DATABASE_URL##', $dsn, $content);
+        $content = str_replace('##DATABASE_USER##', $user, $content);
+        $content = str_replace('##DATABASE_PASSWORD##', $password, $content);
+
+        file_put_contents('propel.yaml', $content);
+
+        return true;
+    }
+
+    /**
+     * Convert local propel.yaml file via config:convert command.
+     *
+     * @param \Symfony\Component\Console\Output\OutputInterface $output
+     * @param string $connection
+     *
+     * @return void
+     */
+    protected function runConfigConvertCommand(OutputInterface $output, string $connection): void
+    {
+        if (!is_file('propel.yaml')) {
+            return;
+        }
+        $in = new ArrayInput([
+            'command' => 'config:convert',
+            '--output-dir' => './build/conf',
+            '--output-file' => sprintf('%s-conf.php', $connection),
+            '--loader-script-dir' => './build/conf',
+        ]);
+
+        $command = $this->getApplication()->find('config:convert');
+        $command->run($in, $output);
+    }
+
+    /**
+     * @param \Symfony\Component\Console\Output\OutputInterface $output
+     * @param string $vendor
+     * @param string|bool $verbose
+     *
+     * @return void
+     */
+    protected function runModelBuildCommand(OutputInterface $output, string $vendor, string|bool $verbose): void
+    {
+        $in = new ArrayInput([
+            'command' => 'model:build',
+            '--schema-dir' => '.',
+            '--output-dir' => 'build/classes/',
+            '--loader-script-dir' => './build/conf',
+            '--platform' => ucfirst($vendor) . 'Platform',
+            '--verbose' => $verbose,
+        ]);
+
+        $command = $this->getApplication()->find('model:build');
+        $command->run($in, $output);
+    }
+
+    /**
+     * @param \Symfony\Component\Console\Output\OutputInterface $output
+     * @param string $vendor
+     * @param string|bool $verbose
+     *
+     * @return void
+     */
+    protected function runSqlBuildCommand(OutputInterface $output, string $vendor, string|bool $verbose): void
+    {
+        $in = new ArrayInput([
+            'command' => 'sql:build',
+            '--schema-dir' => '.',
+            '--output-dir' => 'build/sql/',
+            '--platform' => ucfirst($vendor) . 'Platform',
+            '--verbose' => $verbose,
+        ]);
+
+        $command = $this->getApplication()->find('sql:build');
+        $command->run($in, $output);
+    }
+
+    /**
+     * @param array<string> $connections
+     * @param string $dsn
+     * @param string $user
+     * @param string $password
+     *
+     * @return array<string>
+     */
+    protected function buildConnectionString(array $connections, string $dsn, string|null $user, string|null $password): array
+    {
+        $isSqlite = substr($dsn, 0, 6) === 'sqlite';
+
+        return array_map(fn ($con) => $isSqlite ? "$con=$dsn" : "$con=$dsn;user=$user;password=$password", $connections);
+    }
+
+    /**
+     * @param \Symfony\Component\Console\Output\OutputInterface $output
+     * @param array<string> $connectionStrings
+     * @param string|bool $verbose
+     *
+     * @return void
+     */
+    protected function runSqlInsert(OutputInterface $output, array $connectionStrings, string|bool $verbose): void
+    {
+        $in = new ArrayInput([
+            'command' => 'sql:insert',
+            '--sql-dir' => 'build/sql/',
+            '--connection' => $connectionStrings,
+            '--verbose' => $verbose,
+        ]);
+
+        $command = $this->getApplication()->find('sql:insert');
+        $command->run($in, $output);
     }
 }

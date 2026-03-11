@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Behavior\ConcreteInheritance;
 
@@ -16,6 +12,14 @@ use Propel\Generator\Model\ForeignKey;
 use Propel\Generator\Model\Table;
 use Propel\Generator\Util\PhpParser;
 use Propel\Runtime\Exception\PropelException;
+use function array_flip;
+use function explode;
+use function get_class;
+use function in_array;
+use function sprintf;
+use function str_replace;
+use function strtolower;
+use function ucfirst;
 
 /**
  * Makes a model inherit another one. The model with this behavior gets a copy
@@ -23,8 +27,6 @@ use Propel\Runtime\Exception\PropelException;
  * ActiveQuery classes will extend the related classes of the parent model.
  * Lastly (an optionally), the data from a model with this behavior is copied
  * to the parent model.
- *
- * @author François Zaninotto
  */
 class ConcreteInheritanceBehavior extends Behavior
 {

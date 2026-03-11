@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Runtime\Collection;
 
@@ -12,11 +8,11 @@ use Propel\Runtime\ActiveRecord\ActiveRecordInterface;
 use Propel\Runtime\Collection\Exception\ReadOnlyModelException;
 use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Exception\PropelException;
+use function array_values;
+use function method_exists;
 
 /**
  * Class for iterating over a list of Propel objects stored as arrays
- *
- * @author Francois Zaninotto
  *
  * @extends \Propel\Runtime\Collection\Collection<array<string, mixed>>
  */

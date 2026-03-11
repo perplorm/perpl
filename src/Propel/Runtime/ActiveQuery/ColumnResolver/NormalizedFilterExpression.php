@@ -1,14 +1,13 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
- namespace Propel\Runtime\ActiveQuery\ColumnResolver;
+namespace Propel\Runtime\ActiveQuery\ColumnResolver;
 
  use Propel\Runtime\ActiveQuery\ColumnResolver\ColumnExpression\AbstractColumnExpression;
+use function preg_match;
+use function preg_replace_callback;
+use function strlen;
 
 class NormalizedFilterExpression
 {

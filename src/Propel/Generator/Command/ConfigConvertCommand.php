@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Command;
 
@@ -17,6 +13,14 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Filesystem\Filesystem;
+use function dirname;
+use function file_exists;
+use function file_get_contents;
+use function file_put_contents;
+use function is_writable;
+use function realpath;
+use function sprintf;
+use const DIRECTORY_SEPARATOR;
 
 class ConfigConvertCommand extends AbstractCommand
 {
@@ -34,7 +38,7 @@ class ConfigConvertCommand extends AbstractCommand
      * @inheritDoc
      */
     #[\Override]
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->addOption('config-dir', null, InputOption::VALUE_REQUIRED, 'The directory where the configuration file is placed.', self::DEFAULT_CONFIG_DIRECTORY)
@@ -65,7 +69,9 @@ class ConfigConvertCommand extends AbstractCommand
             throw new RuntimeException(sprintf('Unable to write the "%s" output file', $outputFilePath));
         }
 
-        $loaderDir = $input->getOption('loader-script-dir') ?? $configManager->getConfigProperty('paths.loaderScriptDir') ?? $configManager->getConfigProperty('paths.phpConfDir');
+        $loaderDir = $input->getOption('loader-script-dir')
+            ?? $configManager->getConfigPropertyString('paths.loaderScriptDir')
+            ?? $configManager->getConfigPropertyString('paths.phpConfDir');
         $fileName = $this->createLoadDatabaseDummyScript($loaderDir, $output);
         $relativeLoaderScriptLocation = DIRECTORY_SEPARATOR . $this->getRelativePathToLoaderScript($loaderDir, $outputDir) . $fileName;
 
@@ -73,15 +79,15 @@ class ConfigConvertCommand extends AbstractCommand
 
         if (file_exists($outputFilePath)) {
             $currentContent = file_get_contents($outputFilePath);
-            if ($currentContent == $phpConf) {
-                $output->writeln(sprintf('No change required in the current configuration file <info>"%s"</info>.', $outputFilePath));
+            if ($currentContent === $phpConf) {
+                $output->writeln("No change required in current configuration file <info>$outputFilePath</info>.");
             } else {
                 file_put_contents($outputFilePath, $phpConf);
-                $output->writeln(sprintf('Successfully updated PHP configuration in file <info>"%s"</info>.', $outputFilePath));
+                $output->writeln("Successfully updated PHP configuration in file <info>$outputFilePath</info>.");
             }
         } else {
             file_put_contents($outputFilePath, $phpConf);
-            $output->writeln(sprintf('Successfully wrote PHP configuration in file <info>"%s"</info>.', $outputFilePath));
+            $output->writeln("Successfully wrote PHP configuration in file <info>$outputFilePath</info>.");
         }
 
         return static::CODE_SUCCESS;
@@ -97,8 +103,8 @@ class ConfigConvertCommand extends AbstractCommand
     {
         $options = [];
         $options['connections'] = $configManager->getConnectionParametersArray();
-        $options['defaultConnection'] = $configManager->getSection('runtime')['defaultConnection'];
-        $options['log'] = $configManager->getSection('runtime')['log'];
+        $options['defaultConnection'] = $configManager->getConfigPropertyString('runtime.defaultConnection', true);
+        $options['log'] = $configManager->getConfigProperty('runtime.log');
         $options['profiler'] = $configManager->getConfigProperty('runtime.profiler');
 
         $stringifiedOptions = ArrayToPhpConverter::convert($options);

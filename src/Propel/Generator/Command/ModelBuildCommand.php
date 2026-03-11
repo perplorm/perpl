@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Command;
 
@@ -13,17 +9,13 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-/**
- * @author Florian Klein <florian.klein@free.fr>
- * @author William Durand <william.durand1@gmail.com>
- */
 class ModelBuildCommand extends AbstractCommand
 {
     /**
      * @inheritDoc
      */
     #[\Override]
-    protected function configure()
+    protected function configure(): void
     {
         parent::configure();
 
@@ -135,19 +127,22 @@ class ModelBuildCommand extends AbstractCommand
             }
         }
 
-        $generatorConfig = $this->getGeneratorConfig($configOptions, $input);
-        $this->createDirectory($generatorConfig->getSection('paths')['phpDir']);
+        $generatorConfig = $this->buildGeneratorConfig($configOptions, $input);
+        $this->createDirectory($generatorConfig->getConfigPropertyString('paths.phpDir', true));
 
         $manager = new ModelManager();
         $manager->setFilesystem($this->getFilesystem());
         $manager->setGeneratorConfig($generatorConfig);
-        $manager->setSchemas($this->getSchemas($generatorConfig->getSection('paths')['schemaDir'], $generatorConfig->getSection('generator')['recursive']));
+
+        $schemas = $this->getSchemasFromConfig($generatorConfig);
+        $manager->setSchemas($schemas);
+
         $manager->setLoggerClosure(function ($message) use ($input, $output): void {
             if ($input->getOption('verbose')) {
                 $output->writeln($message);
             }
         });
-        $manager->setWorkingDirectory($generatorConfig->getSection('paths')['phpDir']);
+        $manager->setWorkingDirectory($generatorConfig->getConfigPropertyString('paths.phpDir', true));
 
         $manager->build();
 

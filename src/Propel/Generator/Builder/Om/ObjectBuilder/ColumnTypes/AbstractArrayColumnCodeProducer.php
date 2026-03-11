@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes;
 
@@ -23,6 +19,7 @@ abstract class AbstractArrayColumnCodeProducer extends ColumnCodeProducer
      */
     protected function addHasArrayElement(string &$script, string $typeDescription): void
     {
+        $this->declareGlobalFunction('in_array');
         $clo = $this->column->getLowercasedName();
         $cfc = $this->column->getPhpName();
         $visibility = $this->column->getAccessorVisibility();

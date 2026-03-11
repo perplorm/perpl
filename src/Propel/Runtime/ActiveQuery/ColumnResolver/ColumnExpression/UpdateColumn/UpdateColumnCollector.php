@@ -1,14 +1,15 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Runtime\ActiveQuery\ColumnResolver\ColumnExpression\UpdateColumn;
 
 use Propel\Runtime\ActiveQuery\ColumnResolver\ColumnExpression\AbstractColumnExpression;
+use function array_keys;
+use function array_merge;
+use function count;
+use function strrpos;
+use function substr;
 
 /**
  * A column used in an insert or update, including value expression.

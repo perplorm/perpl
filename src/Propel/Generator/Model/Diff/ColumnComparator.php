@@ -1,14 +1,11 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Model\Diff;
 
 use Propel\Generator\Model\Column;
+use function strtoupper;
 
 /**
  * Service class for comparing Column objects.
@@ -28,20 +25,18 @@ class ColumnComparator
     public static function computeDiff(Column $fromColumn, Column $toColumn)
     {
         $changedProperties = self::compareColumns($fromColumn, $toColumn);
-        if ($changedProperties) {
-            if ($fromColumn->hasPlatform() || $toColumn->hasPlatform()) {
-                $platform = $fromColumn->hasPlatform() ? $fromColumn->getPlatform() : $toColumn->getPlatform();
-                if ($platform->getColumnDDL($fromColumn) == $platform->getColumnDDL($toColumn)) {
-                    return false;
-                }
-            }
-            $columnDiff = new ColumnDiff($fromColumn, $toColumn);
-            $columnDiff->setChangedProperties($changedProperties);
-
-            return $columnDiff;
+        if (!$changedProperties) {
+            return false;
         }
 
-        return false;
+        $platform = $fromColumn->getPlatform() ?: $toColumn->getPlatform();
+        if ($platform && $platform->getColumnDDL($fromColumn) === $platform->getColumnDDL($toColumn)) {
+            return false;
+        }
+        $columnDiff = new ColumnDiff($fromColumn, $toColumn);
+        $columnDiff->setChangedProperties($changedProperties);
+
+        return $columnDiff;
     }
 
     /**

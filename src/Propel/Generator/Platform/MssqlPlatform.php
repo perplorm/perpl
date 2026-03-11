@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Platform;
 
@@ -14,13 +10,12 @@ use Propel\Generator\Model\ForeignKey;
 use Propel\Generator\Model\PropelTypes;
 use Propel\Generator\Model\Table;
 use Propel\Generator\Model\Unique;
+use function in_array;
+use function sprintf;
+use function strtr;
 
 /**
  * MS SQL PlatformInterface implementation.
- *
- * @author Hans Lellelid <hans@xmpl.org> (Propel)
- * @author Martin Poeschl <mpoeschl@marmot.at> (Torque)
- * @author Dominic Winkler <d.winkler@flexarts.at> (Flexarts)
  */
 class MssqlPlatform extends DefaultPlatform
 {
@@ -56,10 +51,10 @@ class MssqlPlatform extends DefaultPlatform
         $this->setSchemaDomainMapping(new Domain(PropelTypes::BLOB, 'VARBINARY(MAX)'));
         $this->setSchemaDomainMapping(new Domain(PropelTypes::OBJECT, 'VARBINARY(MAX)'));
         $this->setSchemaDomainMapping(new Domain(PropelTypes::PHP_ARRAY, 'VARCHAR(MAX)'));
-        $this->setSchemaDomainMapping(new Domain(PropelTypes::ENUM, 'TINYINT'));
-        $this->setSchemaDomainMapping(new Domain(PropelTypes::SET, 'INT'));
         $this->setSchemaDomainMapping(new Domain(PropelTypes::UUID, 'UNIQUEIDENTIFIER'));
         $this->setSchemaDomainMapping(new Domain(PropelTypes::UUID_BINARY, 'BINARY(16)'));
+
+        $this->setSetTypesMapping(false);
     }
 
     /**

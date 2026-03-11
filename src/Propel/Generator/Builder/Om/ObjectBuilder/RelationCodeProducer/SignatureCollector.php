@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Builder\Om\ObjectBuilder\RelationCodeProducer;
 
@@ -14,6 +10,15 @@ use Propel\Generator\Model\Column;
 use Propel\Generator\Model\CrossRelation;
 use Propel\Generator\Model\ForeignKey;
 use RuntimeException;
+use function array_diff;
+use function array_keys;
+use function array_map;
+use function array_merge;
+use function array_unshift;
+use function count;
+use function implode;
+use function lcfirst;
+use function reset;
 
 class SignatureCollector
 {

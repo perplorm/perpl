@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Reverse;
 
@@ -21,11 +17,24 @@ use Propel\Generator\Model\Unique;
 use Propel\Generator\Platform\MysqlPlatform;
 use Propel\Runtime\Connection\ConnectionInterface;
 use RuntimeException;
+use function array_keys;
+use function count;
+use function explode;
+use function implode;
+use function in_array;
+use function is_array;
+use function preg_match;
+use function preg_match_all;
+use function sprintf;
+use function str_replace;
+use function strpos;
+use function strtolower;
+use function strtoupper;
+use function substr;
+use function trim;
 
 /**
  * Mysql database schema parser.
- *
- * @author Hans Lellelid <hans@xmpl.org>
  */
 class MysqlSchemaParser extends AbstractSchemaParser
 {
@@ -116,7 +125,7 @@ class MysqlSchemaParser extends AbstractSchemaParser
     public function parse(Database $database, array $additionalTables = []): int
     {
         if ($this->getGeneratorConfig() !== null) {
-            $this->addVendorInfo = $this->getGeneratorConfig()->get()['migrations']['addVendorInfo'];
+            $this->addVendorInfo = (bool)$this->getGeneratorConfig()->getConfigProperty('migrations.addVendorInfo');
         }
 
         $this->parseTables($database);

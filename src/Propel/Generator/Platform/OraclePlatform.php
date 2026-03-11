@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Platform;
 
@@ -18,13 +14,17 @@ use Propel\Generator\Model\Index;
 use Propel\Generator\Model\PropelTypes;
 use Propel\Generator\Model\Table;
 use Propel\Generator\Model\Unique;
+use function count;
+use function implode;
+use function is_array;
+use function min;
+use function preg_replace;
+use function sprintf;
+use function strlen;
+use function substr;
 
 /**
  * Oracle PlatformInterface implementation.
- *
- * @author Hans Lellelid <hans@xmpl.org> (Propel)
- * @author Martin Poeschl <mpoeschl@marmot.at> (Torque)
- * @author Denis Dalmais
  */
 class OraclePlatform extends DefaultPlatform
 {
@@ -59,10 +59,10 @@ class OraclePlatform extends DefaultPlatform
         $this->setSchemaDomainMapping(new Domain(PropelTypes::LONGVARBINARY, 'LONG RAW'));
         $this->setSchemaDomainMapping(new Domain(PropelTypes::OBJECT, 'LONG RAW'));
         $this->setSchemaDomainMapping(new Domain(PropelTypes::PHP_ARRAY, 'NVARCHAR2', 2000));
-        $this->setSchemaDomainMapping(new Domain(PropelTypes::ENUM, 'NUMBER', 3, 0));
-        $this->setSchemaDomainMapping(new Domain(PropelTypes::SET, 'NUMBER'));
         $this->setSchemaDomainMapping(new Domain(PropelTypes::UUID, 'UUID'));
         $this->setSchemaDomainMapping(new Domain(PropelTypes::UUID_BINARY, 'RAW(16)'));
+
+        $this->setSetTypesMapping(false);
     }
 
     /**

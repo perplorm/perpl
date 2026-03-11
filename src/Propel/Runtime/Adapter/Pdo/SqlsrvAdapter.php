@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Runtime\Adapter\Pdo;
 
@@ -16,11 +12,13 @@ use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Connection\StatementInterface;
 use Propel\Runtime\Map\ColumnMap;
 use Propel\Runtime\Map\DatabaseMap;
+use function is_resource;
+use function rewind;
+use function str_replace;
+use function strtolower;
 
 /**
  * This is used to connect to a MSSQL database using pdo_sqlsrv driver.
- *
- * @author Benjamin Runnels
  */
 class SqlsrvAdapter extends MssqlAdapter implements SqlAdapterInterface
 {

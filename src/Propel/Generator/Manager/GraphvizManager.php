@@ -1,19 +1,18 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Manager;
 
 use Propel\Generator\Model\Column;
+use function count;
+use function file_put_contents;
+use function implode;
+use function var_export;
+use const DIRECTORY_SEPARATOR;
 
 /**
  * Manager for Graphviz representation.
- *
- * @author William Durand <william.durand1@gmail.com>
  */
 class GraphvizManager extends AbstractManager
 {

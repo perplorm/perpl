@@ -1,17 +1,13 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Runtime\ActiveRecord;
 
+use Propel\Runtime\ActiveQuery\FilterExpression\FilterCollector;
+
 /**
  * This ActiveRecord interface helps to find Propel Object
- *
- * @author jaugustin
  *
  * @method array toArray(string $keyType = \Propel\Runtime\Map\TableMap::TYPE_FIELDNAME, bool $includeLazyLoadColumns = true, array $alreadyDumpedObjects = [], bool $includeForeignObjects = false): array
  */
@@ -74,4 +70,11 @@ interface ActiveRecordInterface
      * @return void
      */
     public function setNew(bool $b): void;
+
+    /**
+     * @param \Propel\Runtime\ActiveQuery\FilterExpression\FilterCollector $filterCollector
+     *
+     * @return static
+     */
+    public static function createFromFilters(FilterCollector $filterCollector);
 }

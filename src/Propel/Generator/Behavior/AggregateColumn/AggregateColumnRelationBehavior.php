@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Behavior\AggregateColumn;
 
@@ -13,11 +9,12 @@ use Propel\Generator\Builder\Om\AbstractOMBuilder;
 use Propel\Generator\Model\Behavior;
 use Propel\Generator\Model\ForeignKey;
 use Propel\Generator\Model\Table;
+use function array_shift;
+use function lcfirst;
+use function str_replace;
 
 /**
  * Keeps an aggregate column updated with related table
- *
- * @author François Zaninotto
  */
 class AggregateColumnRelationBehavior extends Behavior
 {

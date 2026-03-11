@@ -1,14 +1,15 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Runtime\ActiveQuery;
 
 use Propel\Runtime\ActiveQuery\FilterExpression\FilterFactory;
+use function array_filter;
+use function implode;
+use function is_string;
+use function strrpos;
+use function substr;
 
 /**
  * Extracted from Criteria
@@ -72,10 +73,10 @@ class JoinBuilder
         $joinCondition = null;
         foreach ($conditions as $condition) {
             [$left, $right] = $condition;
-            [$leftTableName, $leftTableAlias, $leftColumnName] = static::extractColumnData($criteria, $left);
-            [$rightTableName, $rightTableAlias, $rightColumnName] = static::extractColumnData($criteria, $right);
+            [$leftTableName, $leftTableAlias, $leftColumnNameOrValue] = static::extractColumnData($criteria, $left);
+            [$rightTableName, $rightTableAlias, $rightColumnNameOrValue] = static::extractColumnData($criteria, $right);
 
-            if (!$join->getRightTableName()) {
+            if (!$join->getRightTableName() && $rightTableName) {
                 $join->setRightTableName($rightTableName);
             }
 
@@ -83,12 +84,12 @@ class JoinBuilder
                 $join->setRightTableAlias($rightTableAlias);
             }
 
-            $leftSide = static::buildNameFromParts($leftTableName, $leftTableAlias, $leftColumnName);
+            $leftSide = static::buildNameFromParts($leftTableName, $leftTableAlias, (string)$leftColumnNameOrValue);
             $operator = $condition[2] ?? Join::EQUAL;
-            $rightSide = static::buildNameFromParts($rightTableName, $rightTableAlias, $rightColumnName);
+            $rightSide = static::buildNameFromParts($rightTableName, $rightTableAlias, (string)$rightColumnNameOrValue);
 
             $conditionClause = "$leftSide$operator$rightSide";
-            $fullColumnName = "$leftTableName.$leftColumnName";
+            $fullColumnName = "$leftTableName.$leftColumnNameOrValue";
 
             $criterion = FilterFactory::build($criteria, $fullColumnName, Criteria::CUSTOM, $conditionClause);
 
@@ -106,19 +107,19 @@ class JoinBuilder
 
     /**
      * @param \Propel\Runtime\ActiveQuery\Criteria $criteria
-     * @param string $columnIdentifier
+     * @param mixed $columnIdentifierOrValue
      *
-     * @return array{0: string|null, 1: string|null, 2: string}
+     * @return array{0: string, 1: string|null, 2: string}|array{0: null, 1: null, 2: mixed}
      */
-    protected static function extractColumnData(Criteria $criteria, string $columnIdentifier): array
+    protected static function extractColumnData(Criteria $criteria, $columnIdentifierOrValue): array
     {
-        $pos = strrpos($columnIdentifier, '.');
+        $pos = is_string($columnIdentifierOrValue) ? strrpos($columnIdentifierOrValue, '.') : false;
         if (!$pos) {
-            return [null, null, $columnIdentifier];
+            return [null, null, $columnIdentifierOrValue];
         }
 
-        $tableAlias = substr($columnIdentifier, 0, $pos);
-        $columnName = substr($columnIdentifier, $pos + 1);
+        $tableAlias = substr($columnIdentifierOrValue, 0, $pos);
+        $columnName = substr($columnIdentifierOrValue, $pos + 1);
         [$tableName, $tableAlias] = $criteria->getTableNameAndAlias($tableAlias);
 
         return [$tableName, $tableAlias, $columnName];

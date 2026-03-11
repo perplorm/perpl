@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Runtime\Collection;
 
@@ -13,11 +9,10 @@ use Propel\Runtime\DataFetcher\DataFetcherInterface;
 use Propel\Runtime\Exception\PropelException;
 use Propel\Runtime\Formatter\ObjectFormatter;
 use Propel\Runtime\Propel;
+use function is_array;
 
 /**
  * Class for iterating over a statement and returning one Propel object at a time
- *
- * @author Francois Zaninotto
  *
  * @template RowFormat of \Propel\Runtime\ActiveRecord\ActiveRecordInterface
  * @template ListType of \Propel\Runtime\Collection\Collection

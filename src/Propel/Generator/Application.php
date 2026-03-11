@@ -1,16 +1,14 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator;
 
 use Symfony\Component\Console\Application as SymfonyApplication;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use function extension_loaded;
+use function in_array;
 
 class Application extends SymfonyApplication
 {
@@ -23,9 +21,12 @@ class Application extends SymfonyApplication
     #[\Override]
     public function doRun(InputInterface $input, OutputInterface $output): int
     {
-        if (extension_loaded('xdebug')) {
+        $command = $input->getFirstArgument();
+        $xdebugNoWarn = in_array($command, ['completion', '_complete']);
+
+        if (!$xdebugNoWarn && extension_loaded('xdebug')) {
             $output->writeln(
-                '<comment>You are running propel with xdebug enabled. This has a major impact on runtime performance.</comment>' . "\n",
+                '<comment>You are running perpl with xdebug enabled. This has a major impact on runtime performance.</comment>' . "\n",
             );
         }
 

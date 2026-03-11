@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Builder\Om;
 
@@ -15,6 +11,9 @@ use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\Collection\ObjectCollection;
 use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Formatter\ObjectFormatter;
+use function strpos;
+use function strrpos;
+use function substr;
 
 class ObjectCollectionBuilder extends AbstractOMBuilder
 {
@@ -76,7 +75,7 @@ class ObjectCollectionBuilder extends AbstractOMBuilder
             return 'Base\\Collection';
         }
 
-        $namespaceMap = $this->getBuildProperty('generator.objectModel.namespaceCollection');
+        $namespaceMap = $this->getBuildPropertyString('generator.objectModel.namespaceCollection');
         if (!$namespaceMap) {
             return $namespace . '\\Base\\Collection';
         }

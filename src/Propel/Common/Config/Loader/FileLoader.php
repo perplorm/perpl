@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Common\Config\Loader;
 
@@ -15,14 +11,27 @@ use Propel\Common\Config\Exception\RuntimeException;
 use Propel\Common\Config\FileLocator;
 use Symfony\Component\Config\FileLocatorInterface;
 use Symfony\Component\Config\Loader\FileLoader as BaseFileLoader;
+use function getenv;
+use function gettype;
+use function in_array;
+use function is_array;
+use function is_float;
+use function is_int;
+use function is_readable;
+use function is_string;
+use function pathinfo;
+use function preg_replace_callback;
+use function sprintf;
+use function str_replace;
+use function strpos;
+use function substr;
+use const PATHINFO_EXTENSION;
 
 /**
  * Abstract class used by all file-based loaders.
  *
  * The resolve method and correlatives, with parameters between placeholders %name%, are heavily inspired to
  * Symfony\Component\DependencyInjection\ParameterBag class.
- *
- * @author Cristiano Cinotti
  */
 abstract class FileLoader extends BaseFileLoader
 {

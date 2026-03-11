@@ -1,17 +1,12 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Reverse;
 
 // TODO: to remove
 use PDO;
 use Propel\Generator\Model\Column;
-use Propel\Generator\Model\ColumnDefaultValue;
 use Propel\Generator\Model\Database;
 use Propel\Generator\Model\ForeignKey;
 use Propel\Generator\Model\Index;
@@ -19,12 +14,13 @@ use Propel\Generator\Model\PropelTypes;
 use Propel\Generator\Model\Table;
 use Propel\Generator\Model\Unique;
 use RuntimeException;
+use function count;
+use function preg_replace;
+use function sprintf;
+use function strtolower;
 
 /**
  * Microsoft SQL Server database schema parser.
- *
- * @author Hans Lellelid <hans@xmpl.org>
- * @author Dominic Winkler <d.winkler@flexarts.at> (Flexarts)
  */
 class MssqlSchemaParser extends AbstractSchemaParser
 {
@@ -168,7 +164,7 @@ class MssqlSchemaParser extends AbstractSchemaParser
             $column->getDomain()->replaceSize($size);
             $column->getDomain()->replaceScale($scale);
             if ($default !== null) {
-                $column->getDomain()->setDefaultValue(new ColumnDefaultValue($default, ColumnDefaultValue::TYPE_VALUE));
+                $column->getDomain()->createDefaultValue($default);
             }
             $column->setAutoIncrement($autoincrement);
             $column->setNotNull(!$isNullable);

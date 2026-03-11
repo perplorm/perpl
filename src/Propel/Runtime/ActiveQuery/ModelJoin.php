@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Runtime\ActiveQuery;
 
@@ -14,11 +10,10 @@ use Propel\Runtime\ActiveQuery\FilterExpression\JoinCondition;
 use Propel\Runtime\Exception\LogicException;
 use Propel\Runtime\Map\RelationMap;
 use Propel\Runtime\Map\TableMap;
+use function get_class;
 
 /**
  * A ModelJoin is a Join object tied to a RelationMap object
- *
- * @author Francois Zaninotto (Propel)
  */
 class ModelJoin extends Join
 {

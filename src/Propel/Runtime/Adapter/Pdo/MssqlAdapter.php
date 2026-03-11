@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Runtime\Adapter\Pdo;
 
@@ -16,11 +12,31 @@ use Propel\Runtime\Adapter\SqlAdapterInterface;
 use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Map\DatabaseMap;
 use RuntimeException;
+use function count;
+use function explode;
+use function fclose;
+use function implode;
+use function is_array;
+use function is_resource;
+use function preg_match;
+use function preg_match_all;
+use function preg_replace;
+use function rewind;
+use function sprintf;
+use function str_ireplace;
+use function str_replace;
+use function stream_get_contents;
+use function stripos;
+use function stristr;
+use function strlen;
+use function strstr;
+use function strtr;
+use function substr;
+use function trim;
+use function unpack;
 
 /**
  * This is used to connect to a MSSQL database.
- *
- * @author Hans Lellelid <hans@xmpl.org> (Propel)
  */
 class MssqlAdapter extends PdoAdapter implements SqlAdapterInterface
 {
@@ -135,8 +151,6 @@ class MssqlAdapter extends PdoAdapter implements SqlAdapterInterface
      *
      * This rewrites the $sql query to apply the offset and limit.
      * some of the ORDER BY logic borrowed from Doctrine MsSqlPlatform
-     *
-     * @author Benjamin Runnels <kraven@kraven.org>
      *
      * @see SqlAdapterInterface::applyLimit()
      *

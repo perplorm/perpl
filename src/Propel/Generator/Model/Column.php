@@ -1,29 +1,28 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Model;
 
 use Exception;
 use LogicException;
+use Propel\Common\Util\SetColumnConverter;
 use Propel\Generator\Exception\EngineException;
 use Propel\Generator\Platform\PlatformInterface;
+use function count;
+use function in_array;
+use function is_string;
+use function lcfirst;
+use function rtrim;
+use function sprintf;
+use function str_replace;
+use function strrpos;
+use function strtolower;
+use function strtoupper;
+use function substr;
 
 /**
  * A class for holding data about a column used in an application.
- *
- * @author Hans Lellelid <hans@xmpl.org> (Propel)
- * @author Leon Messerschmidt <leon@opticode.co.za> (Torque)
- * @author Jason van Zyl <jvanzyl@apache.org> (Torque)
- * @author Jon S. Stevens <jon@latchkey.com> (Torque)
- * @author Daniel Rall <dlr@finemaltcoding.com> (Torque)
- * @author Byron Foster <byron_foster@yahoo.com> (Torque)
- * @author Bernd Goldschmidt <bgoldschmidt@rapidsoft.de>
- * @author Hugo Hamon <webmaster@apprendre-php.com> (Propel)
  */
 class Column extends MappingModel
 {
@@ -122,7 +121,7 @@ class Column extends MappingModel
     private $domain;
 
     /**
-     * @var \Propel\Generator\Model\Table
+     * @var \Propel\Generator\Model\Table|null
      */
     private $parentTable;
 
@@ -346,8 +345,20 @@ class Column extends MappingModel
             $this->isAutoIncrement = $this->booleanValue($this->getAttribute('autoIncrement'));
             $this->isLazyLoad = $this->booleanValue($this->getAttribute('lazyLoad'));
 
+            if ($this->getAttribute('valueSet')) {
+                $this->setValueSet($this->getAttribute('valueSet'));
+            } elseif ($this->getAttribute('valueEnum')) {
+                $valueEnumClass = $this->getAttribute('valueEnum');
+                $valueSet = SetColumnConverter::getItemsFromEnum($valueEnumClass);
+                $this->setValueSet($valueSet);
+            }
+
             // Add type, size information to associated Domain object
-            $domain->replaceSqlType($this->getAttribute('sqlType'));
+            if ($this->getAttribute('sqlType')) {
+                $domain->replaceSqlType($this->getAttribute('sqlType'));
+            } elseif ($this->getPlatform() && in_array($this->getType(), [PropelTypes::SET_NATIVE, PropelTypes::ENUM_NATIVE], true)) {
+                $domain->replaceSqlType($this->getPlatform()->buildNativeEnumeratedColumnSqlType($this));
+            }
 
             if (
                 !$this->getAttribute('size')
@@ -365,15 +376,14 @@ class Column extends MappingModel
             $scale = $this->getAttribute('scale') ? (int)$this->getAttribute('scale') : null;
             $domain->replaceScale($scale);
 
-            $defval = $this->getAttribute('defaultValue', $this->getAttribute('default'));
-            if ($defval !== null && strtolower($defval) !== 'null') {
-                $domain->setDefaultValue(new ColumnDefaultValue($defval, ColumnDefaultValue::TYPE_VALUE));
-            } elseif ($this->getAttribute('defaultExpr') !== null) {
-                $domain->setDefaultValue(new ColumnDefaultValue($this->getAttribute('defaultExpr'), ColumnDefaultValue::TYPE_EXPR));
-            }
+            foreach (['defaultValue', 'default', 'defaultExpr'] as $key) {
+                $defaultValue = $this->getAttribute($key);
+                if ($defaultValue === null || strtolower((string)$defaultValue) === 'null') {
+                    continue;
+                }
+                $domain->createDefaultValue($defaultValue, $key === 'defaultExpr');
 
-            if ($this->getAttribute('valueSet')) {
-                $this->setValueSet($this->getAttribute('valueSet'));
+                break;
             }
 
             $this->inheritanceType = $this->getAttribute('inheritance');
@@ -457,13 +467,17 @@ class Column extends MappingModel
     }
 
     /**
-     * Returns the fully qualified column name (table.column).
+     * Returns the fully qualified column name (table.COLUMN or table.column).
+     *
+     * @param bool $lowercaseColumnName
      *
      * @return string
      */
-    public function getFullyQualifiedName(): string
+    public function getFullyQualifiedName(bool $lowercaseColumnName = false): string
     {
-        return $this->parentTable->getName() . '.' . strtoupper($this->getName());
+        $columnName = $this->getName();
+
+        return $this->parentTable->getName() . '.' . ($lowercaseColumnName ? $columnName : strtoupper($columnName));
     }
 
     /**
@@ -712,7 +726,7 @@ class Column extends MappingModel
     }
 
     /**
-     * Returns the column constant name.
+     * Returns the column constant name (i.e. COL_ID).
      *
      * @return string
      */
@@ -1226,11 +1240,12 @@ class Column extends MappingModel
      */
     public function setType(string $mappingType): void
     {
+        // $mappingType = $this->getPlatform()->getDomainForType($mappingType)->getType();
+
         $this->getDomain()->setType($mappingType);
 
-        if (in_array($mappingType, [PropelTypes::VARBINARY, PropelTypes::LONGVARBINARY, PropelTypes::BLOB], true)) {
-            $this->needsTransactionInPostgres = true;
-        }
+        $pgRequiresTransactionTypes = [PropelTypes::VARBINARY, PropelTypes::LONGVARBINARY, PropelTypes::BLOB];
+        $this->needsTransactionInPostgres = in_array($mappingType, $pgRequiresTransactionTypes, true);
     }
 
     /**
@@ -1368,33 +1383,58 @@ class Column extends MappingModel
     }
 
     /**
-     * Returns whether this column is an ENUM or SET column.
+     * Returns whether this column uses the valueSet attribute (enums and sets).
      *
      * @return bool
      */
     public function isValueSetType(): bool
     {
-        return ($this->isEnumType() || $this->isSetType());
+        return in_array($this->getType(), [
+            PropelTypes::ENUM_BINARY,
+            PropelTypes::ENUM_NATIVE,
+            PropelTypes::SET_BINARY,
+            PropelTypes::SET_NATIVE,
+        ], true);
     }
 
     /**
-     * Returns whether this column is an ENUM column.
+     * @deprecated Use {@see static::isBinaryEnumType}
      *
      * @return bool
      */
     public function isEnumType(): bool
     {
-        return $this->getType() === PropelTypes::ENUM;
+        return $this->isBinaryEnumType();
     }
 
     /**
-     * Returns whether this column is a SET column.
+     * @deprecated Use {@see static::isBinaryEnumType}
      *
      * @return bool
      */
     public function isSetType(): bool
     {
-        return $this->getType() === PropelTypes::SET;
+        return $this->isBinarySetType();
+    }
+
+    /**
+     * Returns whether this column is an ENUM_BINARY column.
+     *
+     * @return bool
+     */
+    public function isBinaryEnumType(): bool
+    {
+        return $this->getType() === PropelTypes::ENUM_BINARY;
+    }
+
+    /**
+     * Returns whether this column is a SET_BINARY column.
+     *
+     * @return bool
+     */
+    public function isBinarySetType(): bool
+    {
+        return $this->getType() === PropelTypes::SET_BINARY;
     }
 
     /**
@@ -1406,12 +1446,9 @@ class Column extends MappingModel
      */
     public function setValueSet($valueSet): void
     {
-        if (is_string($valueSet)) {
-            $valueSet = explode(',', $valueSet);
-            $valueSet = array_map('trim', $valueSet);
-        }
-
-        $this->valueSet = $valueSet;
+        $this->valueSet = is_string($valueSet)
+            ? SetColumnConverter::itemsCsvToArray($valueSet)
+            : $valueSet;
     }
 
     /**
@@ -1485,9 +1522,29 @@ class Column extends MappingModel
      *
      * @return bool
      */
-    public function hasDefaultValue(): bool
+    public function hasDefault(): bool
     {
         return $this->getDefaultValue() !== null;
+    }
+
+    /**
+     * Check if the column has a default value that is a value (not an expression).
+     *
+     * @return bool
+     */
+    public function hasDefaultValue(): bool
+    {
+        return (bool)$this->getDefaultValue()?->isValueType();
+    }
+
+    /**
+     * Check if the column has a default value that is an expression (not a value).
+     *
+     * @return bool
+     */
+    public function hasDefaultExpression(): bool
+    {
+        return (bool)$this->getDefaultValue()?->isExpression();
     }
 
     /**
@@ -1720,7 +1777,7 @@ class Column extends MappingModel
     public static function generatePhpName(string $name, ?string $phpNamingMethod = null, ?string $namePrefix = null): string
     {
         if ($phpNamingMethod === null) {
-            $phpNamingMethod = PhpNameGenerator::CONV_METHOD_CLEAN;
+            $phpNamingMethod = NameGeneratorInterface::CONV_METHOD_CLEAN;
         }
 
         return NameFactory::generateName(NameFactory::PHP_GENERATOR, [$name, $phpNamingMethod, (string)$namePrefix]);

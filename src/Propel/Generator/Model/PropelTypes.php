@@ -1,23 +1,18 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Model;
 
 use PDO;
+use function in_array;
+use function strtoupper;
 
 /**
  * A class that maps PropelTypes to PHP native types and PDO types.
  *
  * Support for Creole types have been removed as this DBAL library is no longer
  * supported by the Propel project.
- *
- * @author Hans Lellelid <hans@xmpl.org> (Propel)
- * @author Hugo Hamon <webmaster@apprendre-php.com> (Propel)
  */
 class PropelTypes
 {
@@ -162,14 +157,46 @@ class PropelTypes
     public const PHP_ARRAY = 'ARRAY';
 
     /**
+     * Alias ENUM type (legacy behavior uses ENUM_BINARY, expected behavior should be ENUM_NATIVE where available)
+     *
      * @var string
      */
     public const ENUM = 'ENUM';
 
     /**
+     * Alias SET type (legacy behavior uses SET_BINARY, expected behavior should be SET_NATIVE where available)
+     *
      * @var string
      */
     public const SET = 'SET';
+
+    /**
+     * Simulated ENUM type based on bit representation.
+     *
+     * @var string
+     */
+    public const ENUM_BINARY = 'ENUM_BINARY';
+
+    /**
+     * Simulated SET type based on bit representation.
+     *
+     * @var string
+     */
+    public const SET_BINARY = 'SET_BINARY';
+
+    /**
+     * ENUM type using native DB type (if available).
+     *
+     * @var string
+     */
+    public const ENUM_NATIVE = 'ENUM_NATIVE';
+
+    /**
+     * SET type using native DB type (if available).
+     *
+     * @var string
+     */
+    public const SET_NATIVE = 'SET_NATIVE';
 
     /**
      * @var string
@@ -324,16 +351,6 @@ class PropelTypes
     /**
      * @var string
      */
-    public const ENUM_NATIVE_TYPE = 'int';
-
-    /**
-     * @var string
-     */
-    public const SET_NATIVE_TYPE = 'int';
-
-    /**
-     * @var string
-     */
     public const GEOMETRY_NATIVE_TYPE = 'resource';
 
     /**
@@ -347,9 +364,16 @@ class PropelTypes
     public const UUID = 'UUID';
 
     /**
+     * @deprecated Use aptly named UUID_BINARY_TYPE.
+     *
      * @var string
      */
     public const UUID_NATIVE_TYPE = 'string';
+
+    /**
+     * @var string
+     */
+    public const UUID_BINARY_TYPE = 'string';
 
     /**
      * @var string
@@ -387,14 +411,16 @@ class PropelTypes
         self::BOOLEAN_EMU,
         self::OBJECT,
         self::PHP_ARRAY,
-        self::ENUM,
+        self::ENUM_BINARY,
+        self::ENUM_NATIVE,
+        self::SET_BINARY,
+        self::SET_NATIVE,
         self::GEOMETRY,
         // These are pre-epoch dates, which we need to map to String type
         // since they cannot be properly handled using strtotime() -- or
         // even numeric timestamps on Windows.
         self::BU_DATE,
         self::BU_TIMESTAMP,
-        self::SET,
         self::JSON,
         self::UUID,
         self::UUID_BINARY,
@@ -434,12 +460,14 @@ class PropelTypes
         self::BOOLEAN_EMU => self::BOOLEAN_EMU_NATIVE_TYPE,
         self::OBJECT => self::OBJECT_NATIVE_TYPE,
         self::PHP_ARRAY => self::PHP_ARRAY_NATIVE_TYPE,
-        self::ENUM => self::ENUM_NATIVE_TYPE,
-        self::SET => self::SET_NATIVE_TYPE,
+        self::ENUM_BINARY => self::INTEGER_NATIVE_TYPE,
+        self::ENUM_NATIVE => self::VARCHAR_NATIVE_TYPE,
+        self::SET_BINARY => self::INTEGER_NATIVE_TYPE,
+        self::SET_NATIVE => self::VARCHAR_NATIVE_TYPE,
         self::GEOMETRY => self::GEOMETRY,
         self::JSON => self::JSON_TYPE,
-        self::UUID => self::UUID_NATIVE_TYPE,
-        self::UUID_BINARY => self::UUID_NATIVE_TYPE,
+        self::UUID => self::UUID_BINARY_TYPE,
+        self::UUID_BINARY => self::UUID_BINARY_TYPE,
     ];
 
     /**
@@ -475,8 +503,10 @@ class PropelTypes
         self::BOOLEAN_EMU => PDO::PARAM_INT,
         self::OBJECT => PDO::PARAM_LOB,
         self::PHP_ARRAY => PDO::PARAM_STR,
-        self::ENUM => PDO::PARAM_INT,
-        self::SET => PDO::PARAM_INT,
+        self::ENUM_BINARY => PDO::PARAM_INT,
+        self::ENUM_NATIVE => PDO::PARAM_STR,
+        self::SET_BINARY => PDO::PARAM_INT,
+        self::SET_NATIVE => PDO::PARAM_STR,
         self::GEOMETRY => PDO::PARAM_LOB,
 
         // These are pre-epoch dates, which we need to map to String type
@@ -587,6 +617,7 @@ class PropelTypes
             self::BU_DATE,
             self::BU_TIMESTAMP,
             self::JSON,
+            self::ENUM_NATIVE,
         ], true);
     }
 

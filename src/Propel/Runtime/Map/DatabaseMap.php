@@ -1,16 +1,22 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Runtime\Map;
 
 use Propel\Runtime\Adapter\AdapterInterface;
 use Propel\Runtime\Map\Exception\TableNotFoundException;
 use Propel\Runtime\Propel;
+use function array_map;
+use function class_exists;
+use function explode;
+use function get_class;
+use function is_string;
+use function sprintf;
+use function strpos;
+use function strrpos;
+use function substr;
+use function substr_replace;
 
 /**
  * DatabaseMap is used to model a database.
@@ -21,10 +27,6 @@ use Propel\Runtime\Propel;
  * the database at runtime. These classes are similar (a lite version) to the
  * propel.engine.database.model classes, which are build-time modeling classes.
  * These classes in themselves do not do any database metadata lookups.
- *
- * @author Hans Lellelid <hans@xmpl.org> (Propel)
- * @author John D. McNally <jmcnally@collab.net> (Torque)
- * @author Daniel Rall <dlr@collab.net> (Torque)
  *
  * @psalm-consistent-constructor (instantiated by class name in StandardServiceContainer without arguments)
  *

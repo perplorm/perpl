@@ -1,12 +1,8 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
- namespace Propel\Runtime\ActiveQuery\ColumnResolver;
+namespace Propel\Runtime\ActiveQuery\ColumnResolver;
 
 use Propel\Runtime\ActiveQuery\BaseModelCriteria;
 use Propel\Runtime\ActiveQuery\ColumnResolver\ColumnExpression\AbstractColumnExpression;
@@ -20,6 +16,12 @@ use Propel\Runtime\ActiveQuery\Exception\UnknownModelException;
 use Propel\Runtime\ActiveQuery\ModelCriteria;
 use Propel\Runtime\ActiveQuery\ModelJoin;
 use Propel\Runtime\Exception\PropelException;
+use function array_pop;
+use function count;
+use function explode;
+use function implode;
+use function sprintf;
+use function strpos;
 
 class ColumnResolver
 {

@@ -1,19 +1,20 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Model;
 
+use function count;
+use function implode;
+use function in_array;
+use function md5;
+use function sprintf;
+use function strcasecmp;
+use function strtolower;
+use function substr;
+
 /**
  * Information about indices of a table.
- *
- * @author Jason van Zyl <vanzyl@apache.org>
- * @author Daniel Rall <dlr@finemaltcoding.com>
- * @author Hugo Hamon <webmaster@apprendre-php.com> (Propel)
  */
 class Index extends MappingModel
 {
@@ -197,8 +198,8 @@ class Index extends MappingModel
             $this->columnObjects[] = $column;
         } else {
             $this->columns[] = $name = $data ? $data['name'] : null;
-            if (isset($data['size']) && $data['size'] > 0) {
-                $this->columnsSize[$name] = $data['size'];
+            if (isset($data['size']) && (int)$data['size'] > 0) {
+                $this->columnsSize[$name] = (int)$data['size'];
             }
             if ($this->getTable()) {
                 $this->columnObjects[] = $this->getTable()->getColumn($name);
@@ -255,17 +256,17 @@ class Index extends MappingModel
      */
     public function getColumnSize(string $name, bool $caseInsensitive = false): ?int
     {
-        if ($caseInsensitive) {
-            foreach ($this->columnsSize as $forName => $size) {
-                if (strcasecmp($forName, $name) === 0) {
-                    return $size;
-                }
-            }
-
-            return null;
+        if (!$caseInsensitive) {
+            return $this->columnsSize[$name] ?? null;
         }
 
-        return $this->columnsSize[$name] ?? null;
+        foreach ($this->columnsSize as $forName => $size) {
+            if (strcasecmp($forName, $name) === 0) {
+                return $size;
+            }
+        }
+
+        return null;
     }
 
     /**

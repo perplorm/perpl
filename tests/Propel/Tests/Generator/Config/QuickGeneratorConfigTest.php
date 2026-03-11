@@ -111,9 +111,9 @@ class QuickGeneratorConfigTest extends TestCase
         ];
         $generatorConfig = new QuickGeneratorConfig($extraConf);
 
-        $this->assertEquals('path/to/composer', $generatorConfig->get()['paths']['composerDir']);
-        $this->assertEquals('fakeConn', $generatorConfig->get()['runtime']['defaultConnection']);
-        $this->assertEquals(['fakeConn', 'default'], $generatorConfig->get()['runtime']['connections']);
+        $this->assertEquals('path/to/composer', $generatorConfig->getConfigProperty('paths.composerDir'));
+        $this->assertEquals('fakeConn', $generatorConfig->getConfigProperty('runtime.defaultConnection'));
+        $this->assertEquals(['fakeConn', 'default'], $generatorConfig->getConfigProperty('runtime.connections'));
         $this->assertEquals(
             [
                 'adapter' => 'sqlite',
@@ -126,7 +126,7 @@ class QuickGeneratorConfigTest extends TestCase
                     'vendor',
                 ],
             ],
-            $generatorConfig->get()['database']['connections']['fakeConn']
+            $generatorConfig->getConfigProperty('database.connections.fakeConn')
         );
         $this->assertEquals(
             [
@@ -140,7 +140,7 @@ class QuickGeneratorConfigTest extends TestCase
                     'vendor',
                 ],
             ],
-            $generatorConfig->get()['database']['connections']['default']
+            $generatorConfig->getConfigProperty('database.connections.default')
         );
     }
 }

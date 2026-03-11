@@ -1,16 +1,14 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Runtime\Validator\Constraints;
 
 use Propel\Runtime\Map\TableMap;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
+use function in_array;
+use function sprintf;
 
 class UniqueValidator extends ConstraintValidator
 {

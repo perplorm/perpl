@@ -32,7 +32,7 @@ EOF;
         $this->newFile('propel.yaml', $yamlConf);
 
         $manager = new TestableConfigurationManager($this->getRoot()->url());
-        $actual = $manager->get();
+        $actual = $manager->getConfig();
 
         $this->assertEquals('bar', $actual['foo']);
         $this->assertEquals('baz', $actual['bar']);
@@ -49,7 +49,7 @@ bar: baz
 EOF;
         $this->newFile('config/propel.yaml', $yamlConf);
         $manager = new TestableConfigurationManager($this->getRoot()->url());
-        $actual = $manager->get();
+        $actual = $manager->getConfig();
 
         $this->assertEquals('bar', $actual['foo']);
         $this->assertEquals('baz', $actual['bar']);
@@ -66,7 +66,7 @@ bar: baz
 EOF;
         $this->newFile('conf/propel.yaml', $yamlConf);
         $manager = new TestableConfigurationManager($this->getRoot()->url());
-        $actual = $manager->get();
+        $actual = $manager->getConfig();
 
         $this->assertEquals('bar', $actual['foo']);
         $this->assertEquals('baz', $actual['bar']);
@@ -100,7 +100,7 @@ EOF;
         $this->newFile('propel.yaml~', $yamlConf);
 
         $manager = new TestableConfigurationManager($this->getRoot()->url());
-        $actual = $manager->get();
+        $actual = $manager->getConfig();
 
         $this->assertArrayNotHasKey('bar', $actual);
         $this->assertArrayNotHasKey('baz', $actual);
@@ -118,7 +118,7 @@ EOF;
         $this->newFile('propel.log', $yamlConf);
 
         $manager = new TestableConfigurationManager($this->getRoot()->url());
-        $actual = $manager->get();
+        $actual = $manager->getConfig();
 
         $this->assertArrayNotHasKey('bar', $actual);
         $this->assertArrayNotHasKey('baz', $actual);
@@ -202,7 +202,7 @@ EOF;
         $file = $this->newFile('myDir/mySubdir/myConfigFile.yaml', $yamlConf);
 
         $manager = new TestableConfigurationManager($file->url());
-        $actual = $manager->get();
+        $actual = $manager->getConfig();
 
         $this->assertEquals(['foo' => 'bar', 'bar' => 'baz'], $actual);
     }
@@ -227,7 +227,7 @@ EOF;
         $this->newFile('propel.yaml', $yamlConf);
 
         $manager = new TestableConfigurationManager($this->getRoot()->url());
-        $actual = $manager->get();
+        $actual = $manager->getConfig();
 
         $this->assertEquals(['bfoo' => 'bbar', 'bbar' => 'bbaz'], $actual['buildtime']);
         $this->assertEquals(['foo' => 'bar', 'bar' => 'baz'], $actual['runtime']);
@@ -247,7 +247,7 @@ EOF;
         $this->newFile('propel.yaml.dist', $yamlDistConf);
 
         $manager = new TestableConfigurationManager($this->getRoot()->url());
-        $actual = $manager->get();
+        $actual = $manager->getConfig();
 
         $this->assertEquals(['runtime' => ['foo' => 'bar', 'bar' => 'baz']], $actual);
     }
@@ -271,7 +271,7 @@ EOF;
         $this->newFile('myDir/mySubdir/myConfigFile.yaml.dist', $yamlDistConf);
 
         $manager = new TestableConfigurationManager($file->url());
-        $actual = $manager->get();
+        $actual = $manager->getConfig();
 
         $this->assertEquals(['foo' => 'bar', 'bar' => 'baz'], $actual['runtime']);
         $this->assertEquals(['bfoo' => 'bbar', 'bbar' => 'bbaz'], $actual['buildtime']);
@@ -290,7 +290,7 @@ EOF;
         $file = $this->newFile('myDir/mySubdir/myConfigFile.yaml.dist', $yamlDistConf);
 
         $manager = new TestableConfigurationManager($file->url());
-        $actual = $manager->get();
+        $actual = $manager->getConfig();
 
         $this->assertEquals(['runtime' => ['foo' => 'bar', 'bar' => 'baz']], $actual);
     }
@@ -313,7 +313,7 @@ EOF;
         $this->newFile('myDir/mySubdir/propel.yaml', $yamlConf);
         $this->newFile('myDir/mySubdir/propel.yaml.dist', $yamlDistConf);
         $manager = new TestableConfigurationManager(vfsStream::url('root/myDir/mySubdir/'));
-        $actual = $manager->get();
+        $actual = $manager->getConfig();
 
         $this->assertEquals(['foo' => 'bar', 'bar' => 'baz'], $actual['runtime']);
         $this->assertEquals(['bfoo' => 'bbar', 'bbar' => 'bbaz'], $actual['buildtime']);
@@ -345,7 +345,7 @@ EOF;
         $this->newFile('propel.yaml', $yamlConf);
 
         $manager = new TestableConfigurationManager($this->getRoot()->url(), $extraConf);
-        $actual = $manager->get();
+        $actual = $manager->getConfig();
 
         $this->assertEquals($actual['runtime'], ['foo' => 'bar', 'bar' => 'baz']);
         $this->assertEquals($actual['buildtime'], ['bfoo' => 'extrabar', 'bbar' => 'bbaz']);
@@ -396,14 +396,14 @@ EOF;
 
         $manager = new ConfigurationManager($this->getRoot()->url());
 
-        $this->assertArrayHasKey('runtime', $manager->get());
-        $this->assertArrayHasKey('generator', $manager->get());
+        $this->assertArrayHasKey('runtime', $manager->getConfig());
+        $this->assertArrayHasKey('generator', $manager->getConfig());
 
-        $this->assertArrayHasKey('connections', $manager->getSection('runtime'));
-        $this->assertArrayHasKey('connections', $manager->getSection('generator'));
+        $this->assertArrayHasKey('connections', $manager->getConfigProperty('runtime'));
+        $this->assertArrayHasKey('connections', $manager->getConfigProperty('generator'));
 
-        $this->assertEquals(['default'], $manager->get()['runtime']['connections']);
-        $this->assertEquals(['default'], $manager->get()['generator']['connections']);
+        $this->assertEquals(['default'], $manager->getConfigProperty('runtime.connections'));
+        $this->assertEquals(['default'], $manager->getConfigProperty('generator.connections'));
     }
 
     /**
@@ -522,7 +522,7 @@ EOF;
         $this->newFile('propel.yaml', $yamlConf);
 
         $manager = new ConfigurationManager($this->getRoot()->url());
-        $actual = $manager->getSection('runtime');
+        $actual = $manager->getConfigProperty('runtime');
 
         $this->assertEquals($actual['defaultConnection'], 'mysource');
         $this->assertEquals($actual['connections'], ['mysource', 'yoursource']);
@@ -565,7 +565,7 @@ EOF;
         $this->newFile('propel.yaml', $yamlConf);
 
         $manager = new ConfigurationManager($this->getRoot()->url());
-        $actual = $manager->get();
+        $actual = $manager->getConfig();
 
         $this->assertTrue($actual['generator']['namespaceAutoPackage']);
         $this->assertEquals($actual['generator']['dateTime']['dateTimeClass'], '\DateTime');
@@ -735,7 +735,7 @@ EOF;
         ];
 
         $manager = new NotLoadingConfigurationManager(null, $configs);
-        $actual = $manager->GetSection('database')['connections'];
+        $actual = $manager->getConfigProperty('database.connections');
 
         $this->assertEquals($configs['propel']['database']['connections'], $actual);
     }
@@ -747,7 +747,7 @@ EOF;
     {
         $manager = new NotLoadingConfigurationManager(null, null);
 
-        $this->assertEmpty($manager->get());
+        $this->assertEmpty($manager->getConfig());
     }
 
     /**
@@ -854,11 +854,37 @@ EOF;
         $this->newFile('propel.yaml', $yamlConf);
         $manager = new ConfigurationManager($this->getRoot()->url());
 
-        $this->assertEquals('mysource', $manager->getSection('generator')['defaultConnection']);
-        $this->assertEquals('mysource', $manager->getSection('runtime')['defaultConnection']);
-        $this->assertEquals(['mysource', 'yoursource'], $manager->getSection('generator')['connections']);
-        $this->assertEquals(['mysource', 'yoursource'], $manager->getSection('runtime')['connections']);
+        $this->assertEquals('mysource', $manager->getConfigProperty('generator.defaultConnection'));
+        $this->assertEquals('mysource', $manager->getConfigProperty('runtime.defaultConnection'));
+        $this->assertEquals(['mysource', 'yoursource'], $manager->getConfigProperty('generator.connections'));
+        $this->assertEquals(['mysource', 'yoursource'], $manager->getConfigProperty('runtime.connections'));
     }
+
+
+  /**
+   * @return array<array>
+   */
+  public function deflateConfigurationDataProvider(): array
+  {
+    return [
+      [['foo' => 42], ['foo' => 42]],
+      [['foo.bar.baz' => 42], ['foo' => ['bar' => ['baz' => 42]]]],
+      [['foo.bar.baz' => 42, 'foo.fizz' => 43], ['foo' => ['bar' => ['baz' => 42], 'fizz' => 43]]]
+    ];
+  }
+
+  /**
+   * @dataProvider deflateConfigurationDataProvider
+   *
+   * @param array $flattenedConfig
+   * @param array $expectedArray
+   * @return void
+   */
+  public function testDeflateConfiguration(array $flattenedConfig, array $expectedArray)
+  {
+    $actualArray = ConfigurationManager::deflateConfigurationArray($flattenedConfig);
+    $this->assertEquals($expectedArray, $actualArray);
+  }
 }
 
 class TestableConfigurationManager extends ConfigurationManager

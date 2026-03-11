@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Behavior\AggregateMultipleColumns;
 
@@ -14,11 +10,17 @@ use Propel\Generator\Builder\Om\ObjectBuilder;
 use Propel\Generator\Model\Behavior;
 use Propel\Generator\Model\ForeignKey;
 use Propel\Generator\Model\Table;
+use function array_key_exists;
+use function array_map;
+use function array_shift;
+use function implode;
+use function in_array;
+use function is_string;
+use function sprintf;
+use function vsprintf;
 
 /**
  * Keeps an aggregate column updated with related table
- *
- * @author François Zaninotto
  */
 class AggregateMultipleColumnsBehavior extends Behavior
 {

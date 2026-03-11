@@ -1,29 +1,26 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Command;
 
-use Propel\Generator\Manager\MigrationManager;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use function escapeshellarg;
+use function file_put_contents;
+use function shell_exec;
+use function sprintf;
+use function time;
+use const DIRECTORY_SEPARATOR;
 
-/**
- * @author William Durand <william.durand1@gmail.com>
- * @author Fredrik Wollsén <fredrik@neam.se>
- */
-class MigrationCreateCommand extends AbstractCommand
+class MigrationCreateCommand extends AbstractMigrationCommand
 {
     /**
      * @inheritDoc
      */
     #[\Override]
-    protected function configure()
+    protected function configure(): void
     {
         parent::configure();
 
@@ -44,56 +41,51 @@ class MigrationCreateCommand extends AbstractCommand
     #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $configOptions = [];
+        $this->setUp($input);
+        $this->registerMigrationManagerSchemas();
 
-        if ($this->hasInputOption('connection', $input)) {
-            foreach ($input->getOption('connection') as $conn) {
-                $configOptions += $this->connectionToProperties($conn);
-            }
-        }
+        $suffix = $input->getOption('suffix');
+        $comment = $input->getOption('comment');
+        $filePath = $this->createMigrationFile($suffix, $comment);
 
-        if ($this->hasInputOption('schema-dir', $input)) {
-            $configOptions['propel']['paths']['schemaDir'] = $input->getOption('schema-dir');
-        }
-
-        if ($this->hasInputOption('output-dir', $input)) {
-            $configOptions['propel']['paths']['migrationDir'] = $input->getOption('output-dir');
-        }
-
-        $generatorConfig = $this->getGeneratorConfig($configOptions, $input);
-
-        $this->createDirectory($generatorConfig->getSection('paths')['migrationDir']);
-
-        $manager = new MigrationManager();
-        $manager->setGeneratorConfig($generatorConfig);
-        $manager->setSchemas($this->getSchemas($generatorConfig->getSection('paths')['schemaDir'], $generatorConfig->getSection('generator')['recursive']));
-
-        $migrationsUp = [];
-        $migrationsDown = [];
-        foreach ($manager->getDatabases() as $appDatabase) {
-            $name = $appDatabase->getName();
-            $migrationsUp[$name] = '';
-            $migrationsDown[$name] = '';
-        }
-
-        $timestamp = time();
-        $migrationFileName = $manager->getMigrationFileName($timestamp, $input->getOption('suffix'));
-        $migrationClassBody = $manager->getMigrationClassBody($migrationsUp, $migrationsDown, $timestamp, $input->getOption('comment'), $input->getOption('suffix'));
-
-        $file = $generatorConfig->getSection('paths')['migrationDir'] . DIRECTORY_SEPARATOR . $migrationFileName;
-        file_put_contents($file, $migrationClassBody);
-
-        $output->writeln(sprintf('"%s" file successfully created.', $file));
+        $output->writeln(sprintf('"%s" file successfully created.', $filePath));
 
         $editorCmd = $input->getOption('editor');
         if ($editorCmd !== null) {
             $output->writeln(sprintf('Using "%s" as text editor', $editorCmd));
-            shell_exec($editorCmd . ' ' . escapeshellarg($file));
+            shell_exec($editorCmd . ' ' . escapeshellarg($filePath));
         } else {
             $output->writeln('Now add SQL statements and data migration code as necessary.');
             $output->writeln('Once the migration class is valid, call the "migrate" task to execute it.');
         }
 
         return static::CODE_SUCCESS;
+    }
+
+    /**
+     * @param string $suffix
+     * @param string $comment
+     *
+     * @return string
+     */
+    protected function createMigrationFile(string $suffix, string $comment): string
+    {
+        $migrationManager = $this->getMigrationManager();
+        $migrationsUp = [];
+        $migrationsDown = [];
+        foreach ($migrationManager->getDatabases() as $appDatabase) {
+            $name = $appDatabase->getName();
+            $migrationsUp[$name] = '';
+            $migrationsDown[$name] = '';
+        }
+
+        $timestamp = time();
+        $migrationFileName = $migrationManager->getMigrationFileName($timestamp, $suffix);
+        $migrationClassBody = $migrationManager->getMigrationClassBody($migrationsUp, $migrationsDown, $timestamp, $comment, $suffix);
+
+        $filePath = $this->migrationDir . DIRECTORY_SEPARATOR . $migrationFileName;
+        file_put_contents($filePath, $migrationClassBody);
+
+        return $filePath;
     }
 }

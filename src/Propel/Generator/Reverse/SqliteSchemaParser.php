@@ -1,27 +1,29 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Reverse;
 
 use PDO;
 use Propel\Generator\Model\Column;
-use Propel\Generator\Model\ColumnDefaultValue;
 use Propel\Generator\Model\Database;
 use Propel\Generator\Model\ForeignKey;
 use Propel\Generator\Model\Index;
 use Propel\Generator\Model\PropelTypes;
 use Propel\Generator\Model\Table;
 use Propel\Generator\Model\Unique;
+use function count;
+use function preg_match;
+use function sprintf;
+use function str_contains;
+use function str_replace;
+use function str_starts_with;
+use function strpos;
+use function strtolower;
+use function substr;
 
 /**
  * SQLite database schema parser.
- *
- * @author Hans Lellelid <hans@xmpl.org>
  */
 class SqliteSchemaParser extends AbstractSchemaParser
 {
@@ -92,7 +94,7 @@ class SqliteSchemaParser extends AbstractSchemaParser
     public function parse(Database $database, array $additionalTables = []): int
     {
         if ($this->getGeneratorConfig()) {
-            $this->addVendorInfo = $this->getGeneratorConfig()->get()['migrations']['addVendorInfo'];
+            $this->addVendorInfo = (bool)$this->getGeneratorConfig()->getConfigProperty('migrations.addVendorInfo');
         }
 
         $this->parseTables($database);
@@ -221,7 +223,7 @@ class SqliteSchemaParser extends AbstractSchemaParser
             } else {
                 $type = $fulltype;
             }
-            $notNull = $row['notnull'];
+            $notNull = (bool)$row['notnull'];
             $default = $row['dflt_value'];
 
             $propelType = $this->getMappedPropelType(strtolower($type));
@@ -240,16 +242,13 @@ class SqliteSchemaParser extends AbstractSchemaParser
             $column->getDomain()->replaceScale($scale);
 
             if ($default !== null) {
-                if (substr($default, 0, 1) !== "'" && strpos($default, '(')) {
-                    $defaultType = ColumnDefaultValue::TYPE_EXPR;
-                    if ($default === 'datetime(CURRENT_TIMESTAMP, \'localtime\')') {
-                            $default = 'CURRENT_TIMESTAMP';
-                    }
-                } else {
-                    $defaultType = ColumnDefaultValue::TYPE_VALUE;
+                $isExpression = !str_starts_with($default, "'") && str_contains($default, '(');
+                if (!$isExpression) {
                     $default = str_replace("'", '', $default);
+                } elseif ($default === 'datetime(CURRENT_TIMESTAMP, \'localtime\')') {
+                    $default = 'CURRENT_TIMESTAMP';
                 }
-                $column->getDomain()->setDefaultValue(new ColumnDefaultValue($default, $defaultType));
+                $column->getDomain()->createDefaultValue($default, $isExpression);
             }
 
             $column->setNotNull($notNull);

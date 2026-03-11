@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Command;
 
@@ -12,17 +8,15 @@ use Propel\Generator\Manager\SqlManager;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use function array_merge;
 
-/**
- * @author William Durand <william.durand1@gmail.com>
- */
 class SqlBuildCommand extends AbstractCommand
 {
     /**
      * @inheritDoc
      */
     #[\Override]
-    protected function configure()
+    protected function configure(): void
     {
         parent::configure();
 
@@ -39,7 +33,7 @@ class SqlBuildCommand extends AbstractCommand
             ->addOption('composer-dir', null, InputOption::VALUE_REQUIRED, 'Directory in which your composer.json resides', null)
             ->setName('sql:build')
             ->setAliases(['build-sql'])
-            ->setDescription('Build SQL files');
+            ->setDescription('Create SQL script with DDL statements from schema.xml in --output-dir (or paths.schemaDir in config)');
     }
 
     /**
@@ -48,42 +42,17 @@ class SqlBuildCommand extends AbstractCommand
     #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $configOptions = [];
+        $generatorConfig = $this->buildGeneratorConfig([], $input, [
+            'schema-dir' => 'paths.schemaDir',
+            'output-dir' => 'paths.sqlDir',
+            'schema-name' => 'generator.schema.basename',
+            'table-prefix' => 'generator.tablePrefix',
+            'mysql-engine' => 'database.adapters.mysql.tableType',
+            'composer-dir' => 'paths.composerDir',
+        ]);
 
-        foreach ($input->getOptions() as $key => $option) {
-            if ($option !== null) {
-                switch ($key) {
-                    case 'schema-dir':
-                        $configOptions['propel']['paths']['schemaDir'] = $option;
-
-                        break;
-                    case 'output-dir':
-                        $configOptions['propel']['paths']['sqlDir'] = $option;
-
-                        break;
-                    case 'schema-name':
-                        $configOptions['propel']['generator']['schema']['basename'] = $option;
-
-                        break;
-                    case 'table-prefix':
-                        $configOptions['propel']['generator']['tablePrefix'] = $option;
-
-                        break;
-                    case 'mysql-engine':
-                        $configOptions['propel']['database']['adapters']['mysql']['tableType'] = $option;
-
-                        break;
-                    case 'composer-dir':
-                        $configOptions['propel']['paths']['composerDir'] = $option;
-
-                        break;
-                }
-            }
-        }
-
-        $generatorConfig = $this->getGeneratorConfig($configOptions, $input);
-
-        $this->createDirectory($generatorConfig->getSection('paths')['sqlDir']);
+        $sqlDir = $generatorConfig->getConfigPropertyString('paths.sqlDir', true);
+        $this->createDirectory($sqlDir);
 
         $manager = new SqlManager();
 
@@ -102,13 +71,13 @@ class SqlBuildCommand extends AbstractCommand
 
         $manager->setValidate($input->getOption('validate'));
         $manager->setGeneratorConfig($generatorConfig);
-        $manager->setSchemas($this->getSchemas($generatorConfig->getSection('paths')['schemaDir'], $generatorConfig->getSection('generator')['recursive']));
+        $manager->setSchemas($this->getSchemasFromConfig($generatorConfig));
         $manager->setLoggerClosure(function ($message) use ($input, $output): void {
             if ($input->getOption('verbose')) {
                 $output->writeln($message);
             }
         });
-        $manager->setWorkingDirectory($generatorConfig->getSection('paths')['sqlDir']);
+        $manager->setWorkingDirectory($sqlDir);
 
         if (!$manager->isOverwriteSqlMap() && $manager->existSqlMap()) {
             $output->writeln("<info>sqldb.map won't be saved because it already exists. Remove it to generate a new map. Use --overwrite to force a overwrite.</info>");

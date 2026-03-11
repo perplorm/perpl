@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Behavior\Archivable;
 
@@ -16,8 +12,6 @@ use Propel\Generator\Model\Table;
 
 /**
  * Keeps tracks of an ActiveRecord object, even after deletion
- *
- * @author Francois Zaninotto
  */
 class ArchivableBehavior extends SyncedTableBehavior
 {

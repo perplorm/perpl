@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Manager;
 
@@ -14,12 +10,18 @@ use Propel\Generator\Util\SqlParser;
 use Propel\Runtime\Adapter\AdapterFactory;
 use Propel\Runtime\Connection\ConnectionFactory;
 use Propel\Runtime\Connection\ConnectionInterface;
+use Propel\Runtime\Connection\Exception\ConnectionException;
 use RuntimeException;
+use function count;
+use function file_exists;
+use function file_get_contents;
+use function file_put_contents;
+use function sprintf;
+use function str_replace;
+use const DIRECTORY_SEPARATOR;
 
 /**
  * Service class for managing SQL.
- *
- * @author William Durand <william.durand1@gmail.com>
  */
 class SqlManager extends AbstractManager
 {
@@ -216,6 +218,8 @@ class SqlManager extends AbstractManager
      *
      * @param string $datasource
      *
+     * @throws \Propel\Runtime\Connection\Exception\ConnectionException
+     *
      * @return \Propel\Runtime\Connection\ConnectionInterface
      */
     protected function getConnectionInstance(string $datasource): ConnectionInterface
@@ -228,8 +232,10 @@ class SqlManager extends AbstractManager
         $username = isset($buildConnection['user']) && $buildConnection['user'] ? $buildConnection['user'] : null;
         $password = isset($buildConnection['password']) && $buildConnection['password'] ? $buildConnection['password'] : null;
 
-        $con = ConnectionFactory::create(['dsn' => $dsn, 'user' => $username, 'password' => $password], AdapterFactory::create($buildConnection['adapter']));
-
-        return $con;
+        try {
+            return ConnectionFactory::create(['dsn' => $dsn, 'user' => $username, 'password' => $password], AdapterFactory::create($buildConnection['adapter']));
+        } catch (ConnectionException $e) {
+            throw new ConnectionException("Could not open connection `$datasource`, check dsn, username and password.");
+        }
     }
 }

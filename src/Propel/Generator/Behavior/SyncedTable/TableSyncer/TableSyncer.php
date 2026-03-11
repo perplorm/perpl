@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Behavior\SyncedTable\TableSyncer;
 
@@ -21,6 +17,14 @@ use Propel\Generator\Platform\PgsqlPlatform;
 use Propel\Generator\Platform\PlatformInterface;
 use Propel\Generator\Platform\SqlitePlatform;
 use RuntimeException;
+use function array_filter;
+use function array_intersect;
+use function array_map;
+use function array_merge;
+use function array_unique;
+use function count;
+use function in_array;
+use function reset;
 
 /**
  * Creates the the synced table according to the given behavior.

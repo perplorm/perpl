@@ -1,21 +1,19 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Model;
 
+use Propel\Generator\Config\GeneratorConfigInterface;
 use Propel\Generator\Exception\LogicException;
+use function rtrim;
+use function str_replace;
+use function substr;
+use function trim;
 
 /**
  * Data about an element with a name and optional namespace, schema and package
  * attributes.
- *
- * @author Ulf Hermann <ulfhermann@kulturserver.de>
- * @author Hugo Hamon <webmaster@apprendre-php.com> (Propel)
  */
 abstract class ScopedMappingModel extends MappingModel
 {
@@ -61,9 +59,17 @@ abstract class ScopedMappingModel extends MappingModel
      *
      * @param string $name
      *
-     * @return string
+     * @return array|scalar|null
      */
-    abstract protected function getBuildProperty(string $name): string;
+    public function getBuildProperty(string $name): mixed
+    {
+        return $this->getGeneratorConfig()?->getConfigProperty($name) ?? null;
+    }
+
+    /**
+     * @return \Propel\Generator\Config\GeneratorConfigInterface|null
+     */
+    abstract public function getGeneratorConfig(): ?GeneratorConfigInterface;
 
     /**
      * @return void
@@ -85,11 +91,7 @@ abstract class ScopedMappingModel extends MappingModel
      */
     public function getNamespace(bool $getAbsoluteNamespace = false): ?string
     {
-        if ($getAbsoluteNamespace) {
-            return $this->makeNamespaceAbsolute($this->namespace);
-        }
-
-        return $this->namespace;
+        return $getAbsoluteNamespace && $this->namespace ? $this->makeNamespaceAbsolute($this->namespace) : $this->namespace;
     }
 
     /**
@@ -130,7 +132,8 @@ abstract class ScopedMappingModel extends MappingModel
         }
 
         $this->namespace = $namespace;
-        if ($namespace && (!$this->package || $this->packageOverridden) && $this->getBuildProperty('generator.namespaceAutoPackage')) {
+        $isNamespaceAutoPackager = (bool)$this->getBuildProperty('generator.namespaceAutoPackage');
+        if ($namespace && (!$this->package || $this->packageOverridden) && $isNamespaceAutoPackager) {
             $this->package = str_replace('\\', '.', $namespace);
             $this->packageOverridden = true;
         }
@@ -155,15 +158,28 @@ abstract class ScopedMappingModel extends MappingModel
      *
      * A namespace with a backslash is considered absolute.
      *
-     * @param string|null $namespace
+     * @param string $namespace
      *
-     * @return string|null
+     * @return string
      */
-    protected function makeNamespaceAbsolute(?string $namespace): ?string
+    protected function makeNamespaceAbsolute(string $namespace): string
     {
-        $prependBackslash = $namespace && !$this->isAbsoluteNamespace($namespace);
+        return $this->isAbsoluteNamespace($namespace) ? $namespace : "\\$namespace";
+    }
 
-        return ($prependBackslash) ? "\\$namespace" : $namespace;
+    /**
+     * Typesafe version of {@see static::makeNamespaceAbsolute()}
+     *
+     * @param class-string $className
+     *
+     * @return class-string
+     */
+    protected function makeClassNameAbsolute(string $className): string
+    {
+        /** @var class-string $absoluteClassName */
+        $absoluteClassName = $this->makeNamespaceAbsolute($className);
+
+        return $absoluteClassName;
     }
 
     /**

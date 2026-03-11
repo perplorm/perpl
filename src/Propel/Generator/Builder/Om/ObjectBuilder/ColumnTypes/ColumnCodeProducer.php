@@ -1,16 +1,16 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes;
 
 use Propel\Generator\Builder\Om\ObjectBuilder;
 use Propel\Generator\Builder\Om\ObjectBuilder\ObjectCodeProducer;
 use Propel\Generator\Model\Column;
+use function array_intersect;
+use function explode;
+use function settype;
+use function var_export;
 
 class ColumnCodeProducer extends ObjectCodeProducer
 {
@@ -34,7 +34,7 @@ class ColumnCodeProducer extends ObjectCodeProducer
      */
     public function getColumn(): Column
     {
-        return $this->getColumn();
+        return $this->column;
     }
 
     /**
@@ -129,7 +129,7 @@ class ColumnCodeProducer extends ObjectCodeProducer
             return '';
         }
         $defaultValueDescription = $defaultValue->isExpression()
-            ? '(expression) ' . $defaultValue->getValue()
+            ? '(expression) ' . (string)$defaultValue->getValue()
             : $this->getDefaultValueString();
 
         return "
@@ -147,6 +147,24 @@ class ColumnCodeProducer extends ObjectCodeProducer
         return !$description ? '' : "
      *
      * {$description}";
+    }
+
+    /**
+     * Build statement used in Model::applyDefaultValues()
+     *
+     * @return string
+     */
+    public function getApplyDefaultValueStatement(): string
+    {
+        $clo = $this->column->getLowercasedName();
+        $defaultValue = $this->getDefaultValueString();
+        if ($this->column->isPhpObjectType()) {
+            $assumedClassName = $this->declareClass($this->column->getPhpType());
+            $defaultValue = "new $assumedClassName($defaultValue )";
+        }
+
+        return "
+        \$this->{$clo} = $defaultValue;";
     }
 
     /**
@@ -455,5 +473,17 @@ class ColumnCodeProducer extends ObjectCodeProducer
      */
     protected function addMutatorAddition(string &$script): void
     {
+    }
+
+    /**
+     * @see \Propel\Generator\Builder\Om\ObjectBuilder::addCreateFromFilter()
+     *
+     * @param string $valueExpression The variable expression holding the value (i.e. '$value')
+     *
+     * @return string
+     */
+    public function buildCreateFromFilterValueExpression(string $valueExpression): string
+    {
+        return $valueExpression;
     }
 }

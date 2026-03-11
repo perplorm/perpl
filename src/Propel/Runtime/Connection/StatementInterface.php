@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Runtime\Connection;
 
@@ -15,8 +11,6 @@ use PDO;
  * Based on the PDOStatement class.
  *
  * @see http://php.net/manual/en/book.pdo.php
- *
- * @author Aleksandr Bezpiatov
  */
 interface StatementInterface
 {

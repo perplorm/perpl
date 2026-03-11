@@ -1,14 +1,13 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Common\Config\Loader;
 
 use Propel\Common\Config\Exception\InvalidArgumentException;
+use function is_array;
+use function ob_end_clean;
+use function ob_start;
 
 /**
  * PhpFileLoader loads configuration values from a PHP file.
@@ -21,8 +20,6 @@ use Propel\Common\Config\Exception\InvalidArgumentException;
  *             .......................
  *         ];
  * </code>
- *
- * @author Cristiano Cinotti
  */
 class PhpFileLoader extends FileLoader
 {

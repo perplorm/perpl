@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Model;
 
@@ -12,17 +8,21 @@ use Propel\Generator\Config\GeneratorConfigInterface;
 use Propel\Generator\Exception\EngineException;
 use Propel\Generator\Exception\InvalidArgumentException;
 use Propel\Generator\Platform\PlatformInterface;
+use function array_search;
+use function count;
+use function explode;
+use function implode;
+use function in_array;
+use function key;
+use function ksort;
+use function ltrim;
+use function sprintf;
+use function strpos;
+use function strtolower;
+use function strtoupper;
 
 /**
  * A class for holding application data structures.
- *
- * @author Hans Lellelid <hans@xmpl.org> (Propel)
- * @author Leon Messerschmidt <leon@opticode.co.za> (Torque)
- * @author John McNally<jmcnally@collab.net> (Torque)
- * @author Martin Poeschl<mpoeschl@marmot.at> (Torque)
- * @author Daniel Rall<dlr@collab.net> (Torque)
- * @author Byron Foster <byron_foster@yahoo.com> (Torque)
- * @author Hugo Hamon <webmaster@apprendre-php.com> (Propel)
  */
 class Database extends ScopedMappingModel
 {
@@ -51,7 +51,7 @@ class Database extends ScopedMappingModel
     private $baseClass;
 
     /**
-     * @var string|null
+     * @var class-string|null
      */
     private $baseQueryClass;
 
@@ -177,7 +177,7 @@ class Database extends ScopedMappingModel
             $this->identifierQuoting = $this->booleanValue($this->getAttribute('identifierQuoting'));
         }
 
-        $this->tablePrefix = $this->getAttribute('tablePrefix', $this->getBuildProperty('generator.tablePrefix'));
+        $this->tablePrefix = $this->getAttribute('tablePrefix', $this->getGeneratorConfig()?->getConfigPropertyString('generator.tablePrefix'));
         $this->defaultStringFormat = $this->getAttribute('defaultStringFormat', static::DEFAULT_STRING_FORMAT);
     }
 
@@ -250,7 +250,7 @@ class Database extends ScopedMappingModel
      * Returns the name of the base super class inherited by query
      * objects. This parameter is overridden at the table level.
      *
-     * @return string|null
+     * @return class-string|null
      */
     public function getBaseQueryClass(): ?string
     {
@@ -261,26 +261,26 @@ class Database extends ScopedMappingModel
      * Sets the name of the base super class inherited by active record objects.
      * This parameter is overridden at the table level.
      *
-     * @param string $class
+     * @param class-string $class
      *
      * @return void
      */
     public function setBaseClass(string $class): void
     {
-        $this->baseClass = $this->makeNamespaceAbsolute($class);
+        $this->baseClass = $this->makeClassNameAbsolute($class);
     }
 
     /**
      * Sets the name of the base super class inherited by query objects.
      * This parameter is overridden at the table level.
      *
-     * @param string $class
+     * @param class-string $class
      *
      * @return void
      */
     public function setBaseQueryClass(string $class): void
     {
-        $this->baseQueryClass = $this->makeNamespaceAbsolute($class);
+        $this->baseQueryClass = $this->makeClassNameAbsolute($class);
     }
 
     /**
@@ -806,31 +806,7 @@ class Database extends ScopedMappingModel
     #[\Override]
     public function getGeneratorConfig(): ?GeneratorConfigInterface
     {
-        if ($this->parentSchema !== null) {
-            return $this->parentSchema->getGeneratorConfig();
-        }
-
-        return null;
-    }
-
-    /**
-     * Returns the configuration property identified by its name.
-     *
-     * @see \Propel\Common\Config\ConfigurationManager::getConfigProperty() method
-     *
-     * @param string $name
-     *
-     * @return string
-     */
-    #[\Override]
-    public function getBuildProperty(string $name): string
-    {
-        $config = $this->getGeneratorConfig();
-        if ($config) {
-            return (string)$config->getConfigProperty($name);
-        }
-
-        return '';
+        return $this->parentSchema?->getGeneratorConfig();
     }
 
     /**

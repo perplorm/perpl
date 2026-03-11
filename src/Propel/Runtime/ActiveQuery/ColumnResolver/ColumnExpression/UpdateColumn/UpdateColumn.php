@@ -1,18 +1,14 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
-
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace Propel\Runtime\ActiveQuery\ColumnResolver\ColumnExpression\UpdateColumn;
 
 use PDO;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\Map\ColumnMap;
+use function trigger_error;
+use const E_USER_NOTICE;
 
 /**
  * Update column expression with a value.

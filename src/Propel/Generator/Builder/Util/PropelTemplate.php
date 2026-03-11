@@ -1,20 +1,19 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Builder\Util;
 
 use Exception;
 use Propel\Generator\Exception\InvalidArgumentException;
+use function extract;
+use function ob_end_clean;
+use function ob_get_clean;
+use function ob_implicit_flush;
+use function ob_start;
 
 /**
  * Simple templating system to ease behavior writing
- *
- * @author François Zaninotto
  */
 class PropelTemplate
 {

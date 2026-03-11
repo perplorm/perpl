@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Runtime\Formatter;
 
@@ -19,8 +15,6 @@ use ReflectionClass;
  * Object formatter for Propel query
  * format() returns a OnDemandCollection that hydrates objects as the use iterates on the collection
  * This formatter consumes less memory than the ObjectFormatter, but doesn't use Instance Pool
- *
- * @author Francois Zaninotto
  *
  * @template RowFormat of \Propel\Runtime\ActiveRecord\ActiveRecordInterface
  * @extends \Propel\Runtime\Formatter\ObjectFormatter<RowFormat, \Propel\Runtime\Collection\OnDemandCollection<RowFormat>>

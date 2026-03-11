@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Runtime;
 
@@ -23,15 +19,6 @@ use Psr\Log\LoggerInterface;
  *
  * This static class is used to handle Propel initialization and to maintain all of the
  * open database connections and instantiated database maps.
- *
- * @author Hans Lellelid <hans@xmpl.rg> (Propel)
- * @author Daniel Rall <dlr@finemaltcoding.com> (Torque)
- * @author Magnús Þór Torfason <magnus@handtolvur.is> (Torque)
- * @author Jason van Zyl <jvanzyl@apache.org> (Torque)
- * @author Rafal Krzewski <Rafal.Krzewski@e-point.pl> (Torque)
- * @author Martin Poeschl <mpoeschl@marmot.at> (Torque)
- * @author Henning P. Schmiedehausen <hps@intermeta.de> (Torque)
- * @author Kurt Schrader <kschrader@karmalab.org> (Torque)
  */
 class Propel
 {
@@ -40,7 +27,7 @@ class Propel
      *
      * @var string
      */
-    public const VERSION = '2.0.0-dev';
+    public const VERSION = '2.5.0';
 
     /**
      * A constant for <code>default</code>.

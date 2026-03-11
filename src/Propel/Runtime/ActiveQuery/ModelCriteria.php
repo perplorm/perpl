@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Runtime\ActiveQuery;
 
@@ -32,9 +28,28 @@ use Propel\Runtime\Exception\UnexpectedValueException;
 use Propel\Runtime\Formatter\SimpleArrayFormatter;
 use Propel\Runtime\Map\Exception\ColumnNotFoundException;
 use Propel\Runtime\Map\RelationMap;
-use Propel\Runtime\Map\TableMap;
 use Propel\Runtime\Propel;
 use Propel\Runtime\Util\PropelModelPager;
+use function array_key_exists;
+use function array_merge;
+use function array_shift;
+use function array_values;
+use function count;
+use function current;
+use function end;
+use function explode;
+use function in_array;
+use function is_array;
+use function key;
+use function lcfirst;
+use function sprintf;
+use function str_replace;
+use function stripos;
+use function strlen;
+use function strpos;
+use function strrpos;
+use function strtoupper;
+use function substr;
 
 /**
  * This class extends the Criteria by adding runtime introspection abilities
@@ -48,8 +63,6 @@ use Propel\Runtime\Util\PropelModelPager;
  * @method \Propel\Runtime\ActiveQuery\ModelCriteria leftJoin($relation) Adds a LEFT JOIN clause to the query
  * @method \Propel\Runtime\ActiveQuery\ModelCriteria rightJoin($relation) Adds a RIGHT JOIN clause to the query
  * @method \Propel\Runtime\ActiveQuery\ModelCriteria innerJoin($relation) Adds a INNER JOIN clause to the query
- *
- * @author François Zaninotto
  */
 class ModelCriteria extends BaseModelCriteria
 {
@@ -1502,26 +1515,15 @@ class ModelCriteria extends BaseModelCriteria
         if ($this->joins) {
             throw new PropelException(__METHOD__ . ' cannot be used on a query with a join, because Propel cannot transform a SQL JOIN into a subquery. You should split the query in two queries to avoid joins.');
         }
-
-        $ret = $this->findOne($con);
-        if (!$ret) {
-            /** @var class-string $class */
-            $class = $this->getModelName();
-            /** @phpstan-var \Propel\Runtime\ActiveRecord\ActiveRecordInterface $obj */
-            $obj = new $class();
-            if (method_exists($obj, 'setByName')) {
-                $quoteColumnName = false;
-                // turn column filters to values (this is very messy...)
-                foreach ($this->filterCollector->getColumnFilters() as $filter) {
-                    $columnIdentifier = $filter->getLocalColumnName($quoteColumnName);
-                    $value = $filter->getValue();
-                    $obj->setByName($columnIdentifier, $value, TableMap::TYPE_COLNAME);
-                }
-            }
-            $ret = $this->getFormatter()->formatRecord($obj);
+        $found = $this->findOne($con);
+        if ($found) {
+            return $found;
         }
+        /** @phpstan-var class-string<\Propel\Runtime\ActiveRecord\ActiveRecordInterface> $modelClass */
+        $modelClass = $this->getModelName();
+        $created = $modelClass::createFromFilters($this->filterCollector);
 
-        return $ret;
+        return $this->getFormatter()->formatRecord($created);
     }
 
     /**

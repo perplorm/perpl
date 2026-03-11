@@ -1,16 +1,13 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Runtime\Formatter;
 
 use Propel\Runtime\ActiveRecord\ActiveRecordInterface;
 use Propel\Runtime\Collection\ArrayCollection;
 use ReflectionClass;
+use function in_array;
 
 /**
  * @template RowFormat
@@ -102,16 +99,12 @@ abstract class AbstractFormatterWithHydration extends AbstractFormatter
             }
 
             // hydrate related object or take it from registry
-            $key = $modelWith->getTableMap()::getPrimaryKeyHashFromRow($row, $col, $indexType);
+            $key = $modelWith->getTableMap()::getPrimaryKeyHashFromRow($row, $col, $indexType) ?? 'null';
             // we hydrate the main object even in case of a one-to-many relationship
             // in order to get the $col variable increased anyway
             $secondaryObject = $this->getSingleObjectFromRow($row, $class, $col);
             if (!isset($this->alreadyHydratedObjects[$relAlias][$key])) {
-                if ($secondaryObject->isPrimaryKeyNull()) {
-                    $this->alreadyHydratedObjects[$relAlias][$key] = [];
-                } else {
-                    $this->alreadyHydratedObjects[$relAlias][$key] = $secondaryObject->toArray();
-                }
+                $this->alreadyHydratedObjects[$relAlias][$key] = $secondaryObject->isPrimaryKeyNull() ? [] : $secondaryObject->toArray();
             }
 
             if ($modelWith->isPrimary()) {

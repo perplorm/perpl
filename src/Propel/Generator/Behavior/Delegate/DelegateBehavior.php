@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Behavior\Delegate;
 
@@ -18,11 +14,19 @@ use Propel\Generator\Model\NameGeneratorInterface;
 use Propel\Generator\Model\Table;
 use Propel\Generator\Util\PhpParser;
 use RuntimeException;
+use function compact;
+use function explode;
+use function in_array;
+use function ltrim;
+use function preg_match;
+use function rtrim;
+use function sprintf;
+use function str_replace;
+use function substr;
+use function trim;
 
 /**
  * Gives a model class the ability to delegate methods to a relationship.
- *
- * @author François Zaninotto
  */
 class DelegateBehavior extends Behavior
 {

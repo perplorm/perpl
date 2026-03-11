@@ -1,23 +1,18 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Model;
 
 use DOMDocument;
 use DOMNode;
 use Propel\Generator\Exception\EngineException;
+use function in_array;
+use function sprintf;
+use function strtoupper;
 
 /**
  * A class for holding data about a domain used in the schema.
- *
- * @author Hans Lellelid <hans@xmpl.org> (Propel)
- * @author Martin Poeschl <mpoeschl@marmot.at> (Torque)
- * @author Hugo Hamon <webmaster@apprendre-php.com> (Propel)
  */
 class Domain extends MappingModel
 {
@@ -344,7 +339,7 @@ class Domain extends MappingModel
         if ($this->mappingType === PropelTypes::PHP_ARRAY) {
             return $this->getDefaultValueForArray((string)$this->defaultValue->getValue());
         }
-        if ($this->mappingType === PropelTypes::SET) {
+        if ($this->mappingType === PropelTypes::SET_BINARY) {
             return $this->getDefaultValueForSet((string)$this->defaultValue->getValue());
         }
 
@@ -361,6 +356,20 @@ class Domain extends MappingModel
     public function setDefaultValue(ColumnDefaultValue $value): void
     {
         $this->defaultValue = $value;
+    }
+
+    /**
+     * Put a default value on the column
+     *
+     * @param string|int $value
+     * @param bool $isExpression
+     *
+     * @return void
+     */
+    public function createDefaultValue(string|int|null $value, bool $isExpression = false): void
+    {
+        $type = $isExpression ? ColumnDefaultValue::TYPE_EXPR : ColumnDefaultValue::TYPE_VALUE;
+        $this->defaultValue = new ColumnDefaultValue($value, $type);
     }
 
     /**
@@ -439,6 +448,19 @@ class Domain extends MappingModel
         if ($this->defaultValue) {
             $this->defaultValue = clone $this->defaultValue;
         }
+    }
+
+    /**
+     * @param string $type
+     *
+     * @return static
+     */
+    public function cloneAs(string $type): static
+    {
+        $clonedDomain = clone $this;
+        $clonedDomain->setType($type);
+
+        return $clonedDomain;
     }
 
     /**

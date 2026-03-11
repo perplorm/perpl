@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Builder\Om;
 
@@ -16,6 +12,12 @@ use Propel\Generator\Model\Database;
 use Propel\Generator\Model\Table;
 use Propel\Runtime\Map\DatabaseMap;
 use SplFileInfo;
+use function array_merge_recursive;
+use function array_walk;
+use function is_array;
+use function ksort;
+use const DIRECTORY_SEPARATOR;
+use const SORT_STRING;
 
 /**
  * Generates a database loader file, which is used to register all table maps with the DatabaseMap.
@@ -139,7 +141,8 @@ class TableMapLoaderScriptBuilder
      */
     public function getFile(): SplFileInfo
     {
-        $configDir = $this->generatorConfig->getConfigProperty('paths.loaderScriptDir') ?? $this->generatorConfig->getConfigProperty('paths.phpConfDir');
+        $configDir = $this->generatorConfig->getConfigPropertyString('paths.loaderScriptDir')
+            ?? $this->generatorConfig->getConfigPropertyString('paths.phpConfDir', true);
 
         return new SplFileInfo($configDir . DIRECTORY_SEPARATOR . self::FILENAME);
     }

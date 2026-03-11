@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Common\Config;
 
@@ -15,21 +11,35 @@ use RuntimeException;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException as SymfonyInvalidConfigurationException;
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Finder\Finder;
+use function array_any;
+use function array_filter;
+use function array_key_exists;
+use function array_key_first;
+use function array_keys;
+use function array_merge_recursive;
+use function array_pop;
+use function array_reduce;
+use function array_replace_recursive;
+use function array_reverse;
+use function explode;
+use function file_exists;
+use function getcwd;
+use function implode;
+use function in_array;
+use function is_dir;
+use function is_string;
+use function ksort;
+use function str_ends_with;
+use function var_export;
+use const PHP_EOL;
 
 /**
  * Class ConfigurationManager
  *
  * Class to load and process configuration files. Supported formats are: php, ini (or .properties), yaml, xml, json.
- *
- * @author Cristiano Cinotti
  */
 class ConfigurationManager
 {
-    /**
-     * @var string
-     */
-    public const CONFIG_FILE_NAME = 'propel';
-
     /**
      * @var int
      */
@@ -72,6 +82,8 @@ class ConfigurationManager
     }
 
     /**
+     * @deprecated Use aptly named {@see ConfigurationManager::getConfig()}
+     *
      * Return the whole configuration array
      *
      * @return array
@@ -82,6 +94,18 @@ class ConfigurationManager
     }
 
     /**
+     * Return the whole configuration array
+     *
+     * @return array
+     */
+    public function getConfig(): array
+    {
+        return $this->config;
+    }
+
+    /**
+     * @deprecated Access config props (including full sections) through {@see static::getConfigProperty()}
+     *
      * Return a specific section of the configuration array.
      * It ca be useful to get, in example, only 'generator' values.
      *
@@ -106,28 +130,77 @@ class ConfigurationManager
      * is expressed by:
      * <code>'database.adapter.mysql.tableType</code>
      *
-     * @param string $name The name of property, expressed as a dot separated level hierarchy
+     * @psalm-return ($isRequired ? array|int|bool|string : array|scalar|null)
      *
+     * @param string $path The name of property, expressed as a dot separated level hierarchy
+     * @param bool $isRequired
+     *
+     * @throws \Propel\Common\Config\Exception\InvalidConfigurationException
      * @throws \Propel\Common\Config\Exception\InvalidArgumentException
      *
-     * @return mixed The configuration property
+     * @return array|string|int|bool|null The configuration property
      */
-    public function getConfigProperty(string $name)
+    public function getConfigProperty(string $path, bool $isRequired = false): array|int|bool|string|null
     {
-        if ($name === '') {
+        if ($path === '') {
             throw new InvalidArgumentException('Invalid empty configuration property name.');
         }
 
-        $keys = explode('.', $name);
-        $output = $this->get();
+        $keys = explode('.', $path);
+        $section = $this->getConfig();
         foreach ($keys as $key) {
-            if (!array_key_exists($key, $output)) {
-                return null;
+            if (array_key_exists($key, $section)) {
+                $section = $section[$key];
+
+                continue;
             }
-            $output = $output[$key];
+
+            if ($isRequired) {
+                throw new InvalidConfigurationException("Cannot resolve config property '$path': No value at '$key'");
+            }
+
+            return null;
         }
 
-        return $output;
+        if ($isRequired && ($section === null || $section === '')) {
+            throw new InvalidConfigurationException("Required config property '$path' cannot be empty, but is: " . var_export($section, true));
+        }
+
+        return $section;
+    }
+
+    /**
+     * Type-safe access of {@see static::getConfigProperty()}.
+     *
+     * @psalm-return ($isRequired ? string : string|null)
+     *
+     * @param string $path The name of property, expressed as a dot separated level hierarchy
+     * @param bool $isRequired
+     *
+     * @throws \Propel\Common\Config\Exception\InvalidConfigurationException
+     *
+     * @return string|null The configuration property
+     */
+    public function getConfigPropertyString(string $path, bool $isRequired = false): string|null
+    {
+        $val = $this->getConfigProperty($path, $isRequired);
+        if ($val === null || is_string($val)) {
+            return $val;
+        }
+
+        throw new InvalidConfigurationException("Configuration item `$path` is expected to contain a string, but is " . var_export($val, true));
+    }
+
+    /**
+     * Return a specific configuration property.
+     *
+     * @param string $path The name of property, expressed as a dot separated level hierarchy
+     *
+     * @return array|string|int|bool The configuration property
+     */
+    public function getConfigPropertyRequired(string $path): array|int|bool|string
+    {
+        return $this->getConfigProperty($path, true) ?? '';
     }
 
     /**
@@ -215,7 +288,7 @@ class ConfigurationManager
         try {
             $this->config = $processor->processConfiguration($configuration, $this->config);
         } catch (SymfonyInvalidConfigurationException $e) {
-            throw new InvalidConfigurationException('Could not process configuration. Please check the property in error message: ' . $e->getMessage());
+            throw new InvalidConfigurationException('Invalid configuration: ' . $e->getMessage());
         }
         $this->cleanupSlaveConnections();
         $this->cleanupConnections();
@@ -239,11 +312,16 @@ class ConfigurationManager
         ];
         $dirs = array_filter($dirs, 'is_dir');
 
-        $fileGlob = self::CONFIG_FILE_NAME . '.{php,inc,ini,properties,yaml,yml,xml,json}{,.dist}';
+        $fileGlob = 'p{rope,erp}l.{php,inc,ini,properties,yaml,yml,xml,json}{,.dist}';
         $finder = new Finder();
         $finder->in($dirs)->depth(0)->files()->name($fileGlob);
         $orderedConfigFileNames = [];
         foreach ($finder as $file) {
+            $realPath = $file->getRealPath();
+            $isExecutable = $realPath && array_any(['propel', 'perpl'], fn ($cmd) => str_ends_with($realPath, "/bin/{$cmd}.php"));
+            if ($isExecutable) {
+                continue;
+            }
             $precedence = ($file->getExtension() === 'dist') ? self::PRECEDENCE_DIST : self::PRECEDENCE_NORMAL;
             if (isset($orderedConfigFileNames[$precedence])) {
                 $messageSplits = [
@@ -326,5 +404,30 @@ class ConfigurationManager
 
             $assertConnectionExists($configSection['defaultConnection'], $section, 'defaultConnection');
         }
+    }
+
+    /**
+     * @param array<string, mixed> $maybeKeyValues
+     * @param string $separator
+     *
+     * @throws \RuntimeException
+     *
+     * @return array
+     */
+    public static function deflateConfigurationArray(array $maybeKeyValues, string $separator = '.'): array
+    {
+        if ($separator === '') {
+            throw new RuntimeException('Separator cannot be empty.');
+        }
+        $deflatedConfigs = [];
+        $wrapArray = fn (array $config, string $key) => [$key => $config];
+        foreach ($maybeKeyValues as $maybePath => $payload) {
+            $sections = explode($separator, $maybePath);
+            $lastKey = array_pop($sections);
+            $reversedSections = array_reverse($sections);
+            $deflatedConfigs[] = array_reduce($reversedSections, $wrapArray, [$lastKey => $payload]);
+        }
+
+        return array_merge_recursive(...$deflatedConfigs);
     }
 }

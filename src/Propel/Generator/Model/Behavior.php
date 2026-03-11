@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Model;
 
@@ -13,12 +9,15 @@ use Propel\Common\Util\PathTrait;
 use Propel\Generator\Builder\Util\PropelTemplate;
 use Propel\Generator\Exception\LogicException;
 use ReflectionObject;
+use function array_change_key_case;
+use function array_merge;
+use function dirname;
+use function file_exists;
+use function sprintf;
+use const CASE_LOWER;
 
 /**
  * Information about behaviors of a table.
- *
- * @author François Zaninotto
- * @author Hugo Hamon <webmaster@apprendre-php.com> (Propel)
  */
 class Behavior extends MappingModel
 {

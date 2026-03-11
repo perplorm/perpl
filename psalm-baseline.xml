@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<files psalm-version="6.10.1@f9fd6bc117e9ce1e854c2ed6777e7135aaa4966b">
+<files psalm-version="6.13.1@1e3b7f0a8ab32b23197b91107adc0a7ed8a05b51">
   <file src="src/Propel/Common/Config/ConfigurationManager.php">
     <UnsupportedPropertyReferenceUsage>
       <code><![CDATA[$configSection = &$this->config[$section]]]></code>
@@ -105,14 +105,11 @@
   </file>
   <file src="src/Propel/Generator/Manager/AbstractManager.php">
     <UndefinedClass>
-      <code><![CDATA[$xsl]]></code>
-      <code><![CDATA[$xsl]]></code>
       <code><![CDATA[XSLTProcessor]]></code>
     </UndefinedClass>
     <UndefinedMethod>
       <code><![CDATA[getAttribute]]></code>
       <code><![CDATA[getAttribute]]></code>
-      <code><![CDATA[getLocation]]></code>
     </UndefinedMethod>
   </file>
   <file src="src/Propel/Generator/Manager/DataDictionaryExportManager.php">
@@ -122,6 +119,11 @@
     <NullableReturnStatement>
       <code><![CDATA[preg_replace('/\W/', '-', $name)]]></code>
     </NullableReturnStatement>
+  </file>
+  <file src="src/Propel/Generator/Manager/PrintPropelDirectoriesManager.php">
+    <UnsupportedPropertyReferenceUsage>
+      <code><![CDATA[$location = &$this->directoryStructure]]></code>
+    </UnsupportedPropertyReferenceUsage>
   </file>
   <file src="src/Propel/Generator/Model/Index.php">
     <InvalidNullableReturnType>
@@ -234,12 +236,6 @@
       <code><![CDATA[fromArray]]></code>
       <code><![CDATA[fromArray]]></code>
       <code><![CDATA[fromArray]]></code>
-      <code><![CDATA[save]]></code>
-    </UndefinedInterfaceMethod>
-  </file>
-  <file src="src/Propel/Runtime/Collection/ObjectCollection.php">
-    <UndefinedInterfaceMethod>
-      <code><![CDATA[delete]]></code>
       <code><![CDATA[save]]></code>
     </UndefinedInterfaceMethod>
   </file>

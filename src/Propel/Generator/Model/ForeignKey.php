@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Model;
 
@@ -12,15 +8,22 @@ use LogicException;
 use Propel\Common\Pluralizer\PluralizerInterface;
 use Propel\Generator\Platform\PlatformInterface;
 use Propel\Runtime\Exception\RuntimeException;
+use function array_diff;
+use function array_filter;
+use function array_map;
+use function array_search;
+use function count;
+use function implode;
+use function in_array;
+use function is_array;
+use function is_string;
+use function md5;
+use function strtolower;
+use function strtoupper;
+use function substr;
 
 /**
  * A class for information about table foreign keys.
- *
- * @author Hans Lellelid <hans@xmpl.org> (Propel)
- * @author Fedor <fedor.karpelevitch@home.com>
- * @author Daniel Rall <dlr@finemaltcoding.com>
- * @author Ulf Hermann <ulfhermann@kulturserver.de>
- * @author Hugo Hamon <webmaster@apprendre-php.com> (Propel)
  */
 class ForeignKey extends MappingModel
 {
@@ -881,7 +884,7 @@ class ForeignKey extends MappingModel
     public function hasColumnWithRequiredValue(): bool
     {
         foreach ($this->getLocalColumnObjects() as $pk) {
-            if ($pk->isNotNull() && !$pk->hasDefaultValue()) {
+            if ($pk->isNotNull() && !$pk->hasDefault()) {
                 return true;
             }
         }

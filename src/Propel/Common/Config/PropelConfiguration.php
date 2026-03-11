@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Common\Config;
 
@@ -12,6 +8,7 @@ use InvalidArgumentException;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
+use function strpos;
 
 /**
  * Class PropelConfiguration
@@ -76,14 +73,14 @@ class PropelConfiguration implements ConfigurationInterface
                 ->arrayNode('paths')
                     ->addDefaultsIfNotSet()
                     ->children()
-                        ->scalarNode('projectDir')->defaultValue(getcwd())->end()
-                        ->scalarNode('schemaDir')->defaultValue(getcwd())->end()
-                        ->scalarNode('outputDir')->defaultValue(getcwd())->end()
-                        ->scalarNode('phpDir')->defaultValue(getcwd() . '/generated-classes')->end()
-                        ->scalarNode('phpConfDir')->defaultValue(getcwd() . '/generated-conf')->end()
+                        ->scalarNode('projectDir')->defaultValue('.')->end()
+                        ->scalarNode('schemaDir')->defaultValue('.')->end()
+                        ->scalarNode('outputDir')->defaultValue('.')->end()
+                        ->scalarNode('phpDir')->defaultValue('./generated-classes')->end()
+                        ->scalarNode('phpConfDir')->defaultValue('./generated-conf')->end()
                         ->scalarNode('loaderScriptDir')->end()
-                        ->scalarNode('sqlDir')->defaultValue(getcwd() . '/generated-sql')->end()
-                        ->scalarNode('migrationDir')->defaultValue(getcwd() . '/generated-migrations')->end()
+                        ->scalarNode('sqlDir')->defaultValue('./generated-sql')->end()
+                        ->scalarNode('migrationDir')->defaultValue('./generated-migrations')->end()
                         ->scalarNode('composerDir')->defaultNull()->end()
                     ->end()
                 ->end()
@@ -182,6 +179,7 @@ class PropelConfiguration implements ConfigurationInterface
                                         ->scalarNode('tableType')->defaultValue('InnoDB')->treatNullLike('InnoDB')->end()
                                         ->scalarNode('tableEngineKeyword')->defaultValue('ENGINE')->end()
                                         ->scalarNode('uuidColumnType')->defaultValue('binary')->end()
+                                        ->booleanNode('ignoreSizeOnIntegerTypes')->defaultTrue()->end()
                                     ->end()
                                 ->end()
                                 ->arrayNode('sqlite')
@@ -356,6 +354,7 @@ class PropelConfiguration implements ConfigurationInterface
                         ->booleanNode('packageObjectModel')->defaultTrue()->end()
                         ->booleanNode('namespaceAutoPackage')->defaultTrue()->end()
                         ->booleanNode('recursive')->defaultFalse()->end()
+                        ->booleanNode('defaultToNativeEnumeratedColumnTypes')->defaultFalse()->end()
                         ->arrayNode('connections')
                             ->prototype('scalar')->end()
                         ->end()

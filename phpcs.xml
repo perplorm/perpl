@@ -3,7 +3,7 @@
     <description>
         Propel Coding Standard.
 
-        Extends Spryker+Slevomatik Coding Standard.
+        Extends Spryker Coding Standard.
     </description>
 
     <config name="installed_paths" value="../../spryker/code-sniffer"/>
@@ -12,18 +12,43 @@
 
     <file>src/</file>
 
-    <rule ref="Spryker"/>
-
-    <rule ref="vendor/spryker/code-sniffer/SprykerStrict/ruleset.xml">
+    <rule ref="SprykerStrict">
         <exclude name="SprykerStrict.TypeHints.ParameterTypeHint"/>
         <exclude name="SprykerStrict.TypeHints.PropertyTypeHint"/>
         <exclude name="SprykerStrict.TypeHints.ReturnTypeHint"/>
+        <exclude name="Spryker.Internal.SprykerBridge"/>
+        <exclude name="Spryker.Internal.SprykerFacade"/>
+        <exclude name="Spryker.Internal.SprykerNoDemoshop"/>
+        <exclude name="Spryker.Internal.SprykerPreferStaticOverSelf"/>
+        <exclude name="Spryker.Commenting.DocBlockApiAnnotation"/> <!-- Another Spryker internal function. -->
     </rule>
 
     <rule ref="Spryker.Internal.SprykerDisallowFunctions">
         <properties>
-            <!-- We want to prevent 8.0+ functions to break 7.4 compatibility -->
-            <property name="phpVersion" value="7.4"/>
+            <!-- running this rule without phpVersion doubles runtime (in spryker/code-sniffer 0.17.30) -->
+            <property name="phpVersion" value="8.1"/>
+        </properties>
+    </rule>
+
+    <rule ref="SlevomatCodingStandard.TypeHints.DeclareStrictTypes"/>
+
+    <rule ref="SlevomatCodingStandard.Namespaces.ReferenceUsedNamesOnly" >
+        <properties>
+            <property name="allowFallbackGlobalFunctions" value="false"/>
+            <property name="allowFallbackGlobalConstants" value="false"/>
+        </properties>
+    </rule>
+
+    <rule ref="SlevomatCodingStandard.Commenting.ForbiddenAnnotations">
+        <properties>
+            <property name="forbiddenAnnotations" type="array">
+                <element value="@author"/>
+                <element value="@created"/>
+                <element value="@copyright"/>
+                <element value="@license"/>
+                <element value="@package"/>
+                <element value="@version"/>
+            </property>
         </properties>
     </rule>
 </ruleset>

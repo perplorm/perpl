@@ -1,12 +1,11 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Runtime\ActiveQuery\FilterExpression;
+
+use function array_merge;
+use function count;
 
 /**
  * List of conditions and combine operators (and/or)

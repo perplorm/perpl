@@ -38,10 +38,6 @@ runs:
               ${{ runner.os }}-composer-php:${{ inputs.php-version }}-
               ${{ runner.os }}-composer-
 
-    - name: Composer validate
-      run: composer validate
-      shell: bash
-
-    - name: Composer install
-      run: composer install --prefer-dist --no-interaction
+    - name: Composer update
+      run: COMPOSER=tests/composer/composer-symfony${{ inputs.symfony-version }}.json composer update --prefer-dist --no-interaction
       shell: bash

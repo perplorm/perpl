@@ -1,15 +1,16 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Builder\Om\ObjectBuilder\RelationCodeProducer;
 
 use Propel\Generator\Model\ForeignKey;
 use Propel\Runtime\Collection\ObjectCombinationCollection;
+use function array_map;
+use function array_search;
+use function implode;
+use function lcfirst;
+use function ucfirst;
 
 /**
  * Produces code for cross/many-to-many relations where the middle table is a
@@ -451,6 +452,7 @@ class TernaryRelationCodeProducer extends AbstractManyToManyCodeProducer
     #[\Override]
     protected function buildDoAdd(string &$script): void
     {
+        $this->referencedClasses->registerFunction('assert');
         $targetIdentifierSingular = $this->names->getTargetIdentifier(false);
         $sourceIdentifierSingular = $this->names->getSourceIdentifier(false);
         $middleModelClassName = $this->middleTableNames->useObjectStubClassName();

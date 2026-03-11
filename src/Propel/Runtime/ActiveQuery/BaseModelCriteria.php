@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Runtime\ActiveQuery;
 
@@ -18,6 +14,13 @@ use Propel\Runtime\Formatter\AbstractFormatter;
 use Propel\Runtime\Map\TableMap;
 use Propel\Runtime\Propel;
 use Traversable;
+use function array_pop;
+use function class_exists;
+use function explode;
+use function is_array;
+use function is_string;
+use function strpos;
+use function substr;
 
 /**
  * @implements \IteratorAggregate<(int|string), mixed>

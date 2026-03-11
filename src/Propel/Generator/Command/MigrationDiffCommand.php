@@ -1,16 +1,11 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Command;
 
 use Propel\Common\Config\ConfigurationManager;
 use Propel\Generator\Exception\RuntimeException;
-use Propel\Generator\Manager\MigrationManager;
 use Propel\Generator\Model\Database;
 use Propel\Generator\Model\Diff\DatabaseComparator;
 use Propel\Generator\Model\IdMethod;
@@ -19,17 +14,22 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\Output;
 use Symfony\Component\Console\Output\OutputInterface;
+use function array_merge;
+use function escapeshellarg;
+use function file_put_contents;
+use function implode;
+use function shell_exec;
+use function sprintf;
+use function time;
+use const DIRECTORY_SEPARATOR;
 
-/**
- * @author William Durand <william.durand1@gmail.com>
- */
-class MigrationDiffCommand extends AbstractCommand
+class MigrationDiffCommand extends AbstractMigrationCommand
 {
     /**
      * @inheritDoc
      */
     #[\Override]
-    protected function configure()
+    protected function configure(): void
     {
         parent::configure();
 
@@ -58,48 +58,13 @@ class MigrationDiffCommand extends AbstractCommand
     #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $configOptions = [];
+        $this->setUp($input);
+        $this->registerMigrationManagerSchemas();
+        $manager = $this->getMigrationManager();
+        $generatorConfig = $this->getGeneratorConfig();
 
-        if ($this->hasInputOption('connection', $input)) {
-            foreach ($input->getOption('connection') as $conn) {
-                $configOptions += $this->connectionToProperties($conn);
-            }
-        }
-
-        if ($this->hasInputOption('migration-table', $input)) {
-            $configOptions['propel']['migrations']['tableName'] = $input->getOption('migration-table');
-        }
-
-        if ($this->hasInputOption('schema-dir', $input)) {
-            $configOptions['propel']['paths']['schemaDir'] = $input->getOption('schema-dir');
-        }
-
-        if ($this->hasInputOption('output-dir', $input)) {
-            $configOptions['propel']['paths']['migrationDir'] = $input->getOption('output-dir');
-        }
-
-        $generatorConfig = $this->getGeneratorConfig($configOptions, $input);
-
-        $this->createDirectory($generatorConfig->getSection('paths')['migrationDir']);
-
-        $manager = new MigrationManager();
-        $manager->setGeneratorConfig($generatorConfig);
-        $manager->setSchemas($this->getSchemas($generatorConfig->getSection('paths')['schemaDir'], $generatorConfig->getSection('generator')['recursive']));
-
-        $connections = [];
-        $optionConnections = $input->getOption('connection');
-        if (!$optionConnections) {
-            $connections = $generatorConfig->getBuildConnections();
-        } else {
-            foreach ($optionConnections as $connection) {
-                [$name, $dsn, $infos] = $this->parseConnection($connection);
-                $connections[$name] = array_merge(['dsn' => $dsn], $infos);
-            }
-        }
-
-        $manager->setConnections($connections);
-        $manager->setMigrationTable($generatorConfig->getConfigProperty('migrations.tableName'));
-        $manager->setWorkingDirectory($generatorConfig->getSection('paths')['migrationDir']);
+        $customConnectionData = $input->getOption('connection');
+        $this->setUpMigrationManagerAccess($customConnectionData);
 
         if ($manager->hasPendingMigrations()) {
             throw new RuntimeException(sprintf(
@@ -111,6 +76,7 @@ class MigrationDiffCommand extends AbstractCommand
         $totalNbTables = 0;
         $reversedSchema = new Schema();
 
+        $connections = $manager->getConnections();
         foreach ($manager->getDatabases() as $appDatabase) {
             $name = $appDatabase->getName();
             $params = $connections[$name] ?? [];
@@ -175,7 +141,7 @@ class MigrationDiffCommand extends AbstractCommand
         $removeTable = !$input->getOption('skip-removed-table');
         $excludedTables = $input->getOption('skip-tables');
         $configManager = new ConfigurationManager($input->getOption('config-dir'));
-        $excludedTables = array_merge((array)$excludedTables, (array)$configManager->getSection('exclude_tables'));
+        $excludedTables = array_merge((array)$excludedTables, (array)$configManager->getConfigProperty('exclude_tables'));
 
         foreach ($reversedSchema->getDatabases() as $database) {
             $name = $database->getName();
@@ -231,7 +197,7 @@ class MigrationDiffCommand extends AbstractCommand
         $migrationFileName = $manager->getMigrationFileName($timestamp, $input->getOption('suffix'));
         $migrationClassBody = $manager->getMigrationClassBody($migrationsUp, $migrationsDown, $timestamp, $input->getOption('comment'), $input->getOption('suffix'));
 
-        $file = $generatorConfig->getSection('paths')['migrationDir'] . DIRECTORY_SEPARATOR . $migrationFileName;
+        $file = $this->migrationDir . DIRECTORY_SEPARATOR . $migrationFileName;
         file_put_contents($file, $migrationClassBody);
 
         $output->writeln(sprintf('"%s" file successfully created.', $file));

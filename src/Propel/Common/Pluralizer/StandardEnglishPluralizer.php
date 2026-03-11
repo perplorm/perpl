@@ -1,12 +1,15 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Common\Pluralizer;
+
+use function ctype_upper;
+use function in_array;
+use function preg_match;
+use function preg_replace;
+use function strtolower;
+use function ucfirst;
 
 /**
  * Standard replacement English pluralizer class. Based on the links below
@@ -14,8 +17,6 @@ namespace Propel\Common\Pluralizer;
  * @link http://kuwamoto.org/2007/12/17/improved-pluralizing-in-php-actionscript-and-ror/
  * @link http://blogs.msdn.com/dmitryr/archive/2007/01/11/simple-english-noun-pluralizer-in-c.aspx
  * @link http://api.cakephp.org/view_source/inflector/
- *
- * @author paul.hanssen
  */
 class StandardEnglishPluralizer implements PluralizerInterface
 {

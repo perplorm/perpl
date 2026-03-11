@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Builder\Om\ObjectBuilder\RelationCodeProducer;
 
@@ -12,6 +8,7 @@ use Propel\Generator\Builder\Om\ObjectBuilder;
 use Propel\Generator\Builder\Util\EntityObjectClassNames;
 use Propel\Generator\Model\CrossRelation;
 use Propel\Generator\Model\ForeignKey;
+use function array_search;
 
 /**
  * Produces code for cross/many-to-many relations that requires only an element
@@ -276,6 +273,7 @@ class ManyToManyRelationCodeProducer extends AbstractManyToManyCodeProducer
     #[\Override]
     protected function buildDoAdd(string &$script): void
     {
+        $this->referencedClasses->registerFunction('assert');
         $middleTableModelClass = $this->middleTableNames->useObjectStubClassName(true, 'Child');
 
         $middleTableIdentifierSingular = $this->names->getMiddleTableIdentifier(false);

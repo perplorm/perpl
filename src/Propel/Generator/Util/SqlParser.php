@@ -1,20 +1,24 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Util;
 
 use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Connection\StatementInterface;
+use function file_exists;
+use function file_get_contents;
+use function preg_replace;
+use function str_ireplace;
+use function str_replace;
+use function strlen;
+use function strpos;
+use function strtolower;
+use function trim;
+use const PHP_EOL;
 
 /**
  * Service class for parsing a large SQL string into an array of SQL statements
- *
- * @author François Zaninotto
  */
 class SqlParser
 {

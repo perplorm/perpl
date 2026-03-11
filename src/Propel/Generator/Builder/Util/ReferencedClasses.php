@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Builder\Util;
 
@@ -16,18 +12,34 @@ use Propel\Generator\Exception\LogicException;
 use Propel\Generator\Model\ForeignKey;
 use Propel\Generator\Model\PropelTypes;
 use Propel\Generator\Model\Table;
+use function array_map;
+use function array_push;
+use function array_unique;
+use function asort;
+use function explode;
+use function implode;
+use function in_array;
+use function is_string;
+use function is_subclass_of;
+use function preg_match;
+use function preg_replace;
+use function sprintf;
+use function str_replace;
+use function strpos;
+use function strrpos;
+use function substr;
+use function trim;
+use const SORT_FLAG_CASE;
+use const SORT_STRING;
 
 class ReferencedClasses
 {
     /**
-     * @var \Propel\Generator\Builder\Om\AbstractOMBuilder
+     * Code builder that will get the "use" statements
      */
-    protected $builder;
+    protected AbstractOMBuilder $builder;
 
-    /**
-     * @var \Propel\Generator\Builder\BuilderFactory\BuilderFactory
-     */
-    protected $builderFactory;
+    protected BuilderFactory $builderFactory;
 
     /**
      * Declared fully qualified classnames, to build the 'namespace' statements
@@ -35,21 +47,31 @@ class ReferencedClasses
      *
      * @var array<string, array<string, string>>
      */
-    protected $declaredClasses = [];
+    protected array $declaredClasses = [];
 
     /**
      * Mapping between fully qualified classnames and their short classname or alias
      *
      * @var array<string, string>
      */
-    protected $declaredShortClassesOrAlias = [];
+    protected array $declaredShortClassesOrAlias = [];
 
     /**
-     * List of classes that can be use without alias when model don't have namespace
+     * List of classes that can be used without alias when model has no namespace
      *
      * @var array<string>
      */
     protected $whiteListOfDeclaredClasses = ['PDO', 'Exception', 'RuntimeException', 'DateTime', 'ReflectionClass', 'ReflectionProperty', 'DateTimeInterface'];
+
+    /**
+     * @var array<string>
+     */
+    protected array $declaredFunctionImports = [];
+
+    /**
+     * @var array<string>
+     */
+    protected array $declaredConstantImports = [];
 
     /**
      * @param \Propel\Generator\Builder\Om\AbstractOMBuilder $builder
@@ -307,7 +329,7 @@ class ReferencedClasses
                 return true;
             }
 
-            if ((strpos($class, 'Query') !== false)) {
+            if (strpos($class, 'Query') !== false) {
                 return true;
             }
 
@@ -363,6 +385,30 @@ class ReferencedClasses
     }
 
     /**
+     * @param string ...$functionNames
+     *
+     * @return void
+     */
+    public function registerFunction(string ...$functionNames): void
+    {
+        foreach ($functionNames as $functionName) {
+            $this->declaredFunctionImports[] = $functionName;
+        }
+    }
+
+    /**
+     * @param string ...$constantNames
+     *
+     * @return void
+     */
+    public function registerConstant(string ...$constantNames): void
+    {
+        foreach ($constantNames as $constantName) {
+            $this->declaredConstantImports[] = $constantName;
+        }
+    }
+
+    /**
      * @param string $ownNamespace
      * @param string $ownClassName
      * @param string|null $ignoredNamespace
@@ -371,23 +417,61 @@ class ReferencedClasses
      */
     public function buildUseStatements(string $ownNamespace, string $ownClassName, ?string $ignoredNamespace = null): string
     {
+        $importStatements = [
+            ...$this->buildImportClassStatements($ownNamespace, $ownClassName, $ignoredNamespace),
+            ...$this->buildImportGlobalItems(),
+        ];
+
+        return implode("\n", $importStatements) . "\n";
+    }
+
+    /**
+     * @param string $ownNamespace
+     * @param string $ownClassName
+     * @param string|null $ignoredNamespace
+     *
+     * @return array<string>
+     */
+    protected function buildImportClassStatements(string $ownNamespace, string $ownClassName, ?string $ignoredNamespace = null): array
+    {
         $declaredClasses = $this->getDeclaredClasses();
         unset($declaredClasses[$ignoredNamespace]);
-        $usedClasses = [];
+        $importStatements = [];
         foreach ($declaredClasses as $namespace => $classes) {
             foreach ($classes as $class => $alias) {
                 if ($class == $ownClassName && $namespace === $ownNamespace) {
                     continue;
                 }
                 $fqcn = $namespace ? "$namespace\\$class" : $class;
-                $usedClasses[] = ($class === $alias)
+                $importStatements[] = ($class === $alias)
                     ? "use $fqcn;"
                     : "use $fqcn as $alias;";
             }
         }
-        asort($usedClasses, SORT_STRING | SORT_FLAG_CASE);
+        asort($importStatements, SORT_STRING | SORT_FLAG_CASE);
 
-        return implode("\n", $usedClasses) . "\n";
+        return $importStatements;
+    }
+
+    /**
+     * @return array<string>
+     */
+    protected function buildImportGlobalItems(): array
+    {
+        $importStatements = [];
+
+        $importSources = [
+            'function' => $this->declaredFunctionImports,
+            'const' => $this->declaredConstantImports,
+        ];
+        foreach ($importSources as $identifier => $importNames) {
+            $importNames = array_unique($importNames);
+            asort($importNames, SORT_STRING | SORT_FLAG_CASE);
+            $imports = array_map(fn (string $name) => "use $identifier $name;", $importNames);
+            array_push($importStatements, ...$imports);
+        }
+
+        return $importStatements;
     }
 
     /**

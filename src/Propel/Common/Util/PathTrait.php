@@ -1,14 +1,21 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Common\Util;
 
 use RuntimeException;
+use function array_reverse;
+use function array_shift;
+use function explode;
+use function implode;
+use function is_dir;
+use function sprintf;
+use function strrpos;
+use function substr;
+use function trigger_error;
+use const DIRECTORY_SEPARATOR;
+use const E_USER_DEPRECATED;
 
 trait PathTrait
 {

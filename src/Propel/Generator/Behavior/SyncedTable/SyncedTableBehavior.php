@@ -1,16 +1,16 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Behavior\SyncedTable;
 
 use Propel\Generator\Behavior\SyncedTable\TableSyncer\TableSyncer;
 use Propel\Generator\Model\ForeignKey;
 use Propel\Generator\Model\Table;
+use function array_merge;
+use function in_array;
+use function is_string;
+use function strtolower;
 
 /**
  * Syncs another table definition to the one holding this behavior.

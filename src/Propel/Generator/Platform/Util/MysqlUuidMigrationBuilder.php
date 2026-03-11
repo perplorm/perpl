@@ -1,16 +1,16 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Platform\Util;
 
 use Propel\Generator\Model\Column;
 use Propel\Generator\Model\Index;
 use Propel\Generator\Platform\MysqlPlatform;
+use function array_filter;
+use function bin2hex;
+use function implode;
+use function random_bytes;
 
 /**
  * Creates migration statements for UUID columns in MySQL.

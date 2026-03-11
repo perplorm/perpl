@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Builder\Om\ObjectBuilder\RelationCodeProducer;
 
@@ -137,6 +133,7 @@ class RelationFromOneCodeProducer extends AbstractIncomingRelationCode
      */
     protected function addSet(string &$script): void
     {
+        $this->referencedClasses->registerFunction('assert');
         $referrer = $this->relation;
         $modelClassName = $this->targetTableNames->useObjectStubClassName();
         $modelClassNameFq = $this->targetTableNames->useObjectStubClassName(false);

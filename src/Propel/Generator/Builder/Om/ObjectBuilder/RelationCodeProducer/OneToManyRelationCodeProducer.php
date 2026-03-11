@@ -1,14 +1,11 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Builder\Om\ObjectBuilder\RelationCodeProducer;
 
 use Propel\Generator\Model\ForeignKey;
+use function lcfirst;
 
 /**
  * A one-to-many relation from an incoming FK.
@@ -276,6 +273,8 @@ class OneToManyRelationCodeProducer extends AbstractIncomingRelationCode
      */
     protected function addCount(string &$script): void
     {
+        $this->declareGlobalFunction('count');
+
         $targetQueryClassName = $this->targetTableNames->useQueryStubClassName();
         $targetClassName = $this->relation->getForeignTable()->getName();
         $relCol = $this->getRefFKPhpNameAffix($this->relation, true);
@@ -328,6 +327,8 @@ class OneToManyRelationCodeProducer extends AbstractIncomingRelationCode
      */
     protected function addGet(string &$script): void
     {
+        $this->declareGlobalFunction('count');
+
         $attributeName = $this->getAttributeName();
         $targetModelClassName = $this->relation->getForeignTableName();
         $targetModelClassNameFqcn = $this->targetTableNames->useObjectStubClassName(false);
@@ -488,6 +489,7 @@ class OneToManyRelationCodeProducer extends AbstractIncomingRelationCode
      */
     protected function addDoAdd(string &$script): void
     {
+        $this->referencedClasses->registerFunction('assert');
         $targetClassName = $this->targetTableNames->useObjectStubClassName();
         $targetClassNameFq = $this->targetTableNames->useObjectStubClassName(false);
         $relatedObjectClassName = $this->relation->getIdentifierReversed();

@@ -8,6 +8,8 @@
 
 namespace Propel\Tests\Generator\Migration;
 
+use Propel\Generator\Model\PropelTypes;
+
 /**
  * @group database
  */
@@ -349,5 +351,34 @@ class BaseTest extends MigrationTestCase
         $this->applyXmlAndTest($target3Xml);
         $this->applyXmlAndTest($target4Xml);
         $this->applyXmlAndTest($target5Xml);
+    }
+    /**
+     * @return void
+     */
+    public function testNativeEnum()
+    {
+        if ($this->getPlatform()->getDomainForType(PropelTypes::ENUM_NATIVE)->getType() === PropelTypes::ENUM_BINARY) {
+            return $this->markTestSkipped('Test requires native SET/ENUM type.');
+        }
+
+        $originXml = '
+<database>
+    <table name="migration_test_enum">
+        <column name="enum_column" type="ENUM_NATIVE" valueSet="foo,bar"/>
+        <column name="set_column" type="SET_NATIVE" valueSet="foo,bar"/>
+    </table>
+</database>
+';
+
+        $targetXml = '
+<database>
+    <table name="migration_test_enum">
+        <column name="enum_column" type="ENUM_NATIVE" valueSet="baz,foo,bar"/>
+        <column name="set_column" type="SET_NATIVE" valueSet="baz,foo,bar"/>
+    </table>
+</database>
+';
+        $this->applyXmlAndTest($originXml);
+        $this->applyXmlAndTest($targetXml);
     }
 }

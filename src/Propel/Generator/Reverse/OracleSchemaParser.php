@@ -1,28 +1,25 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Reverse;
 
 use PDO;
 use Propel\Generator\Model\Column;
-use Propel\Generator\Model\ColumnDefaultValue;
 use Propel\Generator\Model\Database;
 use Propel\Generator\Model\ForeignKey;
 use Propel\Generator\Model\IdMethodParameter;
 use Propel\Generator\Model\Index;
 use Propel\Generator\Model\PropelTypes;
 use Propel\Generator\Model\Table;
+use function count;
+use function str_replace;
+use function strpos;
+use function strtoupper;
+use function substr;
 
 /**
  * Oracle database schema parser.
- *
- * @author Hans Lellelid <hans@xmpl.org>
- * @author Guillermo Gutierrez <ggutierrez@dailycosas.net> (Adaptation)
  */
 class OracleSchemaParser extends AbstractSchemaParser
 {
@@ -88,7 +85,7 @@ class OracleSchemaParser extends AbstractSchemaParser
         /** @var \PDOStatement $stmt */
         $stmt = $this->dbh->query("SELECT OBJECT_NAME FROM USER_OBJECTS WHERE OBJECT_TYPE = 'TABLE'");
 
-        $seqPattern = $this->getGeneratorConfig()->get()['database']['adapters']['oracle']['autoincrementSequencePattern'];
+        $seqPattern = $this->getGeneratorConfig()->getConfigPropertyString('database.adapters.oracle.autoincrementSequencePattern');
 
         // First load the tables (important that this happens before filling out details of tables)
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
@@ -190,7 +187,7 @@ class OracleSchemaParser extends AbstractSchemaParser
             $column->getDomain()->replaceSize($size);
             $column->getDomain()->replaceScale($scale);
             if ($default !== null) {
-                $column->getDomain()->setDefaultValue(new ColumnDefaultValue($default, ColumnDefaultValue::TYPE_VALUE));
+                $column->getDomain()->createDefaultValue($default);
             }
             $column->setAutoIncrement(false); // This flag sets in self::parse()
             $column->setNotNull(!$isNullable);

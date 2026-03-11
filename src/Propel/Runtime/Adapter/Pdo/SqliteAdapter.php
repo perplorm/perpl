@@ -1,25 +1,42 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Runtime\Adapter\Pdo;
 
+use PDO;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\Lock;
 use Propel\Runtime\Adapter\SqlAdapterInterface;
 use Propel\Runtime\Connection\ConnectionInterface;
+use Propel\Runtime\Connection\ConnectionWrapper;
+use Propel\Runtime\Connection\PdoConnection;
+use RuntimeException;
+use function class_exists;
+use function get_class;
+use function mb_ereg;
+use function mb_regex_encoding;
+use function method_exists;
+use function phpversion;
+use function sprintf;
 
 /**
  * This is used in order to connect to a SQLite database.
- *
- * @author Hans Lellelid <hans@xmpl.org>
  */
 class SqliteAdapter extends PdoAdapter implements SqlAdapterInterface
 {
+    /**
+     * @return class-string<\PDO>
+     */
+    #[\Override]
+    public function getPdoSubclass(): string
+    {
+        /** @var class-string<\PDO> $class */
+        $class = class_exists('\PDO\Sqlite') ? '\PDO\Sqlite' : PDO::class;
+
+        return $class;
+    }
+
     /**
      * For SQLite this method has no effect, since SQLite doesn't support specifying a character
      * set (or, another way to look at it, it doesn't require a single character set per DB).
@@ -47,11 +64,39 @@ class SqliteAdapter extends PdoAdapter implements SqlAdapterInterface
         parent::initConnection($con, $settings);
 
         //add regex support
-        $con->sqliteCreateFunction('regexp', function ($pattern, $value) {
+        $this->createFunction($con, 'regexp', function ($pattern, $value) {
             mb_regex_encoding('UTF-8');
 
             return (mb_ereg($pattern, $value) !== false) ? 1 : 0;
         });
+    }
+
+    /**
+     * @param \Propel\Runtime\Connection\ConnectionInterface $con
+     * @param string $functionName
+     * @param callable $callback
+     *
+     * @throws \RuntimeException
+     *
+     * @return void
+     */
+    protected function createFunction(ConnectionInterface $con, string $functionName, callable $callback): void
+    {
+        $unwrappedConnection = $con instanceof ConnectionWrapper ? $con->getWrappedConnection() : $con;
+        if (!$unwrappedConnection instanceof PdoConnection) {
+            throw new RuntimeException('Expected PDO connection but got ' . get_class($con));
+        }
+        $pdo = $unwrappedConnection->getPdo();
+
+        if (method_exists($pdo, 'createFunction')) {
+            $createFunction = 'createFunction'; // $pdo is \PDO\Sqlite (available since PH 8.4)
+        } elseif (method_exists($pdo, 'sqliteCreateFunction')) {
+            $createFunction = 'sqliteCreateFunction'; // $pdo is PDO before PHP 8.5
+        } else {
+            throw new RuntimeException(sprintf('Cannot create function on PDO class %s (PHP %s)', get_class($con), phpversion()));
+        }
+
+        $pdo->$createFunction($functionName, $callback);
     }
 
     /**

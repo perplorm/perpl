@@ -1,19 +1,17 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Common\Config\Loader;
 
 use Propel\Common\Config\Exception\JsonParseException;
+use function file_get_contents;
+use function json_decode;
+use function json_last_error;
+use const JSON_ERROR_NONE;
 
 /**
  * JsonFileLoader loads configuration parameters from json file.
- *
- * @author Cristiano Cinotti
  */
 class JsonFileLoader extends FileLoader
 {

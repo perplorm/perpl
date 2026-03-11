@@ -337,7 +337,7 @@ class SortableBehaviorObjectBuilderModifierTest extends TestCase
         $this->assertEquals($expected, $this->getFixturesArray(), 'removeFromList() does not change the list until the object is saved');
         $t2->save();
          SortableTable11TableMap::clearInstancePool();
-        $expected = [null => 'row2', 1 => 'row1', 2 => 'row3', 3 => 'row4'];
+        $expected = ['null' => 'row2', 1 => 'row1', 2 => 'row3', 3 => 'row4'];
         $this->assertEquals($expected, $this->getFixturesArray(), 'removeFromList() changes the list once the object is saved');
     }
 }

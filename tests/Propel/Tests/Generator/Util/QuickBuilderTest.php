@@ -177,6 +177,6 @@ EOF;
         $this->assertEquals($foo, QuickBuildFoo3Query::create()->findOne());
 
         $this->assertDirectoryExists(
-            sys_get_temp_dir() . '/propelQuickBuild-' . Propel::VERSION . '-' . substr(sha1(getcwd()), 0, 10));
+            sys_get_temp_dir() . '/perplQuickBuild/v' . Propel::VERSION . '-' . substr(sha1(getcwd()), 0, 10));
     }
 }

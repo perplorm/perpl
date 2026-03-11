@@ -12,7 +12,6 @@ use Propel\Generator\Config\GeneratorConfig;
 use Propel\Generator\Exception\BuildException;
 use Propel\Generator\Exception\ClassNotFoundException;
 use Propel\Generator\Exception\InvalidArgumentException;
-use Propel\Tests\Common\Config\ConfigTestCase;
 use Propel\Tests\TestCase;
 use Propel\Generator\Util\VfsTrait;
 use ReflectionClass;
@@ -35,7 +34,6 @@ class GeneratorConfigTest extends TestCase
     {
         $ref = new ReflectionClass('\\Propel\\Common\\Config\\ConfigurationManager');
         $refProp = $ref->getProperty('config');
-        $refProp->setAccessible(true);
         $refProp->setValue($this->generatorConfig, $config);
     }
 
@@ -126,7 +124,9 @@ class GeneratorConfigTest extends TestCase
     public function testGetConfiguredPlatformGivenBadDatabaseNameThrowsException()
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invalid database name: no configured connection named `badsource`.');
+        $this->expectExceptionMessage('Database connection `badsource` is not a registered connection.
+
+Update configuration or choose one of [`mysource`, `yoursource`]');
 
         $this->generatorConfig->getConfiguredPlatform(null, 'badsource');
     }
@@ -371,7 +371,9 @@ class GeneratorConfigTest extends TestCase
     public function testGetBuildConnectionGivenWrongDatabaseThrowsException()
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invalid database name: no configured connection named `wrongsource`.');
+        $this->expectExceptionMessage('Database connection `wrongsource` is not a registered connection.
+
+Update configuration or choose one of [`mysource`, `yoursource`]');
 
         $actual = $this->generatorConfig->getBuildConnection('wrongsource');
     }
@@ -402,7 +404,9 @@ class GeneratorConfigTest extends TestCase
     public function testGetConnectionWrongDatabaseThrowsException()
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invalid database name: no configured connection named `badsource`.');
+        $this->expectExceptionMessage('Database connection `badsource` is not a registered connection.
+
+Update configuration or choose one of [`mysource`, `yoursource`]');
 
         $actual = $this->generatorConfig->getConnection('badsource');
     }
@@ -415,5 +419,14 @@ class GeneratorConfigTest extends TestCase
         $actual = $this->generatorConfig->getBehaviorLocator();
 
         $this->assertInstanceOf('\\Propel\\Generator\\Util\\BehaviorLocator', $actual);
+    }
+
+    /**
+     * @return void
+     */
+    public function testGetConfigPropertyThrowsException(): void
+    {
+        $this->expectException(\Propel\Common\Config\Exception\InvalidConfigurationException::class);
+        $this->generatorConfig->getConfigProperty('foo.bar', true);
     }
 }

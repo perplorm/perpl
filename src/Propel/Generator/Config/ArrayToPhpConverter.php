@@ -1,12 +1,16 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Config;
+
+use function array_keys;
+use function count;
+use function implode;
+use function is_array;
+use function preg_replace;
+use function var_export;
+use const PHP_EOL;
 
 /**
  * Runtime configuration converter

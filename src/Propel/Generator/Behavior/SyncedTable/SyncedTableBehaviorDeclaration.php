@@ -1,15 +1,17 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Behavior\SyncedTable;
 
 use Propel\Generator\Behavior\SyncedTable\TableSyncer\TableSyncerConfigInterface;
 use Propel\Generator\Behavior\Util\BehaviorWithParameterAccess;
+use function in_array;
+use function is_array;
+use function is_string;
+use function reset;
+use function sprintf;
+use function strtolower;
 
 /**
  * Declares parameter keys and parameter value accessors.
@@ -206,7 +208,7 @@ abstract class SyncedTableBehaviorDeclaration extends BehaviorWithParameterAcces
     #[\Override]
     public function addPkAs(): ?string
     {
-        $val = $this->getParameterTrueOrValue(static::PARAMETER_KEY_ADD_PK, false);
+        $val = $this->getParameterTrueOrValue(static::PARAMETER_KEY_ADD_PK);
 
         return $val === true ? 'id' : $val;
     }

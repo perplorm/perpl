@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Builder\Om\ObjectBuilder\RelationCodeProducer;
 
@@ -14,6 +10,9 @@ use Propel\Generator\Config\GeneratorConfigInterface;
 use Propel\Generator\Model\CrossRelation;
 use Propel\Generator\Model\ForeignKey;
 use Propel\Generator\Model\Table;
+use function implode;
+use function lcfirst;
+use function str_replace;
 
 /**
  * Generates a database loader file, which is used to register all table maps with the DatabaseMap.
@@ -579,6 +578,7 @@ abstract class AbstractManyToManyCodeProducer extends AbstractRelationCodeProduc
      */
     protected function addRemove(string &$script): void
     {
+        $this->referencedClasses->registerFunction('assert');
         $localAttributeName = $this->names->getAttributeWithCollectionName();
         $deletionScheduledAttributeName = $this->names->getAttributeScheduledForDeletionName();
 

@@ -9,9 +9,14 @@
 namespace Propel\Tests;
 
 use PHPUnit\Framework\TestCase as PHPUnitTestCase;
+use Propel\Generator\Builder\Util\SchemaReader;
+use Propel\Generator\Config\QuickGeneratorConfig;
+use Propel\Generator\Model\Database;
 use Propel\Generator\Platform\PlatformInterface;
+use Propel\Generator\Platform\SqlitePlatform;
 use ReflectionClass;
 use ReflectionProperty;
+use function is_object;
 
 class TestCase extends PHPUnitTestCase
 {
@@ -133,13 +138,13 @@ class TestCase extends PHPUnitTestCase
      *
      * @see https://stackoverflow.com/questions/249664/best-practices-to-test-protected-methods-with-phpunit
      *
-     * @param object $obj Instance with protected or private methods
+     * @param class-string|object $obj Instance with protected or private methods
      * @param string $name Name of the protected or private method
      * @param array $args Argumens for method
      *
      * @return mixed Result of method call
      */
-    public function callMethod(object $obj, string $name, array $args = [])
+    public function callMethod(string|object $obj, string $name, array $args = [])
     {
         $class = new ReflectionClass($obj);
         $method = $class->getMethod($name);
@@ -147,7 +152,7 @@ class TestCase extends PHPUnitTestCase
             $method->setAccessible(true); // Use this if you are running PHP older than 8.1.0
         }
 
-        return $method->invokeArgs($obj, $args);
+        return $method->invokeArgs(is_object($obj) ? $obj : null, $args);
     }
 
     /**
@@ -158,7 +163,7 @@ class TestCase extends PHPUnitTestCase
      *
      * @return ReflectionProperty
      */
-    public function getReflectionProperty($obj, string $name): ReflectionProperty
+    protected function getReflectionProperty($obj, string $name): ReflectionProperty
     {
         $reflection = new ReflectionClass($obj);
         $property = $reflection->getProperty($name);
@@ -205,7 +210,7 @@ class TestCase extends PHPUnitTestCase
     {
         // restore instance pool default
         \Propel\Runtime\Propel::enableInstancePooling();
-        
+
         parent::setUpBeforeClass();
 
         //static::printFileNameOnStart();
@@ -219,7 +224,7 @@ class TestCase extends PHPUnitTestCase
     public static function printFileNameOnStart(): void
     {
         $bt = debug_backtrace();
-        foreach($bt as $call) {
+        foreach ($bt as $call) {
             if (!isset($call['object'])) {
                 continue;
             }
@@ -227,5 +232,26 @@ class TestCase extends PHPUnitTestCase
             return;
         }
         var_dump($bt);
+    }
+
+    /**
+     * @param PlatformInterface $platform
+     * @param bool $defaultToNative
+     * @param string $schema
+     * @return Database|null
+     */
+    public function buildDatabaseFromSchema(
+        string $schema,
+        array|null $additionalConfig,
+        PlatformInterface|null $platform,
+    ): Database {
+        $config = new QuickGeneratorConfig($additionalConfig);
+        $platform ??= new SqlitePlatform();
+        $platform->setGeneratorConfig($config);
+        $schemaReader = new SchemaReader($platform);
+        $schemaReader->setGeneratorConfig($config);
+        $schema = $schemaReader->parseString($schema);
+
+        return $schema->getDatabase(); // does final initialization
     }
 }

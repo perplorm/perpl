@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Command;
 
@@ -13,9 +9,6 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-/**
- * @author William Durand <william.durand1@gmail.com>
- */
 class GraphvizGenerateCommand extends AbstractCommand
 {
     /**
@@ -27,7 +20,7 @@ class GraphvizGenerateCommand extends AbstractCommand
      * @inheritDoc
      */
     #[\Override]
-    protected function configure()
+    protected function configure(): void
     {
         parent::configure();
 
@@ -45,17 +38,15 @@ class GraphvizGenerateCommand extends AbstractCommand
     #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $configOptions = [];
-        if ($this->hasInputOption('schema-dir', $input)) {
-            $configOptions['propel']['paths']['schemaDir'] = $input->getOption('schema-dir');
-        }
-        $generatorConfig = $this->getGeneratorConfig($configOptions, $input);
+        $generatorConfig = $this->buildGeneratorConfig([], $input, [
+            'schema-dir' => 'paths.schemaDir',
+        ]);
 
         $this->createDirectory($input->getOption('output-dir'));
 
         $manager = new GraphvizManager();
         $manager->setGeneratorConfig($generatorConfig);
-        $manager->setSchemas($this->getSchemas($generatorConfig->getSection('paths')['schemaDir'], $generatorConfig->getSection('generator')['recursive']));
+        $manager->setSchemas($this->getSchemasFromConfig($generatorConfig));
         $manager->setLoggerClosure(function ($message) use ($input, $output): void {
             if ($input->getOption('verbose')) {
                 $output->writeln($message);

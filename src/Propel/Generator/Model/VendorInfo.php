@@ -1,20 +1,15 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Model;
 
 use Propel\Generator\Exception\SchemaException;
+use function array_merge;
+use function in_array;
 
 /**
  * Object to hold vendor specific information.
- *
- * @author Hans Lellelid <hans@xmpl.org> (Propel)
- * @author Hugo Hamon <webmaster@apprendre-php.com> (Propel)
  */
 class VendorInfo extends MappingModel
 {

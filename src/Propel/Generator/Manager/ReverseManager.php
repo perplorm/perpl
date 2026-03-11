@@ -1,23 +1,28 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Generator\Manager;
 
 use Exception;
+use Propel\Common\Config\Exception\InvalidConfigurationException;
 use Propel\Generator\Exception\BuildException;
 use Propel\Generator\Model\Database;
 use Propel\Generator\Model\IdMethod;
 use Propel\Generator\Schema\Dumper\DumperInterface;
 use Propel\Runtime\Connection\ConnectionInterface;
+use function count;
+use function file_put_contents;
+use function get_class;
+use function implode;
+use function in_array;
+use function is_array;
+use function preg_match;
+use function sprintf;
+use function str_replace;
+use function var_export;
+use const DIRECTORY_SEPARATOR;
 
-/**
- * @author William Durand <william.durand1@gmail.com>
- */
 class ReverseManager extends AbstractManager
 {
     /**
@@ -207,6 +212,8 @@ class ReverseManager extends AbstractManager
     /**
      * Builds the model classes from the database schema.
      *
+     * @throws \Propel\Common\Config\Exception\InvalidConfigurationException
+     *
      * @return \Propel\Generator\Model\Database The built-out Database (with all tables, etc.)
      */
     protected function buildModel(): Database
@@ -214,7 +221,7 @@ class ReverseManager extends AbstractManager
         /** @var \Propel\Generator\Config\GeneratorConfig $config */
         $config = $this->getGeneratorConfig();
         $connection = $this->getConnection();
-        $databaseName = $config->getConfigProperty('reverse.connection');
+        $databaseName = $config->getConfigPropertyString('reverse.connection');
 
         $database = new Database($this->getDatabaseName());
         $database->setPlatform($config->getConfiguredPlatform($connection));
@@ -232,6 +239,9 @@ class ReverseManager extends AbstractManager
         $nbTables = $parser->parse($database);
 
         $excludeTables = $config->getConfigProperty('exclude_tables');
+        if (!is_array($excludeTables)) {
+            throw new InvalidConfigurationException('Configuration item `exclude_tables` is expected to be array or empty, but is ' . var_export($excludeTables, true));
+        }
         $tableNames = [];
 
         foreach ($database->getTables() as $table) {
@@ -276,7 +286,7 @@ class ReverseManager extends AbstractManager
         /** @var \Propel\Generator\Config\GeneratorConfig $generatorConfig */
         $generatorConfig = $this->getGeneratorConfig();
         /** @var string|null $database */
-        $database = $generatorConfig->getConfigProperty('reverse.connection');
+        $database = $generatorConfig->getConfigPropertyString('reverse.connection');
 
         if ($database === null) {
             throw new BuildException('No configured connection. Please add a connection to your configuration file

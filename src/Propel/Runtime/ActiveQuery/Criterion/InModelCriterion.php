@@ -1,14 +1,15 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Runtime\ActiveQuery\Criterion;
 
 use Traversable;
+use function count;
+use function implode;
+use function iterator_to_array;
+use function str_replace;
+use function stripos;
 
 /**
  * Specialized ModelCriterion used for IN or NOT IN model clauses,

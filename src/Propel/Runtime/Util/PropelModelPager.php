@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Runtime\Util;
 
@@ -15,13 +11,18 @@ use Propel\Runtime\Collection\Collection;
 use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Exception\BadMethodCallException;
 use Traversable;
+use function ceil;
+use function count;
+use function floor;
+use function is_array;
+use function max;
+use function method_exists;
+use function min;
+use function sprintf;
 
 /**
  * Implements a pager based on a ModelCriteria
  * The code from this class heavily borrows from symfony's sfPager class
- *
- * @author Fabien Potencier <fabien.potencier@symfony-project.com>
- * @author François Zaninotto
  *
  * @template RowFormat
  *

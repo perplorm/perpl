@@ -1,10 +1,6 @@
 <?php
 
-/**
- * MIT License. This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types = 1);
 
 namespace Propel\Runtime\Connection;
 
@@ -13,6 +9,11 @@ use PDO;
 use PDOStatement;
 use Propel\Runtime\DataFetcher\DataFetcherInterface;
 use Traversable;
+use function func_get_args;
+use function func_num_args;
+use function preg_replace_callback;
+use function sprintf;
+use function var_export;
 
 /**
  * Wraps a Statement class, providing logging.

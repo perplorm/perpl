@@ -9,6 +9,7 @@
 namespace Propel\Tests\Generator\Model;
 
 use Propel\Generator\Exception\EngineException;
+use Propel\Generator\Model\ColumnDefaultValue;
 use Propel\Generator\Model\Domain;
 
 /**
@@ -151,8 +152,8 @@ class DomainTest extends ModelTestCase
     public function provideBooleanValues()
     {
         return [
-            ['BOOLEAN', 1, true],
-            ['BOOLEAN', 0, false],
+            ['BOOLEAN', '1', true],
+            ['BOOLEAN', '0', false],
             ['BOOLEAN', 't', true],
             ['BOOLEAN', 'f', false],
             ['BOOLEAN', 'y', true],
@@ -230,7 +231,7 @@ class DomainTest extends ModelTestCase
         $this->assertSame(2, $newDomain->getScale());
         $this->assertSame('Mapping between FLOAT and DOUBLE', $newDomain->getName());
         $this->assertSame('Some description', $newDomain->getDescription());
-        $this->assertInstanceOf('Propel\Generator\Model\ColumnDefaultValue', $value);
+        $this->assertInstanceOf(ColumnDefaultValue::class, $value);
     }
 
     private function getColumnDefaultValueMock()
