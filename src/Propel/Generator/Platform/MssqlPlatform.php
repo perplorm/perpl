@@ -51,10 +51,10 @@ class MssqlPlatform extends DefaultPlatform
         $this->setSchemaDomainMapping(new Domain(PropelTypes::BLOB, 'VARBINARY(MAX)'));
         $this->setSchemaDomainMapping(new Domain(PropelTypes::OBJECT, 'VARBINARY(MAX)'));
         $this->setSchemaDomainMapping(new Domain(PropelTypes::PHP_ARRAY, 'VARCHAR(MAX)'));
-        $this->setSchemaDomainMapping(new Domain(PropelTypes::ENUM, 'TINYINT'));
-        $this->setSchemaDomainMapping(new Domain(PropelTypes::SET, 'INT'));
         $this->setSchemaDomainMapping(new Domain(PropelTypes::UUID, 'UNIQUEIDENTIFIER'));
         $this->setSchemaDomainMapping(new Domain(PropelTypes::UUID_BINARY, 'BINARY(16)'));
+
+        $this->setSetTypesMapping(false);
     }
 
     /**

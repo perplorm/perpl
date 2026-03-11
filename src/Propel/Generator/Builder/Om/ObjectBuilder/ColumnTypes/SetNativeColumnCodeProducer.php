@@ -4,20 +4,19 @@ declare(strict_types = 1);
 
 namespace Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes;
 
-use Propel\Common\Exception\SetColumnConverterException;
-use Propel\Common\Util\SetColumnConverter;
+use function str_contains;
 
-class SetColumnCodeProducer extends AbstractArrayColumnCodeProducer
+class SetNativeColumnCodeProducer extends AbstractArrayColumnCodeProducer
 {
     /**
-     * @param string $script The script will be modified in this method.
+     * @param string $script
      *
      * @return void
      */
     #[\Override]
     public function addColumnAttributes(string &$script): void
     {
-        $this->addDefaultColumnAttribute($script, 'int');
+        $this->addDefaultColumnAttribute($script, 'string');
         $this->addColumnAttributeConvertedDeclaration($script);
     }
 
@@ -37,16 +36,23 @@ class SetColumnCodeProducer extends AbstractArrayColumnCodeProducer
     }
 
     /**
+     * Build statement used in Model::applyDefaultValues()
+     *
      * @return string
      */
     #[\Override]
-    public function getDefaultValueString(): string
+    public function getApplyDefaultValueStatement(): string
     {
-        $defaultValue = $this->column->getPhpDefaultValue();
+        $defaultValue = $this->getDefaultValueString();
+        $statement = parent::getApplyDefaultValueStatement();
+        if (!str_contains($defaultValue, ',')) {
+            return $statement;
+        }
+        // MySQL does not support multiple default values, write values as regular modification
+        $columnIdentifier = $this->objectBuilder->getColumnConstant($this->column);
 
-        return $defaultValue === null
-            ? 'null'
-            : (string)SetColumnConverter::convertToInt($defaultValue, $this->column->getValueSet());
+        return "$statement
+        \$this->modifiedColumns[$columnIdentifier] = true;";
     }
 
     /**
@@ -63,8 +69,6 @@ class SetColumnCodeProducer extends AbstractArrayColumnCodeProducer
     }
 
     /**
-     * Add the comment for a SET column accessor method.
-     *
      * @param string $script
      * @param string $additionalParam injected from outer class (lazy load)
      *
@@ -79,15 +83,11 @@ class SetColumnCodeProducer extends AbstractArrayColumnCodeProducer
     /**
      * Get the [$clo] column value.{$this->getColumnDescriptionDoc()}{$additionalParam}
      *
-     * @throws \\Propel\\Runtime\\Exception\\PropelException
-     *
      * @return array|null
      */";
     }
 
     /**
-     * Adds the function body for a SET column accessor method.
-     *
      * @param string $script
      *
      * @return void
@@ -95,28 +95,15 @@ class SetColumnCodeProducer extends AbstractArrayColumnCodeProducer
     #[\Override]
     protected function addAccessorBody(string &$script): void
     {
-        $this->declareClasses(
-            'Propel\Common\Util\SetColumnConverter',
-            'Propel\Common\Exception\SetColumnConverterException',
-        );
-
         $clo = $this->column->getLowercasedName();
         $cloConverted = $clo . '_converted';
-
-        $tableMapClassName = $this->getTableMapClassName();
-        $columnConstantExpression = $this->objectBuilder->getColumnConstant($this->column);
 
         $script .= "
         if (\$this->$cloConverted === null) {
             \$this->$cloConverted = [];
         }
         if (!\$this->$cloConverted && \$this->$clo !== null) {
-            \$valueSet = {$tableMapClassName}::getValueSet($columnConstantExpression);
-            try {
-                \$this->$cloConverted = SetColumnConverter::convertIntToArray(\$this->$clo, \$valueSet);
-            } catch (SetColumnConverterException \$e) {
-                throw new PropelException('Unknown stored set key: ' . \$e->getValue(), \$e->getCode(), \$e);
-            }
+            \$this->$cloConverted = explode(',', \$this->$clo);
         }
 
         return \$this->$cloConverted;";
@@ -137,8 +124,6 @@ class SetColumnCodeProducer extends AbstractArrayColumnCodeProducer
     }
 
     /**
-     * Adds the comment for a SET column mutator.
-     *
      * @param string $script
      *
      * @return void
@@ -163,39 +148,51 @@ class SetColumnCodeProducer extends AbstractArrayColumnCodeProducer
     }
 
     /**
-     * Adds a setter for SET column mutator.
-     *
      * @see parent::addColumnMutators()
      *
-     * @param string $script The script will be modified in this method.
+     * @param string $script
      *
      * @return void
      */
     #[\Override]
     protected function addMutatorBody(string &$script): void
     {
-        $this->declareClasses(
-            SetColumnConverter::class,
-            SetColumnConverterException::class,
-        );
-        $this->declareGlobalFunction('array_diff', 'count', 'sprintf');
-
         $col = $this->column;
         $clo = $col->getLowercasedName();
         $cloConverted = $clo . '_converted';
+        $columnConstant = $this->objectBuilder->getColumnConstant($col);
+        $tableMapClassName = $this->getTableMapClassName();
+        $this->declareClass('\Propel\Common\Util\SetColumnConverter');
+
         $script .= "
-        if (\$this->$cloConverted === null || count(array_diff(\$this->$cloConverted, \$v)) > 0 || count(array_diff(\$v, \$this->$cloConverted)) > 0) {
-            \$valueSet = " . $this->getTableMapClassName() . '::getValueSet(' . $this->objectBuilder->getColumnConstant($col) . ");
-            try {
-                \$v = SetColumnConverter::convertToInt(\$v, \$valueSet);
-            } catch (SetColumnConverterException \$e) {
-                throw new PropelException(sprintf('Value \"%s\" is not accepted in this set column', \$e->getValue()), \$e->getCode(), \$e);
-            }
+        if (\$this->$cloConverted === null || array_diff(\$this->$cloConverted, \$v) || array_diff(\$v, \$this->$cloConverted)) {
+            \$v = array_map('trim', \$v);
+            \$valueSet = {$tableMapClassName}::getValueSet($columnConstant);
+            SetColumnConverter::requireValuesInSet(\$v, \$valueSet);
+            
             if (\$this->$clo !== \$v) {
                 \$this->$cloConverted = null;
-                \$this->$clo = \$v;
-                \$this->modifiedColumns[" . $this->objectBuilder->getColumnConstant($col) . "] = true;
+                \$orderedValues = SetColumnConverter::getItemsInOrder(\$v, \$valueSet);
+                \$this->$clo = !\$orderedValues ? null : implode(',', \$orderedValues);
+                \$this->modifiedColumns[$columnConstant] = true;
             }
         }\n";
+    }
+
+    /**
+     * @see \Propel\Generator\Builder\Om\ObjectBuilder::addCreateFromFilter()
+     *
+     * @param string $valueExpression The variable expression holding the value (i.e. '$value')
+     *
+     * @return string
+     */
+    #[\Override]
+    public function buildCreateFromFilterValueExpression(string $valueExpression): string
+    {
+        $this->declareClasses('Propel\Common\Util\SetColumnConverter');
+        $tableMapClassName = $this->getTableMapClassName();
+        $columnConstant = $this->objectBuilder->getColumnConstant($this->column);
+
+        return "SetColumnConverter::rawInputToSetItems($valueExpression, $tableMapClassName::getValueSet($columnConstant))";
     }
 }

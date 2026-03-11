@@ -62,12 +62,12 @@ class PgsqlPlatform extends DefaultPlatform
         $this->setSchemaDomainMapping(new Domain(PropelTypes::CLOB, 'TEXT'));
         $this->setSchemaDomainMapping(new Domain(PropelTypes::OBJECT, 'BYTEA'));
         $this->setSchemaDomainMapping(new Domain(PropelTypes::PHP_ARRAY, 'TEXT'));
-        $this->setSchemaDomainMapping(new Domain(PropelTypes::ENUM, 'INT2'));
-        $this->setSchemaDomainMapping(new Domain(PropelTypes::SET, 'INT4'));
         $this->setSchemaDomainMapping(new Domain(PropelTypes::DECIMAL, 'NUMERIC'));
         $this->setSchemaDomainMapping(new Domain(PropelTypes::DATETIME, 'TIMESTAMP'));
         $this->setSchemaDomainMapping(new Domain(PropelTypes::UUID, 'uuid'));
         $this->setSchemaDomainMapping(new Domain(PropelTypes::UUID_BINARY, 'BYTEA'));
+
+        $this->setSetTypesMapping(false);
     }
 
     /**

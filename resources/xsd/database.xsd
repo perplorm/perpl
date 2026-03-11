@@ -473,6 +473,13 @@
                 </xs:documentation>
             </xs:annotation>
         </xs:attribute>
+        <xs:attribute name="valueEnum" type="xs:string" use="optional">
+            <xs:annotation>
+                <xs:documentation xml:lang="en">
+                    Reference to PHP enum class used to generate the list of values for an ENUM or SET column.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
     </xs:complexType>
 
     <xs:complexType name="foreign-key">

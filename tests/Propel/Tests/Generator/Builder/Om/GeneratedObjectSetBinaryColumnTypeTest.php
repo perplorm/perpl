@@ -22,7 +22,7 @@ use PublicComplexColumnTypeEntitySet;
  *
  * @author Francois Zaninotto, Moritz Schröder
  */
-class GeneratedObjectSetColumnTypeTest extends TestCase
+class GeneratedObjectSetBinaryColumnTypeTest extends TestCase
 {
     /**
      * @return void
@@ -34,10 +34,10 @@ class GeneratedObjectSetColumnTypeTest extends TestCase
 <database name="generated_object_complex_type_test_set" namespace="MyNameSpace">
     <table name="complex_column_type_entity_set">
         <column name="id" primaryKey="true" type="INTEGER" autoIncrement="true"/>
-        <column name="tags" type="SET" valueSet="foo, bar, baz, 1, 4,(, foo bar "/>
-        <column name="bar" type="SET" valueSet="foo, bar"/>
-        <column name="defaults" type="SET" valueSet="foo, bar, foo baz" defaultValue="bar"/>
-        <column name="bears" type="SET" valueSet="foo, bar, baz, kevin" defaultValue="bar, baz"/>
+        <column name="tags" type="SET_BINARY" valueSet="foo, bar, baz, 1, 4,(, foo bar "/>
+        <column name="bar" type="SET_BINARY" valueSet="foo, bar"/>
+        <column name="defaults" type="SET_BINARY" valueSet="foo, bar, foo baz" defaultValue="bar"/>
+        <column name="bears" type="SET_BINARY" valueSet="foo, bar, baz, kevin" defaultValue="bar, baz"/>
 
     </table>
 </database>

@@ -30,6 +30,7 @@ use function in_array;
 use function is_string;
 use function preg_replace;
 use function sprintf;
+use function str_contains;
 use function str_replace;
 use function strlen;
 use function strpos;
@@ -62,6 +63,11 @@ class DefaultPlatform implements PlatformInterface
      * @var bool
      */
     protected $identifierQuoting = true;
+
+    /**
+     * @var bool
+     */
+    protected bool $defaultToNativeEnumeratedColumnTypes = false;
 
     /**
      * @param \Propel\Runtime\Connection\ConnectionInterface|null $con Optional database connection to use in this platform.
@@ -141,6 +147,10 @@ class DefaultPlatform implements PlatformInterface
     #[\Override]
     public function setGeneratorConfig(GeneratorConfigInterface $generatorConfig): void
     {
+        $this->defaultToNativeEnumeratedColumnTypes = (bool)($generatorConfig->getConfigProperty('generator.defaultToNativeEnumeratedColumnTypes') ?? false);
+        if ($this->defaultToNativeEnumeratedColumnTypes) {
+            $this->initializeTypeMap();
+        }
     }
 
     /**
@@ -168,6 +178,39 @@ class DefaultPlatform implements PlatformInterface
 
         // Boolean is a bit special, since typically it must be mapped to INT type.
         $this->schemaDomainMap[PropelTypes::BOOLEAN] = new Domain(PropelTypes::BOOLEAN, 'INTEGER');
+
+        // Default aliases for enumerated types
+        $this->schemaDomainMap[PropelTypes::ENUM] = $this->schemaDomainMap[PropelTypes::ENUM_BINARY];
+        $this->schemaDomainMap[PropelTypes::SET] = $this->schemaDomainMap[PropelTypes::SET_BINARY];
+    }
+
+    /**
+     * @param bool $hasNativeType
+     * @param \Propel\Generator\Model\Domain|null $binarySetDomain
+     * @param \Propel\Generator\Model\Domain|null $binaryEnumDomain
+     *
+     * @return void
+     */
+    protected function setSetTypesMapping(bool $hasNativeType, Domain|null $binarySetDomain = null, Domain|null $binaryEnumDomain = null): void
+    {
+        $binarySetDomain = ($binarySetDomain ?? $this->schemaDomainMap[PropelTypes::INTEGER])->cloneAs(PropelTypes::SET_BINARY);
+        $this->setSchemaDomainMapping($binarySetDomain);
+
+        $binaryEnumDomain = ($binaryEnumDomain ?? $this->schemaDomainMap[PropelTypes::TINYINT])->cloneAs(PropelTypes::ENUM_BINARY);
+        $this->setSchemaDomainMapping($binaryEnumDomain);
+
+        if ($hasNativeType) {
+            $this->setSchemaDomainMapping(new Domain(PropelTypes::SET_NATIVE, 'VARCHAR'));
+            $this->setSchemaDomainMapping(new Domain(PropelTypes::ENUM_NATIVE, 'VARCHAR'));
+        } else {
+            $this->schemaDomainMap[PropelTypes::ENUM_NATIVE] = $this->schemaDomainMap[PropelTypes::ENUM_BINARY];
+            $this->schemaDomainMap[PropelTypes::SET_NATIVE] = $this->schemaDomainMap[PropelTypes::SET_BINARY];
+        }
+
+        // aliases
+        $useNative = $this->defaultToNativeEnumeratedColumnTypes;
+        $this->schemaDomainMap[PropelTypes::ENUM] = $this->schemaDomainMap[$useNative ? PropelTypes::ENUM_NATIVE : PropelTypes::ENUM_BINARY];
+        $this->schemaDomainMap[PropelTypes::SET] = $this->schemaDomainMap[$useNative ? PropelTypes::SET_NATIVE : PropelTypes::SET_BINARY];
     }
 
     /**
@@ -472,40 +515,39 @@ DROP TABLE IF EXISTS " . $this->quoteIdentifier($table->getName()) . ";
     #[\Override]
     public function getColumnDefaultValueDDL(Column $col): string
     {
-        $default = '';
-        $defaultValue = $col->getDefaultValue();
-        if ($defaultValue !== null) {
-            $default .= 'DEFAULT ';
-            if ($defaultValue->isExpression()) {
-                $default .= $defaultValue->getValue();
-            } else {
-                if ($col->isTextType()) {
-                    $default .= $this->quote((string)$defaultValue->getValue());
-                } elseif (in_array($col->getType(), [PropelTypes::BOOLEAN, PropelTypes::BOOLEAN_EMU], true)) {
-                    $default .= $this->getBooleanString($defaultValue->getValue());
-                } elseif ($col->getType() == PropelTypes::ENUM) {
-                    $default .= array_search($defaultValue->getValue(), $col->getValueSet());
-                } elseif ($col->isSetType()) {
-                    $val = trim((string)$defaultValue->getValue());
-                    $values = [];
-                    foreach (explode(',', $val) as $v) {
-                        $values[] = trim($v);
-                    }
-                    $default .= SetColumnConverter::convertToInt($values, $col->getValueSet());
-                } elseif ($col->isPhpArrayType()) {
-                    $value = $this->getPhpArrayString((string)$defaultValue->getValue());
-                    if ($value === null) {
-                        $default = '';
-                    } else {
-                        $default .= $value;
-                    }
-                } else {
-                    $default .= $defaultValue->getValue();
-                }
+        $defaultValueObject = $col->getDefaultValue();
+        if ($defaultValueObject === null) {
+            return '';
+        }
+
+        $value = $defaultValueObject->getValue();
+        if ($defaultValueObject->isExpression()) {
+            return "DEFAULT $value";
+        }
+
+        if ($col->isTextType()) {
+            $value = $this->quote((string)$value);
+        } elseif (in_array($col->getType(), [PropelTypes::BOOLEAN, PropelTypes::BOOLEAN_EMU], true)) {
+            $value = $this->getBooleanString($value);
+        } elseif ($col->isBinaryEnumType()) {
+            $value = array_search($value, $col->getValueSet());
+        } elseif ($col->isBinarySetType()) {
+            $items = SetColumnConverter::itemsCsvToArray($value);
+            $value = SetColumnConverter::convertToBitmask($items, $col->getValueSet());
+        } elseif ($col->getType() === PropelTypes::SET_NATIVE) {
+            if (str_contains($value, ',')) {
+                return ''; // MySQL does not allow multiple values as default
+            }
+            $value = $this->quote((string)$value);
+        } elseif ($col->isPhpArrayType()) {
+            $value = $this->getPhpArrayString((string)$value);
+
+            if ($value === null) {
+                return '';
             }
         }
 
-        return $default;
+        return "DEFAULT $value";
     }
 
     /**
@@ -1637,5 +1679,29 @@ if (is_resource($columnValueAccessor)) {
                 }
             }
         }
+    }
+
+    /**
+     * @param \Propel\Generator\Model\Column $column
+     *
+     * @throws \Propel\Generator\Exception\EngineException
+     *
+     * @return string
+     */
+    #[\Override]
+    public function buildNativeEnumeratedColumnSqlType(Column $column): string
+    {
+        if (!in_array($column->getType(), [PropelTypes::ENUM_NATIVE, PropelTypes::SET_NATIVE])) {
+            throw new EngineException("Only native ENUM or SET type columns can be turned to sql type, but column '{$column->getConstantName()}' is {$column->getType()}");
+        }
+
+        if (!$column->getValueSet()) {
+            throw new EngineException("No values provided for enumerated column '{$column->getConstantName()}'");
+        }
+
+        $typeLiteral = $column->getType() === PropelTypes::ENUM_NATIVE ? 'ENUM' : 'SET';
+        $valuesCsv = "'" . implode("','", $column->getValueSet()) . "'";
+
+        return "$typeLiteral($valuesCsv)";
     }
 }

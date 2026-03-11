@@ -732,27 +732,13 @@ abstract class {$this->getUnqualifiedClassName()}$parentClass implements ActiveR
      */
     protected function addApplyDefaultValuesBody(string &$script): void
     {
-        $table = $this->getTable();
-        // FIXME - Apply support for PHP default expressions here
-        // see: http://propel.phpdb.org/trac/ticket/378
-
-        foreach ($table->getColumns() as $column) {
-            $def = $column->getDefaultValue();
-            if ($def === null || $def->isExpression()) {
+        foreach ($this->columnCodeProducers as $columnCodeProducer) {
+            $isValueType = $columnCodeProducer->getColumn()->getDefaultValue()?->isValueType();
+            if (!$isValueType) {
                 continue;
             }
 
-            $clo = $column->getLowercasedName();
-            $defaultValue = ColumnCodeProducerFactory::create($column, $this)->getDefaultValueString();
-            if ($column->isTemporalType()) {
-                $dateTimeClass = $this->resolveColumnDateTimeClass($column);
-                $defaultValue = "PropelDateTime::newInstance($defaultValue, null, '$dateTimeClass')";
-            } elseif ($column->isPhpObjectType()) {
-                $assumedClassName = $this->declareClass($column->getPhpType());
-                $defaultValue = "new $assumedClassName($defaultValue )";
-            }
-            $script .= "
-        \$this->{$clo} = $defaultValue;";
+            $script .= $columnCodeProducer->getApplyDefaultValueStatement();
         }
     }
 
@@ -1027,7 +1013,7 @@ abstract class {$this->getUnqualifiedClassName()}$parentClass implements ActiveR
                 $script .= "
             \$this->$clo = \$columnValue;
             \$this->$cloUnserialized = null;";
-            } elseif ($col->isSetType()) {
+            } elseif ($col->isBinarySetType()) {
                 $cloConverted = $clo . '_converted';
                 $script .= "
             \$this->$clo = \$columnValue;
@@ -3112,7 +3098,7 @@ $indent};";
                 $script .= "
         \$this->$cloUnserialized = null;";
             }
-            if ($col->isSetType()) {
+            if ($col->isBinarySetType()) {
                 $cloConverted = $clo . '_converted';
 
                 $script .= "
@@ -3307,24 +3293,11 @@ $indent};";
             \$value = \$filter->getValue();
 
             match (\$columnIdentifier) {";
-        foreach ($this->getTable()->getColumns() as $col) {
-            $columnName = $col->getFullyQualifiedName(true);
-            $cfc = $col->getPhpName();
-            $valueExpression = '$value';
-
-            if ($col->getType() === PropelTypes::PHP_ARRAY) {
-                $this->declareGlobalFunction('is_array');
-                $valueExpression = "is_array($valueExpression) ? $valueExpression : static::unserializeArray($valueExpression)";
-            } elseif ($col->getType() === PropelTypes::ENUM) {
-                $tableMapClassName = $this->getTableMapClassName();
-                $columnConstant = $this->getColumnConstant($col);
-                $valueExpression = "$tableMapClassName::getValueSet($columnConstant)[$valueExpression] ?? $valueExpression";
-            } elseif ($col->isSetType()) {
-                $this->declareClasses('Propel\Common\Util\SetColumnConverter');
-                $tableMapClassName = $this->getTableMapClassName();
-                $columnConstant = $this->getColumnConstant($col);
-                $valueExpression = "SetColumnConverter::convertIntToArray($valueExpression, $tableMapClassName::getValueSet($columnConstant))";
-            }
+        foreach ($this->columnCodeProducers as $columnCodeProducer) {
+            $column = $columnCodeProducer->getColumn();
+            $columnName = $column->getFullyQualifiedName(true);
+            $cfc = $column->getPhpName();
+            $valueExpression = $columnCodeProducer->buildCreateFromFilterValueExpression('$value');
 
             $script .= "
                 '$columnName' => {$objectVar}->set$cfc($valueExpression),";

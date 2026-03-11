@@ -20,7 +20,7 @@ use Propel\Tests\TestCase;
  *
  * @author Francois Zaninotto
  */
-class GeneratedQueryEnumColumnTypeTest extends TestCase
+class GeneratedQueryEnumBinaryColumnTypeTest extends TestCase
 {
     /**
      * @return void
@@ -32,8 +32,8 @@ class GeneratedQueryEnumColumnTypeTest extends TestCase
 <database name="generated_object_complex_type_test_13">
     <table name="complex_column_type_entity_13">
         <column name="id" primaryKey="true" type="INTEGER" autoIncrement="true"/>
-        <column name="bar" type="ENUM" valueSet="foo, bar, baz, 1, 4,(, foo bar "/>
-        <column name="bar2" type="ENUM" valueSet="foo, bar" defaultValue="bar"/>
+        <column name="bar" type="ENUM_BINARY" valueSet="foo, bar, baz, 1, 4,(, foo bar "/>
+        <column name="bar2" type="ENUM_BINARY" valueSet="foo, bar" defaultValue="bar"/>
     </table>
 </database>
 EOF;

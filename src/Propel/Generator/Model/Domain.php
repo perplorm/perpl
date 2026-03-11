@@ -339,7 +339,7 @@ class Domain extends MappingModel
         if ($this->mappingType === PropelTypes::PHP_ARRAY) {
             return $this->getDefaultValueForArray((string)$this->defaultValue->getValue());
         }
-        if ($this->mappingType === PropelTypes::SET) {
+        if ($this->mappingType === PropelTypes::SET_BINARY) {
             return $this->getDefaultValueForSet((string)$this->defaultValue->getValue());
         }
 
@@ -448,6 +448,19 @@ class Domain extends MappingModel
         if ($this->defaultValue) {
             $this->defaultValue = clone $this->defaultValue;
         }
+    }
+
+    /**
+     * @param string $type
+     *
+     * @return static
+     */
+    public function cloneAs(string $type): static
+    {
+        $clonedDomain = clone $this;
+        $clonedDomain->setType($type);
+
+        return $clonedDomain;
     }
 
     /**

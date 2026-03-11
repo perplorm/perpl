@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace Propel\Generator\Model;
 
+use Propel\Common\Util\SetColumnConverter;
 use function array_change_key_case;
 use function explode;
 use function implode;
@@ -152,18 +153,7 @@ abstract class MappingModel implements MappingModelInterface
      */
     protected function getDefaultValueForSet(string $stringValue): ?array
     {
-        $stringValue = trim($stringValue);
-
-        if (!$stringValue) {
-            return null;
-        }
-
-        $values = [];
-        foreach (explode(',', $stringValue) as $v) {
-            $values[] = trim($v);
-        }
-
-        return $values;
+        return SetColumnConverter::itemsCsvToArray($stringValue) ?: null;
     }
 
     /**

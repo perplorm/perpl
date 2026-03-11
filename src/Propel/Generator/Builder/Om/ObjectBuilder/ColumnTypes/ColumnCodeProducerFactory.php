@@ -25,8 +25,9 @@ class ColumnCodeProducerFactory
                 PropelTypes::OBJECT => new ObjectColumnCodeProducer($column, $builder),
                 PropelTypes::PHP_ARRAY => new ArrayColumnCodeProducer($column, $builder),
                 PropelTypes::JSON => new JsonColumnCodeProducer($column, $builder),
-                PropelTypes::ENUM => new EnumColumnCodeProducer($column, $builder),
-                PropelTypes::SET => new SetColumnCodeProducer($column, $builder),
+                PropelTypes::ENUM_BINARY => new EnumBinaryColumnCodeProducer($column, $builder),
+                PropelTypes::SET_BINARY => new SetBinaryColumnCodeProducer($column, $builder),
+                PropelTypes::SET_NATIVE => new SetNativeColumnCodeProducer($column, $builder),
                 PropelTypes::BOOLEAN, PropelTypes::BOOLEAN_EMU => new BoolColumnCodeProducer($column, $builder),
                 default => new ColumnCodeProducer($column, $builder),
             };

@@ -9,7 +9,7 @@ use function array_search;
 use function in_array;
 use function sprintf;
 
-class EnumColumnCodeProducer extends ColumnCodeProducer
+class EnumBinaryColumnCodeProducer extends ColumnCodeProducer
 {
     /**
      * @throws \Propel\Generator\Exception\EngineException
@@ -33,8 +33,6 @@ class EnumColumnCodeProducer extends ColumnCodeProducer
     }
 
     /**
-     * Add the comment for an enum accessor method.
-     *
      * @param string $script
      * @param string $additionalParam
      *
@@ -56,8 +54,6 @@ class EnumColumnCodeProducer extends ColumnCodeProducer
     }
 
     /**
-     * Adds the function body for an enum accessor method.
-     *
      * @param string $script
      *
      * @return void
@@ -80,8 +76,6 @@ class EnumColumnCodeProducer extends ColumnCodeProducer
     }
 
     /**
-     * Adds the comment for an enum mutator.
-     *
      * @param string $script
      *
      * @return void
@@ -105,11 +99,9 @@ class EnumColumnCodeProducer extends ColumnCodeProducer
     }
 
     /**
-     * Adds a setter for Enum columns.
-     *
      * @see parent::addColumnMutators()
      *
-     * @param string $script The script will be modified in this method.
+     * @param string $script
      *
      * @return void
      */
@@ -119,10 +111,11 @@ class EnumColumnCodeProducer extends ColumnCodeProducer
         $this->declareGlobalFunction('array_search', 'is_int');
         $col = $this->column;
         $clo = $col->getLowercasedName();
+        $columnConstant = $this->objectBuilder->getColumnConstant($col);
 
         $script .= "
         if (\$v !== null) {
-            \$valueSet = " . $this->getTableMapClassName() . '::getValueSet(' . $this->objectBuilder->getColumnConstant($col) . ");
+            \$valueSet = " . $this->getTableMapClassName() . "::getValueSet($columnConstant);
             \$keyId = array_search(\$v, \$valueSet);
             if (!is_int(\$keyId)) {
                 throw new PropelException(\"Value '\$v' is not accepted in this enumerated column\");
@@ -132,7 +125,23 @@ class EnumColumnCodeProducer extends ColumnCodeProducer
 
         if (\$this->$clo !== \$v) {
             \$this->$clo = \$v;
-            \$this->modifiedColumns[" . $this->objectBuilder->getColumnConstant($col) . "] = true;
+            \$this->modifiedColumns[$columnConstant] = true;
         }\n";
+    }
+
+    /**
+     * @see \Propel\Generator\Builder\Om\ObjectBuilder::addCreateFromFilter()
+     *
+     * @param string $valueExpression The variable expression holding the value (i.e. '$value')
+     *
+     * @return string
+     */
+    #[\Override]
+    public function buildCreateFromFilterValueExpression(string $valueExpression): string
+    {
+        $tableMapClassName = $this->getTableMapClassName();
+        $columnConstant = $this->objectBuilder->getColumnConstant($this->column);
+
+        return "$tableMapClassName::getValueSet($columnConstant)[$valueExpression] ?? $valueExpression";
     }
 }

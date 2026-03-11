@@ -348,4 +348,15 @@ interface PlatformInterface
      * @return string Quoted identifier.
      */
     public function quoteIdentifier(string $text): string;
+
+    /**
+     * Build ENUM or SET SQL declaration, i.e. "SET('foo', 'bar')"
+     *
+     * @param \Propel\Generator\Model\Column $column
+     *
+     * @throws \Propel\Generator\Exception\EngineException
+     *
+     * @return string
+     */
+    public function buildNativeEnumeratedColumnSqlType(Column $column): string;
 }

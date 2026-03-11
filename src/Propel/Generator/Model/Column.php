@@ -6,11 +6,10 @@ namespace Propel\Generator\Model;
 
 use Exception;
 use LogicException;
+use Propel\Common\Util\SetColumnConverter;
 use Propel\Generator\Exception\EngineException;
 use Propel\Generator\Platform\PlatformInterface;
-use function array_map;
 use function count;
-use function explode;
 use function in_array;
 use function is_string;
 use function lcfirst;
@@ -346,8 +345,20 @@ class Column extends MappingModel
             $this->isAutoIncrement = $this->booleanValue($this->getAttribute('autoIncrement'));
             $this->isLazyLoad = $this->booleanValue($this->getAttribute('lazyLoad'));
 
+            if ($this->getAttribute('valueSet')) {
+                $this->setValueSet($this->getAttribute('valueSet'));
+            } elseif ($this->getAttribute('valueEnum')) {
+                $valueEnumClass = $this->getAttribute('valueEnum');
+                $valueSet = SetColumnConverter::getItemsFromEnum($valueEnumClass);
+                $this->setValueSet($valueSet);
+            }
+
             // Add type, size information to associated Domain object
-            $domain->replaceSqlType($this->getAttribute('sqlType'));
+            if ($this->getAttribute('sqlType')) {
+                $domain->replaceSqlType($this->getAttribute('sqlType'));
+            } elseif ($this->getPlatform() && in_array($this->getType(), [PropelTypes::SET_NATIVE, PropelTypes::ENUM_NATIVE], true)) {
+                $domain->replaceSqlType($this->getPlatform()->buildNativeEnumeratedColumnSqlType($this));
+            }
 
             if (
                 !$this->getAttribute('size')
@@ -373,10 +384,6 @@ class Column extends MappingModel
                 $domain->createDefaultValue($defaultValue, $key === 'defaultExpr');
 
                 break;
-            }
-
-            if ($this->getAttribute('valueSet')) {
-                $this->setValueSet($this->getAttribute('valueSet'));
             }
 
             $this->inheritanceType = $this->getAttribute('inheritance');
@@ -1233,11 +1240,12 @@ class Column extends MappingModel
      */
     public function setType(string $mappingType): void
     {
+        // $mappingType = $this->getPlatform()->getDomainForType($mappingType)->getType();
+
         $this->getDomain()->setType($mappingType);
 
-        if (in_array($mappingType, [PropelTypes::VARBINARY, PropelTypes::LONGVARBINARY, PropelTypes::BLOB], true)) {
-            $this->needsTransactionInPostgres = true;
-        }
+        $pgRequiresTransactionTypes = [PropelTypes::VARBINARY, PropelTypes::LONGVARBINARY, PropelTypes::BLOB];
+        $this->needsTransactionInPostgres = in_array($mappingType, $pgRequiresTransactionTypes, true);
     }
 
     /**
@@ -1375,33 +1383,58 @@ class Column extends MappingModel
     }
 
     /**
-     * Returns whether this column is an ENUM or SET column.
+     * Returns whether this column uses the valueSet attribute (enums and sets).
      *
      * @return bool
      */
     public function isValueSetType(): bool
     {
-        return ($this->isEnumType() || $this->isSetType());
+        return in_array($this->getType(), [
+            PropelTypes::ENUM_BINARY,
+            PropelTypes::ENUM_NATIVE,
+            PropelTypes::SET_BINARY,
+            PropelTypes::SET_NATIVE,
+        ], true);
     }
 
     /**
-     * Returns whether this column is an ENUM column.
+     * @deprecated Use {@see static::isBinaryEnumType}
      *
      * @return bool
      */
     public function isEnumType(): bool
     {
-        return $this->getType() === PropelTypes::ENUM;
+        return $this->isBinaryEnumType();
     }
 
     /**
-     * Returns whether this column is a SET column.
+     * @deprecated Use {@see static::isBinaryEnumType}
      *
      * @return bool
      */
     public function isSetType(): bool
     {
-        return $this->getType() === PropelTypes::SET;
+        return $this->isBinarySetType();
+    }
+
+    /**
+     * Returns whether this column is an ENUM_BINARY column.
+     *
+     * @return bool
+     */
+    public function isBinaryEnumType(): bool
+    {
+        return $this->getType() === PropelTypes::ENUM_BINARY;
+    }
+
+    /**
+     * Returns whether this column is a SET_BINARY column.
+     *
+     * @return bool
+     */
+    public function isBinarySetType(): bool
+    {
+        return $this->getType() === PropelTypes::SET_BINARY;
     }
 
     /**
@@ -1413,12 +1446,9 @@ class Column extends MappingModel
      */
     public function setValueSet($valueSet): void
     {
-        if (is_string($valueSet)) {
-            $valueSet = explode(',', $valueSet);
-            $valueSet = array_map('trim', $valueSet);
-        }
-
-        $this->valueSet = $valueSet;
+        $this->valueSet = is_string($valueSet)
+            ? SetColumnConverter::itemsCsvToArray($valueSet)
+            : $valueSet;
     }
 
     /**
@@ -1504,7 +1534,7 @@ class Column extends MappingModel
      */
     public function hasDefaultValue(): bool
     {
-        return (bool)$this->getDefaultValue()?->isValue();
+        return (bool)$this->getDefaultValue()?->isValueType();
     }
 
     /**

@@ -59,10 +59,10 @@ class OraclePlatform extends DefaultPlatform
         $this->setSchemaDomainMapping(new Domain(PropelTypes::LONGVARBINARY, 'LONG RAW'));
         $this->setSchemaDomainMapping(new Domain(PropelTypes::OBJECT, 'LONG RAW'));
         $this->setSchemaDomainMapping(new Domain(PropelTypes::PHP_ARRAY, 'NVARCHAR2', 2000));
-        $this->setSchemaDomainMapping(new Domain(PropelTypes::ENUM, 'NUMBER', 3, 0));
-        $this->setSchemaDomainMapping(new Domain(PropelTypes::SET, 'NUMBER'));
         $this->setSchemaDomainMapping(new Domain(PropelTypes::UUID, 'UUID'));
         $this->setSchemaDomainMapping(new Domain(PropelTypes::UUID_BINARY, 'RAW(16)'));
+
+        $this->setSetTypesMapping(false);
     }
 
     /**
