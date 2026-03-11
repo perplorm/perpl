@@ -108,15 +108,13 @@ class RelationFromOneCodeProducer extends AbstractIncomingRelationCode
         $script .= "
     /**
      * Gets a single $modelClassName object, which is related to this object by a one-to-one relationship.
-     *
-     * @param \Propel\Runtime\Connection\ConnectionInterface|null \$con optional connection object
-     *
+     *{$this->putConDoc(true)}
      * @return $modelClassNameFq|null
      */
-    public function get{$relationIdentifier}(?ConnectionInterface \$con = null)
+    public function get{$relationIdentifier}({$this->putConParam()})
     {
         if (\$this->$varName === null && !\$this->isNew()) {
-            \$this->$varName = $queryClassName::create()->findPk(\$this->getPrimaryKey(), \$con);
+            \$this->$varName = $queryClassName::create()->findPk(\$this->getPrimaryKey(){$this->putConVar(true)});
         }
 
         return \$this->$varName;

@@ -286,12 +286,11 @@ class OneToManyRelationCodeProducer extends AbstractIncomingRelationCode
      * Returns the number of related $targetClassName objects.
      *
      * @param \Propel\Runtime\ActiveQuery\Criteria|null \$criteria
-     * @param bool \$distinct
-     * @param \Propel\Runtime\Connection\ConnectionInterface|null \$con
+     * @param bool \$distinct{$this->putConDoc()}
      *
      * @return int Count of related $targetClassName objects.
      */
-    public function count{$relCol}(?Criteria \$criteria = null, bool \$distinct = false, ?ConnectionInterface \$con = null): int
+    public function count{$relCol}(?Criteria \$criteria = null, bool \$distinct = false{$this->putConParam(true)}): int
     {
         \$partial = \$this->{$collName}Partial && !\$this->isNew();
         if (\$this->$collName === null || \$criteria !== null || \$partial) {
@@ -310,7 +309,7 @@ class OneToManyRelationCodeProducer extends AbstractIncomingRelationCode
 
             return \$query
                 ->filterBy{$identifier}(\$this)
-                ->count(\$con);
+                ->count({$this->putConVar()});
         }
 
         return count(\$this->$collName);
@@ -343,18 +342,17 @@ class OneToManyRelationCodeProducer extends AbstractIncomingRelationCode
     /**
      * Gets $targetModelClassName objects which contain a foreign key that references this object.
      *
-     * If the \$criteria is not null, it is used to always fetch the results from the database.
-     * Otherwise the results are fetched from the database the first time, then cached.
-     * Next time the same method is called without \$criteria, the cached collection is returned.
-     * If this $ownModelClassName is new, it will return
-     * an empty collection or the current collection; the criteria is ignored on a new object.
+     * - If \$criteria is given, the result will be fetched from database using the \$criteria as filter.
+     * - Without \$criteria, all related $targetModelClassName objects will be loaded and cached for
+     *   subsequent calls.
+     * - If this $ownModelClassName is new, an empty collection or the current collection is returned.
+     * - On a new object, \$criteria is ignored.
      *
-     * @param \Propel\Runtime\ActiveQuery\Criteria|null \$criteria
-     * @param \Propel\Runtime\Connection\ConnectionInterface|null \$con
+     * @param \Propel\Runtime\ActiveQuery\Criteria|null \$criteria{$this->putConDoc()}
      *
      * @return $targetCollectionClassNameFq
      */
-    public function get$relationIdentifierPlural(?Criteria \$criteria = null, ?ConnectionInterface \$con = null): $targetCollectionClassName
+    public function get$relationIdentifierPlural(?Criteria \$criteria = null{$this->putConParam(true)}): $targetCollectionClassName
     {
         \$partial = \$this->{$attributeName}Partial && !\$this->isNew();
         if (\$this->$attributeName && !\$criteria && !\$partial) {
@@ -377,7 +375,7 @@ class OneToManyRelationCodeProducer extends AbstractIncomingRelationCode
 
         \$$attributeName = $relationQueryClassName::create(null, \$criteria)
             ->filterBy{$relationIdentifierSingular}(\$this)
-            ->findObjects(\$con);
+            ->findObjects({$this->putConVar()});
 
         if (\$criteria) {
             if (\$this->{$attributeName}Partial !== false && count(\$$attributeName)) {
@@ -442,14 +440,13 @@ class OneToManyRelationCodeProducer extends AbstractIncomingRelationCode
      * It will also schedule objects for deletion based on a diff between old objects (aka persisted)
      * and new objects from the given Propel collection.
      *
-     * @param \Propel\Runtime\Collection\Collection<$targetModelClassNameFq> \${$inputCollectionVar}
-     * @param \Propel\Runtime\Connection\ConnectionInterface|null \$con
+     * @param \Propel\Runtime\Collection\Collection<$targetModelClassNameFq> \${$inputCollectionVar}{$this->putConDoc()}
      *
      * @return static
      */
-    public function set{$relationIdentifierPlural}(Collection \${$inputCollectionVar}, ?ConnectionInterface \$con = null): static
+    public function set{$relationIdentifierPlural}(Collection \${$inputCollectionVar}{$this->putConParam(true)}): static
     {
-        \${$inputCollectionVar}ToDelete = \$this->get{$relationIdentifierPlural}(null, \$con)->diff(\${$inputCollectionVar});\n";
+        \${$inputCollectionVar}ToDelete = \$this->get{$relationIdentifierPlural}(null{$this->putConVar(true)})->diff(\${$inputCollectionVar});\n";
 
         if ($this->relation->isAtLeastOneLocalPrimaryKey()) {
             $script .= "
@@ -629,22 +626,20 @@ class OneToManyRelationCodeProducer extends AbstractIncomingRelationCode
      * an empty collection; or if this $modelClassName has previously
      * been saved, it will retrieve related $relationIdentifierPlural from storage.
      *
-     * @param \Propel\Runtime\ActiveQuery\Criteria|null \$criteria
-     * @param \Propel\Runtime\Connection\ConnectionInterface|null \$con
+     * @param \Propel\Runtime\ActiveQuery\Criteria|null \$criteria{$this->putConDoc()}
      * @param string \$joinBehavior optional join type to use (defaults to $joinBehavior)
      *
      * @return $targetCollectionType
      */
     public function get{$relationIdentifierPlural}Join{$currentRelationIdentifier}(
-        ?Criteria \$criteria = null,
-        ?ConnectionInterface \$con = null,
+        ?Criteria \$criteria = null,{$this->putConParam("\n        ", ',')}
         \$joinBehavior = $joinBehavior
     ): $targetCollectionClassName {";
                 $script .= "
         \$query = $targetQueryClassName::create(null, \$criteria);
         \$query->joinWith('$currentRelationIdentifier', \$joinBehavior);
 
-        return \$this->get{$relationIdentifierPlural}(\$query, \$con);
+        return \$this->get{$relationIdentifierPlural}(\$query{$this->putConVar(true)});
     }
 ";
         }

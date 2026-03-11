@@ -182,12 +182,11 @@ class TernaryRelationCodeProducer extends AbstractManyToManyCodeProducer
      * If this $ownModelClassName is new, it will return
      * an empty collection or the current collection; the criteria is ignored on a new object.
      *
-     * @param \Propel\Runtime\ActiveQuery\Criteria|null \$criteria Optional query object to filter the query
-     * @param \Propel\Runtime\Connection\ConnectionInterface|null \$con Optional connection object
+     * @param \Propel\Runtime\ActiveQuery\Criteria|null \$criteria Optional query object to filter the query{$this->putConDoc()}
      *
      * @return $objectCollectionType
      */
-    public function get{$targetIdentifierPlural}(?Criteria \$criteria = null, ?ConnectionInterface \$con = null): $objectCollectionClassName
+    public function get{$targetIdentifierPlural}(?Criteria \$criteria = null{$this->putConParam(true)}): $objectCollectionClassName
     {
         \$partial = \$this->$attributeIsPartialName && !\$this->isNew();
         if (\$this->$attributeName !== null && !\$partial && !\$criteria) {
@@ -214,7 +213,7 @@ class TernaryRelationCodeProducer extends AbstractManyToManyCodeProducer
             $script .= "
             ;
 
-        \$items = \$query->find(\$con);
+        \$items = \$query->find({$this->putConVar()});
         \$$attributeName = new ObjectCombinationCollection();
         foreach (\$items as \$item) {
             \$combination = [];\n";
@@ -283,14 +282,13 @@ class TernaryRelationCodeProducer extends AbstractManyToManyCodeProducer
      * If you have attached new $relatedObjectClassName object to this object you need to call `save` first to get
      * the correct return value. Use get$targetIdentifierPlural() to get the current internal state.
      *$phpDoc
-     * @param \Propel\Runtime\ActiveQuery\Criteria|null \$criteria
-     * @param \Propel\Runtime\Connection\ConnectionInterface|null \$con
+     * @param \Propel\Runtime\ActiveQuery\Criteria|null \$criteria{$this->putConDoc()}
      *
      * @return $objectCollectionType
      */
-    public function get{$relationIdentifier}($argumentDeclaration, ?Criteria \$criteria = null, ?ConnectionInterface \$con = null)
+    public function get{$relationIdentifier}($argumentDeclaration, ?Criteria \$criteria = null{$this->putConParam(true)})
     {
-        return \$this->create{$relationIdentifier}Query($functionParameters, \$criteria)->find(\$con);
+        return \$this->create{$relationIdentifier}Query($functionParameters, \$criteria)->find({$this->putConVar()});
     }
 ";
     }
@@ -432,14 +430,13 @@ class TernaryRelationCodeProducer extends AbstractManyToManyCodeProducer
      * If you have attached new $argsCsv object to this object you need to call `save` first to get
      * the correct return value. Use get$targetIdentifierPlural() to get the current internal state.
      *$phpDoc
-     * @param \Propel\Runtime\ActiveQuery\Criteria|null \$criteria
-     * @param \Propel\Runtime\Connection\ConnectionInterface|null \$con
+     * @param \Propel\Runtime\ActiveQuery\Criteria|null \$criteria{$this->putConDoc()}
      *
      * @return int
      */
-    public function count{$relationIdentifier}($argumentDeclarations, ?Criteria \$criteria = null, ?ConnectionInterface \$con = null): int
+    public function count{$relationIdentifier}($argumentDeclarations, ?Criteria \$criteria = null{$this->putConParam(true)}): int
     {
-        return \$this->create{$relationIdentifier}Query($functionParameters, \$criteria)->count(\$con);
+        return \$this->create{$relationIdentifier}Query($functionParameters, \$criteria)->count({$this->putConVar()});
     }
 ";
     }

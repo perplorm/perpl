@@ -421,12 +421,11 @@ abstract class AbstractManyToManyCodeProducer extends AbstractRelationCodeProduc
      * It will also schedule objects for deletion based on a diff between old objects (aka persisted)
      * and new objects from the given Propel collection.
      *
-     * @param \Propel\Runtime\Collection\Collection<$collectionContentType> $inputCollectionVar A Propel collection.
-     * @param \Propel\Runtime\Connection\ConnectionInterface|null \$con Optional connection object
+     * @param \Propel\Runtime\Collection\Collection<$collectionContentType> $inputCollectionVar A Propel collection.{$this->putConDoc()}
      *
      * @return static
      */
-    public function set{$targetIdentifierPlural}(Collection $inputCollectionVar, ?ConnectionInterface \$con = null): static
+    public function set{$targetIdentifierPlural}(Collection $inputCollectionVar{$this->putConParam(true)}): static
     {
         \$this->clear{$targetIdentifierPlural}();
         \$current{$targetIdentifierPlural} = \$this->get{$targetIdentifierPlural}();
@@ -488,12 +487,11 @@ abstract class AbstractManyToManyCodeProducer extends AbstractRelationCodeProduc
      * to the current object by way of the $crossRefTableName cross-reference table.
      *
      * @param \Propel\Runtime\ActiveQuery\Criteria|null \$criteria Optional query object to filter the query
-     * @param bool \$distinct Set to true to force count distinct
-     * @param \Propel\Runtime\Connection\ConnectionInterface|null \$con Optional connection object
+     * @param bool \$distinct Set to true to force count distinct{$this->putConDoc()}
      *
      * @return int The number of related $targetIdentifierSingular objects
      */
-    public function count{$targetIdentifierPlural}(?Criteria \$criteria = null, bool \$distinct = false, ?ConnectionInterface \$con = null): int
+    public function count{$targetIdentifierPlural}(?Criteria \$criteria = null, bool \$distinct = false{$this->putConParam(true)}): int
     {
         \$partial = \$this->{$attributeIsPartialName} && !\$this->isNew();
         if (\$this->$attributeName && !\$criteria && !\$partial) {
@@ -515,9 +513,8 @@ abstract class AbstractManyToManyCodeProducer extends AbstractRelationCodeProduc
 
         return \$query
             ->filterBy{$sourceIdentifierSingular}(\$this)
-            ->count(\$con);
-    }
-";
+            ->count({$this->putConVar()});
+    }\n";
 
         $script .= $this->buildAdditionalCountMethods();
     }

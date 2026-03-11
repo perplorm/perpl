@@ -145,12 +145,11 @@ class ManyToManyRelationCodeProducer extends AbstractManyToManyCodeProducer
      * If this $ownModelClassName is new, it will return
      * an empty collection or the current collection; the criteria is ignored on a new object.
      *
-     * @param \Propel\Runtime\ActiveQuery\Criteria|null \$criteria Optional query object to filter the query
-     * @param \Propel\Runtime\Connection\ConnectionInterface|null \$con Optional connection object
+     * @param \Propel\Runtime\ActiveQuery\Criteria|null \$criteria Optional query object to filter the query{$this->putConDoc()}
      *
      * @return $objectCollectionType
      */
-    public function get{$targetIdentifierPlural}(?Criteria \$criteria = null, ?ConnectionInterface \$con = null): $objectCollectionClass
+    public function get{$targetIdentifierPlural}(?Criteria \$criteria = null{$this->putConParam(true)}): $objectCollectionClass
     {
         \$partial = \$this->{$attributeIsPartialName} && !\$this->isNew();
         if (\$this->$attributeName === null || \$criteria !== null || \$partial) {
@@ -162,7 +161,7 @@ class ManyToManyRelationCodeProducer extends AbstractManyToManyCodeProducer
             } else {
                 \$query = $targetQueryClassName::create(null, \$criteria)
                     ->filterBy{$sourceIdentifierSingular}(\$this);
-                \$$attributeName = \$query->findObjects(\$con);
+                \$$attributeName = \$query->findObjects({$this->putConVar()});
                 if (\$criteria !== null) {
                     return \$$attributeName;
                 }

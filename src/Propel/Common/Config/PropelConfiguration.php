@@ -355,6 +355,7 @@ class PropelConfiguration implements ConfigurationInterface
                         ->booleanNode('namespaceAutoPackage')->defaultTrue()->end()
                         ->booleanNode('recursive')->defaultFalse()->end()
                         ->booleanNode('defaultToNativeEnumeratedColumnTypes')->defaultFalse()->end()
+                        ->booleanNode('omitConnectionInterfaceParameterOnRelationMethods')->defaultFalse()->end()
                         ->arrayNode('connections')
                             ->prototype('scalar')->end()
                         ->end()
