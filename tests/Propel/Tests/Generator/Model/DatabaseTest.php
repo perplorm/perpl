@@ -320,7 +320,6 @@ class DatabaseTest extends ModelTestCase
             ['concrete_inheritance', 'ConcreteInheritance'],
             ['delegate', 'Delegate'],
             ['nested_set', 'NestedSet'],
-            ['query_cache', 'QueryCache'],
             ['sluggable', 'Sluggable'],
             ['sortable', 'Sortable'],
             ['timestampable', 'Timestampable'],
