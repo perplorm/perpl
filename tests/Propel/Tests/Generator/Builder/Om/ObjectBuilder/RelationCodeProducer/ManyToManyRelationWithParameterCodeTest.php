@@ -238,7 +238,7 @@ class ManyToManyRelationWithParameterCodeTest extends AbstractManyToManyCodeTest
      * an empty collection or the current collection; the criteria is ignored on a new object.
      *
      * @param \Propel\Runtime\ActiveQuery\Criteria|null $criteria Optional query object to filter the query
-     * @param \Propel\Runtime\Connection\ConnectionInterface|null $con Optional connection object
+     * @param \Propel\Runtime\Connection\ConnectionInterface|null $con
      *
      * @return \Propel\Runtime\Collection\ObjectCombinationCollection<array{\Team, string, int}>
      */
@@ -327,7 +327,7 @@ class ManyToManyRelationWithParameterCodeTest extends AbstractManyToManyCodeTest
      * and new objects from the given Propel collection.
      *
      * @param \Propel\Runtime\Collection\Collection<array{\Team, string, int}> $teamDayTypes A Propel collection.
-     * @param \Propel\Runtime\Connection\ConnectionInterface|null $con Optional connection object
+     * @param \Propel\Runtime\Connection\ConnectionInterface|null $con
      *
      * @return static
      */
@@ -370,7 +370,7 @@ class ManyToManyRelationWithParameterCodeTest extends AbstractManyToManyCodeTest
      *
      * @param \Propel\Runtime\ActiveQuery\Criteria|null $criteria Optional query object to filter the query
      * @param bool $distinct Set to true to force count distinct
-     * @param \Propel\Runtime\Connection\ConnectionInterface|null $con Optional connection object
+     * @param \Propel\Runtime\Connection\ConnectionInterface|null $con
      *
      * @return int The number of related TeamDayType objects
      */

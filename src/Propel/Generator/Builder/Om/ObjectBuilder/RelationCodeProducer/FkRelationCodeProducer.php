@@ -245,23 +245,21 @@ class FkRelationCodeProducer extends AbstractRelationCodeProducer
         $script .= "
     /**
      * Get the associated $relationIdentifierSingular object
-     *
-     * @param \Propel\Runtime\Connection\ConnectionInterface|null \$con Optional Connection object.
-     *
+     *{$this->putConDoc(true)}
      * @return {$targetType}|null
      */
-    public function get{$relationIdentifierSingular}(?ConnectionInterface \$con = null)
+    public function get{$relationIdentifierSingular}({$this->putConParam()})
     {";
         $script .= "
         if (\$this->$varName === null && ($valueIsEmpty)) {";
         if ($findPk) {
             $script .= "
-            \$this->$varName = {$targetQueryClassName}::create()->findPk($targetGetPkArgs, \$con);";
+            \$this->$varName = {$targetQueryClassName}::create()->findPk($targetGetPkArgs{$this->putConVar(true)});";
         } else {
             $script .= "
             \$this->$varName = {$targetQueryClassName}::create()
                 ->filterBy{$relationIdentifierReversedSingular}(\$this) // here
-                ->findOne(\$con);";
+                ->findOne({$this->putConVar()});";
         }
         if ($fk->isLocalPrimaryKey()) {
             $this->referencedClasses->registerFunction('assert');
