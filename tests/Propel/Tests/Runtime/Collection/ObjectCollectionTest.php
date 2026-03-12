@@ -346,6 +346,36 @@ class ObjectCollectionTest extends BookstoreTestBase
     }
 
     /**
+     * @return void
+     */
+    public function testMap()
+    {
+        $titles = array_map(fn($i) => "Foo$i", range(1, 3));
+        $titles[] = null;
+
+        $data = array_map(fn($title) => (new Book())->setTitle($title), $titles);
+        $col = new ObjectCollection($data);
+        $result = $col->map(fn($b) => $b->getTitle());
+
+        $this->assertSame($titles, $result);
+    }
+
+    /**
+     * @return void
+     */
+    public function testReduce()
+    {
+        $titles = array_map(fn($i) => "Foo$i", range(1, 3));
+        $titles[] = null;
+
+        $data = array_map(fn($title) => (new Book())->setTitle($title), $titles);
+        $col = new ObjectCollection($data);
+        $result = $col->reduce(fn($agg, $b) => [...$agg, $b->getTitle()], []);
+
+        $this->assertSame($titles, $result);
+    }
+
+    /**
      * @afterClass
      *
      * @return void
