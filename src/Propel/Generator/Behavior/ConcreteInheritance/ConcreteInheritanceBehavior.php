@@ -201,8 +201,8 @@ class ConcreteInheritanceBehavior extends Behavior
         $parentTable = $this->getParentTable();
 
         $parentBuilder = match (get_class($builder)) {
-            'Propel\Generator\Builder\Om\ObjectBuilder' => $builder->getNewStubObjectBuilder($parentTable),
-            'Propel\Generator\Builder\Om\QueryBuilder' => $builder->getNewStubQueryBuilder($parentTable),
+            'Propel\Generator\Builder\Om\ObjectBuilder' => $builder->getStubObjectBuilder($parentTable),
+            'Propel\Generator\Builder\Om\QueryBuilder' => $builder->getStubQueryBuilder($parentTable),
             default => null
         };
 
@@ -307,7 +307,7 @@ class ConcreteInheritanceBehavior extends Behavior
     protected function addSyncParentToChild(string &$script): void
     {
         $parentTable = $this->getParentTable();
-        $parentClass = $this->builder->getClassNameFromBuilder($this->builder->getNewStubObjectBuilder($parentTable));
+        $parentClass = $this->builder->getClassNameFromBuilder($this->builder->getStubObjectBuilder($parentTable));
 
         $columns = $this->getCopyToChild();
         if ($columns === true) {
@@ -359,13 +359,13 @@ public function syncParentToChild($parentClass \$parent): void
     protected function addObjectGetParentOrCreate(string &$script): void
     {
         $parentTable = $this->getParentTable();
-        $parentClass = $this->builder->getClassNameFromBuilder($this->builder->getNewStubObjectBuilder($parentTable));
+        $parentClass = $this->builder->getClassNameFromBuilder($this->builder->getStubObjectBuilder($parentTable));
 
         $descendantColumnName = $this->getParameter('descendant_column');
         $descendantColumnPhpName = $parentTable->getColumn($descendantColumnName)->getPhpName();
         $stubObjectClassNameFq = $this->builder->getStubObjectBuilder()->getQualifiedClassName();
         $setDescendantClassExpression = "set{$descendantColumnPhpName}('$stubObjectClassNameFq')";
-        $parentTableStubQueryBuilder = $this->builder->getNewStubQueryBuilder($parentTable);
+        $parentTableStubQueryBuilder = $this->builder->getStubQueryBuilder($parentTable);
         $parentTableStubQueryClassName = $this->builder->getClassNameFromBuilder($parentTableStubQueryBuilder);
 
         $script .= "

@@ -9,7 +9,7 @@ use DOMDocument;
 use Exception;
 use LogicException;
 use Propel\Generator\Builder\Util\SchemaReader;
-use Propel\Generator\Config\GeneratorConfigInterface;
+use Propel\Generator\Config\AbstractGeneratorConfig;
 use Propel\Generator\Exception\BuildException;
 use Propel\Generator\Exception\EngineException;
 use Propel\Generator\Model\Database;
@@ -117,7 +117,7 @@ abstract class AbstractManager
     /**
      * An initialized GeneratorConfig object.
      *
-     * @var \Propel\Generator\Config\GeneratorConfigInterface
+     * @var \Propel\Generator\Config\AbstractGeneratorConfig
      */
     private $generatorConfig;
 
@@ -498,9 +498,9 @@ abstract class AbstractManager
      * Returns the GeneratorConfig object for this manager or creates it
      * on-demand.
      *
-     * @return \Propel\Generator\Config\GeneratorConfigInterface
+     * @return \Propel\Generator\Config\AbstractGeneratorConfig
      */
-    protected function getGeneratorConfig(): GeneratorConfigInterface
+    protected function getGeneratorConfig(): AbstractGeneratorConfig
     {
         return $this->generatorConfig;
     }
@@ -508,11 +508,11 @@ abstract class AbstractManager
     /**
      * Sets the GeneratorConfigInterface implementation.
      *
-     * @param \Propel\Generator\Config\GeneratorConfigInterface $generatorConfig
+     * @param \Propel\Generator\Config\AbstractGeneratorConfig $generatorConfig
      *
      * @return void
      */
-    public function setGeneratorConfig(GeneratorConfigInterface $generatorConfig): void
+    public function setGeneratorConfig(AbstractGeneratorConfig $generatorConfig): void
     {
         $this->generatorConfig = $generatorConfig;
     }

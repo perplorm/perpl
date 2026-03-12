@@ -5,7 +5,7 @@ declare(strict_types = 1);
 namespace Propel\Generator\Platform;
 
 use Propel\Common\Util\SetColumnConverter;
-use Propel\Generator\Config\GeneratorConfigInterface;
+use Propel\Generator\Config\AbstractGeneratorConfig;
 use Propel\Generator\Exception\EngineException;
 use Propel\Generator\Model\Column;
 use Propel\Generator\Model\Database;
@@ -140,12 +140,12 @@ class DefaultPlatform implements PlatformInterface
     /**
      * Sets the GeneratorConfigInterface to use in the parsing.
      *
-     * @param \Propel\Generator\Config\GeneratorConfigInterface $generatorConfig
+     * @param \Propel\Generator\Config\AbstractGeneratorConfig $generatorConfig
      *
      * @return void
      */
     #[\Override]
-    public function setGeneratorConfig(GeneratorConfigInterface $generatorConfig): void
+    public function setGeneratorConfig(AbstractGeneratorConfig $generatorConfig): void
     {
         $this->defaultToNativeEnumeratedColumnTypes = (bool)($generatorConfig->getConfigProperty('generator.defaultToNativeEnumeratedColumnTypes') ?? false);
         if ($this->defaultToNativeEnumeratedColumnTypes) {

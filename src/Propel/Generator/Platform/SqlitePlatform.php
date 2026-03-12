@@ -5,7 +5,7 @@ declare(strict_types = 1);
 namespace Propel\Generator\Platform;
 
 use PDO;
-use Propel\Generator\Config\GeneratorConfigInterface;
+use Propel\Generator\Config\AbstractGeneratorConfig;
 use Propel\Generator\Model\Column;
 use Propel\Generator\Model\ColumnDefaultValue;
 use Propel\Generator\Model\Database;
@@ -127,7 +127,7 @@ class SqlitePlatform extends DefaultPlatform
      * @inheritDoc
      */
     #[\Override]
-    public function setGeneratorConfig(GeneratorConfigInterface $generatorConfig): void
+    public function setGeneratorConfig(AbstractGeneratorConfig $generatorConfig): void
     {
         parent::setGeneratorConfig($generatorConfig);
 

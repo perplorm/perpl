@@ -162,14 +162,14 @@ class DelegateBehavior extends Behavior
             if ($type == self::ONE_TO_ONE) {
                 $fks = $delegateTable->getForeignKeysReferencingTable($this->getTable()->getName());
                 $fk = $fks[0];
-                $ARClassName = $builder->getClassNameFromBuilder($builder->getNewStubObjectBuilder($fk->getTable()));
-                $ARFQCN = $builder->getNewStubObjectBuilder($fk->getTable())->getFullyQualifiedClassName();
+                $ARClassName = $builder->getClassNameFromBuilder($builder->getStubObjectBuilder($fk->getTable()));
+                $ARFQCN = $builder->getStubObjectBuilder($fk->getTable())->getFullyQualifiedClassName();
                 $relationName = $builder->getRefFKPhpNameAffix($fk);
             } else {
                 $fks = $this->getTable()->getForeignKeysReferencingTable($delegate);
                 $fk = $fks[0];
-                $ARClassName = $builder->getClassNameFromBuilder($builder->getNewStubObjectBuilder($delegateTable));
-                $ARFQCN = $builder->getNewStubObjectBuilder($delegateTable)->getFullyQualifiedClassName();
+                $ARClassName = $builder->getClassNameFromBuilder($builder->getStubObjectBuilder($delegateTable));
+                $ARFQCN = $builder->getStubObjectBuilder($delegateTable)->getFullyQualifiedClassName();
                 $relationName = $builder->getFKPhpNameAffix($fk);
             }
                 $script .= "

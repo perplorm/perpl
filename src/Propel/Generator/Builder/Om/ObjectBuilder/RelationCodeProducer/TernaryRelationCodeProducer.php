@@ -66,7 +66,7 @@ class TernaryRelationCodeProducer extends AbstractManyToManyCodeProducer
 
         [$signature, $_, $phpDoc] = $this->signature->buildFullSignature(['fkToIgnore' => $relationFk, 'withDefaultValues' => SignatureCollector::USE_DEFAULT_NULL]);
 
-        $relatedUseQueryClassName = $this->getNewStubQueryBuilder($this->crossRelation->getMiddleTable())->getUnqualifiedClassName();
+        $relatedUseQueryClassName = $this->getStubQueryBuilder($this->crossRelation->getMiddleTable())->getUnqualifiedClassName();
         $relatedUseQueryGetter = 'use' . ucfirst($relatedUseQueryClassName);
         $relatedUseQueryVariableName = lcfirst($relatedUseQueryClassName);
 

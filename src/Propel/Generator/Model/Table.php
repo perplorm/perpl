@@ -4,7 +4,7 @@ declare(strict_types = 1);
 
 namespace Propel\Generator\Model;
 
-use Propel\Generator\Config\GeneratorConfigInterface;
+use Propel\Generator\Config\AbstractGeneratorConfig;
 use Propel\Generator\Exception\BuildException;
 use Propel\Generator\Exception\EngineException;
 use Propel\Generator\Exception\InvalidArgumentException;
@@ -170,8 +170,6 @@ class Table extends ScopedMappingModel implements IdMethod
     protected ?string $defaultStringFormat = null;
 
     /**
-     * Constructs a table object with a name
-     *
      * @param string $name table name
      */
     public function __construct(string $name)
@@ -1138,10 +1136,10 @@ class Table extends ScopedMappingModel implements IdMethod
     /**
      * Retrieves the configuration object.
      *
-     * @return \Propel\Generator\Config\GeneratorConfigInterface|null
+     * @return \Propel\Generator\Config\AbstractGeneratorConfig|null
      */
     #[\Override]
-    public function getGeneratorConfig(): GeneratorConfigInterface|null
+    public function getGeneratorConfig(): AbstractGeneratorConfig|null
     {
         return $this->database?->getGeneratorConfig();
     }

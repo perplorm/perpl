@@ -4,7 +4,7 @@ declare(strict_types = 1);
 
 namespace Propel\Generator\Model;
 
-use Propel\Generator\Config\GeneratorConfigInterface;
+use Propel\Generator\Config\AbstractGeneratorConfig;
 use Propel\Generator\Exception\EngineException;
 use Propel\Generator\Exception\InvalidArgumentException;
 use Propel\Generator\Platform\PlatformInterface;
@@ -801,10 +801,10 @@ class Database extends ScopedMappingModel
     /**
      * Returns the GeneratorConfigInterface object.
      *
-     * @return \Propel\Generator\Config\GeneratorConfigInterface|null
+     * @return \Propel\Generator\Config\AbstractGeneratorConfig|null
      */
     #[\Override]
-    public function getGeneratorConfig(): ?GeneratorConfigInterface
+    public function getGeneratorConfig(): ?AbstractGeneratorConfig
     {
         return $this->parentSchema?->getGeneratorConfig();
     }

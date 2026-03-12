@@ -857,10 +857,10 @@ public function clearNestedSetChildren(): void
  */
 public function initNestedSetChildren(): void
 {
-    \$collectionClassName = " . $this->builder->getNewTableMapBuilder($this->table)->getFullyQualifiedClassName() . "::getTableMap()->getCollectionClassName();
+    \$collectionClassName = " . $this->builder->getTableMapBuilder($this->table)->getFullyQualifiedClassName() . "::getTableMap()->getCollectionClassName();
 
     \$this->collNestedSetChildren = new \$collectionClassName;
-    \$this->collNestedSetChildren->setModel('" . $this->builder->getNewStubObjectBuilder($this->table)->getFullyQualifiedClassName() . "');
+    \$this->collNestedSetChildren->setModel('" . $this->builder->getStubObjectBuilder($this->table)->getFullyQualifiedClassName() . "');
 }
 ";
     }

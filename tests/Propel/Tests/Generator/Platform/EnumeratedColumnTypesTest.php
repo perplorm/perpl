@@ -9,6 +9,7 @@
 namespace Propel\Tests\Generator\Platform;
 
 use Propel\Generator\Builder\Om\AbstractOMBuilder;
+use Propel\Generator\Builder\Om\BuilderType;
 use Propel\Generator\Builder\Om\ObjectBuilder;
 use Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes\ColumnCodeProducer;
 use Propel\Generator\Builder\Om\QueryBuilder;
@@ -103,7 +104,7 @@ class EnumeratedColumnTypesTest extends TestCase
     public function testEnumeratedColumnObjectCode(string $columnType, string $fileName): void
     {
         /** @var ObjectBuilder $builder */
-        $builder = $this->buildCodeBuilder($columnType, GeneratorConfig::KEY_OBJECT_BASE);
+        $builder = $this->buildCodeBuilder($columnType, BuilderType::ObjectBase);
         /** @var ColumnCodeProducer $builder */
         $codeProducer = $this->getObjectPropertyValue($builder, 'columnCodeProducers')[0];
 
@@ -139,7 +140,7 @@ class EnumeratedColumnTypesTest extends TestCase
     public function testEnumeratedColumnQueryCode(string $columnType, string $fileName): void
     {
         /** @var QueryBuilder $builder */
-        $builder = $this->buildCodeBuilder($columnType, GeneratorConfig::KEY_QUERY_BASE);
+        $builder = $this->buildCodeBuilder($columnType, BuilderType::QueryBase);
 
         $script = '';
         $this->callMethod($builder, 'addColumnCode', [&$script, $builder->getTable()->getColumns()[0]]);
@@ -225,15 +226,16 @@ EOF;
 
     /**
      * @param string $columnType
+     * @param BuilderType $builderType
      *
      * @return AbstractOMBuilder
      */
-    public function buildCodeBuilder(string $columnType, string $builderTypeIdentifier): AbstractOMBuilder
+    public function buildCodeBuilder(string $columnType, BuilderType $builderType): AbstractOMBuilder
     {
         $columnXml = '<column name="enumerated_column" type="' . $columnType . '" valueSet="A,B"/>';
         $column = $this->buildColumnFromSchema(new MysqlPlatform(), false, $columnXml);
         $config = new QuickGeneratorConfig();
 
-        return $config->getConfiguredBuilder($column->getTable(), $builderTypeIdentifier);
+        return $config->loadConfiguredBuilder($column->getTable(), $builderType);
     }
 }

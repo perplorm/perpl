@@ -130,7 +130,7 @@ class ConfigurationManager
      * is expressed by:
      * <code>'database.adapter.mysql.tableType</code>
      *
-     * @psalm-return ($isRequired ? array|int|bool|string : array|scalar|null)
+     * @psalm-return ($isRequired is true ? array|string|int|bool : array|string|int|bool|null)
      *
      * @param string $path The name of property, expressed as a dot separated level hierarchy
      * @param bool $isRequired
@@ -200,7 +200,7 @@ class ConfigurationManager
      */
     public function getConfigPropertyRequired(string $path): array|int|bool|string
     {
-        return $this->getConfigProperty($path, true) ?? '';
+        return $this->getConfigProperty($path, true);
     }
 
     /**

@@ -18,10 +18,14 @@ use Propel\Generator\Model\Table;
  */
 class QueryInheritanceBuilder extends AbstractOMBuilder implements ExtensionBuilderInterface
 {
-    /**
-     * @var \Propel\Generator\Builder\Util\EntityObjectClassNames
-     */
     protected EntityObjectClassNames $tableNames;
+
+    /**
+     * The current child "object" we are operating on.
+     *
+     * @var \Propel\Generator\Model\Inheritance|null
+     */
+    protected $child;
 
     /**
      * @param \Propel\Generator\Model\Table $table
@@ -33,13 +37,6 @@ class QueryInheritanceBuilder extends AbstractOMBuilder implements ExtensionBuil
     }
 
     /**
-     * The current child "object" we are operating on.
-     *
-     * @var \Propel\Generator\Model\Inheritance|null
-     */
-    protected $child;
-
-    /**
      * Returns the name of the current class being built.
      *
      * @return string
@@ -47,7 +44,7 @@ class QueryInheritanceBuilder extends AbstractOMBuilder implements ExtensionBuil
     #[\Override]
     public function getUnprefixedClassName(): string
     {
-        return $this->getNewStubQueryInheritanceBuilder($this->getChild())->getUnprefixedClassName();
+        return $this->getStubQueryInheritanceBuilder($this->getChild())->getUnprefixedClassName();
     }
 
     /**
@@ -112,18 +109,18 @@ class QueryInheritanceBuilder extends AbstractOMBuilder implements ExtensionBuil
     protected function getParentClassName(): ?string
     {
         if ($this->getChild()->getAncestor() === null) {
-            return $this->getNewStubQueryBuilder($this->getTable())->getUnqualifiedClassName();
+            return $this->getStubQueryBuilder($this->getTable())->getUnqualifiedClassName();
         }
 
         $ancestorClassName = ClassTools::classname($this->getChild()->getAncestor());
         if ($this->getDatabase()->hasTableByPhpName($ancestorClassName)) {
-            return $this->getNewStubQueryBuilder($this->getDatabase()->getTableByPhpName($ancestorClassName))->getUnqualifiedClassName();
+            return $this->getStubQueryBuilder($this->getDatabase()->getTableByPhpName($ancestorClassName))->getUnqualifiedClassName();
         }
 
         // find the inheritance for the parent class
         foreach ($this->getTable()->getChildrenColumn()->getChildren() as $child) {
             if ($child->getClassName() == $ancestorClassName) {
-                return $this->getNewStubQueryInheritanceBuilder($child)->getUnqualifiedClassName();
+                return $this->getStubQueryInheritanceBuilder($child)->getUnqualifiedClassName();
             }
         }
 
@@ -207,7 +204,7 @@ class " . $this->getUnqualifiedClassName() . ' extends ' . $baseClassName . "
      */
     protected function addFactory(string &$script): void
     {
-        $builder = $this->getNewStubQueryInheritanceBuilder($this->getChild());
+        $builder = $this->getStubQueryInheritanceBuilder($this->getChild());
         $queryClassName = $this->declareClassFromBuilder($builder, 'Child');
         $queryClassNameFq = $builder->getFullyQualifiedClassName();
 

@@ -4,7 +4,7 @@ declare(strict_types = 1);
 
 namespace Propel\Generator\Model;
 
-use Propel\Generator\Config\GeneratorConfigInterface;
+use Propel\Generator\Config\AbstractGeneratorConfig;
 use Propel\Generator\Exception\BuildException;
 use Propel\Generator\Util\BehaviorLocator;
 use function sprintf;
@@ -25,9 +25,9 @@ trait BehaviorableTrait
     private $behaviorLocator;
 
     /**
-     * @return \Propel\Generator\Config\GeneratorConfigInterface|null
+     * @return \Propel\Generator\Config\AbstractGeneratorConfig|null
      */
-    abstract protected function getGeneratorConfig(): ?GeneratorConfigInterface;
+    abstract protected function getGeneratorConfig(): ?AbstractGeneratorConfig;
 
     /**
      * Returns the behavior locator.
