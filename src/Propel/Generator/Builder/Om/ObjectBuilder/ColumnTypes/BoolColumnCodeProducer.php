@@ -121,9 +121,8 @@ class BoolColumnCodeProducer extends ColumnCodeProducer
     protected function addMutatorBody(string &$script): void
     {
         $this->declareGlobalFunction('in_array', 'is_string', 'strtolower');
-        $col = $this->column;
-        $clo = $col->getLowercasedName();
-        $columnConstant = $this->builder->getColumnConstant($col);
+        $attribute = $this->getAttributeName();
+        $columnConstant = $this->builder->getColumnConstant($this->column);
 
         $script .= "
         if (\$v !== null) {
@@ -132,8 +131,8 @@ class BoolColumnCodeProducer extends ColumnCodeProducer
                 : (bool)\$v;
         }
 
-        if (\$this->$clo !== \$v) {
-            \$this->$clo = \$v;
+        if ($attribute !== \$v) {
+            $attribute = \$v;
             \$this->modifiedColumns[$columnConstant] = true;
         }\n";
     }

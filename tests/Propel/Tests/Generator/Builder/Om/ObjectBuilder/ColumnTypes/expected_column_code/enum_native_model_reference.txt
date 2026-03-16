@@ -4,7 +4,7 @@ Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes\ColumnCodeProducer
 addColumnAttributes():
 
     /**
-     * The value for the native_enum_column field.
+     * Value of [native_enum_column] field.
      */
     protected string|null $native_enum_column = null;
 

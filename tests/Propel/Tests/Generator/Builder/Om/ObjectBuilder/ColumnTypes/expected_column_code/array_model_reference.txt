@@ -4,16 +4,16 @@ Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes\ArrayColumnCodeProducer
 addColumnAttributes():
 
     /**
-     * The value for the array_column field.
+     * Value of [array_column] field.
      */
     protected string|null $array_column = null;
 
     /**
-     * The unserialized $array_column value.
+     * Deserialized value of [array_column] field.
      *
      * @var array<string>|null
      */
-    protected array|null $array_column_unserialized = null;
+    protected array|null $array_column_deserialized = null;
 
 
 addAccessor():
@@ -21,18 +21,15 @@ addAccessor():
     /**
      * Get the [array_column] column value.
      *
-     * @return array|null
+     * @return array<string>|null
      */
     public function getArrayColumn()
     {
-        if ($this->array_column_unserialized === null) {
-            $this->array_column_unserialized = [];
-        }
-        if (!$this->array_column_unserialized && $this->array_column !== null) {
-            $this->array_column_unserialized = static::unserializeArray($this->array_column);
+        if ($this->array_column_deserialized === null) {
+            $this->array_column_deserialized = !$this->array_column ? [] : static::unserializeArray($this->array_column);
         }
 
-        return $this->array_column_unserialized;
+        return $this->array_column_deserialized;
     }
 
 
@@ -41,14 +38,14 @@ addMutator():
     /**
      * Set the value of [array_column] column.
      *
-     * @param array|null $v New value
+     * @param array<string>|null $v New value
      *
      * @return $this
      */
     public function setArrayColumn($v)
     {
-        if ($this->array_column_unserialized !== $v) {
-            $this->array_column_unserialized = $v;
+        if ($this->array_column_deserialized !== $v) {
+            $this->array_column_deserialized = $v;
             $this->array_column = static::serializeArray($v);
             $this->modifiedColumns[TableTableMap::COL_ARRAY_COLUMN] = true;
         }

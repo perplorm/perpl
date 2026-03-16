@@ -4,18 +4,18 @@ Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes\ObjectColumnCodeProducer
 addColumnAttributes():
 
     /**
-     * The value for the object_column field.
+     * Value of [object_column] field.
      *
      * @var resource|null
      */
     protected $object_column;
 
     /**
-     * The unserialized $object_column value.
+     * Deserialized value of [object_column] field.
      *
      * @var mixed|null
      */
-    protected $object_column_unserialized;
+    protected $object_column_deserialized;
 
 
 addAccessor():
@@ -27,15 +27,15 @@ addAccessor():
      */
     public function getObjectColumn()
     {
-        if (!$this->object_column_unserialized && is_resource($this->object_column)) {
-            $serialisedString = stream_get_contents($this->object_column);
-            if ($serialisedString) {
-                $unserializedString = unserialize($serialisedString);
-                $this->object_column_unserialized = $unserializedString;
+        if (!$this->object_column_deserialized && is_resource($this->object_column)) {
+            $serializedString = stream_get_contents($this->object_column);
+            if ($serializedString) {
+                $deserializedString = unserialize($serializedString);
+                $this->object_column_deserialized = $deserializedString;
             }
         }
 
-        return $this->object_column_unserialized;
+        return $this->object_column_deserialized;
     }
 
 
@@ -52,7 +52,7 @@ addMutator():
     {
         $serializedValue = serialize($v);
         if ($this->object_column === null || stream_get_contents($this->object_column) !== $serializedValue) {
-            $this->object_column_unserialized = $v;
+            $this->object_column_deserialized = $v;
             $this->object_column = $this->writeResource($serializedValue);
             $this->modifiedColumns[TableTableMap::COL_OBJECT_COLUMN] = true;
         }

@@ -4,7 +4,9 @@ declare(strict_types = 1);
 
 namespace Propel\Generator\Builder\Om;
 
+use Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes\ColumnCodeProducer;
 use Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes\ColumnCodeProducerFactory;
+use Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes\LazyLoadColumnCodeProducer;
 use Propel\Generator\Builder\Om\ObjectBuilder\RelationCodeProducer\AbstractIncomingRelationCode;
 use Propel\Generator\Builder\Om\ObjectBuilder\RelationCodeProducer\AbstractManyToManyCodeProducer;
 use Propel\Generator\Builder\Om\ObjectBuilder\RelationCodeProducer\FkRelationCodeProducer;
@@ -16,13 +18,12 @@ use Propel\Generator\Model\IdMethod;
 use Propel\Generator\Model\PropelTypes;
 use Propel\Generator\Model\Table;
 use Propel\Generator\Platform\MssqlPlatform;
-use Propel\Generator\Platform\MysqlPlatform;
-use Propel\Generator\Platform\OraclePlatform;
 use Propel\Generator\Platform\PlatformInterface;
 use Propel\Runtime\ActiveQuery\FilterExpression\FilterCollector;
 use Propel\Runtime\Exception\PropelException;
 use function addslashes;
 use function array_any;
+use function array_filter;
 use function array_intersect;
 use function array_map;
 use function array_values;
@@ -386,8 +387,6 @@ abstract class {$this->getUnqualifiedClassName()}$parentClass implements ActiveR
 
         foreach ($this->columnCodeProducers as $producer) {
             $producer->addAccessor($script);
-        }
-        foreach ($this->columnCodeProducers as $producer) {
             $producer->addMutator($script);
         }
 
@@ -470,8 +469,7 @@ abstract class {$this->getUnqualifiedClassName()}$parentClass implements ActiveR
     #[\Override]
     protected function addClassClose(string &$script): void
     {
-        $script .= "}
-";
+        $script .= "}\n";
         $this->applyBehaviorModifier('objectFilter', $script, '');
     }
 
@@ -605,8 +603,7 @@ abstract class {$this->getUnqualifiedClassName()}$parentClass implements ActiveR
     protected function addConstructorClose(string &$script): void
     {
         $script .= "
-    }
-";
+    }\n";
     }
 
     /**
@@ -737,8 +734,7 @@ abstract class {$this->getUnqualifiedClassName()}$parentClass implements ActiveR
     protected function addApplyDefaultValuesClose(string &$script): void
     {
         $script .= "
-    }
-";
+    }\n";
     }
 
     /**
@@ -750,23 +746,10 @@ abstract class {$this->getUnqualifiedClassName()}$parentClass implements ActiveR
      */
     protected function addHasOnlyDefaultValues(string &$script): void
     {
-        $this->addHasOnlyDefaultValuesComment($script);
-        $this->addHasOnlyDefaultValuesOpen($script);
-        $this->addHasOnlyDefaultValuesBody($script);
-        $this->addHasOnlyDefaultValuesClose($script);
-    }
+        $defaultValueCodeProducers = array_filter($this->columnCodeProducers, fn (ColumnCodeProducer $producer) => (bool)$producer->getColumn()->getDefaultValue()?->isValueType());
+        $checkStatements = array_map(fn (ColumnCodeProducer $p) => $p->getIsDefaultValueStatement(), $defaultValueCodeProducers);
+        $checksConjunction = implode("\n            && ", $checkStatements) ?: 'true';
 
-    /**
-     * Adds the comment for the hasOnlyDefaultValues method
-     *
-     * @see addHasOnlyDefaultValues
-     *
-     * @param string $script The script will be modified in this method.
-     *
-     * @return void
-     */
-    protected function addHasOnlyDefaultValuesComment(string &$script): void
-    {
         $script .= "
     /**
      * Indicates whether the columns in this object are only set to default values.
@@ -775,85 +758,11 @@ abstract class {$this->getUnqualifiedClassName()}$parentClass implements ActiveR
      * modified _and_ has some values set which are non-default.
      *
      * @return bool Whether the columns in this object are only been set with default values.
-     */";
-    }
-
-    /**
-     * Adds the function declaration for the hasOnlyDefaultValues method
-     *
-     * @see addHasOnlyDefaultValues
-     *
-     * @param string $script The script will be modified in this method.
-     *
-     * @return void
      */
-    protected function addHasOnlyDefaultValuesOpen(string &$script): void
-    {
-        $script .= "
     public function hasOnlyDefaultValues(): bool
-    {";
-    }
-
-    /**
-     * Adds the function body for the hasOnlyDefaultValues method
-     *
-     * @see addHasOnlyDefaultValues
-     *
-     * @param string $script The script will be modified in this method.
-     *
-     * @return void
-     */
-    protected function addHasOnlyDefaultValuesBody(string &$script): void
     {
-        $table = $this->getTable();
-        $colsWithDefaults = [];
-        foreach ($table->getColumns() as $col) {
-            $def = $col->getDefaultValue();
-            if ($def !== null && !$def->isExpression()) {
-                $colsWithDefaults[] = $col;
-            }
-        }
-
-        foreach ($colsWithDefaults as $col) {
-            /** @var \Propel\Generator\Model\Column $col */
-            $clo = $col->getLowercasedName();
-            $accessor = "\$this->$clo";
-            if ($col->isTemporalType()) {
-                $fmt = $this->getPlatformOrFail()->getTemporalFormatter($col);
-                $accessor = "\$this->$clo && \$this->{$clo}->format('$fmt')";
-            }
-            $notEquals = '!==';
-            $defaultValueString = ColumnCodeProducerFactory::create($col, $this)->getDefaultValueString();
-            if ($col->isPhpObjectType()) {
-                $assumedClassName = $this->declareClass($col->getPhpType());
-                $defaultValueString = "new $assumedClassName($defaultValueString)";
-            }
-            if (strpos($defaultValueString, 'new ') === 0) {
-                $notEquals = '!='; // allow object-comparison for custom PHP types
-            }
-            $script .= "
-        if ($accessor $notEquals $defaultValueString) {
-            return false;
-        }\n";
-        }
-    }
-
-    /**
-     * Adds the function close for the hasOnlyDefaultValues method
-     *
-     * @see addHasOnlyDefaultValues
-     *
-     * @param string $script The script will be modified in this method.
-     *
-     * @return void
-     */
-    protected function addHasOnlyDefaultValuesClose(string &$script): void
-    {
-        $script .= "
-        return true;";
-        $script .= "
-    }
-";
+        return $checksConjunction;
+    }\n";
     }
 
     /**
@@ -931,9 +840,6 @@ abstract class {$this->getUnqualifiedClassName()}$parentClass implements ActiveR
      */
     protected function addHydrateBody(string &$script): void
     {
-        $table = $this->getTable();
-        $platform = $this->getPlatform();
-
         $tableMapClassName = $this->getTableMapClassName();
 
         $script .= "
@@ -941,76 +847,20 @@ abstract class {$this->getUnqualifiedClassName()}$parentClass implements ActiveR
             \$useNumericIndex = \$indexType === TableMap::TYPE_NUM;";
 
         $rowOffset = 0;
-        foreach ($table->getColumns() as $col) {
+        foreach ($this->columnCodeProducers as $columnCodeProducer) {
+            $col = $columnCodeProducer->getColumn();
             if ($col->isLazyLoad()) {
                 continue;
             }
+            $columnPhpName = $col->getPhpName();
+            $varName = '$' . lcfirst($columnPhpName) . 'Value';
 
             $script .= "\n
-            \$rowIndex = \$useNumericIndex ? \$startcol + $rowOffset : $tableMapClassName::translateFieldName('{$col->getPhpName()}', TableMap::TYPE_PHPNAME, \$indexType);
-            \$columnValue = \$row[\$rowIndex];";
-            $clo = $col->getLowercasedName();
-            if ($col->getType() === PropelTypes::CLOB_EMU && $this->getPlatform() instanceof OraclePlatform) {
-                // PDO_OCI returns a stream for CLOB objects, while other PDO adapters return a string...
-                $this->declareGlobalFunction('stream_get_contents');
-                $script .= "
-            \$this->$clo = stream_get_contents(\$columnValue);";
-            } elseif ($col->isLobType() && !$platform->hasStreamBlobImpl()) {
-                $script .= "
-            \$this->$clo = \$this->writeResource(\$columnValue);";
-            } elseif ($col->isTemporalType()) {
-                $dateTimeClass = $this->resolveColumnDateTimeClass($col);
-                $handleMysqlDate = false;
-                if ($this->getPlatform() instanceof MysqlPlatform) {
-                    if (in_array($col->getType(), [PropelTypes::TIMESTAMP, PropelTypes::DATETIME], true)) {
-                        $handleMysqlDate = true;
-                        $mysqlInvalidDateString = '0000-00-00 00:00:00';
-                    } elseif ($col->getType() === PropelTypes::DATE) {
-                        $handleMysqlDate = true;
-                        $mysqlInvalidDateString = '0000-00-00';
-                    }
-                    // 00:00:00 is a valid time, so no need to check for that.
-                }
-                if ($handleMysqlDate) {
-                    $script .= "
-            if (\$columnValue === '$mysqlInvalidDateString') {
-                \$columnValue = null;
-            }";
-                }
-                $script .= "
-            \$this->$clo = (\$columnValue !== null) ? PropelDateTime::newInstance(\$columnValue, null, '$dateTimeClass') : null;";
-            } elseif ($col->isUuidBinaryType()) {
-                $this->declareGlobalFunction('is_resource', 'stream_get_contents');
-                $uuidSwapFlag = $this->getUuidSwapFlagLiteral();
-                $script .= "
-            if (is_resource(\$columnValue)) {
-                \$columnValue = stream_get_contents(\$columnValue);
-            }
-            \$this->$clo = UuidConverter::binToUuid(\$columnValue, $uuidSwapFlag);";
-            } elseif ($col->isPhpPrimitiveType()) {
-                $script .= "
-            \$this->$clo = \$columnValue !== null ? ({$col->getPhpType()})\$columnValue : null;";
-            } elseif ($col->getType() === PropelTypes::OBJECT) {
-                $script .= "
-            \$this->$clo = \$columnValue;";
-            } elseif ($col->getType() === PropelTypes::PHP_ARRAY) {
-                $cloUnserialized = $clo . '_unserialized';
-                $script .= "
-            \$this->$clo = \$columnValue;
-            \$this->$cloUnserialized = null;";
-            } elseif ($col->isBinarySetType()) {
-                $cloConverted = $clo . '_converted';
-                $script .= "
-            \$this->$clo = \$columnValue;
-            \$this->$cloConverted = null;";
-            } elseif ($col->isPhpObjectType()) {
-                $assumedClassName = $this->declareClass($col->getPhpType());
-                $script .= "
-            \$this->$clo = (\$columnValue === null) ? null : new $assumedClassName(\$columnValue);";
-            } else {
-                $script .= "
-            \$this->$clo = \$columnValue;";
-            }
+            \$rowIndex = \$useNumericIndex ? \$startcol + $rowOffset : $tableMapClassName::translateFieldName('$columnPhpName', TableMap::TYPE_PHPNAME, \$indexType);
+            $varName = \$row[\$rowIndex];";
+
+            $script .= $columnCodeProducer->getHydrateStatement($varName);
+
             $rowOffset++;
         }
 
@@ -1158,8 +1008,7 @@ abstract class {$this->getUnqualifiedClassName()}$parentClass implements ActiveR
         $script .= "
 
         return \$query;
-    }
-";
+    }\n";
     }
 
     /**
@@ -1225,10 +1074,11 @@ abstract class {$this->getUnqualifiedClassName()}$parentClass implements ActiveR
     {
         $script .= "
         \$tableMap = {$this->getTableMapClass()}::getTableMap();
-        \$criteria = new Criteria(" . $this->getTableMapClass() . "::DATABASE_NAME);
-";
-        foreach ($this->getTable()->getColumns() as $col) {
-            $accessValueStatement = $this->getAccessValueStatement($col);
+        \$criteria = new Criteria(" . $this->getTableMapClass() . "::DATABASE_NAME);\n";
+
+        foreach ($this->columnCodeProducers as $columnCodeProducer) {
+            $col = $columnCodeProducer->getColumn();
+            $accessValueStatement = $columnCodeProducer->getAccessValueStatement();
             $columnConstant = $this->getColumnConstant($col);
             $columnName = $col->getName();
             $script .= "
@@ -1252,8 +1102,7 @@ abstract class {$this->getUnqualifiedClassName()}$parentClass implements ActiveR
         $script .= "
 
         return \$criteria;
-    }
-";
+    }\n";
     }
 
     /**
@@ -1362,8 +1211,7 @@ abstract class {$this->getUnqualifiedClassName()}$parentClass implements ActiveR
         }
         $script .= "
         return \$result;
-    }
-";
+    }\n";
     }
 
     // addToArray()
@@ -1432,8 +1280,7 @@ $indent};";
         \$pos = {$tableMapClassName}::translateFieldName(\$name, \$type, TableMap::TYPE_NUM);
 
         return \$this->getByPosition(\$pos);
-    }
-";
+    }\n";
     }
 
     /**
@@ -1466,8 +1313,7 @@ $indent};";
         $script .= "
             default => null
         };
-    }
-";
+    }\n";
     }
 
     /**
@@ -1499,8 +1345,7 @@ $indent};";
         \$this->setByPosition(\$pos, \$value);
 
         return \$this;
-    }
-";
+    }\n";
     }
 
     /**
@@ -1570,8 +1415,8 @@ $indent};";
      */
     public function fromArray(array \$arr, string \$keyType = TableMap::$defaultKeyType)
     {
-        \$keys = " . $this->getTableMapClassName() . "::getFieldNames(\$keyType);
-";
+        \$keys = " . $this->getTableMapClassName() . "::getFieldNames(\$keyType);\n";
+
         foreach ($table->getColumns() as $num => $col) {
             $cfc = $col->getPhpName();
             $script .= "
@@ -1582,8 +1427,7 @@ $indent};";
         $script .= "
 
         return \$this;
-    }
-";
+    }\n";
     }
 
     /**
@@ -1622,8 +1466,7 @@ $indent};";
         \$this->fromArray(\$parser->toArray(\$data), \$keyType);
 
         return \$this;
-    }
-";
+    }\n";
     }
 
     /**
@@ -1748,8 +1591,7 @@ $indent};";
     protected function addDeleteClose(string &$script): void
     {
         $script .= "
-    }
-";
+    }\n";
     }
 
     /**
@@ -1761,7 +1603,6 @@ $indent};";
      */
     protected function addReload(string &$script): void
     {
-        $table = $this->getTable();
         $tableMapClass = $this->getTableMapClass();
         $queryClassName = $this->getQueryClassName();
         $script .= "
@@ -1795,24 +1636,16 @@ $indent};";
         if (!\$row || \$row === true) {
             throw new PropelException('Cannot find matching row in the database to reload object values.');
         }
-        \$this->hydrate(\$row, 0, true, \$dataFetcher->getIndexType()); // rehydrate
-";
+        \$this->hydrate(\$row, 0, true, \$dataFetcher->getIndexType());\n";
 
-        // support for lazy load columns
-        foreach ($table->getColumns() as $col) {
-            if (!$col->isLazyLoad()) {
-                continue;
-            }
-            $clo = $col->getLowercasedName();
-            $script .= "
-        // Reset the $clo lazy-load column
-        \$this->{$clo} = null;
-        \$this->{$clo}_isLoaded = false;
-";
+        /** @var array<\Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes\LazyLoadColumnCodeProducer> $lazyLoadCodeProducers */
+        $lazyLoadCodeProducers = array_filter($this->columnCodeProducers, fn (ColumnCodeProducer $p) => $p instanceof LazyLoadColumnCodeProducer);
+        foreach ($lazyLoadCodeProducers as $producer) {
+            $script .= $producer->getReloadStatement();
         }
 
         $script .= "
-        if (\$deep) { // also de-associate any related objects?";
+        if (\$deep) {";
 
         foreach ($this->fkRelationCodeProducers as $producer) {
             $producer->addOnReloadCode($script);
@@ -1828,8 +1661,7 @@ $indent};";
 
         $script .= "
         }
-    }
-";
+    }\n";
     }
 
     /**
@@ -1931,8 +1763,7 @@ $indent};";
         }
         $script .= "
         return spl_object_hash(\$this);
-    }
-";
+    }\n";
     }
 
     /**
@@ -1978,8 +1809,7 @@ $indent};";
     public function getPrimaryKey()
     {
         return \$this->get{$name}();
-    }
-";
+    }\n";
     }
 
     /**
@@ -2034,8 +1864,7 @@ $indent};";
     public function getPrimaryKey()
     {
         return null;
-    }
-";
+    }\n";
     }
 
     /**
@@ -2149,8 +1978,7 @@ $indent};";
     public function isPrimaryKeyNull(): bool
     {
         return {$returnExpression};
-    }
-";
+    }\n";
     }
 
     /**
@@ -2306,8 +2134,7 @@ $indent};";
         }
         $script .= "
         return \$affectedRows;
-    }
-";
+    }\n";
     }
 
     /**
@@ -2362,8 +2189,7 @@ $indent};";
         }
         $script .= "
         \$this->setNew(false);
-    }
-";
+    }\n";
 
         return $script;
     }
@@ -2498,8 +2324,7 @@ $indent};";
             } catch (Exception \$e) {
                 throw new PropelException('Unable to get sequence id.', 0, \$e);
             }
-        }
-";
+        }\n";
         }
 
         $script .= "
@@ -2531,9 +2356,10 @@ $indent};";
                 switch (\$columnName) {";
 
         $tab = '                        ';
-        foreach ($table->getColumns() as $column) {
+        foreach ($this->columnCodeProducers as $columnCodeProducer) {
+            $column = $columnCodeProducer->getColumn();
             $columnNameCase = var_export($this->quoteIdentifier($column->getName()), true);
-            $accessValueStatement = $this->getAccessValueStatement($column);
+            $accessValueStatement = $columnCodeProducer->getAccessValueStatement();
             $bindValueStatement = $platform->getColumnBindingPHP($column, '$identifier', $accessValueStatement, $tab);
             $script .= "
                     case $columnNameCase:$bindValueStatement
@@ -2548,8 +2374,7 @@ $indent};";
             Propel::log(\$e->getMessage(), Propel::LOG_ERR);
 
             throw new PropelException(\"Unable to execute INSERT statement [\$sql]\", 0, \$e);
-        }
-";
+        }\n";
 
         // if auto-increment, get the id after
         if ($platform->isNativeIdMethodAutoIncrement() && $table->getIdMethod() === 'native') {
@@ -2574,35 +2399,10 @@ $indent};";
         \$this->set{$columnName}($cast\$pk);";
                 }
             }
-            $script .= "
-";
+            $script .= "\n";
         }
 
         return $script;
-    }
-
-    /**
-     * Get the statement how a column value is accessed in the script.
-     *
-     * Note that this is not necessarily just the getter. If the value is
-     * stored on the model in an encoded format, the statement returned by
-     * this method includes the statement to decode the value.
-     *
-     * @param \Propel\Generator\Model\Column $column
-     *
-     * @return string
-     */
-    protected function getAccessValueStatement(Column $column): string
-    {
-        $columnName = $column->getLowercasedName();
-
-        if ($column->isUuidBinaryType()) {
-            $uuidSwapFlag = $this->getUuidSwapFlagLiteral();
-
-            return "UuidConverter::uuidToBin(\$this->$columnName, $uuidSwapFlag)";
-        }
-
-        return "\$this->$columnName";
     }
 
     /**
@@ -2628,8 +2428,7 @@ $indent};";
         \$valuesCriteria = \$this->buildCriteria();
 
         return \$selectCriteria->doUpdate(\$valuesCriteria, \$con);
-    }
-";
+    }\n";
     }
 
     /**
@@ -2646,8 +2445,7 @@ $indent};";
      * Flag to prevent endless save loop, if this object is referenced
      * by another object which falls in this transaction.
      */
-    protected bool \$alreadyInSave = false;
-";
+    protected bool \$alreadyInSave = false;\n";
     }
 
     /**
@@ -2867,8 +2665,7 @@ $indent};";
     protected function addSaveClose(string &$script): void
     {
         $script .= "
-    }
-";
+    }\n";
     }
 
     /**
@@ -2978,8 +2775,7 @@ $indent};";
         if (\$deepCopy) {
             // important: temporarily setNew(false) because this affects the behavior of
             // the getter/setter methods for fkey referrer objects.
-            \$copyObj->setNew(false);
-";
+            \$copyObj->setNew(false);\n";
             foreach ($table->getReferrers() as $fk) {
                 //HL: commenting out self-referential check below
                 //        it seems to work as expected and is probably desirable to have those referrers from same table deep-copied.
@@ -3009,8 +2805,7 @@ $indent};";
                 // } /* if tblFK != table */
             }
             $script .= "
-        }
-";
+        }\n";
         } /* if (count referrers > 0 ) */
 
         $script .= "
@@ -3027,8 +2822,7 @@ $indent};";
         }
         $script .= "
         }
-    }
-";
+    }\n";
     }
 
     /**
@@ -3062,38 +2856,20 @@ $indent};";
         }
 
         foreach ($table->getForeignKeys() as $fk) {
-            $attributeName = $this->getFKVarName($fk);
+            $attribute = '$this->' . $this->getFKVarName($fk);
             $relationIdentifier = $fk->getIdentifierReversed();
             $removeMethodCall = $fk->isOneToOne()
-            ? "set{$relationIdentifier}(null)"
-            : "remove{$relationIdentifier}(\$this)";
+                ? "set{$relationIdentifier}(null)"
+                : "remove{$relationIdentifier}(\$this)";
 
             $script .= "
-        if (\$this->$attributeName !== null) {
-            \$this->$attributeName->$removeMethodCall;
+        if ($attribute !== null) {
+            {$attribute}->$removeMethodCall;
         }";
         }
 
-        foreach ($table->getColumns() as $col) {
-            $clo = $col->getLowercasedName();
-            $script .= "
-        \$this->" . $clo . ' = null;';
-            if ($col->isLazyLoad()) {
-                $script .= "
-        \$this->" . $clo . '_isLoaded = false;';
-            }
-            if ($col->getType() == PropelTypes::OBJECT || $col->getType() == PropelTypes::PHP_ARRAY) {
-                $cloUnserialized = $clo . '_unserialized';
-
-                $script .= "
-        \$this->$cloUnserialized = null;";
-            }
-            if ($col->isBinarySetType()) {
-                $cloConverted = $clo . '_converted';
-
-                $script .= "
-        \$this->$cloConverted = null;";
-            }
+        foreach ($this->columnCodeProducers as $columnCodeProducer) {
+            $script .= $columnCodeProducer->getClearValueStatement();
         }
 
         $script .= "
@@ -3111,8 +2887,7 @@ $indent};";
         \$this->setDeleted(false);
 
         return \$this;
-    }
-";
+    }\n";
     }
 
     /**
@@ -3144,8 +2919,7 @@ $indent};";
     public function clearAllReferences(bool \$deep = false): static
     {{$methodBodyCode}
         return \$this;
-    }
-";
+    }\n";
     }
 
     /**
@@ -3205,8 +2979,7 @@ $indent};";
     public function __toString(): string
     {
         return (string)\$this->get{$column->getPhpName()}();
-    }
-";
+    }\n";
 
                 return;
             }
@@ -3221,8 +2994,7 @@ $indent};";
     public function __toString()
     {
         return (string)\$this->exportTo(" . $this->getTableMapClassName() . "::DEFAULT_STRING_FORMAT);
-    }
-";
+    }\n";
     }
 
     /**

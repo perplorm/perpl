@@ -13,6 +13,11 @@ use Propel\Generator\Platform\SqlsrvPlatform;
 class LazyLoadColumnCodeProducer extends ColumnCodeProducer
 {
     /**
+     * @var string
+     */
+    protected const IS_LOADED_ATTRIBUTE_SUFFIX = '_is_loaded';
+
+    /**
      * @var \Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes\ColumnCodeProducer
      */
     protected ColumnCodeProducer $columnCodeProducer;
@@ -40,12 +45,13 @@ class LazyLoadColumnCodeProducer extends ColumnCodeProducer
     }
 
     /**
+     * @param string $prefix
+     *
      * @return string
      */
-    #[\Override]
-    public function getDefaultValueString(): string
+    protected function getIsLoadedAttributeName(string $prefix = '$this->'): string
     {
-        return $this->columnCodeProducer->getDefaultValueString();
+        return $this->getAttributeName($prefix, static::IS_LOADED_ATTRIBUTE_SUFFIX);
     }
 
     /**
@@ -68,12 +74,56 @@ class LazyLoadColumnCodeProducer extends ColumnCodeProducer
     protected function addColumnAttributeLoaderDeclaration(string &$script): void
     {
         $clo = $this->column->getLowercasedName();
+        $isLoadedAttribute = $this->getIsLoadedAttributeName('$');
+
         $script .= "
     /**
      * Whether the lazy-loaded \$$clo value has been loaded from database.
      * This is necessary to avoid repeated lookups if \$$clo column is NULL in the db.
      */
-    protected bool \${$clo}_isLoaded = false;\n";
+    protected bool $isLoadedAttribute = false;\n";
+    }
+
+    /**
+     * Build statement used in Model::clear()
+     *
+     * @see ObjectBuilder::addClear()}
+     *
+     * @return string
+     */
+    #[\Override]
+    public function getClearValueStatement(): string
+    {
+        $isLoadedAttribute = $this->getIsLoadedAttributeName();
+
+        return $this->columnCodeProducer->getClearValueStatement() . "
+        $isLoadedAttribute = false;";
+    }
+
+    /**
+     * Build statement used in Model::reload()
+     *
+     * @see ObjectBuilder::addReload()}
+     *
+     * @return string
+     */
+    public function getReloadStatement(): string
+    {
+        $isLoadedAttribute = $this->getIsLoadedAttributeName();
+        $fieldAttribute = $this->getAttributeName();
+
+        return "
+        $fieldAttribute = null;
+        $isLoadedAttribute = false;\n";
+    }
+
+    /**
+     * @return string
+     */
+    #[\Override]
+    public function getDefaultValueString(): string
+    {
+        return $this->columnCodeProducer->getDefaultValueString();
     }
 
     /**
@@ -132,12 +182,14 @@ class LazyLoadColumnCodeProducer extends ColumnCodeProducer
      */
     protected function getAccessorLazyLoadSnippet(): string
     {
-        $clo = $this->column->getLowercasedName();
+        $fieldAttribute = $this->getAttributeName();
+        $isLoadedAttribute = $this->getIsLoadedAttributeName();
         $defaultValueString = $this->getDefaultValueString();
+        $callLoad = 'load' . $this->column->getPhpName();
 
         return "
-        if (!\$this->{$clo}_isLoaded && \$this->{$clo} === {$defaultValueString} && !\$this->isNew()) {
-            \$this->load{$this->column->getPhpName()}(\$con);
+        if (!$isLoadedAttribute && $fieldAttribute === $defaultValueString && !\$this->isNew()) {
+            \$this->$callLoad(\$con);
         }\n";
     }
 
@@ -220,9 +272,11 @@ class LazyLoadColumnCodeProducer extends ColumnCodeProducer
     {
         $this->declareGlobalFunction('current');
         $platform = $this->getPlatform();
-        $clo = $this->column->getLowercasedName();
+        $fieldAttribute = $this->getAttributeName();
+        $isLoadedAttribute = $this->getIsLoadedAttributeName();
         $columnConstant = $this->builder->getColumnConstant($this->column);
         $queryClassName = $this->getQueryClassName();
+        $clo = $this->column->getLowercasedName();
 
         // pdo_sqlsrv driver requires the use of PDOStatement::bindColumn() or a hex string will be returned
         if ($this->column->getType() === PropelTypes::BLOB && $platform instanceof SqlsrvPlatform) {
@@ -255,17 +309,19 @@ class LazyLoadColumnCodeProducer extends ColumnCodeProducer
             $this->declareGlobalFunction('stream_get_contents');
             $script .= "
             if (\$firstColumn) {
-                \$this->$clo = stream_get_contents(\$firstColumn);
+                $fieldAttribute = stream_get_contents(\$firstColumn);
             }";
         } elseif ($this->column->isLobType() && !$platform->hasStreamBlobImpl()) {
             $script .= "
-            \$this->$clo = \$this->writeResource(\$firstColumn);";
+            $fieldAttribute = \$this->writeResource(\$firstColumn);";
         } elseif ($this->column->isPhpPrimitiveType()) {
+            $phpType = $this->column->getPhpType();
             $script .= "
-            \$this->$clo = (\$firstColumn !== null) ? (" . $this->column->getPhpType() . ')$firstColumn : null;';
+            $fieldAttribute = (\$firstColumn !== null) ? ($phpType)\$firstColumn : null;";
         } elseif ($this->column->isPhpObjectType()) {
+            $phpType = $this->column->getPhpType();
             $script .= "
-            \$this->$clo = (\$firstColumn !== null) ? new " . $this->column->getPhpType() . '($firstColumn) : null;';
+            $fieldAttribute = (\$firstColumn !== null) ? new $phpType(\$firstColumn) : null;";
         } elseif ($this->column->getType() === PropelTypes::UUID_BINARY) {
             $uuidSwapFlag = $this->builder->getUuidSwapFlagLiteral();
             $this->declareGlobalFunction('is_resource', 'stream_get_contents');
@@ -273,14 +329,14 @@ class LazyLoadColumnCodeProducer extends ColumnCodeProducer
             if (is_resource(\$firstColumn)) {
                 \$firstColumn = stream_get_contents(\$firstColumn);
             }
-            \$this->$clo = UuidConverter::binToUuid(\$firstColumn, $uuidSwapFlag);";
+            $fieldAttribute = UuidConverter::binToUuid(\$firstColumn, $uuidSwapFlag);";
         } else {
             $script .= "
-            \$this->$clo = \$firstColumn;";
+            $fieldAttribute = \$firstColumn;";
         }
 
         $script .= "
-            \$this->" . $clo . "_isLoaded = true;
+            $isLoadedAttribute = true;
         } catch (Exception \$e) {
             throw new PropelException('Error loading value for [$clo] column on demand.', 0, \$e);
         }";
@@ -331,14 +387,14 @@ class LazyLoadColumnCodeProducer extends ColumnCodeProducer
     #[\Override]
     protected function addMutatorBody(string &$script): void
     {
-        $clo = $this->column->getLowercasedName();
         $cfc = $this->column->getPhpName();
+        $isLoadedAttribute = $this->getIsLoadedAttributeName();
         $script .= "
         // explicitly set the is-loaded flag to true for this lazy load col;
         // it doesn't matter if the value is actually set or not (logic below) as
         // any attempt to set the value means that no db lookup should be performed
         // when the get$cfc() method is called.
-        \$this->{$clo}_isLoaded = true;\n";
+        $isLoadedAttribute = true;\n";
 
         $this->columnCodeProducer->addMutatorBody($script);
     }

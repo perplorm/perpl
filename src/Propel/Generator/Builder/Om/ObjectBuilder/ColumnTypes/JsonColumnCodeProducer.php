@@ -17,15 +17,13 @@ class JsonColumnCodeProducer extends ColumnCodeProducer
     {
         $clo = $this->column->getLowercasedName();
 
-        $orNull = $this->column->isNotNull() ? '' : '|null';
-
         $script .= "
     /**
      * Get the [$clo] column value.{$this->getColumnDescriptionDoc()}
      *
      * @param bool \$asArray Returns the JSON data as array instead of object{$additionalParam}
      *
-     * @return object|array{$orNull}
+     * @return object|array
      */";
     }
 
@@ -57,9 +55,10 @@ class JsonColumnCodeProducer extends ColumnCodeProducer
     #[\Override]
     protected function addAccessorBody(string &$script): void
     {
-        $clo = $this->column->getLowercasedName();
+        $stringAttribute = $this->getAttributeName();
+
         $script .= "
-        return json_decode(\$this->$clo, \$asArray);";
+        return json_decode($stringAttribute, \$asArray);";
     }
 
     /**
@@ -98,7 +97,8 @@ class JsonColumnCodeProducer extends ColumnCodeProducer
     #[\Override]
     protected function addMutatorBody(string &$script): void
     {
-        $clo = $this->column->getLowercasedName();
+        $stringAttribute = $this->getAttributeName();
+        $columnConstant = $this->builder->getColumnConstant($this->column);
 
         $script .= "
         if (is_string(\$v)) {
@@ -106,9 +106,9 @@ class JsonColumnCodeProducer extends ColumnCodeProducer
             \$v = json_decode(\$v);
         }
         \$encodedValue = json_encode(\$v);
-        if (\$encodedValue !== \$this->$clo) {
-            \$this->$clo = \$encodedValue;
-            \$this->modifiedColumns[" . $this->builder->getColumnConstant($this->column) . "] = true;
+        if (\$encodedValue !== $stringAttribute) {
+            $stringAttribute = \$encodedValue;
+            \$this->modifiedColumns[$columnConstant] = true;
         }\n";
     }
 }

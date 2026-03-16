@@ -14,19 +14,18 @@ class ArrayColumnCodeProducer extends AbstractArrayColumnCodeProducer
     #[\Override]
     protected function getQualifiedTypeString(): string
     {
-        return 'array';
+        return 'array<string>';
     }
 
     /**
-     * @param string $script The script will be modified in this method.
+     * Get attribute types in order [database field type, deserialized type]
      *
-     * @return void
+     * @return array{string, string}
      */
     #[\Override]
-    public function addColumnAttributes(string &$script): void
+    protected function getQualifiedAttributeTypes(): array
     {
-        $this->addDefaultColumnAttribute($script, 'string');
-        $this->addColumnAttributeUnserialized($script, 'array<string>');
+        return ['string', 'array<string>'];
     }
 
     /**
@@ -65,18 +64,15 @@ class ArrayColumnCodeProducer extends AbstractArrayColumnCodeProducer
     #[\Override]
     protected function addAccessorBody(string &$script): void
     {
-        $clo = $this->column->getLowercasedName();
-        $cloUnserialized = $clo . '_unserialized';
+        $stringAttribute = $this->getAttributeName();
+        $arrayAttribute = $this->getDeserializedAttributeName();
 
         $script .= "
-        if (\$this->$cloUnserialized === null) {
-            \$this->$cloUnserialized = [];
-        }
-        if (!\$this->$cloUnserialized && \$this->$clo !== null) {
-            \$this->$cloUnserialized = static::unserializeArray(\$this->$clo);
+        if ($arrayAttribute === null) {
+            $arrayAttribute = !$stringAttribute ? [] : static::unserializeArray($stringAttribute);
         }
 
-        return \$this->$cloUnserialized;";
+        return $arrayAttribute;";
     }
 
     /**
@@ -105,15 +101,15 @@ class ArrayColumnCodeProducer extends AbstractArrayColumnCodeProducer
     #[\Override]
     protected function addMutatorBody(string &$script): void
     {
-        $col = $this->column;
-        $clo = $col->getLowercasedName();
-        $cloUnserialized = $clo . '_unserialized';
+        $stringAttribute = $this->getAttributeName();
+        $arrayAttribute = $this->getDeserializedAttributeName();
+        $columnConstant = $this->builder->getColumnConstant($this->getColumn());
 
         $script .= "
-        if (\$this->$cloUnserialized !== \$v) {
-            \$this->$cloUnserialized = \$v;
-            \$this->$clo = static::serializeArray(\$v);
-            \$this->modifiedColumns[" . $this->builder->getColumnConstant($col) . "] = true;
+        if ($arrayAttribute !== \$v) {
+            $arrayAttribute = \$v;
+            $stringAttribute = static::serializeArray(\$v);
+            \$this->modifiedColumns[$columnConstant] = true;
         }\n";
     }
 

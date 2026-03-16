@@ -4,7 +4,7 @@ Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes\JsonColumnCodeProducer
 addColumnAttributes():
 
     /**
-     * The value for the json_column field.
+     * Value of [json_column] field.
      */
     protected string|null $json_column = null;
 
@@ -16,7 +16,7 @@ addAccessor():
      *
      * @param bool $asArray Returns the JSON data as array instead of object
      *
-     * @return object|array|null
+     * @return object|array
      */
     public function getJsonColumn($asArray = true)
     {

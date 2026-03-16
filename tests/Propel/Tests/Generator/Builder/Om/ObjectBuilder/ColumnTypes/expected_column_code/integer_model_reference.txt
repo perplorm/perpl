@@ -4,7 +4,7 @@ Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes\ColumnCodeProducer
 addColumnAttributes():
 
     /**
-     * The value for the integer_column field.
+     * Value of [integer_column] field.
      *
      * Note: this column has a database default value of: 42
      */

@@ -4,11 +4,13 @@ Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes\SetNativeColumnCodeProduce
 addColumnAttributes():
 
     /**
-     * The value for the native_set_column field.
+     * Value of [native_set_column] field.
      */
     protected string|null $native_set_column = null;
 
     /**
+     * Deserialized value of [native_set_column] field.
+     *
      * @var array<string>|null
      */
     protected array|null $native_set_column_converted = null;
@@ -39,9 +41,7 @@ addMutator():
     /**
      * Set the value of [native_set_column] column.
      *
-     * @param array|null $v new value
-     *
-     * @throws \Propel\Runtime\Exception\PropelException
+     * @param array<string>|null $v new value
      *
      * @return $this
      */

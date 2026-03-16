@@ -4,7 +4,7 @@ Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes\ColumnCodeProducer
 addColumnAttributes():
 
     /**
-     * The value for the uuid_column field.
+     * Value of [uuid_column] field.
      */
     protected string|null $uuid_column = null;
 

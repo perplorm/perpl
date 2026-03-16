@@ -10,14 +10,20 @@ use Exception;
 use Propel\Generator\Exception\EngineException;
 use Propel\Generator\Model\PropelTypes;
 use Propel\Generator\Platform\MysqlPlatform;
+use Propel\Runtime\Util\PropelDateTime;
 use function date_default_timezone_set;
 use function in_array;
 use function is_subclass_of;
 use function sprintf;
 use function var_export;
 
-class TemporalColumnCodeProducer extends ColumnCodeProducer
+class TemporalColumnCodeProducer extends AbstractDeserializableColumnCodeProducer
 {
+    /**
+     * @var string
+     */
+    protected const DESERIALIZED_ATTRIBUTE_AFFIX = '_date_object';
+
     /**
      * @return string
      */
@@ -28,6 +34,48 @@ class TemporalColumnCodeProducer extends ColumnCodeProducer
     }
 
     /**
+     * Get attribute types in order [database field type, deserialized type]
+     *
+     * @return array{string, string}
+     */
+    #[\Override]
+    protected function getQualifiedAttributeTypes(): array
+    {
+        return ['string', $this->getQualifiedTypeString()];
+    }
+
+    /**
+     * Build statement used in Model::hydrate()
+     *
+     * @see ObjectBuilder::addHydrateBody()}
+     *
+     * @param string $valueVariable
+     *
+     * @return string
+     */
+    #[\Override]
+    public function getHydrateStatement(string $valueVariable): string
+    {
+        $stringAttribute = $this->getAttributeName();
+        $objectAttribute = $this->getDeserializedAttributeName();
+
+        $mysqlInvalidDateString = !$this->getPlatform() instanceof MysqlPlatform ? null
+            : match ($this->column->getType()) {
+                PropelTypes::TIMESTAMP, PropelTypes::DATETIME => '0000-00-00 00:00:00',
+                PropelTypes::DATE => '0000-00-00',
+                default => null
+            };
+
+        $stringAttributeValueStatement = $mysqlInvalidDateString
+            ? "$valueVariable === '$mysqlInvalidDateString' ? null : $valueVariable"
+            : $valueVariable;
+
+        return "
+            $objectAttribute = null;
+            $stringAttribute = $stringAttributeValueStatement;";
+    }
+
+    /**
      * Build statement used in Model::applyDefaultValues()
      *
      * @return string
@@ -35,12 +83,13 @@ class TemporalColumnCodeProducer extends ColumnCodeProducer
     #[\Override]
     public function getApplyDefaultValueStatement(): string
     {
-        $clo = $this->column->getLowercasedName();
+        $stringAttribute = $this->getAttributeName();
+        $objectAttribute = $this->getDeserializedAttributeName();
         $defaultValue = $this->getDefaultValueString();
-        $dateTimeClass = $this->resolveColumnDateTimeClass($this->column);
 
         return "
-        \$this->{$clo} = PropelDateTime::newInstance($defaultValue, null, '$dateTimeClass');";
+        $objectAttribute = $stringAttribute === $defaultValue ? $objectAttribute : null;
+        $stringAttribute = $defaultValue;";
     }
 
     /**
@@ -64,7 +113,7 @@ class TemporalColumnCodeProducer extends ColumnCodeProducer
         try {
             if (
                 !($this->getPlatform() instanceof MysqlPlatform &&
-                ($val === '0000-00-00 00:00:00' || $val === '0000-00-00'))
+                    ($val === '0000-00-00 00:00:00' || $val === '0000-00-00'))
             ) {
                 // while technically this is not a default value of NULL,
                 // this seems to be closest in meaning.
@@ -79,6 +128,22 @@ class TemporalColumnCodeProducer extends ColumnCodeProducer
         }
 
         return $defaultValue;
+    }
+
+    /**
+     * Build statement to check if current value is the default value.
+     *
+     * @see ObjectBuilder::addHasOnlyDefaultValuesBody()
+     *
+     * @return string
+     */
+    #[\Override]
+    public function getIsDefaultValueStatement(): string
+    {
+        $stringAttribute = $this->getAttributeName();
+        $defaultValueString = $this->getDefaultValueString();
+
+        return "$stringAttribute === $defaultValueString";
     }
 
     /**
@@ -116,7 +181,7 @@ class TemporalColumnCodeProducer extends ColumnCodeProducer
 
         $script .= "
     /**
-     * Get the [optionally formatted] temporal [$clo] column value.{$this->getColumnDescriptionDoc()}
+     * Get the temporal [$clo] column value.{$this->getColumnDescriptionDoc()}
      *
      * @psalm-return (\$format is null ? {$dateTimeClass}|\DateTimeInterface|null : string|null)
      *
@@ -191,14 +256,16 @@ class TemporalColumnCodeProducer extends ColumnCodeProducer
     protected function addAccessorBody(string &$script): void
     {
         $this->declareClass('DateTimeInterface');
-        $clo = $this->column->getLowercasedName();
+        $stringAttribute = $this->getAttributeName();
+        $objectAttribute = $this->getDeserializedAttributeName();
+        $createInstanceStatement = $this->buildCreateInstanceStatement();
 
         $script .= "
-        if (\$format === null) {
-            return \$this->$clo;
-        } else {
-            return \$this->$clo instanceof DateTimeInterface ? \$this->{$clo}->format(\$format) : null;
-        }";
+        if (!$objectAttribute && $stringAttribute) {
+            $objectAttribute = $createInstanceStatement;
+        }
+
+        return \$format !== null ? {$objectAttribute}?->format(\$format) : $objectAttribute;";
     }
 
     /**
@@ -211,14 +278,12 @@ class TemporalColumnCodeProducer extends ColumnCodeProducer
     {
         $col = $this->column;
         $clo = $col->getLowercasedName();
-        $orNull = $col->isNotNull() ? '' : '|null';
 
         $script .= "
     /**
      * Sets the value of [$clo] column to a normalized version of the date/time value specified.{$this->getColumnDescriptionDoc()}
      *
-     * @param \DateTimeInterface|string|int{$orNull} \$v string, integer (timestamp), or \DateTimeInterface value.
-     *               Empty strings are treated as NULL.
+     * @param \DateTimeInterface|string|int|null \$v Empty strings are treated as null.
      *
      * @return \$this
      */";
@@ -236,48 +301,44 @@ class TemporalColumnCodeProducer extends ColumnCodeProducer
     #[\Override]
     protected function addMutatorBody(string &$script): void
     {
+        $this->declareClasses(DateTimeInterface::class);
+
         $col = $this->column;
-        $clo = $col->getLowercasedName();
+        $stringAttribute = $this->getAttributeName();
+        $objectAttribute = $this->getDeserializedAttributeName();
+        $columnConstant = $this->builder->getColumnConstant($col);
+        $createInstanceStatement = $this->buildCreateInstanceStatement('$v');
+        $dateFormat = $this->getPlatform()->getTemporalFormatter($col);
 
-        $dateTimeClass = $this->resolveColumnDateTimeClass($this->column);
-        $this->declareClasses('\Propel\Runtime\Util\PropelDateTime');
-
-        $fmt = var_export($this->getPlatformOrFail()->getTemporalFormatter($col), true);
-
-        $script .= "
-        \$dt = PropelDateTime::newInstance(\$v, null, '$dateTimeClass');
-        if (\$this->$clo !== null || \$dt !== null) {";
-
+        $additionalConditions = '';
         $def = $col->getDefaultValue();
         if ($def !== null && !$def->isExpression()) {
+            // special case: mark modified when default value is provided
             $defaultValue = $this->getDefaultValueString();
-            $script .= "
-            if (
-                \$dt !== \$this->{$clo} // normalized values don't match
-                || \$dt->format($fmt) === $defaultValue // or the entered value matches the default
-            ) {";
-        } else {
-            switch ($col->getType()) {
-                case 'DATE':
-                    $format = 'Y-m-d';
-
-                    break;
-                case 'TIME':
-                    $format = 'H:i:s.u';
-
-                    break;
-                default:
-                    $format = 'Y-m-d H:i:s.u';
-            }
-            $script .= "
-            if (\$this->{$clo} === null || \$dt === null || \$dt->format('$format') !== \$this->{$clo}->format('$format')) {";
+            $additionalConditions = " || \$newDateString === $defaultValue";
         }
 
         $script .= "
-                \$this->$clo = \$dt === null ? null : clone \$dt;
-                \$this->modifiedColumns[" . $this->builder->getColumnConstant($col) . "] = true;
-            }
-        } // if either are not null
-";
+        \$newDateObject = \$v instanceof DateTimeInterface ? \$v : $createInstanceStatement;
+        \$newDateString = \$newDateObject?->format('$dateFormat');
+        if ($stringAttribute !== \$newDateString{$additionalConditions}) {
+            $objectAttribute = \$newDateObject;
+            $stringAttribute = \$newDateString;
+            \$this->modifiedColumns[$columnConstant] = true;
+        }\n";
+    }
+
+    /**
+     * @param string|null $var
+     *
+     * @return string
+     */
+    protected function buildCreateInstanceStatement(string|null $var = null): string
+    {
+        $this->declareClasses(PropelDateTime::class);
+        $dateTimeClass = $this->resolveColumnDateTimeClass($this->column);
+        $var ??= $this->getAttributeName();
+
+        return "PropelDateTime::newInstance($var, null, '$dateTimeClass')";
     }
 }

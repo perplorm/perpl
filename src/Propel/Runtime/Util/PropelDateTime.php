@@ -127,34 +127,35 @@ class PropelDateTime extends DateTime
     /**
      * Factory method to get a DateTime object from a temporal input
      *
-     * @param mixed $value The value to convert (can be a string, a timestamp, or another DateTime)
-     * @param \DateTimeZone|null $timeZone (optional) timezone
-     * @param class-string<\DateTimeInterface> $dateTimeClass The class of the object to create, defaults to DateTime
+     * @param \DateTimeInterface|string|int|null $value
+     * @param \DateTimeZone|null $timeZone
+     * @param class-string<\DateTimeInterface> $dateTimeClass Defaults to DateTime
      *
      * @throws \Propel\Runtime\Exception\PropelException
      *
      * @return \DateTimeInterface|null An instance of $dateTimeClass
      */
-    public static function newInstance($value, ?DateTimeZone $timeZone = null, string $dateTimeClass = DateTime::class): DateTimeInterface|null
-    {
+    public static function newInstance(
+        string|int|DateTimeInterface|null $value,
+        ?DateTimeZone $timeZone = null,
+        string $dateTimeClass = DateTime::class
+    ): DateTimeInterface|null {
         if ($value instanceof DateTimeInterface) {
-            return $value;
+            return clone $value;
         }
-        if ($value === false || $value === null || $value === '') {
+        if ($value === null || $value === '') {
             // '' is seen as NULL for temporal objects
             // because DateTime('') == DateTime('now') -- which is unexpected
             return null;
         }
 
         try {
-            $dateTimeObject = static::createDateTime($value, $timeZone, $dateTimeClass);
+            return static::createDateTime($value, $timeZone, $dateTimeClass);
         } catch (Exception $e) {
             $value = var_export($value, true);
 
-            throw new PropelException('Error parsing date/time value `' . $value . '`: ' . $e->getMessage(), 0, $e);
+            throw new PropelException("Error parsing date/time value `$value`: " . $e->getMessage(), 0, $e);
         }
-
-        return $dateTimeObject;
     }
 
     /**

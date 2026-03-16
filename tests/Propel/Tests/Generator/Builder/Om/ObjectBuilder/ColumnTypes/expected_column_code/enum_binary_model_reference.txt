@@ -4,7 +4,7 @@ Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes\EnumBinaryColumnCodeProduc
 addColumnAttributes():
 
     /**
-     * The value for the bin_enum_column field.
+     * Value of [bin_enum_column] field.
      */
     protected int|null $bin_enum_column = null;
 

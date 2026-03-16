@@ -4,7 +4,7 @@ Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes\LobColumnCodeProducer
 addColumnAttributes():
 
     /**
-     * The value for the blob_column field.
+     * Value of [blob_column] field.
      *
      * @var resource|string|null
      */
