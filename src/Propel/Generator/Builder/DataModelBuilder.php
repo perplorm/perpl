@@ -590,13 +590,11 @@ abstract class DataModelBuilder
     /**
      * @param string ...$classNames
      *
-     * @return void
+     * @return array<string>
      */
-    public function declareClasses(string ...$classNames): void
+    public function declareClasses(string ...$classNames): array
     {
-        foreach ($classNames as $class) {
-            $this->declareClass($class);
-        }
+        return array_map([$this, 'declareClass'], $classNames);
     }
 
     /**

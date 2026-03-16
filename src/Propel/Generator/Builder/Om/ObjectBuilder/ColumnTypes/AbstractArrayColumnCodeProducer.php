@@ -7,8 +7,23 @@ namespace Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes;
 /**
  * Base class for array-based column types (array and set).
  */
-abstract class AbstractArrayColumnCodeProducer extends ColumnCodeProducer
+abstract class AbstractArrayColumnCodeProducer extends AbstractDeserializableColumnCodeProducer
 {
+    /**
+     * Get template strings for when this is a lazy-loaded column
+     *
+     * @return array{string, string, string}
+     */
+    protected function getLazyLoadConnectionInterfaceDeclarations(): array
+    {
+        return !$this->column->isLazyLoad() ? ['', '', ''] : [
+            '
+     * @param \Propel\Runtime\Connection\ConnectionInterface $con Optional ConnectionInterface connection fetch lazy-loaded column.',
+            ', ?ConnectionInterface $con = null',
+            '$con',
+        ];
+    }
+
     /**
      * Adds a tester method for an array column.
      *
@@ -24,29 +39,20 @@ abstract class AbstractArrayColumnCodeProducer extends ColumnCodeProducer
         $cfc = $this->column->getPhpName();
         $visibility = $this->column->getAccessorVisibility();
         $singularPhpName = $this->column->getPhpSingularName();
-        $script .= $this->column->isLazyLoad() ? "
+
+        [$conDoc, $conParam, $conVar] = $this->getLazyLoadConnectionInterfaceDeclarations();
+
+        $script .= "
     /**
      * Test the presence of a value in the [$clo] $typeDescription column value.
      *
-     * @param mixed \$value
-     * @param \Propel\Runtime\Connection\ConnectionInterface \$con An optional ConnectionInterface connection to use for fetching this lazy-loaded column.
+     * @param mixed \$value{$conDoc}
      *
      * @return bool
      */
-    $visibility function has$singularPhpName(\$value, ?ConnectionInterface \$con = null): bool
+    $visibility function has$singularPhpName(\$value{$conParam}): bool
     {
-        return in_array(\$value, \$this->get$cfc(\$con));
-    }\n" : "
-    /**
-     * Test the presence of a value in the [$clo] $typeDescription column value.
-     *
-     * @param mixed \$value
-     *
-     * @return bool
-     */
-    $visibility function has$singularPhpName(\$value): bool
-    {
-        return in_array(\$value, \$this->get$cfc());
+        return in_array(\$value, \$this->get$cfc($conVar));
     }\n";
     }
 
@@ -65,33 +71,19 @@ abstract class AbstractArrayColumnCodeProducer extends ColumnCodeProducer
         $cfc = $col->getPhpName();
         $visibility = $col->getAccessorVisibility();
         $singularPhpName = $col->getPhpSingularName();
-        $script .= $this->column->isLazyLoad() ? "
-    /**
-     * Adds a value to the [$clo] $typeDescription column value.{$this->getColumnDescriptionDoc()}
-     *
-     * @param mixed \$value
-     * @param ConnectionInterface \$con An optional ConnectionInterface connection to use for fetching this lazy-loaded column.
-     *
-     * @return \$this
-     */
-    $visibility function add$singularPhpName(\$value, ?ConnectionInterface \$con = null)
-    {
-        \$currentArray = \$this->get$cfc(\$con);
-        \$currentArray[] = \$value;
-        \$this->set$cfc(\$currentArray);
+        [$conDoc, $conParam, $conVar] = $this->getLazyLoadConnectionInterfaceDeclarations();
 
-        return \$this;
-    }\n" : "
+        $script .= "
     /**
      * Adds a value to the [$clo] $typeDescription column value.{$this->getColumnDescriptionDoc()}
      *
-     * @param mixed \$value
+     * @param mixed \$value{$conDoc}
      *
      * @return \$this
      */
-    $visibility function add$singularPhpName(\$value)
+    $visibility function add$singularPhpName(\$value{$conParam})
     {
-        \$currentArray = \$this->get$cfc();
+        \$currentArray = \$this->get$cfc($conVar);
         \$currentArray[] = \$value;
         \$this->set$cfc(\$currentArray);
 
@@ -114,39 +106,20 @@ abstract class AbstractArrayColumnCodeProducer extends ColumnCodeProducer
         $cfc = $col->getPhpName();
         $visibility = $col->getAccessorVisibility();
         $singularPhpName = $col->getPhpSingularName();
-        $script .= $this->column->isLazyLoad() ? "
-    /**
-     * Removes a value from the [$clo] $typeDescription column value.{$this->getColumnDescriptionDoc()}
-     *
-     * @param mixed \$value
-     *
-     * @param \Propel\Runtime\Connection\ConnectionInterface \$con An optional ConnectionInterface connection to use for fetching this lazy-loaded column.
-     *
-     * @return \$this
-     */
-    $visibility function remove$singularPhpName(\$value, ?ConnectionInterface \$con = null)
-    {
-        \$targetArray = [];
-        foreach (\$this->get$cfc(\$con) as \$element) {
-            if (\$element != \$value) {
-                \$targetArray[] = \$element;
-            }
-        }
-        \$this->set$cfc(\$targetArray);
+        [$conDoc, $conParam, $conVar] = $this->getLazyLoadConnectionInterfaceDeclarations();
 
-        return \$this;
-    }\n" : "
+        $script .= "
     /**
      * Removes a value from the [$clo] $typeDescription column value.{$this->getColumnDescriptionDoc()}
      *
-     * @param mixed \$value
+     * @param mixed \$value{$conDoc}
      *
      * @return \$this
      */
-    $visibility function remove$singularPhpName(\$value)
+    $visibility function remove$singularPhpName(\$value{$conParam})
     {
         \$targetArray = [];
-        foreach (\$this->get$cfc() as \$element) {
+        foreach (\$this->get$cfc($conVar) as \$element) {
             if (\$element != \$value) {
                 \$targetArray[] = \$element;
             }

@@ -9,30 +9,21 @@ use function str_contains;
 class SetNativeColumnCodeProducer extends AbstractArrayColumnCodeProducer
 {
     /**
-     * @param string $script
+     * @see AbstractDeserializableColumnCodeProducer::DESERIALIZED_ATTRIBUTE_AFFIX
      *
-     * @return void
+     * @var string
      */
-    #[\Override]
-    public function addColumnAttributes(string &$script): void
-    {
-        $this->addDefaultColumnAttribute($script, 'string');
-        $this->addColumnAttributeConvertedDeclaration($script);
-    }
+    protected const DESERIALIZED_ATTRIBUTE_AFFIX = '_converted';
 
     /**
-     * @param string $script
+     * Get attribute types in order [database field type, deserialized type]
      *
-     * @return void
+     * @return array{string, string}
      */
-    protected function addColumnAttributeConvertedDeclaration(string &$script): void
+    #[\Override]
+    protected function getQualifiedAttributeTypes(): array
     {
-        $attributeName = '$' . $this->column->getLowercasedName() . '_converted';
-        $script .= "
-    /**
-     * @var array<string>|null
-     */
-    protected array|null $attributeName = null;\n";
+        return ['string', 'array<string>'];
     }
 
     /**
@@ -95,18 +86,18 @@ class SetNativeColumnCodeProducer extends AbstractArrayColumnCodeProducer
     #[\Override]
     protected function addAccessorBody(string &$script): void
     {
-        $clo = $this->column->getLowercasedName();
-        $cloConverted = $clo . '_converted';
+        $csvAttribute = $this->getAttributeName();
+        $arrayAttribute = $this->getDeserializedAttributeName();
 
         $script .= "
-        if (\$this->$cloConverted === null) {
-            \$this->$cloConverted = [];
+        if ($arrayAttribute === null) {
+            $arrayAttribute = [];
         }
-        if (!\$this->$cloConverted && \$this->$clo !== null) {
-            \$this->$cloConverted = explode(',', \$this->$clo);
+        if (!$arrayAttribute && $csvAttribute !== null) {
+            $arrayAttribute = explode(',', $csvAttribute);
         }
 
-        return \$this->$cloConverted;";
+        return $arrayAttribute;";
     }
 
     /**
@@ -133,15 +124,11 @@ class SetNativeColumnCodeProducer extends AbstractArrayColumnCodeProducer
     {
         $clo = $this->column->getLowercasedName();
 
-        $orNull = $this->column->isNotNull() ? '' : '|null';
-
         $script .= "
     /**
      * Set the value of [$clo] column.{$this->getColumnDescriptionDoc()}
      *
-     * @param array{$orNull} \$v new value
-     *
-     * @throws \\Propel\\Runtime\\Exception\\PropelException
+     * @param array<string>|null \$v new value
      *
      * @return \$this
      */";
@@ -157,23 +144,23 @@ class SetNativeColumnCodeProducer extends AbstractArrayColumnCodeProducer
     #[\Override]
     protected function addMutatorBody(string &$script): void
     {
-        $col = $this->column;
-        $clo = $col->getLowercasedName();
-        $cloConverted = $clo . '_converted';
-        $columnConstant = $this->objectBuilder->getColumnConstant($col);
-        $tableMapClassName = $this->getTableMapClassName();
         $this->declareClass('\Propel\Common\Util\SetColumnConverter');
 
+        $csvAttribute = $this->getAttributeName();
+        $arrayAttribute = $this->getDeserializedAttributeName();
+        $columnConstant = $this->objectBuilder->getColumnConstant($this->column);
+        $tableMapClassName = $this->getTableMapClassName();
+
         $script .= "
-        if (\$this->$cloConverted === null || array_diff(\$this->$cloConverted, \$v) || array_diff(\$v, \$this->$cloConverted)) {
+        if ($arrayAttribute === null || array_diff($arrayAttribute, \$v) || array_diff(\$v, $arrayAttribute)) {
             \$v = array_map('trim', \$v);
             \$valueSet = {$tableMapClassName}::getValueSet($columnConstant);
             SetColumnConverter::requireValuesInSet(\$v, \$valueSet);
             
-            if (\$this->$clo !== \$v) {
-                \$this->$cloConverted = null;
+            if ($csvAttribute !== \$v) {
+                $arrayAttribute = null;
                 \$orderedValues = SetColumnConverter::getItemsInOrder(\$v, \$valueSet);
-                \$this->$clo = !\$orderedValues ? null : implode(',', \$orderedValues);
+                $csvAttribute = !\$orderedValues ? null : implode(',', \$orderedValues);
                 \$this->modifiedColumns[$columnConstant] = true;
             }
         }\n";

@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace Propel\Runtime\Adapter\Pdo;
 
+use DateTimeInterface;
 use PDO;
 use PDOException;
 use Propel\Generator\Model\PropelTypes;
@@ -372,36 +373,33 @@ abstract class PdoAdapter
     /**
      * Formats a temporal value before binding, given a ColumnMap object
      *
-     * @param mixed $value The temporal value
+     * @param \DateTimeInterface|string|int|null $value The temporal value
      * @param \Propel\Runtime\Map\ColumnMap $cMap
      *
-     * @return string The formatted temporal value
+     * @return string|null The formatted temporal value
      */
-    public function formatTemporalValue($value, ColumnMap $cMap): string
+    public function formatTemporalValue(DateTimeInterface|string|int|null $value, ColumnMap $cMap): string|null
     {
-        /** @var \Propel\Runtime\Util\PropelDateTime|null $dt */
-        $dt = PropelDateTime::newInstance($value);
-        if ($dt) {
-            switch ($cMap->getType()) {
-                case PropelTypes::TIMESTAMP:
-                case PropelTypes::BU_TIMESTAMP:
-                case PropelTypes::DATETIME:
-                    $value = $dt->format($this->getTimestampFormatter());
-
-                    break;
-                case PropelTypes::DATE:
-                case PropelTypes::BU_DATE:
-                    $value = $dt->format($this->getDateFormatter());
-
-                    break;
-                case PropelTypes::TIME:
-                    $value = $dt->format($this->getTimeFormatter());
-
-                    break;
-            }
+        if ($value === null || $value === '') {
+            return $value;
         }
+        /** @var \DateTimeInterface $dt */
+        $dt = $value instanceof DateTimeInterface ? $value : PropelDateTime::newInstance($value);
+        $format = match ($cMap->getType()) {
+            PropelTypes::DATE,
+            PropelTypes::BU_DATE
+                => $this->getDateFormatter(),
+            PropelTypes::TIME
+                => $this->getTimeFormatter(),
+            PropelTypes::TIMESTAMP,
+            PropelTypes::BU_TIMESTAMP,
+            PropelTypes::DATETIME,
+                => $this->getTimestampFormatter(),
+            default
+                => $this->getTimestampFormatter(),
+        };
 
-        return $value;
+        return $dt->format($format);
     }
 
     /**
