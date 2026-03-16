@@ -24,6 +24,7 @@
         <exclude name="Spryker.Commenting.DocBlockApiAnnotation"/> <!-- Another Spryker internal function. -->
         <exclude name="Spryker.Commenting.DocBlockReturnSelf.InvalidChainable"/> <!-- methods with "@return $this" must end with "return $this", but cannot return $this through another method -->
         <exclude name="Spryker.Commenting.DocBlockParamAllowDefaultValue.Typehint"/> <!-- fails to recognize array shapes (like `array{int, string})`-->
+        <exclude name="Spryker.Commenting.DocBlockParamAllowDefaultValue.WrongNullable"/> <!-- Checks for null as '?' (?string) but not '|null' (string|null) in spryker/code-sniffer 0.17.30 -->
     </rule>
 
     <rule ref="Spryker.Internal.SprykerDisallowFunctions">
