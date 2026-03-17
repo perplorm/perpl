@@ -1559,13 +1559,7 @@ ALTER TABLE %s ADD
     public function getColumnBindingPHP(Column $column, string $identifier, string $columnValueAccessor, string $tab = '            '): string
     {
         $script = '';
-        if ($column->getType() === PropelTypes::DATE) {
-            $columnValueAccessor = $columnValueAccessor . ' ? ' . $columnValueAccessor . "->format('{$this->getDateFormatter()}') : null";
-        } elseif ($column->getType() === PropelTypes::TIME) {
-            $columnValueAccessor = $columnValueAccessor . ' ? ' . $columnValueAccessor . "->format('{$this->getTimeFormatter()}') : null";
-        } elseif ($column->isTemporalType()) {
-            $columnValueAccessor = $columnValueAccessor . ' ? ' . $columnValueAccessor . "->format('{$this->getTimestampFormatter()}') : null";
-        } elseif ($column->isLobType()) {
+        if ($column->isLobType()) {
             // we always need to make sure that the stream is rewound, otherwise nothing will
             // get written to database.
             $script .= "

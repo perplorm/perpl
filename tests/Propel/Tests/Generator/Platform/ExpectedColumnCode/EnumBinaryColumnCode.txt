@@ -1,6 +1,6 @@
 
     /**
-     * The value for the enumerated_column field.
+     * Value of [enumerated_column] field.
      */
     protected int|null $enumerated_column = null;
 

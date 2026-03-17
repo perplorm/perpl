@@ -5,6 +5,7 @@ declare(strict_types = 1);
 namespace Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes;
 
 use Propel\Generator\Exception\EngineException;
+use Propel\Runtime\Exception\PropelException;
 use function array_search;
 use function in_array;
 use function sprintf;
@@ -61,18 +62,22 @@ class EnumBinaryColumnCodeProducer extends ColumnCodeProducer
     #[\Override]
     protected function addAccessorBody(string &$script): void
     {
-        $clo = $this->column->getLowercasedName();
+        $this->declareClass(PropelException::class);
+
+        $attribute = $this->getAttributeName();
+        $columnConstant = $this->objectBuilder->getColumnConstant($this->column);
+        $tableMapClassName = $this->getTableMapClassName();
 
         $script .= "
-        if (\$this->$clo === null) {
+        if ($attribute === null) {
             return null;
         }
-        \$valueSet = " . $this->getTableMapClassName() . '::getValueSet(' . $this->objectBuilder->getColumnConstant($this->column) . ");
-        if (!isset(\$valueSet[\$this->$clo])) {
-            throw new PropelException('Unknown stored enum key: ' . \$this->$clo);
+        \$valueSet = {$tableMapClassName}::getValueSet($columnConstant);
+        if (!isset(\$valueSet[$attribute])) {
+            throw new PropelException('Unknown stored enum key: ' . $attribute);
         }
 
-        return \$valueSet[\$this->$clo];";
+        return \$valueSet[$attribute];";
     }
 
     /**
@@ -84,13 +89,12 @@ class EnumBinaryColumnCodeProducer extends ColumnCodeProducer
     public function addMutatorComment(string &$script): void
     {
         $clo = $this->column->getLowercasedName();
-        $orNull = $this->column->isNotNull() ? '' : '|null';
 
         $script .= "
     /**
      * Set the value of [$clo] column.{$this->getColumnDescriptionDoc()}
      *
-     * @param string{$orNull} \$v new value
+     * @param string|null \$v new value
      *
      * @throws \\Propel\\Runtime\\Exception\\PropelException
      *
@@ -108,14 +112,16 @@ class EnumBinaryColumnCodeProducer extends ColumnCodeProducer
     #[\Override]
     protected function addMutatorBody(string &$script): void
     {
+        $this->declareClass(PropelException::class);
         $this->declareGlobalFunction('array_search', 'is_int');
         $col = $this->column;
-        $clo = $col->getLowercasedName();
+        $attribute = $this->getAttributeName();
+        $tableMapClassName = $this->getTableMapClassName();
         $columnConstant = $this->objectBuilder->getColumnConstant($col);
 
         $script .= "
         if (\$v !== null) {
-            \$valueSet = " . $this->getTableMapClassName() . "::getValueSet($columnConstant);
+            \$valueSet = {$tableMapClassName}::getValueSet($columnConstant);
             \$keyId = array_search(\$v, \$valueSet);
             if (!is_int(\$keyId)) {
                 throw new PropelException(\"Value '\$v' is not accepted in this enumerated column\");
@@ -123,8 +129,8 @@ class EnumBinaryColumnCodeProducer extends ColumnCodeProducer
             \$v = \$keyId;
         }
 
-        if (\$this->$clo !== \$v) {
-            \$this->$clo = \$v;
+        if ($attribute !== \$v) {
+            $attribute = \$v;
             \$this->modifiedColumns[$columnConstant] = true;
         }\n";
     }

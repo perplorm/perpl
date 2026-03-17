@@ -21,6 +21,8 @@
         <exclude name="Spryker.Internal.SprykerNoDemoshop"/>
         <exclude name="Spryker.Internal.SprykerPreferStaticOverSelf"/>
         <exclude name="Spryker.Commenting.DocBlockApiAnnotation"/> <!-- Another Spryker internal function. -->
+        <exclude name="Spryker.Commenting.DocBlockParamAllowDefaultValue.WrongNullable"/> <!-- Checks for null as '?' (?string) but not '|null' (string|null) in spryker/code-sniffer 0.17.30 -->
+
     </rule>
 
     <rule ref="Spryker.Internal.SprykerDisallowFunctions">

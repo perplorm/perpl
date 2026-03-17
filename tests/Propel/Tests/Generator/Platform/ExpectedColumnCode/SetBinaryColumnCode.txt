@@ -1,10 +1,12 @@
 
     /**
-     * The value for the enumerated_column field.
+     * Value of [enumerated_column] field.
      */
     protected int|null $enumerated_column = null;
 
     /**
+     * Deserialized value of [enumerated_column] field.
+     *
      * @var array<string>|null
      */
     protected array|null $enumerated_column_converted = null;

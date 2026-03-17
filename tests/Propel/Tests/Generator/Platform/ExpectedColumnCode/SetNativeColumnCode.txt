@@ -1,10 +1,12 @@
 
     /**
-     * The value for the enumerated_column field.
+     * Value of [enumerated_column] field.
      */
     protected string|null $enumerated_column = null;
 
     /**
+     * Deserialized value of [enumerated_column] field.
+     *
      * @var array<string>|null
      */
     protected array|null $enumerated_column_converted = null;
@@ -29,9 +31,7 @@
     /**
      * Set the value of [enumerated_column] column.
      *
-     * @param array|null $v new value
-     *
-     * @throws \Propel\Runtime\Exception\PropelException
+     * @param array<string>|null $v new value
      *
      * @return $this
      */
