@@ -4,7 +4,7 @@ declare(strict_types = 1);
 
 namespace Propel\Generator\Builder\Util;
 
-use Propel\Generator\Config\GeneratorConfigInterface;
+use Propel\Generator\Config\AbstractGeneratorConfig;
 use Propel\Generator\Exception\SchemaException;
 use Propel\Generator\Model\Index;
 use Propel\Generator\Model\Schema;
@@ -147,11 +147,11 @@ class SchemaReader
     /**
      * Set the Schema generator configuration
      *
-     * @param \Propel\Generator\Config\GeneratorConfigInterface $generatorConfig
+     * @param \Propel\Generator\Config\AbstractGeneratorConfig $generatorConfig
      *
      * @return void
      */
-    public function setGeneratorConfig(GeneratorConfigInterface $generatorConfig): void
+    public function setGeneratorConfig(AbstractGeneratorConfig $generatorConfig): void
     {
         $this->schema->setGeneratorConfig($generatorConfig);
     }

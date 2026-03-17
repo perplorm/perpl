@@ -8,7 +8,7 @@ use Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes\ColumnCodeProducerFact
 use Propel\Generator\Builder\Om\ObjectBuilder\RelationCodeProducer\AbstractIncomingRelationCode;
 use Propel\Generator\Builder\Om\ObjectBuilder\RelationCodeProducer\AbstractManyToManyCodeProducer;
 use Propel\Generator\Builder\Om\ObjectBuilder\RelationCodeProducer\FkRelationCodeProducer;
-use Propel\Generator\Config\GeneratorConfigInterface;
+use Propel\Generator\Config\AbstractGeneratorConfig;
 use Propel\Generator\Exception\EngineException;
 use Propel\Generator\Model\Column;
 use Propel\Generator\Model\ForeignKey;
@@ -75,12 +75,12 @@ class ObjectBuilder extends AbstractObjectBuilder
 
     /**
      * @param \Propel\Generator\Model\Table $table
-     * @param \Propel\Generator\Config\GeneratorConfigInterface|null $generatorConfig
+     * @param \Propel\Generator\Config\AbstractGeneratorConfig|null $generatorConfig
      *
      * @return void
      */
     #[\Override]
-    protected function init(Table $table, ?GeneratorConfigInterface $generatorConfig): void
+    protected function init(Table $table, ?AbstractGeneratorConfig $generatorConfig): void
     {
         parent::init($table, $generatorConfig);
 

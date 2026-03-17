@@ -19,14 +19,8 @@ use function var_export;
 
 class FkRelationCodeProducer extends AbstractRelationCodeProducer
 {
-    /**
-     * @var \Propel\Generator\Model\ForeignKey
-     */
-    protected $relation;
+    protected ForeignKey $relation;
 
-    /**
-     * @var \Propel\Generator\Builder\Util\EntityObjectClassNames
-     */
     protected EntityObjectClassNames $targetTableNames;
 
     /**
@@ -60,27 +54,6 @@ class FkRelationCodeProducer extends AbstractRelationCodeProducer
     {
         $this->addMutator($script);
         $this->addAccessor($script);
-    }
-
-    /**
-     * Get target class data, possibly intersected with 'interface' attribute declared on foreign-key tag in schema.xml.
-     *
-     * @return array{string, string}
-     */
-    protected function getTargetClassNameOrInterface(): array
-    {
-        $className = $this->targetTableNames->useObjectStubClassName();
-        $classNameFq = $this->targetTableNames->useObjectStubClassName(false);
-
-        /*
-        $interface = $this->relation->getInterface();
-        if ($interface) {
-            $className .= '&' . $this->declareClass($interface);
-            $classNameFq .= '&\\' . trim($interface, '\\');
-        }
-        */
-
-        return [$className, $classNameFq];
     }
 
     /**
@@ -171,7 +144,8 @@ class FkRelationCodeProducer extends AbstractRelationCodeProducer
         $reverseIdentifierSingular = $this->relation->getIdentifierReversed();
         $ownStubClassName = $this->objectBuilder->getObjectClassName();
 
-        [$targetClassName, $targetType] = $this->getTargetClassNameOrInterface();
+        $targetClassName = $this->targetTableNames->useObjectStubClassName();
+        $targetTypeFq = $this->targetTableNames->useObjectStubClassName(false);
 
         $attributeName = $this->getAttributeName();
         $setAdd = $this->relation->isLocalPrimaryKey() ? 'set' : 'add'; // one-to-one or one-to-many
@@ -180,7 +154,7 @@ class FkRelationCodeProducer extends AbstractRelationCodeProducer
     /**
      * Declares an association between this object and a $targetClassName object.
      *
-     * @param {$targetType}|null $varName
+     * @param {$targetTypeFq}|null $varName
      *
      * @return \$this
      */
@@ -231,7 +205,7 @@ class FkRelationCodeProducer extends AbstractRelationCodeProducer
 
         $relationIdentifierReversedSingular = $fk->getIdentifierReversed();
         $relationIdentifierReversedPlural = $fk->getIdentifierReversed($this->getPluralizer());
-        [$_, $targetType] = $this->getTargetClassNameOrInterface();
+        $targetTypeFq = $this->targetTableNames->useObjectStubClassName(false);
 
         // If the related columns are a primary key on the foreign table
         // then use findPk() instead of doSelect() to take advantage
@@ -248,7 +222,7 @@ class FkRelationCodeProducer extends AbstractRelationCodeProducer
      *
      * @param \Propel\Runtime\Connection\ConnectionInterface|null \$con Optional Connection object.
      *
-     * @return {$targetType}|null
+     * @return {$targetTypeFq}|null
      */
     public function get{$relationIdentifierSingular}(?ConnectionInterface \$con = null)
     {";

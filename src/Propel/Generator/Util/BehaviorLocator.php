@@ -5,7 +5,7 @@ declare(strict_types = 1);
 namespace Propel\Generator\Util;
 
 use LogicException;
-use Propel\Generator\Config\GeneratorConfigInterface;
+use Propel\Generator\Config\AbstractGeneratorConfig;
 use Propel\Generator\Exception\BehaviorNotFoundException;
 use Propel\Generator\Exception\BuildException;
 use Propel\Generator\Model\PhpNameGenerator;
@@ -45,9 +45,9 @@ class BehaviorLocator
     /**
      * Creates the composer finder
      *
-     * @param \Propel\Generator\Config\GeneratorConfigInterface|null $config build config
+     * @param \Propel\Generator\Config\AbstractGeneratorConfig|null $config build config
      */
-    public function __construct(?GeneratorConfigInterface $config = null)
+    public function __construct(?AbstractGeneratorConfig $config = null)
     {
         if ($config !== null) {
             $this->composerDir = $config->getConfigPropertyString('paths.composerDir');

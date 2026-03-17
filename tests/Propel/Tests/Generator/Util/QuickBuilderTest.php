@@ -14,6 +14,7 @@ use MyNameSpace2\QuickBuildFoo2;
 use MyNameSpace2\QuickBuildFoo2Query;
 use MyNameSpace3\QuickBuildFoo3;
 use MyNameSpace3\QuickBuildFoo3Query;
+use Propel\Generator\Builder\Om\BuilderType;
 use Propel\Generator\Platform\MysqlPlatform;
 use Propel\Generator\Platform\SqlitePlatform;
 use Propel\Generator\Util\QuickBuilder;
@@ -111,7 +112,7 @@ EOF;
      */
     public function testGetClassesLimitedClassTargets($builder): void
     {
-        $script = $builder->getClasses(['tablemap', 'object', 'query']);
+        $script = $builder->getClasses([BuilderType::TableMap, BuilderType::ObjectBase, BuilderType::QueryBase]);
         $this->assertStringNotContainsString('class QuickBuildFoo1 extends BaseQuickBuildFoo1', $script);
         $this->assertStringNotContainsString('class QuickBuildFoo1Query extends BaseQuickBuildFoo1Query', $script);
         $this->assertStringContainsString('class QuickBuildFoo1 implements ActiveRecordInterface', $script);

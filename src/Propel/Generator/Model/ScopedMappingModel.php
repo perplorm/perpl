@@ -4,7 +4,7 @@ declare(strict_types = 1);
 
 namespace Propel\Generator\Model;
 
-use Propel\Generator\Config\GeneratorConfigInterface;
+use Propel\Generator\Config\AbstractGeneratorConfig;
 use Propel\Generator\Exception\LogicException;
 use function rtrim;
 use function str_replace;
@@ -67,9 +67,9 @@ abstract class ScopedMappingModel extends MappingModel
     }
 
     /**
-     * @return \Propel\Generator\Config\GeneratorConfigInterface|null
+     * @return \Propel\Generator\Config\AbstractGeneratorConfig|null
      */
-    abstract public function getGeneratorConfig(): ?GeneratorConfigInterface;
+    abstract public function getGeneratorConfig(): ?AbstractGeneratorConfig;
 
     /**
      * @return void

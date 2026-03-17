@@ -128,7 +128,7 @@ class ArchivableBehavior extends SyncedTableBehavior
         }
 
         $archiveTable = $this->getSyncedTable();
-        $tableStub = $builder->getNewStubObjectBuilder($archiveTable);
+        $tableStub = $builder->getStubObjectBuilder($archiveTable);
 
         return $builder->getClassNameFromBuilder($tableStub);
     }
@@ -144,7 +144,7 @@ class ArchivableBehavior extends SyncedTableBehavior
             return $this->getParameter('archive_class') . 'Query';
         }
 
-        return $builder->getClassNameFromBuilder($builder->getNewStubQueryBuilder($this->getSyncedTable()));
+        return $builder->getClassNameFromBuilder($builder->getStubQueryBuilder($this->getSyncedTable()));
     }
 
     /**

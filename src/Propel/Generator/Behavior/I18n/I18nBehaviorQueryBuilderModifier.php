@@ -89,8 +89,8 @@ class I18nBehaviorQueryBuilderModifier
         $fk = $this->behavior->getI18nForeignKey();
 
         return $this->behavior->renderTemplate('queryUseI18nQuery', [
-            'queryClass' => $this->builder->getClassNameFromBuilder($this->builder->getNewStubQueryBuilder($i18nTable)),
-            'namespacedQueryClass' => $this->builder->getNewStubQueryBuilder($i18nTable)->getFullyQualifiedClassName(),
+            'queryClass' => $this->builder->getClassNameFromBuilder($this->builder->getStubQueryBuilder($i18nTable)),
+            'namespacedQueryClass' => $this->builder->getStubQueryBuilder($i18nTable)->getFullyQualifiedClassName(),
             'defaultLocale' => $this->behavior->getDefaultLocale(),
             'i18nRelationName' => $this->builder->getRefFKPhpNameAffix($fk),
             'localeColumn' => $this->behavior->getLocaleColumn()->getPhpName(),

@@ -17,6 +17,7 @@ use Propel\Generator\Platform\SqlitePlatform;
 use ReflectionClass;
 use ReflectionProperty;
 use function is_object;
+use function sprintf;
 
 class TestCase extends PHPUnitTestCase
 {
@@ -128,9 +129,7 @@ class TestCase extends PHPUnitTestCase
     {
         $className = sprintf('\\Propel\\Generator\\Reverse\\%sSchemaParser', ucfirst($this->getDriver()));
 
-        $obj = new $className($con);
-
-        return $obj;
+        return new $className($con);
     }
 
     /**
@@ -141,12 +140,13 @@ class TestCase extends PHPUnitTestCase
      * @param class-string|object $obj Instance with protected or private methods
      * @param string $name Name of the protected or private method
      * @param array $args Argumens for method
+     * @param class-string|null $referenceClass Optional parent class owning the property
      *
      * @return mixed Result of method call
      */
-    public function callMethod(string|object $obj, string $name, array $args = [])
+    public function callMethod(string|object $obj, string $name, array $args = [], string|null $referenceClass = null)
     {
-        $class = new ReflectionClass($obj);
+        $class = new ReflectionClass($referenceClass ?? $obj);
         $method = $class->getMethod($name);
         if (version_compare(PHP_VERSION, '8.1.0', '<')) {
             $method->setAccessible(true); // Use this if you are running PHP older than 8.1.0
@@ -158,7 +158,7 @@ class TestCase extends PHPUnitTestCase
     /**
      * Get private or protected property.
      *
-     * @param object|class-string $obj Instance with protected or private property
+     * @param class-string|object $obj Instance with protected or private property
      * @param string $name Name of the protected or private property
      *
      * @return ReflectionProperty
@@ -177,30 +177,32 @@ class TestCase extends PHPUnitTestCase
     /**
      * Get private or protected property value.
      *
-     * @param object|class-string $obj Instance with protected or private property
+     * @param class-string|object $obj Instance with protected or private property
      * @param string $name Name of the protected or private property
+     * @param class-string|null $referenceClass Optional parent class owning the property
      *
      * @return mixed
      */
-    public function getObjectPropertyValue($obj, string $name)
+    public function getObjectPropertyValue($obj, string $name, string|null $referenceClass = null)
     {
         $getValueParam = is_object($obj) ? $obj : null;
 
-        return $this->getReflectionProperty($obj, $name)->getValue($getValueParam);
+        return $this->getReflectionProperty($referenceClass ?? $obj, $name)->getValue($getValueParam);
     }
 
     /**
      * Set private or protected property
      *
-     * @param object|class-string $obj Instance with protected or private property
+     * @param class-string|object $obj Instance with protected or private property
      * @param string $name Name of the protected or private property
      * @param mixed $value New value for property
+     * @param class-string|null $referenceClass Optional parent class owning the property
      *
      * @return void
      */
-    public function setObjectPropertyValue($obj, string $name, $value): void
+    public function setObjectPropertyValue($obj, string $name, $value, string|null $referenceClass = null): void
     {
-        $this->getReflectionProperty($obj, $name)->setValue($obj, $value);
+        $this->getReflectionProperty($referenceClass ?? $obj, $name)->setValue($obj, $value);
     }
 
     /**

@@ -29,18 +29,12 @@ use function ucfirst;
  */
 class ObjectCollection extends Collection
 {
-    /**
-     * @var array
-     */
-    protected $index = [];
+    protected array $index = [];
+
+    protected array $indexSplHash = [];
 
     /**
-     * @var array
-     */
-    protected $indexSplHash = [];
-
-    /**
-     * @param array $data
+     * @param array<RowFormat> $data
      */
     public function __construct(array $data = [])
     {

@@ -389,4 +389,28 @@ class CollectionTest extends BookstoreTestBase
         $this->assertInstanceOf('\Propel\Runtime\Collection\Collection', $result);
         $this->assertEquals(0, count($result));
     }
+
+    /**
+     * @return void
+     */
+    public function testMap()
+    {
+        $data = [['bar1'], ['bar2'], ['bar3']];
+        $col = new Collection($data);
+        $result = $col->map(fn($val) => $val[0]);
+
+        $this->assertSame(['bar1', 'bar2', 'bar3'], $result);
+    }
+
+    /**
+     * @return void
+     */
+    public function testReduce()
+    {
+        $data = range(1,5);
+        $col = new Collection($data);
+        $result = $col->reduce(fn($agg, $val) => $agg + $val, 100);
+
+        $this->assertSame(115, $result);
+    }
 }

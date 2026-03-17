@@ -5,10 +5,10 @@ declare(strict_types = 1);
 namespace Propel\Generator\Builder\Util;
 
 use DateTimeInterface;
-use Propel\Generator\Builder\BuilderFactory\BuilderFactory;
 use Propel\Generator\Builder\Om\AbstractOMBuilder;
-use Propel\Generator\Config\GeneratorConfigInterface;
+use Propel\Generator\Config\AbstractGeneratorConfig;
 use Propel\Generator\Exception\LogicException;
+use Propel\Generator\Exception\RuntimeException;
 use Propel\Generator\Model\ForeignKey;
 use Propel\Generator\Model\PropelTypes;
 use Propel\Generator\Model\Table;
@@ -39,7 +39,7 @@ class ReferencedClasses
      */
     protected AbstractOMBuilder $builder;
 
-    protected BuilderFactory $builderFactory;
+    protected AbstractGeneratorConfig|null $generatorConfig = null;
 
     /**
      * Declared fully qualified classnames, to build the 'namespace' statements
@@ -79,7 +79,6 @@ class ReferencedClasses
     public function __construct(AbstractOMBuilder $builder)
     {
         $this->builder = $builder;
-        $this->builderFactory = new BuilderFactory();
     }
 
     /**
@@ -89,17 +88,31 @@ class ReferencedClasses
      */
     public function useEntityObjectClassNames(Table $table): EntityObjectClassNames
     {
-        return new EntityObjectClassNames($table, $this, $this->builderFactory);
+        return new EntityObjectClassNames($table, $this);
     }
 
     /**
-     * @param \Propel\Generator\Config\GeneratorConfigInterface $generatorConfig
+     * @param \Propel\Generator\Config\AbstractGeneratorConfig $generatorConfig
      *
      * @return void
      */
-    public function setGeneratorConfig(GeneratorConfigInterface $generatorConfig): void
+    public function setGeneratorConfig(AbstractGeneratorConfig $generatorConfig): void
     {
-        $this->builderFactory->setGeneratorConfig($generatorConfig);
+        $this->generatorConfig = $generatorConfig;
+    }
+
+    /**
+     * @throws \Propel\Generator\Exception\RuntimeException
+     *
+     * @return \Propel\Generator\Config\AbstractGeneratorConfig
+     */
+    public function getGeneratorConfig(): AbstractGeneratorConfig
+    {
+        if (!$this->generatorConfig) {
+            throw new RuntimeException('Trying to access GeneratorConfig before it was set.');
+        }
+
+        return $this->generatorConfig;
     }
 
     /**
@@ -116,22 +129,6 @@ class ReferencedClasses
         }
 
         return $this->declaredClasses;
-    }
-
-    /**
-     * Resolve the future class name of one of the to-be-built classes for the given table.
-     *
-     * @param string $classType
-     * @param \Propel\Generator\Model\Table $table
-     * @param bool $fullyQualified
-     *
-     * @return string
-     */
-    public function resolveClassNameForTable(string $classType, Table $table, bool $fullyQualified = false)
-    {
-        $builderStub = $this->builderFactory->createBuilderForTable($table, $classType);
-
-        return $this->getInternalNameOfBuilderResultClass($builderStub, $fullyQualified);
     }
 
     /**
