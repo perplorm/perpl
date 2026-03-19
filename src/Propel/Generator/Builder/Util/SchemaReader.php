@@ -25,9 +25,10 @@ use function sprintf;
 use function strpos;
 use function strtolower;
 use function version_compare;
-use function vsprintf;
+use function xml_error_string;
 use function xml_get_current_column_number;
 use function xml_get_current_line_number;
+use function xml_get_error_code;
 use function xml_parse;
 use function xml_parser_create;
 use function xml_parser_free;
@@ -53,7 +54,7 @@ class SchemaReader
     private $schema;
 
     /**
-     * @var \XMLParser|resource
+     * @var \XMLParser
      */
     private $parser;
 
@@ -203,10 +204,10 @@ class SchemaReader
         try {
             $success = xml_parse($this->parser, $xmlString);
         } catch (Exception $e) {
-            throw new SchemaException('XML parser failed at ' . $this->getLocationDescription() . ': ' . $e->getMessage());
+            throw new SchemaException('XML parser failed at ' . $this->getLocationDescription() . ': ' . $e->getMessage(), 0, $e);
         }
         if (!$success) {
-            throw new SchemaException('XML parser failed at ' . $this->getLocationDescription());
+            $this->throwParserError();
         }
         if (version_compare(phpversion(), '8.1', '<')) {
             xml_parser_free($this->parser);
@@ -436,28 +437,27 @@ class SchemaReader
     /**
      * @param string $tagName
      *
-     * @return void
-     */
-    protected function throwInvalidTagException(string $tagName): void
-    {
-        $this->throwSchemaExceptionWithLocation('Unexpected tag <%s>', $tagName);
-    }
-
-    /**
-     * @param string $format
-     * @param mixed $args sprintf arguments
-     *
      * @throws \Propel\Generator\Exception\SchemaException
      *
      * @return void
      */
-    private function throwSchemaExceptionWithLocation(string $format, ...$args): void
+    protected function throwInvalidTagException(string $tagName): void
     {
-        $format .= ' in %s';
-        $args[] = $this->getLocationDescription();
-        $message = vsprintf($format, $args);
+        throw new SchemaException("Unexpected tag $tagName");
+    }
 
-        throw new SchemaException($message);
+    /**
+     * @throws \Propel\Generator\Exception\SchemaException
+     *
+     * @return void
+     */
+    protected function throwParserError(): void
+    {
+        $errorCode = xml_get_error_code($this->parser);
+        $errorMessage = xml_error_string($errorCode);
+        $location = $this->getLocationDescription();
+
+        throw new SchemaException("XML error: $errorMessage at $location");
     }
 
     /**
@@ -607,6 +607,8 @@ class SchemaReader
     /**
      * Feeds the current parameter list to its parent and clears the collector.
      *
+     * @throws \Propel\Generator\Exception\SchemaException
+     *
      * @return void
      */
     private function finalizeParameterList(): void
@@ -615,7 +617,7 @@ class SchemaReader
         if ($parentTag === 'behavior') {
             $this->currBehavior->addParameter($this->currParameterListCollector);
         } else {
-            $this->throwSchemaExceptionWithLocation('Cannot add parameter list to tag <%s>', $parentTag);
+            throw new SchemaException("Cannot add parameter list to tag `$parentTag`");
         }
 
         $this->currParameterListCollector = null;
@@ -627,12 +629,14 @@ class SchemaReader
      * @param array $attributes
      * @param string $key
      *
+     * @throws \Propel\Generator\Exception\SchemaException
+     *
      * @return string the non-empty value
      */
     private function getExpectedValue(array $attributes, string $key): string
     {
         if (empty($attributes[$key])) {
-            $this->throwSchemaExceptionWithLocation('Parameter misses expected attribute "%s"', $key);
+            throw new SchemaException("Parameter misses expected attribute `$key`");
         }
 
         return $attributes[$key];

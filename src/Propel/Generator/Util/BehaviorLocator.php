@@ -174,7 +174,7 @@ class BehaviorLocator
         }
 
         if (!class_exists($class)) {
-            throw new BehaviorNotFoundException(sprintf('Unknown behavior "%s". You may try running `composer update` or passing the `--composer-dir` option.', $name));
+            throw new BehaviorNotFoundException(sprintf('Unknown behavior "%s".', $name));
         }
 
         return $class;
