@@ -18,6 +18,26 @@ on:
         description: 'PHP max version'
         required: true
         default: '8.5'
+      runTests:
+        description: 'Run suites'
+        required: true
+        default: true
+        type: boolean
+      runStaticAnalysis:
+        description: 'Run Stan & Psalm'
+        required: true
+        default: true
+        type: boolean
+      runLinter:
+        description: 'Check code style'
+        required: true
+        default: true
+        type: boolean
+      runGeneratedCodeChecks:
+        description: 'Check generated code'
+        required: true
+        default: true
+        type: boolean
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -30,6 +50,7 @@ env:
 
 jobs:
     testsuite:
+        if: ${{ inputs.runTests }}
         name: "Test Suite"
         runs-on: ubuntu-24.04
         strategy:
@@ -119,6 +140,7 @@ jobs:
                   file: tests/coverage.xml
 
     static-analysis:
+        if: ${{ inputs.runStaticAnalysis }}
         name: 'Stan & Psalm'
         runs-on: ubuntu-24.04
         strategy:
@@ -127,7 +149,7 @@ jobs:
             include:
               - php-version: ${{ inputs.phpMinVersion }}
                 symfony-version: '6-max'
-              - php-version: 8.4 # should be ${{ inputs.phpMaxVersion }}, but 8.5.4 breaks Psalm atm
+              - php-version: ${{ inputs.phpMaxVersion }}
                 symfony-version: '8-max'
         steps:
             - uses: actions/checkout@v3
@@ -145,6 +167,7 @@ jobs:
               run: composer psalm -- --php-version=${{ steps.build-container.outputs.php-version }}
 
     code-style:
+        if: ${{ inputs.runLinter }}
         name: 'Code Style (PHPCS)'
         runs-on: ubuntu-24.04
         steps:
@@ -159,6 +182,7 @@ jobs:
               run: composer cs-check
 
     generated-code-style:
+        if: ${{ inputs.runGeneratedCodeChecks }}
         runs-on: ubuntu-24.04
         strategy:
           fail-fast: false
