@@ -1,0 +1,43 @@
+
+    /**
+     * Filter the query on the manually_typed_column column
+     *
+     * Example usage:
+     * <code>
+     * $query->filterByMyCol(1234); // WHERE manually_typed_column = 1234
+     * $query->filterByMyCol(array(12, 34)); // WHERE manually_typed_column IN (12, 34)
+     * $query->filterByMyCol(array('min' => 12)); // WHERE manually_typed_column > 12
+     * </code>
+     *
+     * @param mixed $myCol The value to use as filter.
+     *              Use scalar values for equality.
+     *              Use array values for in_array() equivalent.
+     *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
+     * @param string|null $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return $this
+     */
+    public function filterByMyCol($myCol = null, ?string $comparison = null)
+    {
+        $resolvedColumn = $this->resolveLocalColumnByName('manually_typed_column');
+        if (is_array($myCol)) {
+            $useMinMax = false;
+            if (isset($myCol['min'])) {
+                $this->addUsingOperator($resolvedColumn, $myCol['min'], Criteria::GREATER_EQUAL);
+                $useMinMax = true;
+            }
+            if (isset($myCol['max'])) {
+                $this->addUsingOperator($resolvedColumn, $myCol['max'], Criteria::LESS_EQUAL);
+                $useMinMax = true;
+            }
+            if ($useMinMax) {
+                return $this;
+            }
+            if ($comparison === null) {
+                $comparison = Criteria::IN;
+            }
+        }
+        $this->addUsingOperator($resolvedColumn, $myCol, $comparison);
+
+        return $this;
+    }

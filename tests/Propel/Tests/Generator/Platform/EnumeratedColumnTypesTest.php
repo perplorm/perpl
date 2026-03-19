@@ -10,10 +10,6 @@ namespace Propel\Tests\Generator\Platform;
 
 use Propel\Generator\Builder\Om\AbstractOMBuilder;
 use Propel\Generator\Builder\Om\BuilderType;
-use Propel\Generator\Builder\Om\ObjectBuilder;
-use Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes\ColumnCodeProducer;
-use Propel\Generator\Builder\Om\QueryBuilder;
-use Propel\Generator\Config\GeneratorConfig;
 use Propel\Generator\Config\QuickGeneratorConfig;
 use Propel\Generator\Model\Column;
 use Propel\Generator\Model\PropelTypes;
@@ -24,7 +20,6 @@ use Propel\Generator\Platform\OraclePlatform;
 use Propel\Generator\Platform\PgsqlPlatform;
 use Propel\Generator\Platform\PlatformInterface;
 use Propel\Generator\Platform\SqlitePlatform;
-use Propel\Tests\Attributes\ComparesGeneratedFile;
 use Propel\Tests\Helpers\ColorsBackedEnum;
 use Propel\Tests\Helpers\ColorsBasicEnum;
 use Propel\Tests\TestCase;
@@ -79,98 +74,6 @@ class EnumeratedColumnTypesTest extends TestCase
         $actualColumnType = $column->getType();
 
         $this->assertSame($expectedColumnType, $actualColumnType);
-    }
-
-    /**
-     * @return string[][]
-     */
-    #[ComparesGeneratedFile(textBuilder: 'buildObjectClassCode')]
-    public function ColumnCodeDataProvider(): array
-    {
-        return [ // [type, expected code file name]
-            [PropelTypes::ENUM_BINARY, __DIR__ . '/expected_column_code/EnumBinaryColumnCode.txt'],
-            [PropelTypes::ENUM_NATIVE, __DIR__ . '/expected_column_code/EnumNativeColumnCode.txt'],
-            [PropelTypes::SET_BINARY, __DIR__ . '/expected_column_code/SetBinaryColumnCode.txt'],
-            [PropelTypes::SET_NATIVE, __DIR__ . '/expected_column_code/SetNativeColumnCode.txt']
-        ];
-    }
-
-    /**
-     * @param string $columnType
-     *
-     * @return string
-     */
-    public function buildObjectClassCode(string $columnType): string
-    {
-        /** @var ObjectBuilder $builder */
-        $builder = $this->buildCodeBuilder($columnType, BuilderType::ObjectBase);
-        /** @var ColumnCodeProducer $builder */
-        $codeProducer = $this->getObjectPropertyValue($builder, 'columnCodeProducers')[0];
-
-        $script = '';
-        $codeProducer->addColumnAttributes($script);
-        $codeProducer->addAccessor($script);
-        $codeProducer->addMutator($script);
-
-        return $script;
-    }
-
-    /**
-     * @dataProvider ColumnCodeDataProvider
-     *
-     * @param string $columnType
-     * @param string $fileName
-     *
-     * @return void
-     */
-    public function testEnumeratedColumnObjectCode(string $columnType, string $fileName): void
-    {
-        $objectClassCode = $this->buildObjectClassCode($columnType);
-        $this->assertStringEqualsFile($fileName, $objectClassCode);
-    }
-
-    /**
-     * @return string[][]
-     */
-    #[ComparesGeneratedFile(textBuilder: 'buildQueryClassCode')]
-    public function QueryCodeDataProvider(): array
-    {
-        return [ // [type, expected code file name]
-            [PropelTypes::ENUM_BINARY, __DIR__ . '/expected_column_code/EnumBinaryQueryCode.txt'],
-            [PropelTypes::ENUM_NATIVE, __DIR__ . '/expected_column_code/EnumNativeQueryCode.txt'],
-            [PropelTypes::SET_BINARY, __DIR__ . '/expected_column_code/SetBinaryQueryCode.txt'],
-            [PropelTypes::SET_NATIVE, __DIR__ . '/expected_column_code/SetNativeQueryCode.txt'],
-        ];
-    }
-
-    /**
-     * @param string $columnType
-     *
-     * @return string
-     */
-    public function buildQueryClassCode(string $columnType): string
-    {
-        /** @var QueryBuilder $builder */
-        $builder = $this->buildCodeBuilder($columnType, BuilderType::QueryBase);
-
-        $script = '';
-        $this->callMethod($builder, 'addColumnCode', [&$script, $builder->getTable()->getColumns()[0]]);
-
-        return $script;
-    }
-
-    /**
-     * @dataProvider QueryCodeDataProvider
-     *
-     * @param string $columnType
-     * @param string $fileName
-     *
-     * @return void
-     */
-    public function testEnumeratedColumnQueryCode(string $columnType, string $fileName): void
-    {
-        $queryClassCode = $this->buildQueryClassCode($columnType);
-        $this->assertStringEqualsFile($fileName, $queryClassCode);
     }
 
     /**

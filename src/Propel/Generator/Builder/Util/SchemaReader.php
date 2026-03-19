@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace Propel\Generator\Builder\Util;
 
+use Exception;
 use Propel\Generator\Config\AbstractGeneratorConfig;
 use Propel\Generator\Exception\SchemaException;
 use Propel\Generator\Model\Index;
@@ -25,10 +26,8 @@ use function strpos;
 use function strtolower;
 use function version_compare;
 use function vsprintf;
-use function xml_error_string;
 use function xml_get_current_column_number;
 use function xml_get_current_line_number;
-use function xml_get_error_code;
 use function xml_parse;
 use function xml_parser_create;
 use function xml_parser_free;
@@ -201,14 +200,13 @@ class SchemaReader
         $this->parser = xml_parser_create();
         xml_parser_set_option($this->parser, XML_OPTION_CASE_FOLDING, 0);
         xml_set_element_handler($this->parser, [$this, 'startElement'], [$this, 'endElement']);
-        if (!xml_parse($this->parser, $xmlString)) {
-            throw new SchemaException(
-                sprintf(
-                    'XML error: %s at line %d',
-                    xml_error_string(xml_get_error_code($this->parser)),
-                    xml_get_current_line_number($this->parser),
-                ),
-            );
+        try {
+            $success = xml_parse($this->parser, $xmlString);
+        } catch (Exception $e) {
+            throw new SchemaException('XML parser failed at ' . $this->getLocationDescription() . ': ' . $e->getMessage());
+        }
+        if (!$success) {
+            throw new SchemaException('XML parser failed at ' . $this->getLocationDescription());
         }
         if (version_compare(phpversion(), '8.1', '<')) {
             xml_parser_free($this->parser);
@@ -221,7 +219,7 @@ class SchemaReader
     }
 
     /**
-     * @param resource $parser
+     * @param \XMLParser $parser
      * @param string $tagName
      * @param array $attributes
      *
@@ -236,10 +234,7 @@ class SchemaReader
             switch ($tagName) {
                 case 'database':
                     if ($this->isExternalSchema()) {
-                        $this->currentPackage = $attributes['package'] ?? null;
-                        if ($this->currentPackage === null) {
-                            $this->currentPackage = $this->defaultPackage;
-                        }
+                        $this->currentPackage = $attributes['package'] ?? $this->defaultPackage;
                     } else {
                         $this->currDB = $this->schema->addDatabase($attributes);
                     }

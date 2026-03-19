@@ -1,15 +1,15 @@
 
     /**
-     * Filter the query on the enumerated_column column
+     * Filter the query on the native_set_column column
      *
-     * @param mixed $enumeratedColumn The value to use as filter
+     * @param mixed $nativeSetColumn The value to use as filter
      * @param string|null $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
      * @return $this
      */
-    public function filterByEnumeratedColumn($enumeratedColumn = null, ?string $comparison = null)
+    public function filterByNativeSetColumn($nativeSetColumn = null, ?string $comparison = null)
     {
-        $resolvedColumn = $this->resolveLocalColumnByName('enumerated_column');
+        $resolvedColumn = $this->resolveLocalColumnByName('native_set_column');
         $binaryOperator = match($comparison) {
             null,
             Criteria::CONTAINS_ALL => Criteria::BINARY_ALL,
@@ -20,14 +20,14 @@
         };
 
         if ($binaryOperator) {
-            if (!$enumeratedColumn && in_array($binaryOperator, [Criteria::BINARY_AND, Criteria::BINARY_ALL], true)) {
+            if (!$nativeSetColumn && in_array($binaryOperator, [Criteria::BINARY_AND, Criteria::BINARY_ALL], true)) {
                 return $this;
             }
-            if (!$enumeratedColumn && $binaryOperator === Criteria::BINARY_NONE) {
+            if (!$nativeSetColumn && $binaryOperator === Criteria::BINARY_NONE) {
                 $itemBitmask = -1; // none but empty set (Propel-specific behavior)
             } else {
-                $valueSet = TableTableMap::getValueSet(TableTableMap::COL_ENUMERATED_COLUMN);
-                $itemBitmask = SetColumnConverter::convertToBitmask($enumeratedColumn, $valueSet);
+                $valueSet = TableTableMap::getValueSet(TableTableMap::COL_NATIVE_SET_COLUMN);
+                $itemBitmask = SetColumnConverter::convertToBitmask($nativeSetColumn, $valueSet);
             }
 
             $this->addUsingOperator($resolvedColumn, $itemBitmask, $binaryOperator);
@@ -38,7 +38,7 @@
             return $this;
         }
 
-        $this->addUsingOperator($resolvedColumn, $enumeratedColumn, $comparison);
+        $this->addUsingOperator($resolvedColumn, $nativeSetColumn, $comparison);
 
         return $this;
     }

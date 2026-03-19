@@ -1,0 +1,57 @@
+Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes\LobColumnCodeProducer
+
+
+addColumnAttributes():
+
+    /**
+     * The value for the blob_column field.
+     *
+     * @var resource|string|null
+     */
+    protected $blob_column;
+
+
+addAccessor():
+
+    /**
+     * Get the [blob_column] column value.
+     *
+     * @return resource|string|null
+     */
+    public function getBlobColumn()
+    {
+        return $this->blob_column;
+    }
+
+
+addMutator():
+
+    /**
+     * Set the value of [blob_column] column.
+     *
+     * @param resource|string|null $v New value
+     *
+     * @return $this
+     */
+    public function setBlobColumn($v)
+    {
+        // Because BLOB columns are streams in PDO we have to assume that they are
+        // always modified when a new value is passed in.  For example, the contents
+        // of the stream itself may have changed externally.
+        $this->blob_column = $this->writeResource($v);
+
+        $this->modifiedColumns[TableTableMap::COL_BLOB_COLUMN] = true;
+
+        return $this;
+    }
+
+
+getDefaultValueString:
+null
+
+getApplyDefaultValueStatement:
+
+        $this->blob_column = null;
+
+buildCreateFromFilterValueExpression:
+$value

@@ -1,0 +1,55 @@
+Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes\ColumnCodeProducer
+
+
+addColumnAttributes():
+
+    /**
+     * The value for the manually_typed_column field.
+     *
+     * Note: this column has a database default value of: '42'
+     */
+    protected ChildFooType|null $manually_typed_column = null;
+
+
+addAccessor():
+
+    /**
+     * Get the [manually_typed_column] column value.
+     *
+     * @return FooType|null
+     */
+    public function getMyCol()
+    {
+        return $this->manually_typed_column;
+    }
+
+
+addMutator():
+
+    /**
+     * Set the value of [manually_typed_column] column.
+     *
+     * @param FooType|null $v New value
+     *
+     * @return $this
+     */
+    public function setMyCol($v)
+    {
+        if ($this->manually_typed_column !== $v) {
+            $this->manually_typed_column = $v;
+            $this->modifiedColumns[TableTableMap::COL_MANUALLY_TYPED_COLUMN] = true;
+        }
+
+        return $this;
+    }
+
+
+getDefaultValueString:
+'42'
+
+getApplyDefaultValueStatement:
+
+        $this->manually_typed_column = new ChildFooType('42');
+
+buildCreateFromFilterValueExpression:
+$value

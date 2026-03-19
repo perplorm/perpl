@@ -7,6 +7,7 @@ namespace Propel\Generator\Model;
 use Propel\Generator\Config\AbstractGeneratorConfig;
 use Propel\Generator\Exception\EngineException;
 use Propel\Generator\Exception\InvalidArgumentException;
+use Propel\Generator\Exception\SchemaException;
 use Propel\Generator\Platform\PlatformInterface;
 use function array_search;
 use function count;
@@ -572,12 +573,16 @@ class Database extends ScopedMappingModel
      * @param \Propel\Generator\Model\Table|array $table
      *
      * @throws \Propel\Generator\Exception\EngineException
+     * @throws \Propel\Generator\Exception\SchemaException
      *
      * @return \Propel\Generator\Model\Table
      */
     public function addTable($table): Table
     {
         if (!$table instanceof Table) {
+            if (empty($table['name'])) {
+                throw new SchemaException('Table misses required attribute `name`');
+            }
             $tbl = new Table($table['name']);
             $tbl->setDatabase($this);
             $tbl->loadMapping($table);

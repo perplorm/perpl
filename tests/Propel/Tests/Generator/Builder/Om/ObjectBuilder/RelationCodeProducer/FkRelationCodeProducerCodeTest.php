@@ -9,7 +9,6 @@
 namespace Propel\Tests\Generator\Builder\Om\ObjectBuilder\RelationCodeProducer;
 
 use Propel\Generator\Builder\Om\ObjectBuilder;
-use Propel\Generator\Config\GeneratorConfig;
 use Propel\Generator\Config\QuickGeneratorConfig;
 use Propel\Generator\Util\QuickBuilder;
 use Propel\Tests\Attributes\ComparesGeneratedFile;

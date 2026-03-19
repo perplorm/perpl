@@ -160,7 +160,7 @@ class ColumnCodeProducer extends ObjectCodeProducer
         $defaultValue = $this->getDefaultValueString();
         if ($this->column->isPhpObjectType()) {
             $assumedClassName = $this->declareClass($this->column->getPhpType());
-            $defaultValue = "new $assumedClassName($defaultValue )";
+            $defaultValue = "new $assumedClassName($defaultValue)";
         }
 
         return "

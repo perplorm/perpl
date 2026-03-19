@@ -1,0 +1,60 @@
+Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes\JsonColumnCodeProducer
+
+
+addColumnAttributes():
+
+    /**
+     * The value for the json_column field.
+     */
+    protected string|null $json_column = null;
+
+
+addAccessor():
+
+    /**
+     * Get the [json_column] column value.
+     *
+     * @param bool $asArray Returns the JSON data as array instead of object
+     *
+     * @return object|array|null
+     */
+    public function getJsonColumn($asArray = true)
+    {
+        return json_decode($this->json_column, $asArray);
+    }
+
+
+addMutator():
+
+    /**
+     * Set the value of [json_column] column.
+     *
+     * @param string|array|object|null $v new value
+     *
+     * @return $this
+     */
+    public function setJsonColumn($v)
+    {
+        if (is_string($v)) {
+            // JSON as string needs to be decoded/encoded to get a reliable comparison (spaces, ...)
+            $v = json_decode($v);
+        }
+        $encodedValue = json_encode($v);
+        if ($encodedValue !== $this->json_column) {
+            $this->json_column = $encodedValue;
+            $this->modifiedColumns[TableTableMap::COL_JSON_COLUMN] = true;
+        }
+
+        return $this;
+    }
+
+
+getDefaultValueString:
+null
+
+getApplyDefaultValueStatement:
+
+        $this->json_column = null;
+
+buildCreateFromFilterValueExpression:
+$value

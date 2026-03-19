@@ -1,42 +1,42 @@
 
     /**
-     * Filter the query on the enumerated_column column
+     * Filter the query on the bin_set_column column
      *
-     * @param mixed $enumeratedColumn The value to use as filter
+     * @param mixed $binSetColumn The value to use as filter
      * @param string|null $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
      * @throws \Propel\Runtime\Exception\PropelException
      *
      * @return $this
      */
-    public function filterByEnumeratedColumn($enumeratedColumn = null, ?string $comparison = null)
+    public function filterByBinSetColumn($binSetColumn = null, ?string $comparison = null)
     {
-        $resolvedColumn = $this->resolveLocalColumnByName('enumerated_column');
-        $valueSet = TableTableMap::getValueSet(TableTableMap::COL_ENUMERATED_COLUMN);
+        $resolvedColumn = $this->resolveLocalColumnByName('bin_set_column');
+        $valueSet = TableTableMap::getValueSet(TableTableMap::COL_BIN_SET_COLUMN);
         try {
-            $enumeratedColumn = SetColumnConverter::convertToBitmask($enumeratedColumn, $valueSet);
+            $binSetColumn = SetColumnConverter::convertToBitmask($binSetColumn, $valueSet);
         } catch (SetColumnConverterException $e) {
             throw new PropelException(sprintf('Value "%s" is not accepted in this set column', $e->getValue()), $e->getCode(), $e);
         }
         if ($comparison === null || $comparison == Criteria::CONTAINS_ALL) {
-            if ($enumeratedColumn === 0) {
+            if ($binSetColumn === 0) {
                 return $this;
             }
             $comparison = Criteria::BINARY_ALL;
         } elseif ($comparison == Criteria::CONTAINS_SOME || $comparison == Criteria::IN) {
-            if ($enumeratedColumn === 0) {
+            if ($binSetColumn === 0) {
                 return $this;
             }
             $comparison = Criteria::BINARY_AND;
         } elseif ($comparison == Criteria::CONTAINS_NONE) {
-            if ($enumeratedColumn !== 0) {
-                $this->addAnd($resolvedColumn, $enumeratedColumn, Criteria::BINARY_NONE);
+            if ($binSetColumn !== 0) {
+                $this->addAnd($resolvedColumn, $binSetColumn, Criteria::BINARY_NONE);
             }
             $this->addOr($resolvedColumn, null, Criteria::ISNULL);
 
             return $this;
         }
-        $this->addUsingOperator($resolvedColumn, $enumeratedColumn, $comparison);
+        $this->addUsingOperator($resolvedColumn, $binSetColumn, $comparison);
 
         return $this;
     }

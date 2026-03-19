@@ -31,6 +31,7 @@ use function strrpos;
 use function strtolower;
 use function strtoupper;
 use function substr_replace;
+use function var_export;
 
 /**
  * Data about a table used in an application.
@@ -562,12 +563,16 @@ class Table extends ScopedMappingModel implements IdMethod
      * @param \Propel\Generator\Model\Column|array $col
      *
      * @throws \Propel\Generator\Exception\EngineException
+     * @throws \Propel\Generator\Exception\SchemaException
      *
      * @return \Propel\Generator\Model\Column
      */
     public function addColumn($col): Column
     {
         if (is_array($col)) {
+            if (empty($col['name'])) {
+                throw new SchemaException("Column on table `{$this->commonName}` misses required attribute `name` Attributes:" . var_export($col, true));
+            }
             $column = new Column($col['name']);
             $column->setTable($this);
             $column->loadMapping($col);

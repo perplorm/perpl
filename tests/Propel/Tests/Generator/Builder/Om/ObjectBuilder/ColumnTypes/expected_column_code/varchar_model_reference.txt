@@ -1,0 +1,59 @@
+Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes\ColumnCodeProducer
+
+
+addColumnAttributes():
+
+    /**
+     * The value for the var_char_column field.
+     *
+     * Note: this column has a database default value of: 'Bar'
+     */
+    protected string|null $var_char_column = null;
+
+
+addAccessor():
+
+    /**
+     * Get the [var_char_column] column value.
+     *
+     * @return string|null
+     */
+    public function getVarCharColumn()
+    {
+        return $this->var_char_column;
+    }
+
+
+addMutator():
+
+    /**
+     * Set the value of [var_char_column] column.
+     *
+     * @param string|null $v New value
+     *
+     * @return $this
+     */
+    public function setVarCharColumn($v)
+    {
+        if ($v !== null) {
+            $v = (string)$v;
+        }
+
+        if ($this->var_char_column !== $v) {
+            $this->var_char_column = $v;
+            $this->modifiedColumns[TableTableMap::COL_VAR_CHAR_COLUMN] = true;
+        }
+
+        return $this;
+    }
+
+
+getDefaultValueString:
+'Bar'
+
+getApplyDefaultValueStatement:
+
+        $this->var_char_column = 'Bar';
+
+buildCreateFromFilterValueExpression:
+$value

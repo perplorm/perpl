@@ -1,0 +1,59 @@
+Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes\ColumnCodeProducer
+
+
+addColumnAttributes():
+
+    /**
+     * The value for the integer_column field.
+     *
+     * Note: this column has a database default value of: 42
+     */
+    protected int|null $integer_column = null;
+
+
+addAccessor():
+
+    /**
+     * Get the [integer_column] column value.
+     *
+     * @return int|null
+     */
+    public function getIntegerColumn()
+    {
+        return $this->integer_column;
+    }
+
+
+addMutator():
+
+    /**
+     * Set the value of [integer_column] column.
+     *
+     * @param int|null $v New value
+     *
+     * @return $this
+     */
+    public function setIntegerColumn($v)
+    {
+        if ($v !== null) {
+            $v = (int)$v;
+        }
+
+        if ($this->integer_column !== $v) {
+            $this->integer_column = $v;
+            $this->modifiedColumns[TableTableMap::COL_INTEGER_COLUMN] = true;
+        }
+
+        return $this;
+    }
+
+
+getDefaultValueString:
+42
+
+getApplyDefaultValueStatement:
+
+        $this->integer_column = 42;
+
+buildCreateFromFilterValueExpression:
+$value

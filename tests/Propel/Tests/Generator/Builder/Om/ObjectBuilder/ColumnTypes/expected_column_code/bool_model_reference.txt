@@ -1,0 +1,76 @@
+Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes\BoolColumnCodeProducer
+
+
+addColumnAttributes():
+
+    /**
+     * The value for the bool_column field.
+     *
+     * Note: this column has a database default value of: true
+     */
+    protected bool|null $bool_column = null;
+
+
+addAccessor():
+
+    /**
+     * Get the [bool_column] column value.
+     *
+     * @return bool|null
+     */
+    public function getBoolColumn()
+    {
+        return $this->bool_column;
+    }
+
+    /**
+     * Get the [bool_column] column value.
+     *
+     * @return bool|null
+     */
+    public function isBoolColumn()
+    {
+        return $this->getBoolColumn();
+    }
+
+
+addMutator():
+
+    /**
+     * Sets the value of the [bool_column] column.
+     *
+     * Non-boolean arguments are converted using the following rules:
+     * - 1, '1', 'true', 'on', 'yes' are converted to boolean true
+     * - 0, '0', 'false', 'off', 'no' are converted to boolean false
+     * Check on string values is case insensitive (so 'FaLsE' is seen as 'false').
+     *
+     * @param string|int|bool|null $v The new value
+     *
+     * @return $this
+     */
+    public function setBoolColumn($v)
+    {
+        if ($v !== null) {
+            $v = is_string($v)
+                ? !in_array(strtolower($v), ['false', 'off', '-', 'no', 'n', '0', ''])
+                : (bool)$v;
+        }
+
+        if ($this->bool_column !== $v) {
+            $this->bool_column = $v;
+            $this->modifiedColumns[TableTableMap::COL_BOOL_COLUMN] = true;
+        }
+
+        return $this;
+    }
+
+
+getDefaultValueString:
+true
+
+getApplyDefaultValueStatement:
+
+        $this->bool_column = true;
+
+buildCreateFromFilterValueExpression:
+$value

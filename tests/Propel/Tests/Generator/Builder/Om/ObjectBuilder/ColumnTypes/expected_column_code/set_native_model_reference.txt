@@ -1,0 +1,75 @@
+Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes\SetNativeColumnCodeProducer
+
+
+addColumnAttributes():
+
+    /**
+     * The value for the native_set_column field.
+     */
+    protected string|null $native_set_column = null;
+
+    /**
+     * @var array<string>|null
+     */
+    protected array|null $native_set_column_converted = null;
+
+
+addAccessor():
+
+    /**
+     * Get the [native_set_column] column value.
+     *
+     * @return array|null
+     */
+    public function getNativeSetColumn()
+    {
+        if ($this->native_set_column_converted === null) {
+            $this->native_set_column_converted = [];
+        }
+        if (!$this->native_set_column_converted && $this->native_set_column !== null) {
+            $this->native_set_column_converted = explode(',', $this->native_set_column);
+        }
+
+        return $this->native_set_column_converted;
+    }
+
+
+addMutator():
+
+    /**
+     * Set the value of [native_set_column] column.
+     *
+     * @param array|null $v new value
+     *
+     * @throws \Propel\Runtime\Exception\PropelException
+     *
+     * @return $this
+     */
+    public function setNativeSetColumn($v)
+    {
+        if ($this->native_set_column_converted === null || array_diff($this->native_set_column_converted, $v) || array_diff($v, $this->native_set_column_converted)) {
+            $v = array_map('trim', $v);
+            $valueSet = TableTableMap::getValueSet(TableTableMap::COL_NATIVE_SET_COLUMN);
+            SetColumnConverter::requireValuesInSet($v, $valueSet);
+            
+            if ($this->native_set_column !== $v) {
+                $this->native_set_column_converted = null;
+                $orderedValues = SetColumnConverter::getItemsInOrder($v, $valueSet);
+                $this->native_set_column = !$orderedValues ? null : implode(',', $orderedValues);
+                $this->modifiedColumns[TableTableMap::COL_NATIVE_SET_COLUMN] = true;
+            }
+        }
+
+        return $this;
+    }
+
+
+getDefaultValueString:
+null
+
+getApplyDefaultValueStatement:
+
+        $this->native_set_column = null;
+
+buildCreateFromFilterValueExpression:
+SetColumnConverter::rawInputToSetItems($value, TableTableMap::getValueSet(TableTableMap::COL_NATIVE_SET_COLUMN))
