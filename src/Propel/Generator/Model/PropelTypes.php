@@ -4,8 +4,10 @@ declare(strict_types = 1);
 
 namespace Propel\Generator\Model;
 
+use BackedEnum;
 use PDO;
 use function in_array;
+use function is_subclass_of;
 use function strtoupper;
 
 /**
@@ -727,7 +729,7 @@ class PropelTypes
      */
     public static function isPhpBackedEnumType(string $phpType): bool
     {
-        return is_subclass_of($phpType, \BackedEnum::class);
+        return is_subclass_of($phpType, BackedEnum::class);
     }
 
     /**

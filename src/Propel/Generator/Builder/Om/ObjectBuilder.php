@@ -2627,7 +2627,7 @@ $indent};";
         }
 
         if ($column->isPhpBackedEnumType()) {
-            return "\$this->$columnName?->value";
+            return '$this->' . $columnName . '?->value';
         }
 
         return "\$this->$columnName";
