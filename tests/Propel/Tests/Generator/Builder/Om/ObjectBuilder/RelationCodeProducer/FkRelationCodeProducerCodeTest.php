@@ -65,7 +65,7 @@ class FkRelationCodeProducerCodeTest extends CompareGeneratedCodeTestCase
     public function testFkRelationCode(string $schema, string $fileName): void
     {
         $code = $this->buildCodeForRelation($schema);
-        $this->assertStringEqualsFile($fileName, $code);
+        $this->assertStringEqualsFile($fileName, $code, CompareGeneratedCodeTestCase::HOW_TO_UPDATE_MESSAGE);
     }
 
     /**

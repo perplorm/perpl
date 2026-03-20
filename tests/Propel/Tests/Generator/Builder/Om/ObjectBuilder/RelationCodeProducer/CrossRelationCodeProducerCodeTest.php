@@ -67,7 +67,7 @@ class CrossRelationCodeProducerCodeTest extends CompareGeneratedCodeTestCase
     public function testCrossRelationCode(string $schema, string $fileName): void
     {
         $code = $this->buildCodeForCrossRelation($schema);
-        $this->assertStringEqualsFile($fileName, $code);
+        $this->assertStringEqualsFile($fileName, $code, CompareGeneratedCodeTestCase::HOW_TO_UPDATE_MESSAGE);
     }
 
     /* 

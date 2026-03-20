@@ -9,6 +9,8 @@ namespace Propel\Tests;
  */
 class CompareGeneratedCodeTestCase extends TestCase
 {
+    public const HOW_TO_UPDATE_MESSAGE = 'Reference file does not match anymore. Update by calling `./tests/bin/rebuild-reference-files` (from Perpl root dir).';
+
     /**
      * Summary of generateCodeFileContent
      * @param mixed $obj

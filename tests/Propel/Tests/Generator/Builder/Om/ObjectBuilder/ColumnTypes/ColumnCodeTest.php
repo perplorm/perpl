@@ -78,7 +78,7 @@ class ColumnCodeTest extends CompareGeneratedCodeTestCase
     public function testEnumeratedColumnObjectCode(array $builderArgs, string $fileName): void
     {
         $objectClassCode = $this->buildObjectClassCode(...$builderArgs);
-        $this->assertStringEqualsFile($fileName, $objectClassCode);
+        $this->assertStringEqualsFile($fileName, $objectClassCode, CompareGeneratedCodeTestCase::HOW_TO_UPDATE_MESSAGE);
     }
 
     /**
@@ -138,7 +138,7 @@ class ColumnCodeTest extends CompareGeneratedCodeTestCase
     public function testEnumeratedColumnQueryCode(array $builderArgs, string $fileName): void
     {
         $queryClassCode = $this->buildQueryClassCode(...$builderArgs);
-        $this->assertStringEqualsFile($fileName, $queryClassCode);
+        $this->assertStringEqualsFile($fileName, $queryClassCode, CompareGeneratedCodeTestCase::HOW_TO_UPDATE_MESSAGE);
     }
 
     /**

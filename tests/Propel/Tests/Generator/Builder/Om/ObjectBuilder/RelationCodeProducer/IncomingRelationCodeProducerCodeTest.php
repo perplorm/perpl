@@ -72,7 +72,7 @@ class IncomingRelationCodeProducerCodeTest extends CompareGeneratedCodeTestCase
     public function testIncomingRelationCode(string $schema, string $fileName): void
     {
         $code = $this->buildCodeForIncomingRelation($schema);
-        $this->assertStringEqualsFile($fileName, $code);
+        $this->assertStringEqualsFile($fileName, $code, CompareGeneratedCodeTestCase::HOW_TO_UPDATE_MESSAGE);
     }
 
     protected const MANY_TO_ONE_RELATION_CODE_SCHEMA = <<<EOF

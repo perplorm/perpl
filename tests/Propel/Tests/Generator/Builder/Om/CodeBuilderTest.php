@@ -80,7 +80,7 @@ class CodeBuilderTest extends CompareGeneratedCodeTestCase
     public function testCodeBuilderOutput(array $builderArgs, string $fileName): void
     {
         $code = $this->buildCode(...$builderArgs);
-        $this->assertStringEqualsFile($fileName, $code);
+        $this->assertStringEqualsFile($fileName, $code, CompareGeneratedCodeTestCase::HOW_TO_UPDATE_MESSAGE);
     }
 
     /**
