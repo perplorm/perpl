@@ -272,7 +272,8 @@ class PgsqlSchemaParser extends AbstractSchemaParser
             is_nullable,
             numeric_precision,
             numeric_scale,
-            character_maximum_length
+            character_maximum_length,
+            udt_name
         FROM information_schema.columns
         WHERE
             table_schema IN ($searchPath) AND table_name = ?
@@ -304,6 +305,18 @@ class PgsqlSchemaParser extends AbstractSchemaParser
             }
 
             $autoincrement = null;
+            $enumValues = null;
+            $enumTypeName = null;
+
+            // Detect PostgreSQL native enum types (USER-DEFINED with enum values)
+            if (strtoupper($type) === 'USER-DEFINED' && isset($row['udt_name'])) {
+                $enumSchema = $table->getSchema() ?: $table->getDatabase()->getSchema() ?: 'public';
+                $enumValues = $this->getEnumValues($row['udt_name'], $enumSchema);
+                if ($enumValues !== null) {
+                    $enumTypeName = $row['udt_name'];
+                    $type = 'enum';
+                }
+            }
 
             // if column has a default
 
@@ -318,10 +331,14 @@ class PgsqlSchemaParser extends AbstractSchemaParser
                 $default = null;
             }
 
-            $propelType = $this->getMappedPropelType($type);
-            if (!$propelType) {
-                $propelType = Column::DEFAULT_TYPE;
-                $this->warn('Column [' . $table->getName() . '.' . $name . '] has a column type (' . $type . ') that Propel does not support.');
+            if ($enumTypeName !== null) {
+                $propelType = PropelTypes::ENUM_NATIVE;
+            } else {
+                $propelType = $this->getMappedPropelType($type);
+                if (!$propelType) {
+                    $propelType = Column::DEFAULT_TYPE;
+                    $this->warn('Column [' . $table->getName() . '.' . $name . '] has a column type (' . $type . ') that Propel does not support.');
+                }
             }
 
             if (isset(static::$defaultTypeSizes[$type]) && $size == static::$defaultTypeSizes[$type]) {
@@ -341,6 +358,13 @@ class PgsqlSchemaParser extends AbstractSchemaParser
                 $column->getDomain()->replaceScale($scale);
             }
 
+            if ($enumTypeName !== null) {
+                $column->getDomain()->replaceSqlType($enumTypeName);
+                if ($enumValues) {
+                    $column->setValueSet($enumValues);
+                }
+            }
+
             if ($default !== null) {
                 $isExpression = $this->isColumnDefaultExpression($default);
                 if (!$isExpression) {
@@ -354,6 +378,35 @@ class PgsqlSchemaParser extends AbstractSchemaParser
 
             $table->addColumn($column);
         }
+    }
+
+    /**
+     * Queries pg_enum to retrieve enum values for a PostgreSQL enum type.
+     *
+     * @param string $typeName The enum type name (udt_name)
+     * @param string $schema The schema containing the type
+     *
+     * @return array<string>|null Enum values in sort order, or null if not an enum type
+     */
+    protected function getEnumValues(string $typeName, string $schema): ?array
+    {
+        $stmt = $this->dbh->prepare("
+            SELECT e.enumlabel
+            FROM pg_enum e
+            JOIN pg_type t ON e.enumtypid = t.oid
+            JOIN pg_namespace n ON t.typnamespace = n.oid
+            WHERE t.typname = ? AND n.nspname = ?
+            ORDER BY e.enumsortorder
+        ");
+
+        if ($stmt === false) {
+            return null;
+        }
+
+        $stmt->execute([$typeName, $schema]);
+        $values = $stmt->fetchAll(PDO::FETCH_COLUMN, 0);
+
+        return $values ?: null;
     }
 
     /**
