@@ -36,12 +36,12 @@ class EnumeratedColumnTypesTest extends TestCase
             DefaultPlatform::class,
             MssqlPlatform::class,
             OraclePlatform::class,
-            PgsqlPlatform::class,
             SqlitePlatform::class,
         ];
 
         $platformsWithNativeType = [
             MysqlPlatform::class,
+            PgsqlPlatform::class,
         ];
 
         $data = [];
@@ -200,6 +200,41 @@ class EnumeratedColumnTypesTest extends TestCase
         $ddl = $platform->getColumnDDL($column);
 
         $this->assertEquals($expectedColumnDdl, $ddl);
+    }
+
+    public function testIsPhpBackedEnumType(): void
+    {
+        $this->assertTrue(PropelTypes::isPhpBackedEnumType(ColorsBackedEnum::class));
+        $this->assertFalse(PropelTypes::isPhpBackedEnumType(ColorsBasicEnum::class));
+        $this->assertFalse(PropelTypes::isPhpBackedEnumType('string'));
+        $this->assertFalse(PropelTypes::isPhpBackedEnumType(\stdClass::class));
+    }
+
+    public function testColumnWithPhpTypeBackedEnum(): void
+    {
+        $columnXml = '<column name="color" type="VARCHAR" size="16" phpType="' . ColorsBackedEnum::class . '"/>';
+        $column = $this->buildColumnFromSchema(new DefaultPlatform(), false, $columnXml);
+
+        $this->assertTrue($column->isPhpBackedEnumType());
+        $this->assertTrue($column->isPhpObjectType());
+    }
+
+    public function testColumnWithPhpTypeRegularClassIsNotBackedEnum(): void
+    {
+        $columnXml = '<column name="amount" type="DECIMAL" phpType="\stdClass"/>';
+        $column = $this->buildColumnFromSchema(new DefaultPlatform(), false, $columnXml);
+
+        $this->assertFalse($column->isPhpBackedEnumType());
+        $this->assertTrue($column->isPhpObjectType());
+    }
+
+    public function testPgsqlEnumNativeUsesVarchar(): void
+    {
+        $columnXml = '<column name="status" type="ENUM_NATIVE" valueEnum="' . ColorsBackedEnum::class . '"/>';
+        $platform = new PgsqlPlatform();
+        $column = $this->buildColumnFromSchema($platform, false, $columnXml);
+
+        $this->assertSame('VARCHAR', $column->getDomain()->getSqlType());
     }
 
     /**

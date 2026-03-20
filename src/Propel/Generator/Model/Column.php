@@ -1729,6 +1729,18 @@ class Column extends MappingModel
     }
 
     /**
+     * Returns whether the column PHP type is a backed enum.
+     *
+     * @see PropelTypes::isPhpBackedEnumType()
+     *
+     * @return bool
+     */
+    public function isPhpBackedEnumType(): bool
+    {
+        return PropelTypes::isPhpBackedEnumType($this->getPhpType());
+    }
+
+    /**
      * Returns an instance of PlatformInterface interface.
      *
      * @return \Propel\Generator\Platform\PlatformInterface|null

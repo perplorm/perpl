@@ -67,7 +67,22 @@ class PgsqlPlatform extends DefaultPlatform
         $this->setSchemaDomainMapping(new Domain(PropelTypes::UUID, 'uuid'));
         $this->setSchemaDomainMapping(new Domain(PropelTypes::UUID_BINARY, 'BYTEA'));
 
-        $this->setSetTypesMapping(false);
+        $this->setSetTypesMapping(true);
+    }
+
+    /**
+     * PostgreSQL uses named enum types created via CREATE TYPE, not inline ENUM() syntax.
+     * Returns VARCHAR as the SQL type since PDO handles PG enum values as strings.
+     * Use the `sqlType` schema attribute to specify the actual PG enum type name if needed.
+     *
+     * @param \Propel\Generator\Model\Column $column
+     *
+     * @return string
+     */
+    #[\Override]
+    public function buildNativeEnumeratedColumnSqlType(Column $column): string
+    {
+        return 'VARCHAR';
     }
 
     /**

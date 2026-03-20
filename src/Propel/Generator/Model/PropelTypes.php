@@ -719,6 +719,18 @@ class PropelTypes
     }
 
     /**
+     * Returns whether a passed-in PHP type is a backed enum.
+     *
+     * @param string $phpType
+     *
+     * @return bool
+     */
+    public static function isPhpBackedEnumType(string $phpType): bool
+    {
+        return is_subclass_of($phpType, \BackedEnum::class);
+    }
+
+    /**
      * Convenience method to indicate whether a passed-in PHP type is an array.
      *
      * @param string $phpType The PHP type to check
