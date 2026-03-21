@@ -233,6 +233,24 @@ class EnumeratedColumnTypesTest extends TestCase
         $this->assertTrue($column->isPhpObjectType());
     }
 
+    public function testIsPhpUnitEnumType(): void
+    {
+        $this->assertTrue(PropelTypes::isPhpUnitEnumType(ColorsBasicEnum::class));
+        $this->assertFalse(PropelTypes::isPhpUnitEnumType(ColorsBackedEnum::class));
+        $this->assertFalse(PropelTypes::isPhpUnitEnumType('string'));
+        $this->assertFalse(PropelTypes::isPhpUnitEnumType(\stdClass::class));
+    }
+
+    public function testColumnWithPhpTypeUnitEnum(): void
+    {
+        $columnXml = '<column name="color" type="VARCHAR" size="16" phpType="' . ColorsBasicEnum::class . '"/>';
+        $column = $this->buildColumnFromSchema(new DefaultPlatform(), false, $columnXml);
+
+        $this->assertTrue($column->isPhpUnitEnumType());
+        $this->assertFalse($column->isPhpBackedEnumType());
+        $this->assertTrue($column->isPhpObjectType());
+    }
+
     public function testPgsqlEnumNativeUsesSqlType(): void
     {
         $columnXml = '<column name="status" type="ENUM_NATIVE" valueEnum="' . ColorsBackedEnum::class . '" sqlType="status_type"/>';

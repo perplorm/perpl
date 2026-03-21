@@ -1741,6 +1741,18 @@ class Column extends MappingModel
     }
 
     /**
+     * Returns whether this column's phpType is a UnitEnum (non-backed).
+     *
+     * @see PropelTypes::isPhpUnitEnumType()
+     *
+     * @return bool
+     */
+    public function isPhpUnitEnumType(): bool
+    {
+        return PropelTypes::isPhpUnitEnumType($this->getPhpType());
+    }
+
+    /**
      * Returns an instance of PlatformInterface interface.
      *
      * @return \Propel\Generator\Platform\PlatformInterface|null

@@ -6,6 +6,7 @@ namespace Propel\Generator\Model;
 
 use BackedEnum;
 use PDO;
+use UnitEnum;
 use function in_array;
 use function is_subclass_of;
 use function strtoupper;
@@ -730,6 +731,18 @@ class PropelTypes
     public static function isPhpBackedEnumType(string $phpType): bool
     {
         return is_subclass_of($phpType, BackedEnum::class);
+    }
+
+    /**
+     * Convenience method to indicate whether a passed-in PHP type is a UnitEnum (non-backed).
+     *
+     * @param string $phpType
+     *
+     * @return bool
+     */
+    public static function isPhpUnitEnumType(string $phpType): bool
+    {
+        return is_subclass_of($phpType, UnitEnum::class) && !is_subclass_of($phpType, BackedEnum::class);
     }
 
     /**

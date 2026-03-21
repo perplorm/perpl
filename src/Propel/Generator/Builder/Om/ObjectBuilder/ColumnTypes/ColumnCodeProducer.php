@@ -161,6 +161,9 @@ class ColumnCodeProducer extends ObjectCodeProducer
         if ($this->column->isPhpBackedEnumType()) {
             $assumedClassName = $this->declareClass($this->column->getPhpType());
             $defaultValue = "$assumedClassName::from($defaultValue)";
+        } elseif ($this->column->isPhpUnitEnumType()) {
+            $assumedClassName = $this->declareClass($this->column->getPhpType());
+            $defaultValue = "constant($assumedClassName::class . '::' . $defaultValue)";
         } elseif ($this->column->isPhpObjectType()) {
             $assumedClassName = $this->declareClass($this->column->getPhpType());
             $defaultValue = "new $assumedClassName($defaultValue )";
