@@ -73,7 +73,12 @@ class EnumeratedColumnTypesTest extends TestCase
      */
     public function testEnumAliasOnPlatform(string $platformClass, bool $defaultToNative, string $columnType, string $expectedColumnType): void
     {
-        $columnXml = '<column name="column" type="' . $columnType . '" valueSet="A,B"/>';
+        $sqlTypeAttr = (
+            $platformClass === PgsqlPlatform::class
+            && in_array($columnType, [PropelTypes::ENUM, PropelTypes::SET], true)
+            && $defaultToNative
+        ) ? ' sqlType="column_type"' : '';
+        $columnXml = '<column name="column" type="' . $columnType . '" valueSet="A,B"' . $sqlTypeAttr . '/>';
         $column = $this->buildColumnFromSchema(new $platformClass, $defaultToNative, $columnXml);
         $actualColumnType = $column->getType();
 
@@ -228,7 +233,16 @@ class EnumeratedColumnTypesTest extends TestCase
         $this->assertTrue($column->isPhpObjectType());
     }
 
-    public function testPgsqlEnumNativeUsesVarchar(): void
+    public function testPgsqlEnumNativeUsesSqlType(): void
+    {
+        $columnXml = '<column name="status" type="ENUM_NATIVE" valueEnum="' . ColorsBackedEnum::class . '" sqlType="status_type"/>';
+        $platform = new PgsqlPlatform();
+        $column = $this->buildColumnFromSchema($platform, false, $columnXml);
+
+        $this->assertSame('status_type', $column->getDomain()->getSqlType());
+    }
+
+    public function testPgsqlEnumNativeWithoutSqlTypeFallsBackToVarchar(): void
     {
         $columnXml = '<column name="status" type="ENUM_NATIVE" valueEnum="' . ColorsBackedEnum::class . '"/>';
         $platform = new PgsqlPlatform();

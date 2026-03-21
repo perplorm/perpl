@@ -9,6 +9,7 @@
 namespace Propel\Tests\Generator\Migration;
 
 use Propel\Generator\Model\PropelTypes;
+use Propel\Generator\Platform\PgsqlPlatform;
 
 /**
  * @group database
@@ -361,11 +362,15 @@ class BaseTest extends MigrationTestCase
             return $this->markTestSkipped('Test requires native SET/ENUM type.');
         }
 
+        $isPgsql = $this->getPlatform() instanceof PgsqlPlatform;
+        $enumSqlType = $isPgsql ? ' sqlType="migration_test_enum_type"' : '';
+        $setSqlType = $isPgsql ? ' sqlType="migration_test_set_type"' : '';
+
         $originXml = '
 <database>
     <table name="migration_test_enum">
-        <column name="enum_column" type="ENUM_NATIVE" valueSet="foo,bar"/>
-        <column name="set_column" type="SET_NATIVE" valueSet="foo,bar"/>
+        <column name="enum_column" type="ENUM_NATIVE" valueSet="foo,bar"' . $enumSqlType . '/>
+        <column name="set_column" type="SET_NATIVE" valueSet="foo,bar"' . $setSqlType . '/>
     </table>
 </database>
 ';
@@ -373,8 +378,8 @@ class BaseTest extends MigrationTestCase
         $targetXml = '
 <database>
     <table name="migration_test_enum">
-        <column name="enum_column" type="ENUM_NATIVE" valueSet="baz,foo,bar"/>
-        <column name="set_column" type="SET_NATIVE" valueSet="baz,foo,bar"/>
+        <column name="enum_column" type="ENUM_NATIVE" valueSet="baz,foo,bar"' . $enumSqlType . '/>
+        <column name="set_column" type="SET_NATIVE" valueSet="baz,foo,bar"' . $setSqlType . '/>
     </table>
 </database>
 ';

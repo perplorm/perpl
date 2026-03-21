@@ -39,6 +39,13 @@ class PgsqlPlatform extends DefaultPlatform
     protected $createOrDropSequences = '';
 
     /**
+     * Tracks enum type names already emitted in the current DDL generation run.
+     *
+     * @var array<string, true>
+     */
+    protected array $createdEnumTypes = [];
+
+    /**
      * Initializes db specific domain mapping.
      *
      * @return void
@@ -72,8 +79,9 @@ class PgsqlPlatform extends DefaultPlatform
 
     /**
      * PostgreSQL uses named enum types created via CREATE TYPE, not inline ENUM() syntax.
-     * Returns VARCHAR as the SQL type since PDO handles PG enum values as strings.
-     * Use the `sqlType` schema attribute to specify the actual PG enum type name if needed.
+     * Returns VARCHAR as fallback when `sqlType` is not explicitly set.
+     * Set the `sqlType` schema attribute to specify the PostgreSQL enum type name
+     * for CREATE TYPE generation in migrations.
      *
      * @param \Propel\Generator\Model\Column $column
      *
@@ -308,6 +316,60 @@ SET search_path TO public;
     }
 
     /**
+     * Scans all tables for native enum columns and generates CREATE TYPE DDL.
+     * Deduplicates by type name — shared enum types are only created once.
+     *
+     * @param \Propel\Generator\Model\Database $database
+     *
+     * @return string
+     */
+    protected function getCreateEnumTypesDDL(Database $database): string
+    {
+        $ret = '';
+
+        foreach ($database->getTablesForSql() as $table) {
+            foreach ($table->getColumns() as $column) {
+                $ret .= $this->getCreateEnumTypeDDLForColumn($column);
+            }
+        }
+
+        return $ret;
+    }
+
+    /**
+     * Generates a CREATE TYPE DDL for a native enum column, if not already emitted.
+     *
+     * @param \Propel\Generator\Model\Column $column
+     *
+     * @return string
+     */
+    protected function getCreateEnumTypeDDLForColumn(Column $column): string
+    {
+        if (!in_array($column->getType(), [PropelTypes::ENUM_NATIVE, PropelTypes::SET_NATIVE], true)) {
+            return '';
+        }
+
+        // Only generate CREATE TYPE when sqlType is explicitly set
+        if (!$column->getAttribute('sqlType')) {
+            return '';
+        }
+
+        $typeName = $column->getDomain()->getSqlType();
+        if (isset($this->createdEnumTypes[$typeName])) {
+            return '';
+        }
+
+        $valuesCsv = implode(', ', array_map(
+            fn (string $value): string => "'" . $value . "'",
+            $column->getValueSet(),
+        ));
+
+        $this->createdEnumTypes[$typeName] = true;
+
+        return sprintf("\nCREATE TYPE %s AS ENUM (%s);\n", $this->quoteIdentifier($typeName), $valuesCsv);
+    }
+
+    /**
      * @param \Propel\Generator\Model\Database $database
      *
      * @return string
@@ -315,7 +377,10 @@ SET search_path TO public;
     #[\Override]
     public function getAddTablesDDL(Database $database): string
     {
+        $this->createdEnumTypes = [];
+
         $ret = $this->getAddSchemasDDL($database);
+        $ret .= $this->getCreateEnumTypesDDL($database);
 
         foreach ($database->getTablesForSql() as $table) {
             $this->normalizeTable($table);
@@ -403,7 +468,12 @@ COMMIT;
     #[\Override]
     public function getAddTableDDL(Table $table): string
     {
-        $ret = $this->getUseSchemaDDL($table);
+        $ret = '';
+        foreach ($table->getColumns() as $column) {
+            $ret .= $this->getCreateEnumTypeDDLForColumn($column);
+        }
+
+        $ret .= $this->getUseSchemaDDL($table);
         $ret .= $this->getAddSequenceDDL($table);
 
         $lines = [];
@@ -502,7 +572,35 @@ DROP TABLE IF EXISTS %s CASCADE;
 ";
         $ret .= sprintf($pattern, $this->quoteIdentifier($table->getName()));
         $ret .= $this->getDropSequenceDDL($table);
+        $ret .= $this->getDropEnumTypesDDL($table);
         $ret .= $this->getResetSchemaDDL($table);
+
+        return $ret;
+    }
+
+    /**
+     * Generates DROP TYPE IF EXISTS DDL for native enum columns on a table.
+     *
+     * @param \Propel\Generator\Model\Table $table
+     *
+     * @return string
+     */
+    protected function getDropEnumTypesDDL(Table $table): string
+    {
+        $ret = '';
+
+        foreach ($table->getColumns() as $column) {
+            if (!in_array($column->getType(), [PropelTypes::ENUM_NATIVE, PropelTypes::SET_NATIVE], true)) {
+                continue;
+            }
+
+            if (!$column->getAttribute('sqlType')) {
+                continue;
+            }
+
+            $typeName = $column->getDomain()->getSqlType();
+            $ret .= sprintf("\nDROP TYPE IF EXISTS %s;\n", $this->quoteIdentifier($typeName));
+        }
 
         return $ret;
     }
@@ -668,11 +766,70 @@ ALTER TABLE %s RENAME TO %s;
     {
         $ret = parent::getModifyTableDDL($tableDiff);
 
+        $prefix = $this->getAlterEnumTypesDDL($tableDiff);
+
         if ($this->createOrDropSequences) {
-            $ret = $this->createOrDropSequences . $ret;
+            $prefix .= $this->createOrDropSequences;
+            $this->createOrDropSequences = '';
         }
 
-        $this->createOrDropSequences = '';
+        return $prefix . $ret;
+    }
+
+    /**
+     * Compares enum valueSets between from/to tables and generates ALTER TYPE ADD VALUE DDL.
+     *
+     * @param \Propel\Generator\Model\Diff\TableDiff $tableDiff
+     *
+     * @throws \Propel\Generator\Exception\EngineException
+     *
+     * @return string
+     */
+    protected function getAlterEnumTypesDDL(TableDiff $tableDiff): string
+    {
+        $ret = '';
+        $fromTable = $tableDiff->getFromTable();
+        $toTable = $tableDiff->getToTable();
+
+        foreach ($toTable->getColumns() as $toColumn) {
+            if (!in_array($toColumn->getType(), [PropelTypes::ENUM_NATIVE, PropelTypes::SET_NATIVE], true)) {
+                continue;
+            }
+
+            if (!$toColumn->getAttribute('sqlType') || !$toColumn->getValueSet()) {
+                continue;
+            }
+
+            $fromColumn = $fromTable->hasColumn($toColumn->getName())
+                ? $fromTable->getColumn($toColumn->getName())
+                : null;
+
+            if (!$fromColumn || !$fromColumn->getValueSet()) {
+                continue;
+            }
+
+            $typeName = $toColumn->getDomain()->getSqlType();
+
+            $removedValues = array_diff($fromColumn->getValueSet(), $toColumn->getValueSet());
+            if ($removedValues) {
+                throw new EngineException(sprintf(
+                    "Column '%s' on table '%s': PostgreSQL does not support removing values from an enum type. "
+                    . "Values removed: %s. This must be handled manually.",
+                    $toColumn->getName(),
+                    $toTable->getName(),
+                    implode(', ', $removedValues),
+                ));
+            }
+
+            $newValues = array_diff($toColumn->getValueSet(), $fromColumn->getValueSet());
+            foreach ($newValues as $value) {
+                $ret .= sprintf(
+                    "\nALTER TYPE %s ADD VALUE IF NOT EXISTS '%s';\n",
+                    $this->quoteIdentifier($typeName),
+                    $value,
+                );
+            }
+        }
 
         return $ret;
     }
@@ -895,12 +1052,17 @@ DROP SEQUENCE %s CASCADE;
     #[\Override]
     public function getAddColumnsDDL(array $columns): string
     {
+        $enumDDL = '';
+        foreach ($columns as $column) {
+            $enumDDL .= $this->getCreateEnumTypeDDLForColumn($column);
+        }
+
         $ret = '';
         foreach ($columns as $column) {
             $ret .= $this->getAddColumnDDL($column);
         }
 
-        return $ret;
+        return $enumDDL . $ret;
     }
 
     /**
