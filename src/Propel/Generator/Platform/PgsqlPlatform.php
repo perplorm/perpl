@@ -17,6 +17,8 @@ use Propel\Generator\Model\Index;
 use Propel\Generator\Model\PropelTypes;
 use Propel\Generator\Model\Table;
 use Propel\Generator\Model\Unique;
+use function array_diff;
+use function array_map;
 use function filter_var;
 use function implode;
 use function in_array;
@@ -813,8 +815,8 @@ ALTER TABLE %s RENAME TO %s;
             $removedValues = array_diff($fromColumn->getValueSet(), $toColumn->getValueSet());
             if ($removedValues) {
                 throw new EngineException(sprintf(
-                    "Column '%s' on table '%s': PostgreSQL does not support removing values from an enum type. "
-                    . "Values removed: %s. This must be handled manually.",
+                    'Column \'%s\' on table \'%s\': PostgreSQL does not support removing values from an enum type. '
+                    . 'Values removed: %s. This must be handled manually.',
                     $toColumn->getName(),
                     $toTable->getName(),
                     implode(', ', $removedValues),
