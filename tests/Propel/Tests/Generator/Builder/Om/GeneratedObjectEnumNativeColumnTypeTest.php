@@ -13,7 +13,6 @@ use Map\EnumNativeUnitEntityTableMap;
 use Propel\Generator\Platform\PgsqlPlatform;
 use Propel\Generator\Util\QuickBuilder;
 use Propel\Runtime\Adapter\Pdo\PgsqlAdapter;
-use Propel\Runtime\Exception\PropelException;
 use Propel\Tests\Helpers\ColorsBackedEnum;
 use Propel\Tests\Helpers\ColorsBasicEnum;
 use Propel\Tests\TestCase;
@@ -196,23 +195,7 @@ EOF;
         $this->assertEquals(1, EnumNativeUnitEntityQuery::create()->filterByColor('Blue')->count());
     }
 
-    public function testUnitEnumInvalidValueThrowsException(): void
-    {
-        $this->expectException(PropelException::class);
-        $this->expectExceptionMessage('Unknown enum case');
-
-        $entity = new EnumNativeUnitEntity();
-        $entity->setColor(ColorsBasicEnum::Red);
-        $entity->save();
-
-        EnumNativeUnitEntityTableMap::clearInstancePool();
-
-        // Write an invalid enum case name directly to the database
-        $con = \Propel\Runtime\Propel::getConnection('enum_native_test');
-        $stmt = $con->prepare("UPDATE enum_native_unit_entity SET color = 'InvalidCase' WHERE id = ?");
-        $stmt->execute([$entity->getId()]);
-
-        // Hydrating should throw PropelException
-        EnumNativeUnitEntityQuery::create()->findOneById($entity->getId());
-    }
+    // Note: invalid enum value test is not possible with ENUM_NATIVE because
+    // PostgreSQL enforces valid values at the database level. The PropelException
+    // for unknown UnitEnum cases applies to non-native columns (e.g., VARCHAR with phpType).
 }
