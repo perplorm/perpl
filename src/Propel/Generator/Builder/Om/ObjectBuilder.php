@@ -839,7 +839,13 @@ abstract class {$this->getUnqualifiedClassName()}$parentClass implements ActiveR
             }
             $notEquals = '!==';
             $defaultValueString = ColumnCodeProducerFactory::create($col, $this)->getDefaultValueString();
-            if ($col->isPhpObjectType()) {
+            if ($col->isPhpBackedEnumType()) {
+                $assumedClassName = $this->declareClass($col->getPhpType());
+                $defaultValueString = "$assumedClassName::from($defaultValueString)";
+            } elseif ($col->isPhpUnitEnumType()) {
+                $assumedClassName = $this->declareClass($col->getPhpType());
+                $defaultValueString = "constant($assumedClassName::class . '::' . $defaultValueString)";
+            } elseif ($col->isPhpObjectType()) {
                 $assumedClassName = $this->declareClass($col->getPhpType());
                 $defaultValueString = "new $assumedClassName($defaultValueString)";
             }
@@ -1018,6 +1024,17 @@ abstract class {$this->getUnqualifiedClassName()}$parentClass implements ActiveR
                 $script .= "
             \$this->$clo = \$columnValue;
             \$this->$cloConverted = null;";
+            } elseif ($col->isPhpBackedEnumType()) {
+                $assumedClassName = $this->declareClass($col->getPhpType());
+                $script .= "
+            \$this->$clo = (\$columnValue === null) ? null : $assumedClassName::from(\$columnValue);";
+            } elseif ($col->isPhpUnitEnumType()) {
+                $assumedClassName = $this->declareClass($col->getPhpType());
+                $script .= "
+            if (\$columnValue !== null && !defined($assumedClassName::class . '::' . \$columnValue)) {
+                throw new \\Propel\\Runtime\\Exception\\PropelException(sprintf('Unknown enum case \"%s\" for %s', \$columnValue, $assumedClassName::class));
+            }
+            \$this->$clo = (\$columnValue === null) ? null : constant($assumedClassName::class . '::' . \$columnValue);";
             } elseif ($col->isPhpObjectType()) {
                 $assumedClassName = $this->declareClass($col->getPhpType());
                 $script .= "
@@ -2617,6 +2634,14 @@ $indent};";
             $uuidSwapFlag = $this->getUuidSwapFlagLiteral();
 
             return "UuidConverter::uuidToBin(\$this->$columnName, $uuidSwapFlag)";
+        }
+
+        if ($column->isPhpBackedEnumType()) {
+            return '$this->' . $columnName . '?->value';
+        }
+
+        if ($column->isPhpUnitEnumType()) {
+            return '$this->' . $columnName . '?->name';
         }
 
         return "\$this->$columnName";
