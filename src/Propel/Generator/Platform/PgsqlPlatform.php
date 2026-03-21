@@ -318,6 +318,26 @@ SET search_path TO public;
     }
 
     /**
+     * Prepends the table's schema name to an identifier, following the same
+     * pattern as Table::getName() for schema-qualified names.
+     *
+     * @param string $name The unqualified name
+     * @param \Propel\Generator\Model\Table|null $table The table providing schema context
+     *
+     * @return string The schema-qualified name, or the original name if no schema
+     */
+    protected function getSchemaQualifiedName(string $name, ?Table $table): string
+    {
+        if ($table === null || strpos($name, '.') !== false) {
+            return $name;
+        }
+
+        $schemaName = $table->guessSchemaName();
+
+        return $schemaName ? $schemaName . '.' . $name : $name;
+    }
+
+    /**
      * Generates a CREATE TYPE DDL for a native enum column, if not already emitted.
      *
      * @param \Propel\Generator\Model\Column $column
@@ -340,14 +360,19 @@ SET search_path TO public;
             return '';
         }
 
+        $qualifiedTypeName = $this->getSchemaQualifiedName($typeName, $column->getTable());
+        if (isset($this->createdEnumTypes[$qualifiedTypeName])) {
+            return '';
+        }
+
         $valuesCsv = implode(', ', array_map(
             fn (string $value): string => "'" . $value . "'",
             $column->getValueSet(),
         ));
 
-        $this->createdEnumTypes[$typeName] = true;
+        $this->createdEnumTypes[$qualifiedTypeName] = true;
 
-        return sprintf("\nCREATE TYPE %s AS ENUM (%s);\n", $this->quoteIdentifier($typeName), $valuesCsv);
+        return sprintf("\nCREATE TYPE %s AS ENUM (%s);\n", $this->quoteIdentifier($qualifiedTypeName), $valuesCsv);
     }
 
     /**
@@ -578,7 +603,7 @@ DROP TABLE IF EXISTS %s CASCADE;
                 continue;
             }
 
-            $typeName = $column->getDomain()->getSqlType();
+            $typeName = $this->getSchemaQualifiedName($column->getDomain()->getSqlType(), $table);
             $ret .= sprintf("\nDROP TYPE IF EXISTS %s;\n", $this->quoteIdentifier($typeName));
         }
 
@@ -610,6 +635,11 @@ DROP TABLE IF EXISTS %s CASCADE;
 
         $ddl = [$this->quoteIdentifier($col->getName())];
         $sqlType = $domain->getSqlType();
+
+        // Schema-qualify native enum type references
+        if (in_array($col->getType(), [PropelTypes::ENUM_NATIVE, PropelTypes::SET_NATIVE], true) && $col->getAttribute('sqlType')) {
+            $sqlType = $this->getSchemaQualifiedName($sqlType, $col->getTable());
+        }
         $table = $col->getTable();
         if ($col->isAutoIncrement() && $table && $table->getIdMethodParameters() == null) {
             $sqlType = $col->getType() === PropelTypes::BIGINT ? 'bigserial' : 'serial';
@@ -788,7 +818,7 @@ ALTER TABLE %s RENAME TO %s;
                 continue;
             }
 
-            $typeName = $toColumn->getDomain()->getSqlType();
+            $qualifiedTypeName = $this->getSchemaQualifiedName($toColumn->getDomain()->getSqlType(), $toTable);
 
             $removedValues = array_diff($fromColumn->getValueSet(), $toColumn->getValueSet());
             if ($removedValues) {
@@ -805,7 +835,7 @@ ALTER TABLE %s RENAME TO %s;
             foreach ($newValues as $value) {
                 $ret .= sprintf(
                     "\nALTER TYPE %s ADD VALUE IF NOT EXISTS '%s';\n",
-                    $this->quoteIdentifier($typeName),
+                    $this->quoteIdentifier($qualifiedTypeName),
                     $value,
                 );
             }
