@@ -318,27 +318,6 @@ SET search_path TO public;
     }
 
     /**
-     * Scans all tables for native enum columns and generates CREATE TYPE DDL.
-     * Deduplicates by type name — shared enum types are only created once.
-     *
-     * @param \Propel\Generator\Model\Database $database
-     *
-     * @return string
-     */
-    protected function getCreateEnumTypesDDL(Database $database): string
-    {
-        $ret = '';
-
-        foreach ($database->getTablesForSql() as $table) {
-            foreach ($table->getColumns() as $column) {
-                $ret .= $this->getCreateEnumTypeDDLForColumn($column);
-            }
-        }
-
-        return $ret;
-    }
-
-    /**
      * Generates a CREATE TYPE DDL for a native enum column, if not already emitted.
      *
      * @param \Propel\Generator\Model\Column $column
@@ -382,7 +361,6 @@ SET search_path TO public;
         $this->createdEnumTypes = [];
 
         $ret = $this->getAddSchemasDDL($database);
-        $ret .= $this->getCreateEnumTypesDDL($database);
 
         foreach ($database->getTablesForSql() as $table) {
             $this->normalizeTable($table);
@@ -470,12 +448,12 @@ COMMIT;
     #[\Override]
     public function getAddTableDDL(Table $table): string
     {
-        $ret = '';
+        $ret = $this->getUseSchemaDDL($table);
+
         foreach ($table->getColumns() as $column) {
             $ret .= $this->getCreateEnumTypeDDLForColumn($column);
         }
 
-        $ret .= $this->getUseSchemaDDL($table);
         $ret .= $this->getAddSequenceDDL($table);
 
         $lines = [];

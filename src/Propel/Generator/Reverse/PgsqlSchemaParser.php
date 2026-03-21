@@ -310,7 +310,8 @@ class PgsqlSchemaParser extends AbstractSchemaParser
 
             // Detect PostgreSQL native enum types (USER-DEFINED with enum values)
             if (strtoupper($type) === 'USER-DEFINED' && isset($row['udt_name'])) {
-                $enumValues = $this->getEnumValues($row['udt_name'], $table->getSchema() ?: 'public');
+                $enumSchema = $table->getSchema() ?: $table->getDatabase()->getSchema() ?: 'public';
+                $enumValues = $this->getEnumValues($row['udt_name'], $enumSchema);
                 if ($enumValues !== null) {
                     $enumTypeName = $row['udt_name'];
                     $type = 'enum';
