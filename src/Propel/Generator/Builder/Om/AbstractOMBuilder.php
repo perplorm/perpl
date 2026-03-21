@@ -615,7 +615,7 @@ abstract class AbstractOMBuilder extends DataModelBuilder
      */
     protected function generateTimestampBlock(): string
     {
-        if ($this->getBuildProperty('generator.objectModel.addTimeStamp')) {
+        if (!$this->getBuildProperty('generator.objectModel.addTimeStamp')) {
             return '';
         }
         $now = gmdate('c');
