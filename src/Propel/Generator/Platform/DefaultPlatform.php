@@ -1522,6 +1522,25 @@ ALTER TABLE %s ADD
     }
 
     /**
+     * Returns the appropriate formatter for a date/time column.
+     *
+     * @param \Propel\Generator\Model\Column $column
+     *
+     * @return string|null
+     */
+    #[\Override]
+    public function getTemporalFormatter(Column $column): string|null
+    {
+        return match ($column->getType()) {
+            PropelTypes::DATE => $this->getDateFormatter(),
+            PropelTypes::TIME => $this->getTimeFormatter(),
+            PropelTypes::TIMESTAMP,
+            PropelTypes::DATETIME => $this->getTimestampFormatter(),
+            default => null,
+        };
+    }
+
+    /**
      * Get the default On Delete behavior for foreign keys when not explicitly set.
      *
      * @return string

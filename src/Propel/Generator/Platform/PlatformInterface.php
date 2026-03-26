@@ -274,6 +274,13 @@ interface PlatformInterface
     public function getTimeFormatter(): string;
 
     /**
+     * @param \Propel\Generator\Model\Column $column
+     *
+     * @return string|null
+     */
+    public function getTemporalFormatter(Column $column): string|null;
+
+    /**
      * @phpstan-return non-empty-string
      *
      * @return string

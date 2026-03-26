@@ -12,7 +12,6 @@ use Propel\Generator\Exception\InvalidArgumentException;
 use Propel\Generator\Exception\LogicException;
 use Propel\Generator\Model\Column;
 use Propel\Generator\Model\ForeignKey;
-use Propel\Generator\Model\PropelTypes;
 use Propel\Generator\Model\Table;
 use Propel\Generator\Model\VendorInfo;
 use function array_merge;
@@ -642,27 +641,5 @@ abstract class AbstractOMBuilder extends DataModelBuilder
         $this->declareGlobalFunction('serialize', 'array_map');
 
         return "serialize(array_map(fn (\$k) => (string)\$k, $varLiteral))";
-    }
-
-    /**
-     * Returns the appropriate formatter (from platform) for a date/time column.
-     *
-     * @param \Propel\Generator\Model\Column $column
-     *
-     * @return string|null
-     */
-    public function getTemporalFormatter(Column $column): ?string
-    {
-        switch ($column->getType()) {
-            case PropelTypes::DATE:
-                return $this->getPlatformOrFail()->getDateFormatter();
-            case PropelTypes::TIME:
-                return $this->getPlatformOrFail()->getTimeFormatter();
-            case PropelTypes::TIMESTAMP:
-            case PropelTypes::DATETIME:
-                return $this->getPlatformOrFail()->getTimestampFormatter();
-            default:
-                return null;
-        }
     }
 }

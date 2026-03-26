@@ -824,7 +824,7 @@ abstract class {$this->getUnqualifiedClassName()}$parentClass implements ActiveR
             $clo = $col->getLowercasedName();
             $accessor = "\$this->$clo";
             if ($col->isTemporalType()) {
-                $fmt = $this->getTemporalFormatter($col);
+                $fmt = $this->getPlatformOrFail()->getTemporalFormatter($col);
                 $accessor = "\$this->$clo && \$this->{$clo}->format('$fmt')";
             }
             $notEquals = '!==';
@@ -1323,9 +1323,10 @@ abstract class {$this->getUnqualifiedClassName()}$parentClass implements ActiveR
         foreach ($this->getTable()->getColumns() as $num => $col) {
             if ($col->isTemporalType()) {
                 $this->declareClass('DateTimeInterface');
+                $dateFormat = $this->getPlatformOrFail()->getTemporalFormatter($col);
                 $script .= "
         if (\$result[\$keys[$num]] instanceof DateTimeInterface) {
-            \$result[\$keys[$num]] = \$result[\$keys[$num]]->format('" . $this->getTemporalFormatter($col) . "');
+            \$result[\$keys[$num]] = \$result[\$keys[$num]]->format('$dateFormat');
         }\n";
             }
         }
