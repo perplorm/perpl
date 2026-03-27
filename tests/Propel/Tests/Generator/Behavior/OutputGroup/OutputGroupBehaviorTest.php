@@ -51,7 +51,7 @@ class OutputGroupBehaviorTest extends TestCase
         <column name="password" type="VARCHAR" size="100" ignoreGroup="public"/>
         <column name="enabled" type="BOOLEAN" ignoreGroup="public"/>
         <column name="not_enabled" type="BOOLEAN" ignoreGroup="public"/>
-        <column name="created" type="TIMESTAMP"/>
+        <column name="created" type="TIMESTAMP" size="6"/>
         <column name="role_id" type="INTEGER"/>
         <column name="authenticator" type="VARCHAR" size="32"/>
 

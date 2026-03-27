@@ -113,11 +113,12 @@ class DefaultPlatformTest extends TestCase
         $this->assertEquals($expected, $quoted);
     }
 
-    protected function createColumn($type, $defaultValue)
+    protected function createColumn($type, $defaultValue, $size = null)
     {
         $column = new Column('');
         $column->setType($type);
-        $column->setDefaultValue($defaultValue);
+        $defaultValue !== null && $column->setDefaultValue($defaultValue);
+        $column->getDomain()->setSize($size);
 
         return $column;
     }
@@ -168,10 +169,11 @@ class DefaultPlatformTest extends TestCase
     public function getColumnBindingDataProvider(): array
     {
         return [
-            [$this->createColumn(PropelTypes::DATE, '2020-02-03'), '$stmt->bindValue(ID, ACCESSOR ? ACCESSOR->format(\'Y-m-d\') : null, PDO::PARAM_STR);'],
-            [$this->createColumn(PropelTypes::TIME, '11:01:03'), '$stmt->bindValue(ID, ACCESSOR ? ACCESSOR->format(\'H:i:s.u\') : null, PDO::PARAM_STR);'],
-            [$this->createColumn(PropelTypes::TIMESTAMP, '2020-02-03 11:01:03'), '$stmt->bindValue(ID, ACCESSOR ? ACCESSOR->format(\'Y-m-d H:i:s.u\') : null, PDO::PARAM_STR);'],
-            [$this->createColumn(PropelTypes::DATETIME, '2022-06-28 11:01:03'), '$stmt->bindValue(ID, ACCESSOR ? ACCESSOR->format(\'Y-m-d H:i:s.u\') : null, PDO::PARAM_STR);'],
+            [$this->createColumn(PropelTypes::DATE, '2020-02-03'), '$stmt->bindValue(ID, ACCESSOR?->format(\'Y-m-d\'), PDO::PARAM_STR);'],
+            [$this->createColumn(PropelTypes::TIME, '11:01:03'), '$stmt->bindValue(ID, ACCESSOR?->format(\'H:i:s\'), PDO::PARAM_STR);'],
+            [$this->createColumn(PropelTypes::TIMESTAMP, '2020-02-03 11:01:03'), '$stmt->bindValue(ID, ACCESSOR?->format(\'Y-m-d H:i:s\'), PDO::PARAM_STR);'],
+            [$this->createColumn(PropelTypes::DATETIME, '2022-06-28 11:01:03'), '$stmt->bindValue(ID, ACCESSOR?->format(\'Y-m-d H:i:s\'), PDO::PARAM_STR);'],
+            [$this->createColumn(PropelTypes::DATETIME, '2022-06-28 11:01:03', 6), '$stmt->bindValue(ID, ACCESSOR?->format(\'Y-m-d H:i:s.u\'), PDO::PARAM_STR);'],
             [$this->createColumn(PropelTypes::BLOB, 'BLOB'), '$stmt->bindValue(ID, ACCESSOR, PDO::PARAM_LOB);'],
         ];
     }
@@ -192,5 +194,30 @@ class DefaultPlatformTest extends TestCase
     public function testDoesNotSupportNativeOnDeleteTriggers()
     {
         $this->assertFalse($this->getPlatform()->supportsNativeDeleteTrigger());
+    }
+
+    public function GetTemporalFormatterDataProvider(): array
+    {
+        return [
+            [PropelTypes::DATE, null, 'Y-m-d'],
+            [PropelTypes::TIME, null, 'H:i:s'],
+            [PropelTypes::TIMESTAMP, null, 'Y-m-d H:i:s'],
+            [PropelTypes::DATETIME, null, 'Y-m-d H:i:s'],
+            [PropelTypes::DATE, 6, 'Y-m-d'],
+            [PropelTypes::TIME, 6, 'H:i:s.u'],
+            [PropelTypes::TIMESTAMP, 6, 'Y-m-d H:i:s.u'],
+            [PropelTypes::DATETIME, 6, 'Y-m-d H:i:s.u'],
+        ];
+    }
+
+    /**
+     * @dataProvider GetTemporalFormatterDataProvider
+     */
+    public function testGetTemporalFormatter(string $columnType, int|null $size, string $expectedFormat): void
+    {
+        $column = $this->createColumn($columnType, null, $size);
+        $actual = $this->getPlatform()->getTemporalFormatter($column);
+
+        $this->assertSame($expectedFormat, $actual);
     }
 }

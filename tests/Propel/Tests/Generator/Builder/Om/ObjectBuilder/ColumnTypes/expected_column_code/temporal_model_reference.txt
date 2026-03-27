@@ -6,7 +6,7 @@ addColumnAttributes():
     /**
      * The value for the temporal_column field.
      *
-     * Note: this column has a database default value of: '2026-03-19 01:09:00.000000'
+     * Note: this column has a database default value of: '2026-03-19 01:09:00'
      */
     protected DateTimeInterface|null $temporal_column = null;
 
@@ -49,7 +49,7 @@ addMutator():
         if ($this->temporal_column !== null || $dt !== null) {
             if (
                 $dt !== $this->temporal_column // normalized values don't match
-                || $dt->format('Y-m-d H:i:s.u') === '2026-03-19 01:09:00.000000' // or the entered value matches the default
+                || $dt->format('Y-m-d H:i:s') === '2026-03-19 01:09:00' // or the entered value matches the default
             ) {
                 $this->temporal_column = $dt === null ? null : clone $dt;
                 $this->modifiedColumns[TableTableMap::COL_TEMPORAL_COLUMN] = true;
@@ -61,11 +61,11 @@ addMutator():
 
 
 getDefaultValueString:
-'2026-03-19 01:09:00.000000'
+'2026-03-19 01:09:00'
 
 getApplyDefaultValueStatement:
 
-        $this->temporal_column = PropelDateTime::newInstance('2026-03-19 01:09:00.000000', null, '\DateTime');
+        $this->temporal_column = PropelDateTime::newInstance('2026-03-19 01:09:00', null, '\DateTime');
 
 buildCreateFromFilterValueExpression:
 $value

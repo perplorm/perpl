@@ -255,9 +255,11 @@ interface PlatformInterface
     /**
      * Gets the preferred timestamp formatter for setting date/time values.
      *
+     * @param bool $withMilliseconds
+     *
      * @return string
      */
-    public function getTimestampFormatter(): string;
+    public function getTimestampFormatter(bool $withMilliseconds = true): string;
 
     /**
      * Gets the preferred date formatter for setting time values.
@@ -269,9 +271,11 @@ interface PlatformInterface
     /**
      * Gets the preferred time formatter for setting time values.
      *
+     * @param bool $withMilliseconds
+     *
      * @return string
      */
-    public function getTimeFormatter(): string;
+    public function getTimeFormatter(bool $withMilliseconds = true): string;
 
     /**
      * @param \Propel\Generator\Model\Column $column

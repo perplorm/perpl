@@ -688,4 +688,30 @@ PRAGMA foreign_keys = ON;
 
         return (string)$pdoStatement->fetch(PDO::FETCH_NUM)[0];
     }
+
+    /**
+     * Gets the preferred timestamp formatter for setting date/time values.
+     *
+     * @param bool $withMilliseconds
+     *
+     * @return string
+     */
+    #[\Override]
+    public function getTimestampFormatter(bool $withMilliseconds = true): string
+    {
+        return parent::getTimestampFormatter(true);
+    }
+
+    /**
+     * Gets the preferred time formatter for setting date/time values.
+     *
+     * @param bool $withMilliseconds
+     *
+     * @return string
+     */
+    #[\Override]
+    public function getTimeFormatter(bool $withMilliseconds = true): string
+    {
+        return parent::getTimeFormatter(true);
+    }
 }
