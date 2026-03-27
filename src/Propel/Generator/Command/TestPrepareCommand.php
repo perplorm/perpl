@@ -51,7 +51,9 @@ class TestPrepareCommand extends AbstractCommand
     public const DEFAULT_DB_PASSWD = '';
 
     /**
-     * @var array
+     * Fixtures dir to connection names
+     *
+     * @var array<string, list<string>>
      */
     protected $fixtures = [
         //directory - array of connections
@@ -62,6 +64,7 @@ class TestPrepareCommand extends AbstractCommand
         'schemas' => ['bookstore-schemas'],
         'migration' => ['migration'],
         'quoting' => ['quoting'],
+        'instance-pool' => ['instance-pool-test'],
     ];
 
     /**
