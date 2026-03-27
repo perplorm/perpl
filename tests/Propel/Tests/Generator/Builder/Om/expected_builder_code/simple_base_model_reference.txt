@@ -909,7 +909,7 @@ abstract class IdTable implements ActiveRecordInterface
     }
 
     /**
-     * Generic method to set the primary key (id column).
+     * Generic method to set the primary key ([id] column).
      *
      * @param int|null $key Primary key.
      *

@@ -2071,12 +2071,18 @@ $indent};";
     {
         $pkeys = $this->getTable()->getPrimaryKey();
         $col = $pkeys[0];
+        // HACK: monkey-patch ENUM_/SET_BINARY type
+        $ctype = match ($col->getType()) {
+            PropelTypes::ENUM_BINARY => 'string',
+            PropelTypes::SET_BINARY => 'array',
+            default => $col->getPhpType(),
+        };
         $clo = $col->getLowercasedName();
-        $ctype = $col->getPhpType();
+        $phpName = $col->getPhpName();
 
         $script .= "
     /**
-     * Generic method to set the primary key ($clo column).
+     * Generic method to set the primary key ([$clo] column).
      *
      * @param $ctype|null \$key Primary key.
      *
@@ -2084,9 +2090,8 @@ $indent};";
      */
     public function setPrimaryKey(?$ctype \$key = null): void
     {
-        \$this->set" . $col->getPhpName() . "(\$key);
-    }
-";
+        \$this->set{$phpName}(\$key);
+    }\n";
     }
 
     /**
@@ -2109,10 +2114,10 @@ $indent};";
     public function setPrimaryKey(array \$keys): void
     {";
         $i = 0;
-        foreach ($this->getTable()->getPrimaryKey() as $pk) {
+        foreach ($this->getTable()->getPrimaryKey() as $i => $pk) {
+            $phpName = $pk->getPhpName();
             $script .= "
-        \$this->set" . $pk->getPhpName() . "(\$keys[$i]);";
-            $i++;
+        \$this->set{$phpName}(\$keys[$i]);";
         }
         $script .= "
     }
