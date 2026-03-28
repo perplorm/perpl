@@ -33,7 +33,7 @@
         "ext-xml": "*",
         "monolog/monolog": "^1.3 || ^2.3 || ^3.0",
         "phpstan/phpstan": "^2.0",
-        "phpunit/phpunit": "^9.5.0",
+        "phpunit/phpunit": "^10.0",
         "spryker/code-sniffer": "^0.17.2",
         "psalm/phar": "^6",
         "mikey179/vfsstream": "^1.6",

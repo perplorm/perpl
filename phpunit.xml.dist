@@ -8,35 +8,32 @@
     bootstrap="tests/bootstrap.php"
     xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd"
 >
-
-    <testsuites>
-        <testsuite name="propel2">
-            <directory>tests/Propel/Tests/</directory>
-        </testsuite>
-    </testsuites>
-
-    <groups>
-        <exclude>
-            <group>pgsql</group>
-            <group>mysql</group>
-        </exclude>
-    </groups>
-
-    <php>
-        <env name="DB" value="mysql"/> <!-- mysql, sqlite, pgsql -->
-        <env name="DB_USER" value=""/>
-        <env name="DB_PW" value=""/>
-    </php>
-
-    <logging />
-
-    <coverage>
-        <include>
-            <directory>src/Propel/</directory>
-        </include>
-        <report>
-            <php outputFile="tests/clover.cov" />
-        </report>
-    </coverage>
-
+  <testsuites>
+    <testsuite name="propel2">
+      <directory>tests/Propel/Tests/</directory>
+    </testsuite>
+  </testsuites>
+  <groups>
+    <exclude>
+      <group>pgsql</group>
+      <group>mysql</group>
+    </exclude>
+  </groups>
+  <php>
+    <!-- DB is one of mysql, sqlite, pgsql -->
+    <env name="DB" value="mysql"/>
+    <env name="DB_USER" value=""/>
+    <env name="DB_PW" value=""/>
+  </php>
+  <logging/>
+  <coverage>
+    <report>
+      <php outputFile="tests/clover.cov"/>
+    </report>
+  </coverage>
+  <source>
+    <include>
+      <directory>src/Propel/</directory>
+    </include>
+  </source>
 </phpunit>

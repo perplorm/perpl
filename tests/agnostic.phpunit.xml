@@ -1,6 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" colors="true" bootstrap="bootstrap.php" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd">
-  <coverage>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" colors="true" bootstrap="bootstrap.php" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.5/phpunit.xsd">
+  <testsuites>
+    <testsuite name="propel2">
+      <directory>Propel/Tests/Common</directory>
+      <directory>Propel/Tests/Helpers</directory>
+      <directory>Propel/Tests/Generator</directory>
+      <directory>Propel/Tests/Runtime</directory>
+      <directory>Propel/Tests/Bookstore</directory>
+      <directory>Propel/Tests/</directory>
+    </testsuite>
+  </testsuites>
+  <groups>
+    <exclude>
+      <group>database</group>
+      <group>pgsql</group>
+      <group>mysql</group>
+    </exclude>
+  </groups>
+  <source>
     <include>
       <directory>../src/Propel/</directory>
     </include>
@@ -20,22 +37,5 @@
       <file>../src/Propel/Runtime/Adapter/Pdo/SqlsrvAdapter.php</file>
       <file>../src/Propel/Runtime/Adapter/Pdo/SqlsrvAdapter.php</file>
     </exclude>
-  </coverage>
-  <testsuites>
-    <testsuite name="propel2">
-      <directory>Propel/Tests/Common</directory>
-      <directory>Propel/Tests/Helpers</directory>
-      <directory>Propel/Tests/Generator</directory>
-      <directory>Propel/Tests/Runtime</directory>
-      <directory>Propel/Tests/Bookstore</directory>
-      <directory>Propel/Tests/</directory>
-    </testsuite>
-  </testsuites>
-  <groups>
-    <exclude>
-      <group>database</group>
-      <group>pgsql</group>
-      <group>mysql</group>
-    </exclude>
-  </groups>
+  </source>
 </phpunit>
