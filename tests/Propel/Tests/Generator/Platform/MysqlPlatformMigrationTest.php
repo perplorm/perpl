@@ -12,58 +12,55 @@ use Propel\Generator\Config\GeneratorConfig;
 use Propel\Generator\Model\Diff\DatabaseComparator;
 use Propel\Generator\Platform\MysqlPlatform;
 use Propel\Generator\Platform\PlatformInterface;
-use Propel\Generator\Util\VfsTrait;
 
 class MysqlPlatformMigrationTest extends MysqlPlatformMigrationTestProvider
 {
-    use VfsTrait;
-
-    /**
-     * @var \Propel\Generator\Platform\MysqlPlatform|null
-     */
-    protected $platform;
+    protected static $platform;
 
     /**
      * Get the Platform object for this class
      *
      * @return \Propel\Generator\Platform\MysqlPlatform
      */
-    protected function getPlatform(): PlatformInterface
+    protected static function getPlatform(): PlatformInterface
     {
-        if (!$this->platform) {
-            $this->platform = new MysqlPlatform();
-            $configFileContent = <<<EOF
-propel:
-  database:
-    connections:
-      bookstore:
-        adapter: mysql
-        classname: \Propel\Runtime\Connection\DebugPDO
-        dsn: mysql:host=127.0.0.1;dbname=test
-        user: root
-        password:
-    adapters:
-      mysql:
-        tableType: InnoDB
+        static::$platform ??= static::setUpPlatform();
 
-  generator:
-    defaultConnection: bookstore
-    connections:
-      - bookstore
+        return static::$platform;
+    }
+    /**
+     * Get the Platform object for this class
+     *
+     * @return \Propel\Generator\Platform\MysqlPlatform
+     */
+    protected static function setUpPlatform(): MysqlPlatform
+    {
+        $platform = new MysqlPlatform();
+        $config = [
+            'propel.database' => [
+                'adapters.mysql.tableType' => 'InnoDB',
+                'connections.bookstore' => [
+                    'adapter' => 'mysql',
+                    'classname' => '\\Propel\\Runtime\\Connection\\DebugPDO',
+                    'dsn' => 'mysql:host=127.0.0.1;dbname=test',
+                    'user' => 'root',
+                    'password' => '',
+                ]
+            ],
+            'propel.generator' => [
+                'defaultConnection' => 'bookstore',
+                'connections' => ['bookstore'],
+            ],
+            'propel.runtime' => [
+                'defaultConnection' => 'bookstore',
+                'connections' => ['bookstore'],
+            ],
+        ];
 
-  runtime:
-    defaultConnection: bookstore
-    connections:
-      - bookstore
-EOF;
+        $config = new GeneratorConfig(null, $config);
+        $platform->setGeneratorConfig($config);
 
-            $configFile = $this->newFile('propel.yaml', $configFileContent);
-            $config = new GeneratorConfig($configFile->url());
-
-            $this->platform->setGeneratorConfig($config);
-        }
-
-        return $this->platform;
+        return $platform;
     }
 
     /**
@@ -100,7 +97,7 @@ CREATE TABLE `foo5`
 # This restores the fkey checks, after having unset them earlier
 SET FOREIGN_KEY_CHECKS = 1;
 ";
-        $this->assertEquals($expected, $this->getPlatform()->getModifyDatabaseDDL($databaseDiff));
+        $this->assertEquals($expected, static::getPlatform()->getModifyDatabaseDDL($databaseDiff));
     }
 
     /**
@@ -112,7 +109,7 @@ SET FOREIGN_KEY_CHECKS = 1;
         $expected = "
 RENAME TABLE `foo1` TO `foo2`;
 ";
-        $this->assertEquals($expected, $this->getPlatform()->getRenameTableDDL($fromName, $toName));
+        $this->assertEquals($expected, static::getPlatform()->getRenameTableDDL($fromName, $toName));
     }
 
     /**
@@ -148,7 +145,7 @@ ALTER TABLE `foo` ADD CONSTRAINT `foo1_fk_1`
     FOREIGN KEY (`bar1`)
     REFERENCES `foo2` (`bar`);
 ";
-        $this->assertEquals($expected, $this->getPlatform()->getModifyTableDDL($tableDiff));
+        $this->assertEquals($expected, static::getPlatform()->getModifyTableDDL($tableDiff));
     }
 
     /**
@@ -164,7 +161,7 @@ ALTER TABLE `foo` CHANGE `baz` `baz` VARCHAR(12);
 
 ALTER TABLE `foo` ADD `baz3` TEXT AFTER `baz`;
 ";
-        $this->assertEquals($expected, $this->getPlatform()->getModifyTableColumnsDDL($tableDiff));
+        $this->assertEquals($expected, static::getPlatform()->getModifyTableColumnsDDL($tableDiff));
     }
 
     /**
@@ -178,7 +175,7 @@ ALTER TABLE `foo` DROP PRIMARY KEY;
 
 ALTER TABLE `foo` ADD PRIMARY KEY (`id`,`bar`);
 ";
-        $this->assertEquals($expected, $this->getPlatform()->getModifyTablePrimaryKeyDDL($tableDiff));
+        $this->assertEquals($expected, static::getPlatform()->getModifyTablePrimaryKeyDDL($tableDiff));
     }
 
     /**
@@ -200,7 +197,7 @@ DROP INDEX `bar_baz_fk` ON `foo`;
 
 CREATE INDEX `bar_baz_fk` ON `foo` (`id`, `bar`, `baz`);
 ";
-        $this->assertEquals($expected, $this->getPlatform()->getModifyTableIndicesDDL($tableDiff));
+        $this->assertEquals($expected, static::getPlatform()->getModifyTableIndicesDDL($tableDiff));
     }
 
     /**
@@ -222,7 +219,7 @@ ALTER TABLE `foo1` ADD CONSTRAINT `foo1_fk_2`
     FOREIGN KEY (`bar`,`id`)
     REFERENCES `foo2` (`bar`,`id`);
 ";
-        $this->assertEquals($expected, $this->getPlatform()->getModifyTableForeignKeysDDL($tableDiff));
+        $this->assertEquals($expected, static::getPlatform()->getModifyTableForeignKeysDDL($tableDiff));
     }
 
     /**
@@ -234,13 +231,13 @@ ALTER TABLE `foo1` ADD CONSTRAINT `foo1_fk_2`
         $expected = "
 ALTER TABLE `foo1` DROP FOREIGN KEY `foo1_fk_1`;
 ";
-        $this->assertEquals($expected, $this->getPlatform()->getModifyTableForeignKeysDDL($tableDiff));
+        $this->assertEquals($expected, static::getPlatform()->getModifyTableForeignKeysDDL($tableDiff));
         $expected = "
 ALTER TABLE `foo1` ADD CONSTRAINT `foo1_fk_1`
     FOREIGN KEY (`bar`)
     REFERENCES `foo2` (`bar`);
 ";
-        $this->assertEquals($expected, $this->getPlatform()->getModifyTableForeignKeysDDL($tableDiff->getReverseDiff()));
+        $this->assertEquals($expected, static::getPlatform()->getModifyTableForeignKeysDDL($tableDiff->getReverseDiff()));
     }
 
     /**
@@ -250,9 +247,9 @@ ALTER TABLE `foo1` ADD CONSTRAINT `foo1_fk_1`
     public function testGetModifyTableForeignKeysSkipSql2DDL($tableDiff)
     {
         $expected = '';
-        $this->assertEquals($expected, $this->getPlatform()->getModifyTableForeignKeysDDL($tableDiff));
+        $this->assertEquals($expected, static::getPlatform()->getModifyTableForeignKeysDDL($tableDiff));
         $expected = '';
-        $this->assertEquals($expected, $this->getPlatform()->getModifyTableForeignKeysDDL($tableDiff->getReverseDiff()));
+        $this->assertEquals($expected, static::getPlatform()->getModifyTableForeignKeysDDL($tableDiff->getReverseDiff()));
     }
 
     /**
@@ -264,7 +261,7 @@ ALTER TABLE `foo1` ADD CONSTRAINT `foo1_fk_1`
         $expected = "
 ALTER TABLE `foo` DROP `bar`;
 ";
-        $this->assertEquals($expected, $this->getPlatform()->getRemoveColumnDDL($column));
+        $this->assertEquals($expected, static::getPlatform()->getRemoveColumnDDL($column));
     }
 
     /**
@@ -276,7 +273,7 @@ ALTER TABLE `foo` DROP `bar`;
         $expected = "
 ALTER TABLE `foo` CHANGE `bar1` `bar2` DOUBLE(2);
 ";
-        $this->assertEquals($expected, $this->getPlatform()->getRenameColumnDDL($fromColumn, $toColumn));
+        $this->assertEquals($expected, static::getPlatform()->getRenameColumnDDL($fromColumn, $toColumn));
     }
 
     /**
@@ -288,7 +285,7 @@ ALTER TABLE `foo` CHANGE `bar1` `bar2` DOUBLE(2);
         $expected = "
 ALTER TABLE `foo` CHANGE `bar` `bar` DOUBLE(3);
 ";
-        $this->assertEquals($expected, $this->getPlatform()->getModifyColumnDDL($columnDiff));
+        $this->assertEquals($expected, static::getPlatform()->getModifyColumnDDL($columnDiff));
     }
 
     /**
@@ -302,7 +299,7 @@ ALTER TABLE `foo` CHANGE `bar1` `bar1` DOUBLE(3);
 
 ALTER TABLE `foo` CHANGE `bar2` `bar2` INTEGER NOT NULL;
 ";
-        $this->assertEquals($expected, $this->getPlatform()->getModifyColumnsDDL($columnDiffs));
+        $this->assertEquals($expected, static::getPlatform()->getModifyColumnsDDL($columnDiffs));
     }
 
     /**
@@ -314,7 +311,7 @@ ALTER TABLE `foo` CHANGE `bar2` `bar2` INTEGER NOT NULL;
         $expected = "
 ALTER TABLE `foo` ADD `bar` INTEGER AFTER `id`;
 ";
-        $this->assertEquals($expected, $this->getPlatform()->getAddColumnDDL($column));
+        $this->assertEquals($expected, static::getPlatform()->getAddColumnDDL($column));
     }
 
     /**
@@ -326,7 +323,7 @@ ALTER TABLE `foo` ADD `bar` INTEGER AFTER `id`;
         $expected = "
 ALTER TABLE `foo` ADD `bar` INTEGER FIRST;
 ";
-        $this->assertEquals($expected, $this->getPlatform()->getAddColumnDDL($column));
+        $this->assertEquals($expected, static::getPlatform()->getAddColumnDDL($column));
     }
 
     /**
@@ -340,7 +337,7 @@ ALTER TABLE `foo` ADD `bar1` INTEGER AFTER `id`;
 
 ALTER TABLE `foo` ADD `bar2` DOUBLE(3,2) DEFAULT -1 NOT NULL AFTER `bar1`;
 ";
-        $this->assertEquals($expected, $this->getPlatform()->getAddColumnsDDL($columns));
+        $this->assertEquals($expected, static::getPlatform()->getAddColumnsDDL($columns));
     }
 
     /**
@@ -470,7 +467,7 @@ ALTER TABLE `foo` ADD PRIMARY KEY (`id`);
 ;--sql statement block;
 
 EOT;
-        $actual = $this->getPlatform()->getModifyTableColumnsDDL($tableDiff);
+        $actual = static::getPlatform()->getModifyTableColumnsDDL($tableDiff);
         $this->assertStringMatchesFormat($expected, $actual);
     }
 
@@ -499,7 +496,7 @@ ALTER TABLE `foo` ADD PRIMARY KEY (`id`);
 
 ;--sql statement block;
 EOT;
-        $actual = $this->getPlatform()->getModifyTableColumnsDDL($tableDiff);
+        $actual = static::getPlatform()->getModifyTableColumnsDDL($tableDiff);
         $this->assertStringMatchesFormat($expected, $actual);
     }
 }

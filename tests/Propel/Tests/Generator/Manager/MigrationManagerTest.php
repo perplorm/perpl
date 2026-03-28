@@ -53,7 +53,7 @@ class MigrationManagerTest extends TestCase
         $connections = $generatorConfig->getBuildConnections();
 
         $migrationManager = $this->getMockBuilder(MigrationManager::class)
-            ->setMethods(['getMigrationTimestamps'])
+            ->onlyMethods(['getMigrationTimestamps'])
             ->getMock();
         $migrationManager->setGeneratorConfig($generatorConfig);
         $migrationManager->setConnections($connections);
@@ -349,11 +349,11 @@ class MigrationManagerTest extends TestCase
     public function testModifyMigrationTableIfOutdatedShouldNotUpdateTableIfExecutionDatetimeColumnExists(): void
     {
         $platformMock = $this->getMockBuilder(DefaultPlatform::class)
-            ->setMethods(['getAddColumnDDL'])
+            ->onlyMethods(['getAddColumnDDL'])
             ->getMock();
 
         $migrationManager = $this->getMockBuilder(MigrationManager::class)
-            ->setMethods(['getPlatform'])
+            ->onlyMethods(['getPlatform'])
             ->getMock();
 
         $migrationManager->expects($this->any())

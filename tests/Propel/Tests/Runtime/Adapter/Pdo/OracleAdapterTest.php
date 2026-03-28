@@ -27,7 +27,7 @@ class OracleAdapterTest extends TestCaseFixtures
     /**
      * @return string
      */
-    protected function getDriver()
+    protected static function getDriver(): string
     {
         return 'oracle';
     }
@@ -37,6 +37,7 @@ class OracleAdapterTest extends TestCaseFixtures
         $params = [];
         Propel::getServiceContainer()->setAdapter('oracle', new OracleAdapter());
         $query->setDbName('oracle');
+
         return $query->createSelectSql($params);
     }
 

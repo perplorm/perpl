@@ -25,7 +25,7 @@ class TestCase extends PHPUnitTestCase
     /**
      * @return string
      */
-    protected function getDriver()
+    protected static function getDriver(): string
     {
         return 'sqlite';
     }
@@ -40,11 +40,9 @@ class TestCase extends PHPUnitTestCase
      *
      * @return mixed
      */
-    protected function getSql($sql, $source = 'mysql', $target = null)
+    protected static function getSql($sql, $source = 'mysql', $target = null)
     {
-        if (!$target) {
-            $target = $this->getDriver();
-        }
+        $target ??= static::getDriver();
 
         if ($target === 'sqlite' && $source === 'mysql') {
             return preg_replace('/`([^`]*)`/', '[$1]', $sql);
@@ -66,57 +64,57 @@ class TestCase extends PHPUnitTestCase
      *
      * @return bool
      */
-    protected function isDb($db = 'mysql')
+    protected static function isDb($db = 'mysql')
     {
-        return $this->getDriver() == $db;
+        return static::getDriver() == $db;
     }
 
     /**
      * @return bool
      */
-    protected function runningOnPostgreSQL()
+    protected static function runningOnPostgreSQL()
     {
-        return $this->isDb('pgsql');
+        return static::isDb('pgsql');
     }
 
     /**
      * @return bool
      */
-    protected function runningOnMySQL()
+    protected static function runningOnMySQL()
     {
-        return $this->isDb('mysql');
+        return static::isDb('mysql');
     }
 
     /**
      * @return bool
      */
-    protected function runningOnSQLite()
+    protected static function runningOnSQLite()
     {
-        return $this->isDb('sqlite');
+        return static::isDb('sqlite');
     }
 
     /**
      * @return bool
      */
-    protected function runningOnOracle()
+    protected static function runningOnOracle()
     {
-        return $this->isDb('oracle');
+        return static::isDb('oracle');
     }
 
     /**
      * @return bool
      */
-    protected function runningOnMSSQL()
+    protected static function runningOnMSSQL()
     {
-        return $this->isDb('mssql');
+        return static::isDb('mssql');
     }
 
     /**
      * @return \Propel\Generator\Platform\PlatformInterface
      */
-    protected function getPlatform(): PlatformInterface
+    protected static function getPlatform(): PlatformInterface
     {
-        $className = sprintf('\\Propel\\Generator\\Platform\\%sPlatform', ucfirst($this->getDriver()));
+        $className = sprintf('\\Propel\\Generator\\Platform\\%sPlatform', ucfirst(static::getDriver()));
 
         return new $className();
     }
@@ -126,9 +124,9 @@ class TestCase extends PHPUnitTestCase
      *
      * @return \Propel\Generator\Reverse\SchemaParserInterface
      */
-    protected function getParser($con)
+    protected static function getParser($con)
     {
-        $className = sprintf('\\Propel\\Generator\\Reverse\\%sSchemaParser', ucfirst($this->getDriver()));
+        $className = sprintf('\\Propel\\Generator\\Reverse\\%sSchemaParser', ucfirst(static::getDriver()));
 
         return new $className($con);
     }
@@ -243,7 +241,7 @@ class TestCase extends PHPUnitTestCase
      * @param string $schema
      * @return Database|null
      */
-    public function buildDatabaseFromSchema(
+    public static function buildDatabaseFromSchema(
         string $schema,
         array|null $additionalConfig = null,
         PlatformInterface|null $platform = null,
@@ -264,13 +262,13 @@ class TestCase extends PHPUnitTestCase
      * @param string $schema
      * @return Column|null
      */
-    public function buildColumnFromSchema(
+    public static function buildColumnFromSchema(
         string $columnXml,
         array|null $additionalConfig = null,
         PlatformInterface|null $platform = null,
     ): Column {
         $schema = "<database><table name='table'>$columnXml</table></database";
-        $database = $this->buildDatabaseFromSchema($schema, $additionalConfig, $platform);
+        $database = static::buildDatabaseFromSchema($schema, $additionalConfig, $platform);
 
         return $database->getTable('table')->getColumns()[0];
     }

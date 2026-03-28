@@ -16,20 +16,18 @@ use Propel\Tests\TestCase;
 
 class DefaultPlatformTest extends TestCase
 {
-    protected $platform;
+    protected static PlatformInterface|null $platform = null;
 
     /**
      * Get the Platform object for this class
      *
      * @return \Propel\Generator\Platform\PlatformInterface
      */
-    protected function getPlatform(): PlatformInterface
+    protected static function getPlatform(): PlatformInterface
     {
-        if (null === $this->platform) {
-            $this->platform = new DefaultPlatform();
-        }
-
-        return $this->platform;
+        static::$platform ??= new DefaultPlatform();
+        
+        return static::$platform;
     }
 
     /**
@@ -37,7 +35,7 @@ class DefaultPlatformTest extends TestCase
      */
     protected function tearDown(): void
     {
-        $this->platform = null;
+        static::$platform = null;
     }
 
     /**
@@ -46,7 +44,7 @@ class DefaultPlatformTest extends TestCase
     #[\PHPUnit\Framework\Attributes\DataProvider('provideValidBooleanValues')]
     public function testGetBooleanString($value)
     {
-        $p = $this->getPlatform();
+        $p = static::getPlatform();
 
         $this->assertEquals('1', $p->getBooleanString($value));
     }
@@ -72,7 +70,7 @@ class DefaultPlatformTest extends TestCase
     #[\PHPUnit\Framework\Attributes\DataProvider('provideInvalidBooleanValues')]
     public function testGetNonBooleanString($value)
     {
-        $p = $this->getPlatform();
+        $p = static::getPlatform();
 
         $this->assertEquals('0', $p->getBooleanString($value));
     }
@@ -98,7 +96,7 @@ class DefaultPlatformTest extends TestCase
      */
     public function testQuote()
     {
-        $p = $this->getPlatform();
+        $p = static::getPlatform();
 
         $unquoted = 'Nice';
         $quoted = $p->quote($unquoted);
@@ -111,7 +109,7 @@ class DefaultPlatformTest extends TestCase
         $this->assertEquals($expected, $quoted);
     }
 
-    protected function createColumn($type, $defaultValue, $size = null)
+    protected static function createColumn($type, $defaultValue, $size = null)
     {
         $column = new Column('');
         $column->setType($type);
@@ -121,35 +119,35 @@ class DefaultPlatformTest extends TestCase
         return $column;
     }
 
-    public function createEnumeratedColumn(string $propelType, $defaultValues, $defaultValue)
+    public static function createEnumeratedColumn(string $propelType, $defaultValues, $defaultValue)
     {
-        $column = $this->createColumn($propelType, $defaultValue);
+        $column = static::createColumn($propelType, $defaultValue);
         $column->setValueSet($defaultValues);
 
         return $column;
     }
 
-    public function getColumnDefaultValueDDLDataProvider(): array
+    public static function getColumnDefaultValueDDLDataProvider(): array
     {
         return [
-            [$this->createColumn(PropelTypes::INTEGER, 0), 'DEFAULT 0'],
-            [$this->createColumn(PropelTypes::INTEGER, '0'), 'DEFAULT 0'],
-            [$this->createColumn(PropelTypes::VARCHAR, 'foo'), "DEFAULT 'foo'"],
-            [$this->createColumn(PropelTypes::VARCHAR, 0), "DEFAULT '0'"],
-            [$this->createColumn(PropelTypes::BOOLEAN, true), 'DEFAULT 1'],
-            [$this->createColumn(PropelTypes::BOOLEAN, false), 'DEFAULT 0'],
-            [$this->createColumn(PropelTypes::BOOLEAN, 'true'), 'DEFAULT 1'],
-            [$this->createColumn(PropelTypes::BOOLEAN, 'false'), 'DEFAULT 0'],
-            [$this->createColumn(PropelTypes::BOOLEAN, 'TRUE'), 'DEFAULT 1'],
-            [$this->createColumn(PropelTypes::BOOLEAN, 'FALSE'), 'DEFAULT 0'],
-            [$this->createEnumeratedColumn(PropelTypes::ENUM_BINARY, ['foo', 'bar', 'baz'], 'foo'), 'DEFAULT 0'],
-            [$this->createEnumeratedColumn(PropelTypes::ENUM_BINARY, ['foo', 'bar', 'baz'], 'bar'), 'DEFAULT 1'],
-            [$this->createEnumeratedColumn(PropelTypes::ENUM_BINARY, ['foo', 'bar', 'baz'], 'baz'), 'DEFAULT 2'],
-            [$this->createEnumeratedColumn(PropelTypes::SET_BINARY, ['foo', 'bar', 'baz'], 'foo'), 'DEFAULT 1'],
-            [$this->createEnumeratedColumn(PropelTypes::SET_BINARY, ['foo', 'bar', 'baz'], 'bar'), 'DEFAULT 2'],
-            [$this->createEnumeratedColumn(PropelTypes::SET_BINARY, ['foo', 'bar', 'baz'], 'baz'), 'DEFAULT 4'],
-            [$this->createEnumeratedColumn(PropelTypes::ENUM_NATIVE, ['foo', 'bar', 'baz'], 'bar'), 'DEFAULT \'bar\''],
-            [$this->createEnumeratedColumn(PropelTypes::SET_NATIVE, ['foo', 'bar', 'baz'], 'bar'), 'DEFAULT \'bar\''],
+            [static::createColumn(PropelTypes::INTEGER, 0), 'DEFAULT 0'],
+            [static::createColumn(PropelTypes::INTEGER, '0'), 'DEFAULT 0'],
+            [static::createColumn(PropelTypes::VARCHAR, 'foo'), "DEFAULT 'foo'"],
+            [static::createColumn(PropelTypes::VARCHAR, 0), "DEFAULT '0'"],
+            [static::createColumn(PropelTypes::BOOLEAN, true), 'DEFAULT 1'],
+            [static::createColumn(PropelTypes::BOOLEAN, false), 'DEFAULT 0'],
+            [static::createColumn(PropelTypes::BOOLEAN, 'true'), 'DEFAULT 1'],
+            [static::createColumn(PropelTypes::BOOLEAN, 'false'), 'DEFAULT 0'],
+            [static::createColumn(PropelTypes::BOOLEAN, 'TRUE'), 'DEFAULT 1'],
+            [static::createColumn(PropelTypes::BOOLEAN, 'FALSE'), 'DEFAULT 0'],
+            [static::createEnumeratedColumn(PropelTypes::ENUM_BINARY, ['foo', 'bar', 'baz'], 'foo'), 'DEFAULT 0'],
+            [static::createEnumeratedColumn(PropelTypes::ENUM_BINARY, ['foo', 'bar', 'baz'], 'bar'), 'DEFAULT 1'],
+            [static::createEnumeratedColumn(PropelTypes::ENUM_BINARY, ['foo', 'bar', 'baz'], 'baz'), 'DEFAULT 2'],
+            [static::createEnumeratedColumn(PropelTypes::SET_BINARY, ['foo', 'bar', 'baz'], 'foo'), 'DEFAULT 1'],
+            [static::createEnumeratedColumn(PropelTypes::SET_BINARY, ['foo', 'bar', 'baz'], 'bar'), 'DEFAULT 2'],
+            [static::createEnumeratedColumn(PropelTypes::SET_BINARY, ['foo', 'bar', 'baz'], 'baz'), 'DEFAULT 4'],
+            [static::createEnumeratedColumn(PropelTypes::ENUM_NATIVE, ['foo', 'bar', 'baz'], 'bar'), 'DEFAULT \'bar\''],
+            [static::createEnumeratedColumn(PropelTypes::SET_NATIVE, ['foo', 'bar', 'baz'], 'bar'), 'DEFAULT \'bar\''],
 
         ];
     }
@@ -160,18 +158,18 @@ class DefaultPlatformTest extends TestCase
     #[\PHPUnit\Framework\Attributes\DataProvider('getColumnDefaultValueDDLDataProvider')]
     public function testGetColumnDefaultValueDDL($column, $default)
     {
-        $this->assertEquals($default, $this->getPlatform()->getColumnDefaultValueDDL($column));
+        $this->assertEquals($default, static::getPlatform()->getColumnDefaultValueDDL($column));
     }
 
-    public function getColumnBindingDataProvider(): array
+    public static function getColumnBindingDataProvider(): array
     {
         return [
-            [$this->createColumn(PropelTypes::DATE, '2020-02-03'), '$stmt->bindValue(ID, ACCESSOR?->format(\'Y-m-d\'), PDO::PARAM_STR);'],
-            [$this->createColumn(PropelTypes::TIME, '11:01:03'), '$stmt->bindValue(ID, ACCESSOR?->format(\'H:i:s\'), PDO::PARAM_STR);'],
-            [$this->createColumn(PropelTypes::TIMESTAMP, '2020-02-03 11:01:03'), '$stmt->bindValue(ID, ACCESSOR?->format(\'Y-m-d H:i:s\'), PDO::PARAM_STR);'],
-            [$this->createColumn(PropelTypes::DATETIME, '2022-06-28 11:01:03'), '$stmt->bindValue(ID, ACCESSOR?->format(\'Y-m-d H:i:s\'), PDO::PARAM_STR);'],
-            [$this->createColumn(PropelTypes::DATETIME, '2022-06-28 11:01:03', 6), '$stmt->bindValue(ID, ACCESSOR?->format(\'Y-m-d H:i:s.u\'), PDO::PARAM_STR);'],
-            [$this->createColumn(PropelTypes::BLOB, 'BLOB'), '$stmt->bindValue(ID, ACCESSOR, PDO::PARAM_LOB);'],
+            [static::createColumn(PropelTypes::DATE, '2020-02-03'), '$stmt->bindValue(ID, ACCESSOR?->format(\'Y-m-d\'), PDO::PARAM_STR);'],
+            [static::createColumn(PropelTypes::TIME, '11:01:03'), '$stmt->bindValue(ID, ACCESSOR?->format(\'H:i:s\'), PDO::PARAM_STR);'],
+            [static::createColumn(PropelTypes::TIMESTAMP, '2020-02-03 11:01:03'), '$stmt->bindValue(ID, ACCESSOR?->format(\'Y-m-d H:i:s\'), PDO::PARAM_STR);'],
+            [static::createColumn(PropelTypes::DATETIME, '2022-06-28 11:01:03'), '$stmt->bindValue(ID, ACCESSOR?->format(\'Y-m-d H:i:s\'), PDO::PARAM_STR);'],
+            [static::createColumn(PropelTypes::DATETIME, '2022-06-28 11:01:03', 6), '$stmt->bindValue(ID, ACCESSOR?->format(\'Y-m-d H:i:s.u\'), PDO::PARAM_STR);'],
+            [static::createColumn(PropelTypes::BLOB, 'BLOB'), '$stmt->bindValue(ID, ACCESSOR, PDO::PARAM_LOB);'],
         ];
     }
 
@@ -181,7 +179,7 @@ class DefaultPlatformTest extends TestCase
     #[\PHPUnit\Framework\Attributes\DataProvider('getColumnBindingDataProvider')]
     public function testGetColumnBindingPHP($column, $default)
     {
-        $this->assertStringContainsString($default, $this->getPlatform()->getColumnBindingPHP($column, 'ID', 'ACCESSOR'));
+        $this->assertStringContainsString($default, static::getPlatform()->getColumnBindingPHP($column, 'ID', 'ACCESSOR'));
     }
 
     /**
@@ -189,7 +187,7 @@ class DefaultPlatformTest extends TestCase
      */
     public function testDoesNotSupportNativeOnDeleteTriggers()
     {
-        $this->assertFalse($this->getPlatform()->supportsNativeDeleteTrigger());
+        $this->assertFalse(static::getPlatform()->supportsNativeDeleteTrigger());
     }
 
     public static function GetTemporalFormatterDataProvider(): array
@@ -209,8 +207,8 @@ class DefaultPlatformTest extends TestCase
     #[\PHPUnit\Framework\Attributes\DataProvider('GetTemporalFormatterDataProvider')]
     public function testGetTemporalFormatter(string $columnType, int|null $size, string $expectedFormat): void
     {
-        $column = $this->createColumn($columnType, null, $size);
-        $actual = $this->getPlatform()->getTemporalFormatter($column);
+        $column = static::createColumn($columnType, null, $size);
+        $actual = static::getPlatform()->getTemporalFormatter($column);
 
         $this->assertSame($expectedFormat, $actual);
     }

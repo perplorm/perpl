@@ -402,7 +402,7 @@ class MigrationTest extends TestCaseFixturesDatabase
         $defaultAppArguments = [
             '--config-dir' => self::CONNECTION_CONFIG_DIR,
             '--output-dir' => self::OUTPUT_DIR,
-            '--platform' => ucfirst($this->getDriver()) . 'Platform',
+            '--platform' => ucfirst(static::getDriver()) . 'Platform',
             '--connection' => $connectionOption,
             '--verbose' => true,
         ];

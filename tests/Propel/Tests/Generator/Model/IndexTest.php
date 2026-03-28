@@ -8,7 +8,9 @@
 
 namespace Propel\Tests\Generator\Model;
 
+use Propel\Generator\Model\Column;
 use Propel\Generator\Model\Index;
+use Propel\Generator\Model\PropelTypes;
 
 /**
  * Unit test suite for the Index model class.
@@ -98,12 +100,12 @@ class IndexTest extends ModelTestCase
         $this->assertNull($index->getColumnSize('baz'));
     }
 
-    public function provideColumnDefinitions()
+    public static function provideColumnDefinitions()
     {
         $dataset[0][] = [
-            $this->getColumnMock('foo', [ 'size' => 100 ]),
-            $this->getColumnMock('bar', [ 'size' => 5   ]),
-            $this->getColumnMock('baz', [ 'size' => 0   ]),
+            new Column('foo', PropelTypes::VARCHAR, 100),
+            new Column('bar', PropelTypes::VARCHAR, 5),
+            new Column('baz', PropelTypes::VARCHAR, 0),
         ];
 
         $dataset[1][] = [

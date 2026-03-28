@@ -53,7 +53,7 @@ class CriteriaCombineTest extends BaseTestCase
     /**
      * @return string
      */
-    protected function getDriver()
+    protected static function getDriver(): string
     {
         return 'sqlite';
     }

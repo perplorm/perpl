@@ -151,7 +151,7 @@ class ColumnCodeTest extends CompareGeneratedCodeTestCase
         array|null $extraConfig = null,
         PlatformInterface|null $platform = null
     ): AbstractOMBuilder {
-        $column = $this->buildColumnFromSchema($columnXml);
+        $column = static::buildColumnFromSchema($columnXml);
         $config = new QuickGeneratorConfig($extraConfig);
 
         return $config->loadConfiguredBuilder($column->getTable(), $builderType);
@@ -164,7 +164,7 @@ class ColumnCodeTest extends CompareGeneratedCodeTestCase
      *
      * @return \Propel\Generator\Model\Column
      */
-    public function buildColumnFromSchema(string $columnXml, array|null $extraConfig = null, PlatformInterface|null $platform = null): Column
+    public static function buildColumnFromSchema(string $columnXml, array|null $extraConfig = null, PlatformInterface|null $platform = null): Column
     {
         $schema = <<<EOF
                 <database>
@@ -173,7 +173,7 @@ class ColumnCodeTest extends CompareGeneratedCodeTestCase
                     </table>
                 </database>
 EOF;
-        $schema = $this->buildDatabaseFromSchema($schema, $extraConfig, $platform ?? new MysqlPlatform());
+        $schema = static::buildDatabaseFromSchema($schema, $extraConfig, $platform ?? new MysqlPlatform());
 
         return $schema->getTable('table')->getColumns()[0];
     }

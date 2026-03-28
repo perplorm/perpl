@@ -22,7 +22,7 @@ class OraclePlatformTest extends PlatformTestProvider
      *
      * @return \Propel\Generator\Platform\OraclePlatform
      */
-    protected function getPlatform(): PlatformInterface
+    protected static function getPlatform(): PlatformInterface
     {
         return new OraclePlatform();
     }
@@ -35,7 +35,7 @@ class OraclePlatformTest extends PlatformTestProvider
         $table = new Table('foo');
         $table->setIdMethod(IdMethod::NATIVE);
         $expected = 'foo_SEQ';
-        $this->assertEquals($expected, $this->getPlatform()->getSequenceName($table));
+        $this->assertEquals($expected, static::getPlatform()->getSequenceName($table));
     }
 
     /**
@@ -50,7 +50,7 @@ class OraclePlatformTest extends PlatformTestProvider
         $table->addIdMethodParameter($idMethodParameter);
         $table->setIdMethod(IdMethod::NATIVE);
         $expected = 'foo_sequence';
-        $this->assertEquals($expected, $this->getPlatform()->getSequenceName($table));
+        $this->assertEquals($expected, static::getPlatform()->getSequenceName($table));
     }
 
     /**
@@ -115,7 +115,7 @@ ALTER TABLE book ADD CONSTRAINT book_fk_ea464c
     FOREIGN KEY (author_id) REFERENCES author (id);
 
 EOF;
-        $this->assertEquals($expected, $this->getPlatform()->getAddTablesDDL($database));
+        $this->assertEquals($expected, static::getPlatform()->getAddTablesDDL($database));
     }
 
     /**
@@ -129,7 +129,7 @@ EOF;
 ALTER SESSION SET NLS_DATE_FORMAT='YYYY-MM-DD';
 ALTER SESSION SET NLS_TIMESTAMP_FORMAT='YYYY-MM-DD HH24:MI:SS';
 ";
-        $this->assertEquals($expected, $this->getPlatform()->getAddTablesDDL($database));
+        $this->assertEquals($expected, static::getPlatform()->getAddTablesDDL($database));
     }
 
     /**
@@ -152,7 +152,7 @@ ALTER TABLE foo ADD CONSTRAINT foo_pk PRIMARY KEY (id);
 CREATE SEQUENCE foo_SEQ
     INCREMENT BY 1 START WITH 1 NOMAXVALUE NOCYCLE NOCACHE ORDER;
 ";
-        $this->assertEquals($expected, $this->getPlatform()->getAddTableDDL($table));
+        $this->assertEquals($expected, static::getPlatform()->getAddTableDDL($table));
     }
 
     /**
@@ -172,7 +172,7 @@ CREATE TABLE foo
 
 ALTER TABLE foo ADD CONSTRAINT foo_pk PRIMARY KEY (foo,bar);
 ";
-        $this->assertEquals($expected, $this->getPlatform()->getAddTableDDL($table));
+        $this->assertEquals($expected, static::getPlatform()->getAddTableDDL($table));
     }
 
     /**
@@ -195,7 +195,7 @@ ALTER TABLE foo ADD CONSTRAINT foo_pk PRIMARY KEY (id);
 CREATE SEQUENCE foo_SEQ
     INCREMENT BY 1 START WITH 1 NOMAXVALUE NOCYCLE NOCACHE ORDER;
 ";
-        $this->assertEquals($expected, $this->getPlatform()->getAddTableDDL($table));
+        $this->assertEquals($expected, static::getPlatform()->getAddTableDDL($table));
     }
 
     /**
@@ -207,7 +207,7 @@ CREATE SEQUENCE foo_SEQ
         $expected = "
 DROP TABLE foo CASCADE CONSTRAINTS;
 ";
-        $this->assertEquals($expected, $this->getPlatform()->getDropTableDDL($table));
+        $this->assertEquals($expected, static::getPlatform()->getDropTableDDL($table));
     }
 
     /**
@@ -225,7 +225,7 @@ DROP TABLE foo CASCADE CONSTRAINTS;
 
 DROP SEQUENCE foo_sequence;
 ";
-        $this->assertEquals($expected, $this->getPlatform()->getDropTableDDL($table));
+        $this->assertEquals($expected, static::getPlatform()->getDropTableDDL($table));
     }
 
     /**
@@ -234,14 +234,14 @@ DROP SEQUENCE foo_sequence;
     public function testGetColumnDDLCustomSqlType()
     {
         $column = new Column('foo');
-        $column->getDomain()->copy($this->getPlatform()->getDomainForType('DOUBLE'));
+        $column->getDomain()->copy(static::getPlatform()->getDomainForType('DOUBLE'));
         $column->getDomain()->replaceScale(2);
         $column->getDomain()->replaceSize(3);
         $column->setNotNull(true);
         $column->getDomain()->createDefaultValue(123);
         $column->getDomain()->replaceSqlType('DECIMAL(5,6)');
         $expected = 'foo DECIMAL(5,6) DEFAULT 123 NOT NULL';
-        $this->assertEquals($expected, $this->getPlatform()->getColumnDDL($column));
+        $this->assertEquals($expected, static::getPlatform()->getColumnDDL($column));
     }
 
     /**
@@ -251,7 +251,7 @@ DROP SEQUENCE foo_sequence;
     public function testGetPrimaryKeyDDLSimpleKey($table)
     {
         $expected = 'CONSTRAINT foo_pk PRIMARY KEY (bar)';
-        $this->assertEquals($expected, $this->getPlatform()->getPrimaryKeyDDL($table));
+        $this->assertEquals($expected, static::getPlatform()->getPrimaryKeyDDL($table));
     }
 
     /**
@@ -264,7 +264,7 @@ DROP SEQUENCE foo_sequence;
         $column->setPrimaryKey(true);
         $table->addColumn($column);
         $expected = 'CONSTRAINT this_table_has_a_very_long__pk PRIMARY KEY (bar)';
-        $this->assertEquals($expected, $this->getPlatform()->getPrimaryKeyDDL($table));
+        $this->assertEquals($expected, static::getPlatform()->getPrimaryKeyDDL($table));
     }
 
     /**
@@ -280,7 +280,7 @@ DROP SEQUENCE foo_sequence;
         $column2->setPrimaryKey(true);
         $table->addColumn($column2);
         $expected = 'CONSTRAINT foo_pk PRIMARY KEY (bar1,bar2)';
-        $this->assertEquals($expected, $this->getPlatform()->getPrimaryKeyDDL($table));
+        $this->assertEquals($expected, static::getPlatform()->getPrimaryKeyDDL($table));
     }
 
     /**
@@ -292,7 +292,7 @@ DROP SEQUENCE foo_sequence;
         $expected = "
 ALTER TABLE foo DROP CONSTRAINT foo_pk;
 ";
-        $this->assertEquals($expected, $this->getPlatform()->getDropPrimaryKeyDDL($table));
+        $this->assertEquals($expected, static::getPlatform()->getDropPrimaryKeyDDL($table));
     }
 
     /**
@@ -304,7 +304,7 @@ ALTER TABLE foo DROP CONSTRAINT foo_pk;
         $expected = "
 ALTER TABLE foo ADD CONSTRAINT foo_pk PRIMARY KEY (bar);
 ";
-        $this->assertEquals($expected, $this->getPlatform()->getAddPrimaryKeyDDL($table));
+        $this->assertEquals($expected, static::getPlatform()->getAddPrimaryKeyDDL($table));
     }
 
     /**
@@ -318,7 +318,7 @@ CREATE INDEX babar ON foo (bar1,bar2);
 
 CREATE INDEX foo_index ON foo (bar1);
 ";
-        $this->assertEquals($expected, $this->getPLatform()->getAddIndicesDDL($table));
+        $this->assertEquals($expected, static::getPlatform()->getAddIndicesDDL($table));
     }
 
     /**
@@ -330,7 +330,7 @@ CREATE INDEX foo_index ON foo (bar1);
         $expected = "
 CREATE INDEX babar ON foo (bar1,bar2);
 ";
-        $this->assertEquals($expected, $this->getPLatform()->getAddIndexDDL($index));
+        $this->assertEquals($expected, static::getPlatform()->getAddIndexDDL($index));
     }
 
     /**
@@ -342,7 +342,7 @@ CREATE INDEX babar ON foo (bar1,bar2);
         $expected = "
 DROP INDEX babar;
 ";
-        $this->assertEquals($expected, $this->getPLatform()->getDropIndexDDL($index));
+        $this->assertEquals($expected, static::getPlatform()->getDropIndexDDL($index));
     }
 
     /**
@@ -352,7 +352,7 @@ DROP INDEX babar;
     public function testGetIndexDDL($index)
     {
         $expected = 'INDEX babar (bar1,bar2)';
-        $this->assertEquals($expected, $this->getPLatform()->getIndexDDL($index));
+        $this->assertEquals($expected, static::getPlatform()->getIndexDDL($index));
     }
 
     /**
@@ -362,7 +362,7 @@ DROP INDEX babar;
     public function testGetUniqueDDL($index)
     {
         $expected = 'CONSTRAINT babar UNIQUE (bar1,bar2)';
-        $this->assertEquals($expected, $this->getPlatform()->getUniqueDDL($index));
+        $this->assertEquals($expected, static::getPlatform()->getUniqueDDL($index));
     }
 
     /**
@@ -380,7 +380,7 @@ ALTER TABLE foo ADD CONSTRAINT foo_baz_fk
     FOREIGN KEY (baz_id) REFERENCES baz (id)
     ON DELETE SET NULL;
 ";
-        $this->assertEquals($expected, $this->getPLatform()->getAddForeignKeysDDL($table));
+        $this->assertEquals($expected, static::getPlatform()->getAddForeignKeysDDL($table));
     }
 
     /**
@@ -394,7 +394,7 @@ ALTER TABLE foo ADD CONSTRAINT foo_bar_fk
     FOREIGN KEY (bar_id) REFERENCES bar (id)
     ON DELETE CASCADE;
 ";
-        $this->assertEquals($expected, $this->getPLatform()->getAddForeignKeyDDL($fk));
+        $this->assertEquals($expected, static::getPlatform()->getAddForeignKeyDDL($fk));
     }
 
     /**
@@ -404,7 +404,7 @@ ALTER TABLE foo ADD CONSTRAINT foo_bar_fk
     public function testGetAddForeignKeySkipSqlDDL($fk)
     {
         $expected = '';
-        $this->assertEquals($expected, $this->getPLatform()->getAddForeignKeyDDL($fk));
+        $this->assertEquals($expected, static::getPlatform()->getAddForeignKeyDDL($fk));
     }
 
     /**
@@ -416,7 +416,7 @@ ALTER TABLE foo ADD CONSTRAINT foo_bar_fk
         $expected = "
 ALTER TABLE foo DROP CONSTRAINT foo_bar_fk;
 ";
-        $this->assertEquals($expected, $this->getPLatform()->getDropForeignKeyDDL($fk));
+        $this->assertEquals($expected, static::getPlatform()->getDropForeignKeyDDL($fk));
     }
 
     /**
@@ -426,7 +426,7 @@ ALTER TABLE foo DROP CONSTRAINT foo_bar_fk;
     public function testGetDropForeignKeySkipSqlDDL($fk)
     {
         $expected = '';
-        $this->assertEquals($expected, $this->getPLatform()->getDropForeignKeyDDL($fk));
+        $this->assertEquals($expected, static::getPlatform()->getDropForeignKeyDDL($fk));
     }
 
     /**
@@ -438,7 +438,7 @@ ALTER TABLE foo DROP CONSTRAINT foo_bar_fk;
         $expected = "CONSTRAINT foo_bar_fk
     FOREIGN KEY (bar_id) REFERENCES bar (id)
     ON DELETE CASCADE";
-        $this->assertEquals($expected, $this->getPLatform()->getForeignKeyDDL($fk));
+        $this->assertEquals($expected, static::getPlatform()->getForeignKeyDDL($fk));
     }
 
     /**
@@ -448,7 +448,7 @@ ALTER TABLE foo DROP CONSTRAINT foo_bar_fk;
     public function testGetForeignKeySkipSqlDDL($fk)
     {
         $expected = '';
-        $this->assertEquals($expected, $this->getPLatform()->getForeignKeyDDL($fk));
+        $this->assertEquals($expected, static::getPlatform()->getForeignKeyDDL($fk));
     }
 
     /**
@@ -461,7 +461,7 @@ ALTER TABLE foo DROP CONSTRAINT foo_bar_fk;
 -- foo bar
 -----------------------------------------------------------------------
 ";
-        $this->assertEquals($expected, $this->getPLatform()->getCommentBlockDDL('foo bar'));
+        $this->assertEquals($expected, static::getPlatform()->getCommentBlockDDL('foo bar'));
     }
 
     /**
@@ -629,7 +629,7 @@ ALTER TABLE book ADD CONSTRAINT book_fk_4444ca
 
 EOF;
 
-        $this->assertEquals($expected, $this->getPlatform()->getAddTablesDDL($database));
+        $this->assertEquals($expected, static::getPlatform()->getAddTablesDDL($database));
     }
 
     /**

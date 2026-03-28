@@ -26,16 +26,18 @@ class MysqlPlatformMyISAMTest extends PlatformTestProvider
      *
      * @return \Propel\Generator\Platform\MysqlPlatform
      */
-    protected function getPlatform(): PlatformInterface
+    protected static function getPlatform(): PlatformInterface
     {
         static $platform;
 
         if (!$platform) {
             $platform = new MysqlPlatform();
 
-            $configProp['propel']['database']['adapters']['mysql']['tableType'] = 'MyISAM';
-            $configProp['propel']['paths']['composerDir'] = __DIR__ . '/../../../../../';
-            $config = new GeneratorConfig(__DIR__ . '/../../../../Fixtures/bookstore', $configProp);
+            $configProps = [
+                'propel.database.adapters.mysql.tableType' => 'MyISAM',
+                'propel.paths.composerDir' => __DIR__ . '/../../../../../'
+            ];
+            $config = new GeneratorConfig(__DIR__ . '/../../../../Fixtures/bookstore', $configProps);
 
             $platform->setGeneratorConfig($config);
         }
@@ -51,7 +53,7 @@ class MysqlPlatformMyISAMTest extends PlatformTestProvider
         $table = new Table('foo');
         $table->setIdMethod(IdMethod::NATIVE);
         $expected = 'foo_SEQ';
-        $this->assertEquals($expected, $this->getPlatform()->getSequenceName($table));
+        $this->assertEquals($expected, static::getPlatform()->getSequenceName($table));
     }
 
     /**
@@ -66,7 +68,7 @@ class MysqlPlatformMyISAMTest extends PlatformTestProvider
         $table->addIdMethodParameter($idMethodParameter);
         $table->setIdMethod(IdMethod::NATIVE);
         $expected = 'foo_sequence';
-        $this->assertEquals($expected, $this->getPlatform()->getSequenceName($table));
+        $this->assertEquals($expected, static::getPlatform()->getSequenceName($table));
     }
 
     /**
@@ -131,7 +133,7 @@ CREATE TABLE `x`.`book_summary`
 SET FOREIGN_KEY_CHECKS = 1;
 
 EOF;
-        $this->assertEquals($expected, $this->getPlatform()->getAddTablesDDL($database));
+        $this->assertEquals($expected, static::getPlatform()->getAddTablesDDL($database));
     }
 
     /**
@@ -181,7 +183,7 @@ CREATE TABLE `author`
 SET FOREIGN_KEY_CHECKS = 1;
 
 EOF;
-        $this->assertEquals($expected, $this->getPlatform()->getAddTablesDDL($database));
+        $this->assertEquals($expected, static::getPlatform()->getAddTablesDDL($database));
     }
 
     /**
@@ -192,7 +194,7 @@ EOF;
     {
         $database = $this->getDatabaseFromSchema($schema);
         $expected = '';
-        $this->assertEquals($expected, $this->getPlatform()->getAddTablesDDL($database));
+        $this->assertEquals($expected, static::getPlatform()->getAddTablesDDL($database));
     }
 
     /**
@@ -210,7 +212,7 @@ CREATE TABLE `foo`
     PRIMARY KEY (`id`)
 ) ENGINE=MyISAM COMMENT='This is foo table';
 ";
-        $this->assertEquals($expected, $this->getPlatform()->getAddTableDDL($table));
+        $this->assertEquals($expected, static::getPlatform()->getAddTableDDL($table));
     }
 
     /**
@@ -229,7 +231,7 @@ CREATE TABLE `foo`
     PRIMARY KEY (`foo`,`bar`)
 ) ENGINE=MyISAM;
 ";
-        $this->assertEquals($expected, $this->getPlatform()->getAddTableDDL($table));
+        $this->assertEquals($expected, static::getPlatform()->getAddTableDDL($table));
     }
 
     /**
@@ -248,7 +250,7 @@ CREATE TABLE `foo`
     UNIQUE INDEX `foo_u_14f552` (`bar`)
 ) ENGINE=MyISAM;
 ";
-        $this->assertEquals($expected, $this->getPlatform()->getAddTableDDL($table));
+        $this->assertEquals($expected, static::getPlatform()->getAddTableDDL($table));
     }
 
     /**
@@ -277,7 +279,7 @@ CREATE TABLE `foo`
     INDEX `foo_i_14f552` (`bar`)
 ) ENGINE=MyISAM;
 ";
-        $this->assertEquals($expected, $this->getPlatform()->getAddTableDDL($table));
+        $this->assertEquals($expected, static::getPlatform()->getAddTableDDL($table));
     }
 
     /**
@@ -309,7 +311,7 @@ CREATE TABLE `foo`
     INDEX `foo_fi_426410` (`bar_id`)
 ) ENGINE=MyISAM;
 ";
-        $this->assertEquals($expected, $this->getPlatform()->getAddTableDDL($table));
+        $this->assertEquals($expected, static::getPlatform()->getAddTableDDL($table));
     }
 
     /**
@@ -341,7 +343,7 @@ CREATE TABLE `foo`
     INDEX `foo_fi_426410` (`bar_id`)
 ) ENGINE=MyISAM;
 ";
-        $this->assertEquals($expected, $this->getPlatform()->getAddTableDDL($table));
+        $this->assertEquals($expected, static::getPlatform()->getAddTableDDL($table));
     }
 
     /**
@@ -397,7 +399,7 @@ CREATE TABLE `foo`
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1000 CHARACTER SET='utf8';
 ";
-        $this->assertEquals($expected, $this->getPlatform()->getAddTableDDL($table));
+        $this->assertEquals($expected, static::getPlatform()->getAddTableDDL($table));
     }
 
     /**
@@ -415,7 +417,7 @@ CREATE TABLE `Woopah`.`foo`
     PRIMARY KEY (`id`)
 ) ENGINE=MyISAM;
 ";
-        $this->assertEquals($expected, $this->getPlatform()->getAddTableDDL($table));
+        $this->assertEquals($expected, static::getPlatform()->getAddTableDDL($table));
     }
 
     /**
@@ -428,7 +430,7 @@ CREATE TABLE `Woopah`.`foo`
         $expected = "
 DROP TABLE IF EXISTS `foo`;
 ";
-        $this->assertEquals($expected, $this->getPlatform()->getDropTableDDL($table));
+        $this->assertEquals($expected, static::getPlatform()->getDropTableDDL($table));
     }
 
     /**
@@ -441,7 +443,7 @@ DROP TABLE IF EXISTS `foo`;
         $expected = "
 DROP TABLE IF EXISTS `Woopah`.`foo`;
 ";
-        $this->assertEquals($expected, $this->getPlatform()->getDropTableDDL($table));
+        $this->assertEquals($expected, static::getPlatform()->getDropTableDDL($table));
     }
 
     /**
@@ -450,13 +452,13 @@ DROP TABLE IF EXISTS `Woopah`.`foo`;
     public function testGetColumnDDL()
     {
         $column = new Column('foo');
-        $column->getDomain()->copy($this->getPlatform()->getDomainForType('DOUBLE'));
+        $column->getDomain()->copy(static::getPlatform()->getDomainForType('DOUBLE'));
         $column->getDomain()->replaceScale(2);
         $column->getDomain()->replaceSize(3);
         $column->setNotNull(true);
         $column->getDomain()->createDefaultValue(123);
         $expected = '`foo` DOUBLE(3,2) DEFAULT 123 NOT NULL';
-        $this->assertEquals($expected, $this->getPlatform()->getColumnDDL($column));
+        $this->assertEquals($expected, static::getPlatform()->getColumnDDL($column));
     }
 
     /**
@@ -465,12 +467,12 @@ DROP TABLE IF EXISTS `Woopah`.`foo`;
     public function testGetColumnDDLCharsetVendor()
     {
         $column = new Column('foo');
-        $column->getDomain()->copy($this->getPlatform()->getDomainForType('LONGVARCHAR'));
+        $column->getDomain()->copy(static::getPlatform()->getDomainForType('LONGVARCHAR'));
         $vendor = new VendorInfo('mysql');
         $vendor->setParameter('Charset', 'greek');
         $column->addVendorInfo($vendor);
         $expected = '`foo` TEXT CHARACTER SET \'greek\'';
-        $this->assertEquals($expected, $this->getPlatform()->getColumnDDL($column));
+        $this->assertEquals($expected, static::getPlatform()->getColumnDDL($column));
     }
 
     /**
@@ -479,20 +481,20 @@ DROP TABLE IF EXISTS `Woopah`.`foo`;
     public function testGetColumnDDLCharsetCollation()
     {
         $column = new Column('foo');
-        $column->getDomain()->copy($this->getPlatform()->getDomainForType('LONGVARCHAR'));
+        $column->getDomain()->copy(static::getPlatform()->getDomainForType('LONGVARCHAR'));
         $vendor = new VendorInfo('mysql');
         $vendor->setParameter('Collate', 'latin1_german2_ci');
         $column->addVendorInfo($vendor);
         $expected = '`foo` TEXT COLLATE \'latin1_german2_ci\'';
-        $this->assertEquals($expected, $this->getPlatform()->getColumnDDL($column));
+        $this->assertEquals($expected, static::getPlatform()->getColumnDDL($column));
 
         $column = new Column('foo');
-        $column->getDomain()->copy($this->getPlatform()->getDomainForType('LONGVARCHAR'));
+        $column->getDomain()->copy(static::getPlatform()->getDomainForType('LONGVARCHAR'));
         $vendor = new VendorInfo('mysql');
         $vendor->setParameter('Collation', 'latin1_german2_ci');
         $column->addVendorInfo($vendor);
         $expected = '`foo` TEXT COLLATE \'latin1_german2_ci\'';
-        $this->assertEquals($expected, $this->getPlatform()->getColumnDDL($column));
+        $this->assertEquals($expected, static::getPlatform()->getColumnDDL($column));
     }
 
     /**
@@ -501,10 +503,10 @@ DROP TABLE IF EXISTS `Woopah`.`foo`;
     public function testGetColumnDDLComment()
     {
         $column = new Column('foo');
-        $column->getDomain()->copy($this->getPlatform()->getDomainForType('INTEGER'));
+        $column->getDomain()->copy(static::getPlatform()->getDomainForType('INTEGER'));
         $column->setDescription('This is column Foo');
         $expected = '`foo` INTEGER COMMENT \'This is column Foo\'';
-        $this->assertEquals($expected, $this->getPlatform()->getColumnDDL($column));
+        $this->assertEquals($expected, static::getPlatform()->getColumnDDL($column));
     }
 
     /**
@@ -513,13 +515,13 @@ DROP TABLE IF EXISTS `Woopah`.`foo`;
     public function testGetColumnDDLCharsetNotNull()
     {
         $column = new Column('foo');
-        $column->getDomain()->copy($this->getPlatform()->getDomainForType('LONGVARCHAR'));
+        $column->getDomain()->copy(static::getPlatform()->getDomainForType('LONGVARCHAR'));
         $column->setNotNull(true);
         $vendor = new VendorInfo('mysql');
         $vendor->setParameter('Charset', 'greek');
         $column->addVendorInfo($vendor);
         $expected = '`foo` TEXT CHARACTER SET \'greek\' NOT NULL';
-        $this->assertEquals($expected, $this->getPlatform()->getColumnDDL($column));
+        $this->assertEquals($expected, static::getPlatform()->getColumnDDL($column));
     }
 
     /**
@@ -528,14 +530,14 @@ DROP TABLE IF EXISTS `Woopah`.`foo`;
     public function testGetColumnDDLCustomSqlType()
     {
         $column = new Column('foo');
-        $column->getDomain()->copy($this->getPlatform()->getDomainForType('DOUBLE'));
+        $column->getDomain()->copy(static::getPlatform()->getDomainForType('DOUBLE'));
         $column->getDomain()->replaceScale(2);
         $column->getDomain()->replaceSize(3);
         $column->setNotNull(true);
         $column->getDomain()->createDefaultValue(123);
         $column->getDomain()->replaceSqlType('DECIMAL(5,6)');
         $expected = '`foo` DECIMAL(5,6) DEFAULT 123 NOT NULL';
-        $this->assertEquals($expected, $this->getPlatform()->getColumnDDL($column));
+        $this->assertEquals($expected, static::getPlatform()->getColumnDDL($column));
     }
 
     /**
@@ -549,7 +551,7 @@ DROP TABLE IF EXISTS `Woopah`.`foo`;
         $column->setPrimaryKey(true);
         $table->addColumn($column);
         $expected = 'PRIMARY KEY (`bar`)';
-        $this->assertEquals($expected, $this->getPlatform()->getPrimaryKeyDDL($table));
+        $this->assertEquals($expected, static::getPlatform()->getPrimaryKeyDDL($table));
     }
 
     /**
@@ -566,7 +568,7 @@ DROP TABLE IF EXISTS `Woopah`.`foo`;
         $column2->setPrimaryKey(true);
         $table->addColumn($column2);
         $expected = 'PRIMARY KEY (`bar1`,`bar2`)';
-        $this->assertEquals($expected, $this->getPlatform()->getPrimaryKeyDDL($table));
+        $this->assertEquals($expected, static::getPlatform()->getPrimaryKeyDDL($table));
     }
 
     /**
@@ -578,7 +580,7 @@ DROP TABLE IF EXISTS `Woopah`.`foo`;
         $expected = "
 ALTER TABLE `foo` DROP PRIMARY KEY;
 ";
-        $this->assertEquals($expected, $this->getPlatform()->getDropPrimaryKeyDDL($table));
+        $this->assertEquals($expected, static::getPlatform()->getDropPrimaryKeyDDL($table));
     }
 
     /**
@@ -590,7 +592,7 @@ ALTER TABLE `foo` DROP PRIMARY KEY;
         $expected = "
 ALTER TABLE `foo` ADD PRIMARY KEY (`bar`);
 ";
-        $this->assertEquals($expected, $this->getPlatform()->getAddPrimaryKeyDDL($table));
+        $this->assertEquals($expected, static::getPlatform()->getAddPrimaryKeyDDL($table));
     }
 
     /**
@@ -604,7 +606,7 @@ CREATE INDEX `babar` ON `foo` (`bar1`, `bar2`);
 
 CREATE INDEX `foo_index` ON `foo` (`bar1`);
 ";
-        $this->assertEquals($expected, $this->getPlatform()->getAddIndicesDDL($table));
+        $this->assertEquals($expected, static::getPlatform()->getAddIndicesDDL($table));
     }
 
     /**
@@ -616,7 +618,7 @@ CREATE INDEX `foo_index` ON `foo` (`bar1`);
         $expected = "
 CREATE INDEX `babar` ON `foo` (`bar1`, `bar2`);
 ";
-        $this->assertEquals($expected, $this->getPlatform()->getAddIndexDDL($index));
+        $this->assertEquals($expected, static::getPlatform()->getAddIndexDDL($index));
     }
 
     /**
@@ -628,7 +630,7 @@ CREATE INDEX `babar` ON `foo` (`bar1`, `bar2`);
         $expected = "
 DROP INDEX `babar` ON `foo`;
 ";
-        $this->assertEquals($expected, $this->getPlatform()->getDropIndexDDL($index));
+        $this->assertEquals($expected, static::getPlatform()->getDropIndexDDL($index));
     }
 
     /**
@@ -638,7 +640,7 @@ DROP INDEX `babar` ON `foo`;
     public function testGetIndexDDL($index)
     {
         $expected = 'INDEX `babar` (`bar1`, `bar2`)';
-        $this->assertEquals($expected, $this->getPlatform()->getIndexDDL($index));
+        $this->assertEquals($expected, static::getPlatform()->getIndexDDL($index));
     }
 
     /**
@@ -649,14 +651,14 @@ DROP INDEX `babar` ON `foo`;
         $table = new Table('foo');
         $table->setIdentifierQuoting(true);
         $column1 = new Column('bar1');
-        $column1->getDomain()->copy($this->getPlatform()->getDomainForType('VARCHAR'));
+        $column1->getDomain()->copy(static::getPlatform()->getDomainForType('VARCHAR'));
         $column1->setSize(5);
         $table->addColumn($column1);
         $index = new Index('bar_index');
         $index->addColumn($column1);
         $table->addIndex($index);
         $expected = 'INDEX `bar_index` (`bar1`(5))';
-        $this->assertEquals($expected, $this->getPlatform()->getIndexDDL($index));
+        $this->assertEquals($expected, static::getPlatform()->getIndexDDL($index));
     }
 
     /**
@@ -667,7 +669,7 @@ DROP INDEX `babar` ON `foo`;
         $table = new Table('foo');
         $table->setIdentifierQuoting(true);
         $column1 = new Column('bar1');
-        $column1->getDomain()->copy($this->getPlatform()->getDomainForType('LONGVARCHAR'));
+        $column1->getDomain()->copy(static::getPlatform()->getDomainForType('LONGVARCHAR'));
         $table->addColumn($column1);
         $index = new Index('bar_index');
         $index->addColumn($column1);
@@ -676,7 +678,7 @@ DROP INDEX `babar` ON `foo`;
         $index->addVendorInfo($vendor);
         $table->addIndex($index);
         $expected = 'FULLTEXT INDEX `bar_index` (`bar1`)';
-        $this->assertEquals($expected, $this->getPlatform()->getIndexDDL($index));
+        $this->assertEquals($expected, static::getPlatform()->getIndexDDL($index));
     }
 
     /**
@@ -686,7 +688,7 @@ DROP INDEX `babar` ON `foo`;
     public function testGetUniqueDDL($index)
     {
         $expected = 'UNIQUE INDEX `babar` (`bar1`, `bar2`)';
-        $this->assertEquals($expected, $this->getPlatform()->getUniqueDDL($index));
+        $this->assertEquals($expected, static::getPlatform()->getUniqueDDL($index));
     }
 
     /**
@@ -696,7 +698,7 @@ DROP INDEX `babar` ON `foo`;
     public function testGetAddForeignKeysDDL($table)
     {
         $expected = '';
-        $this->assertEquals($expected, $this->getPlatform()->getAddForeignKeysDDL($table));
+        $this->assertEquals($expected, static::getPlatform()->getAddForeignKeysDDL($table));
     }
 
     /**
@@ -706,7 +708,7 @@ DROP INDEX `babar` ON `foo`;
     public function testGetAddForeignKeyDDL($fk)
     {
         $expected = '';
-        $this->assertEquals($expected, $this->getPlatform()->getAddForeignKeyDDL($fk));
+        $this->assertEquals($expected, static::getPlatform()->getAddForeignKeyDDL($fk));
     }
 
     /**
@@ -716,7 +718,7 @@ DROP INDEX `babar` ON `foo`;
     public function testGetAddForeignKeySkipSqlDDL($fk)
     {
         $expected = '';
-        $this->assertEquals($expected, $this->getPlatform()->getAddForeignKeyDDL($fk));
+        $this->assertEquals($expected, static::getPlatform()->getAddForeignKeyDDL($fk));
     }
 
     /**
@@ -726,7 +728,7 @@ DROP INDEX `babar` ON `foo`;
     public function testGetDropForeignKeyDDL($fk)
     {
         $expected = '';
-        $this->assertEquals($expected, $this->getPlatform()->getDropForeignKeyDDL($fk));
+        $this->assertEquals($expected, static::getPlatform()->getDropForeignKeyDDL($fk));
     }
 
     /**
@@ -736,7 +738,7 @@ DROP INDEX `babar` ON `foo`;
     public function testGetDropForeignKeySkipSqlDDL($fk)
     {
         $expected = '';
-        $this->assertEquals($expected, $this->getPlatform()->getDropForeignKeyDDL($fk));
+        $this->assertEquals($expected, static::getPlatform()->getDropForeignKeyDDL($fk));
     }
 
     /**
@@ -746,7 +748,7 @@ DROP INDEX `babar` ON `foo`;
     public function testGetForeignKeyDDL($fk)
     {
         $expected = '';
-        $this->assertEquals($expected, $this->getPlatform()->getForeignKeyDDL($fk));
+        $this->assertEquals($expected, static::getPlatform()->getForeignKeyDDL($fk));
     }
 
     /**
@@ -756,7 +758,7 @@ DROP INDEX `babar` ON `foo`;
     public function testGetForeignKeySkipSqlDDL($fk)
     {
         $expected = '';
-        $this->assertEquals($expected, $this->getPlatform()->getForeignKeyDDL($fk));
+        $this->assertEquals($expected, static::getPlatform()->getForeignKeyDDL($fk));
     }
 
     /**
@@ -769,7 +771,7 @@ DROP INDEX `babar` ON `foo`;
 -- foo bar
 -- ---------------------------------------------------------------------
 ";
-        $this->assertEquals($expected, $this->getPlatform()->getCommentBlockDDL('foo bar'));
+        $this->assertEquals($expected, static::getPlatform()->getCommentBlockDDL('foo bar'));
     }
 
     /**
@@ -810,7 +812,7 @@ CREATE TABLE `bar`
 ";
 
         $table = $this->getDatabaseFromSchema($schema)->getTable('bar');
-        $relationTableSql = $this->getPlatform()->getAddTableDDL($table);
+        $relationTableSql = static::getPlatform()->getAddTableDDL($table);
 
         $this->assertEquals($expectedRelationSql, $relationTableSql);
     }

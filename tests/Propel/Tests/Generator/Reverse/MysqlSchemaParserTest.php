@@ -26,7 +26,7 @@ use Propel\Tests\Bookstore\Map\BookTableMap;
  * @group database
  * @group mysql
  */
-class MysqlSchemaParserTest extends AbstractSchemaParserTest
+class MysqlSchemaParserTest extends AbstractSchemaParserTestBase
 {
     /**
      * @return string
