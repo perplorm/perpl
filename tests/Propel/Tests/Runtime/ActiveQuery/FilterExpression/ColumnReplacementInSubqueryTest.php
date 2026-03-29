@@ -19,7 +19,7 @@ use Propel\Tests\TestCaseFixtures;
  */
 class ColumnReplacementInSubqueryTest extends TestCaseFixtures
 {
-    public function ReplaceInSubqueryDataProvider(): array
+    public static function ReplaceInSubqueryDataProvider(): array
     {
         return [
             [
@@ -44,11 +44,10 @@ class ColumnReplacementInSubqueryTest extends TestCaseFixtures
         ];
     }
     /**
-     * @dataProvider ReplaceInSubqueryDataProvider
-     *
      * @return void
      */
-    public function testReplaceInSubquery(string $description, string $clause, $value, string $expectedClause, array $expectedParam)
+    #[\PHPUnit\Framework\Attributes\DataProvider('ReplaceInSubqueryDataProvider')]
+    public function testReplaceInSubquery(string $description, string $inputClause, $value, string $expectedClause, array $expectedParam)
     {
         $subquery = AuthorQuery::create('aut')
             ->setModelAlias('aut', true)
@@ -59,7 +58,7 @@ class ColumnReplacementInSubqueryTest extends TestCaseFixtures
             ->select('id')
             ->addSubquery($subquery, 'saut')
             ->where('saut.Id = bok.AuthorId')
-            ->where($clause, $value)
+            ->where($inputClause, $value)
         ;
 
         $expectedSql =  'SELECT book.id AS "id" '.

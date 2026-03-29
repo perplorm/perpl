@@ -87,10 +87,9 @@ class BasicCriterionTest extends BaseTestCase
     }
 
     /**
-     * @dataProvider supportedANSIFunctions
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('supportedANSIFunctions')]
     public function testAppendPsToAcceptsAnANSIDateFunctionForValue($ansiFunction)
     {
         $cton = new BasicCriterion(new Criteria(), 'A.COL', $ansiFunction);

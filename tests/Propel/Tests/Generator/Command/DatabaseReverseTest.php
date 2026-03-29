@@ -40,7 +40,7 @@ class DatabaseReverseTest extends TestCaseFixturesDatabase
             '--database-name' => 'reverse-test',
             '--output-dir' => $outputDir,
             '--verbose' => true,
-            '--platform' => ucfirst($this->getDriver()) . 'Platform',
+            '--platform' => ucfirst(static::getDriver()) . 'Platform',
             'connection' => $this->getConnectionDsn('bookstore-schemas', true),
         ]);
 
@@ -89,7 +89,7 @@ class DatabaseReverseTest extends TestCaseFixturesDatabase
             '--database-name' => 'reverse-test',
             '--output-dir' => $outputDir,
             '--verbose' => true,
-            '--platform' => ucfirst($this->getDriver()) . 'Platform',
+            '--platform' => ucfirst(static::getDriver()) . 'Platform',
             '--namespace' => $testNamespace,
             'connection' => $this->getConnectionDsn('bookstore-schemas', true),
         ]);

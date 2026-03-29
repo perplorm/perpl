@@ -16,7 +16,7 @@ use Propel\Tests\TestCase;
  */
 class ColumnDefaultValueTest extends TestCase
 {
-    public function equalsProvider()
+    public static function equalsProvider()
     {
         return [
             [new ColumnDefaultValue('foo', 'bar'), new ColumnDefaultValue('foo', 'bar'), true],
@@ -28,10 +28,9 @@ class ColumnDefaultValueTest extends TestCase
     }
 
     /**
-     * @dataProvider equalsProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('equalsProvider')]
     public function testEquals($def1, $def2, $test)
     {
         if ($test) {

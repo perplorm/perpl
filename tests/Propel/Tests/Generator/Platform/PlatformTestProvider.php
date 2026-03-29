@@ -33,7 +33,7 @@ abstract class PlatformTestProvider extends PlatformTestBase
     /**
      * @return string[][]
      */
-    public function providerForTestGetAddTablesDDL()
+    public static function providerForTestGetAddTablesDDL()
     {
         $schema = <<<EOF
 <database name="test" identifierQuoting="true">
@@ -59,7 +59,7 @@ EOF;
         return [[$schema]];
     }
 
-    public function providerForTestGetAddTablesDDLSchema()
+    public static function providerForTestGetAddTablesDDLSchema()
     {
         $schema = <<<EOF
 <database name="test" schema="x" identifierQuoting="true">
@@ -93,7 +93,7 @@ EOF;
         return [[$schema]];
     }
 
-    public function providerForTestGetAddTablesSkipSQLDDL()
+    public static function providerForTestGetAddTablesSkipSQLDDL()
     {
         $schema = <<<EOF
 <database name="test" identifierQuoting="true">
@@ -119,7 +119,7 @@ EOF;
         return [[$schema]];
     }
 
-    public function providerForTestGetAddTableDDLSimplePK()
+    public static function providerForTestGetAddTableDDLSimplePK()
     {
         $schema = <<<EOF
 <database name="test" identifierQuoting="true">
@@ -133,7 +133,7 @@ EOF;
         return [[$schema]];
     }
 
-    public function providerForTestGetAddTableDDLNonIntegerPK()
+    public static function providerForTestGetAddTableDDLNonIntegerPK()
     {
         $schema = <<<EOF
 <database name="test" identifierQuoting="true">
@@ -147,7 +147,7 @@ EOF;
         return [[$schema]];
     }
 
-    public function providerForTestGetAddTableDDLCompositePK()
+    public static function providerForTestGetAddTableDDLCompositePK()
     {
         $schema = <<<EOF
 <database name="test" identifierQuoting="true">
@@ -162,7 +162,7 @@ EOF;
         return [[$schema]];
     }
 
-    public function providerForTestGetAddTableDDLUniqueIndex()
+    public static function providerForTestGetAddTableDDLUniqueIndex()
     {
         $schema = <<<EOF
 <database name="test" identifierQuoting="true">
@@ -179,7 +179,7 @@ EOF;
         return [[$schema]];
     }
 
-    public function providerForTestGetAddTableDDLSchema()
+    public static function providerForTestGetAddTableDDLSchema()
     {
         $schema = <<<EOF
 <database name="test" identifierQuoting="true">
@@ -193,7 +193,7 @@ EOF;
         return [[$schema]];
     }
 
-    public function providerForTestGetUniqueDDL()
+    public static function providerForTestGetUniqueDDL()
     {
         $table = new Table('foo');
         $table->setIdentifierQuoting(true);
@@ -213,7 +213,7 @@ EOF;
         ];
     }
 
-    public function providerForTestGetIndicesDDL()
+    public static function providerForTestGetIndicesDDL()
     {
         $table = new Table('foo');
         $table->setIdentifierQuoting(true);
@@ -236,7 +236,7 @@ EOF;
         ];
     }
 
-    public function providerForTestGetIndexDDL()
+    public static function providerForTestGetIndexDDL()
     {
         $table = new Table('foo');
         $table->setIdentifierQuoting(true);
@@ -259,7 +259,7 @@ EOF;
     /**
      * @return array
      */
-    public function providerForTestGetUniqueIndexDDL(): array
+    public static function providerForTestGetUniqueIndexDDL(): array
     {
         $table = new Table('foo');
         $table->setIdentifierQuoting(true);
@@ -275,7 +275,7 @@ EOF;
         ];
     }
 
-    public function providerForTestPrimaryKeyDDL()
+    public static function providerForTestPrimaryKeyDDL()
     {
         $table = new Table('foo');
         $table->setIdentifierQuoting(true);
@@ -288,7 +288,7 @@ EOF;
         ];
     }
 
-    public function providerForTestGetForeignKeyDDL()
+    public static function providerForTestGetForeignKeyDDL()
     {
         $db = new Database();
         $db->setIdentifierQuoting(true);
@@ -316,7 +316,7 @@ EOF;
         ];
     }
 
-    public function providerForTestGetForeignKeySkipSqlDDL()
+    public static function providerForTestGetForeignKeySkipSqlDDL()
     {
         $arr = self::providerForTestGetForeignKeyDDL();
         $fk = $arr[0][0];
@@ -327,7 +327,7 @@ EOF;
         ];
     }
 
-    public function providerForTestGetForeignKeysDDL()
+    public static function providerForTestGetForeignKeysDDL()
     {
         $db = new Database();
         $db->setIdentifierQuoting(true);
@@ -370,7 +370,7 @@ EOF;
         ];
     }
 
-    public function providerForTestCreateSchemaWithUuidColumns()
+    public static function providerForTestCreateSchemaWithUuidColumns()
     {
         $schema = <<<EOF
 <database name="test" identifierQuoting="true">
@@ -384,7 +384,7 @@ EOF;
         return [[$schema]];
     }
 
-    public function providerForTestCreateSchemaWithUuidBinaryColumns()
+    public static function providerForTestCreateSchemaWithUuidBinaryColumns()
     {
         $schema = <<<EOF
 <database name="test" identifierQuoting="true">

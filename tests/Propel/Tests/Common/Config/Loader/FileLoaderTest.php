@@ -8,6 +8,7 @@
 
 namespace Propel\Tests\Common\Config\Loader;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use Propel\Common\Config\Exception\InvalidArgumentException;
 use Propel\Common\Config\Exception\RuntimeException;
 use Propel\Common\Config\Loader\FileLoader as BaseFileLoader;
@@ -26,7 +27,7 @@ class FileLoaderTest extends TestCase
         $this->loader = new TestableFileLoader();
     }
 
-    public function resolveParamsProvider()
+    public static function resolveParamsProvider()
     {
         return [
             [
@@ -164,10 +165,9 @@ class FileLoaderTest extends TestCase
     }
 
     /**
-     * @dataProvider resolveParamsProvider
-     *
      * @return void
      */
+    #[DataProvider('resolveParamsProvider')]
     public function testResolveValues($conf, $expected, $message)
     {
         $this->assertEquals($expected, $this->loader->resolveParams($conf), $message);

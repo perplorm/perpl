@@ -22,7 +22,7 @@ class CrossRelationCodeProducerCodeTest extends CompareGeneratedCodeTestCase
      * @return array<array{string, string}>
      */
     #[ComparesGeneratedFile(textBuilder: 'buildCodeForCrossRelation')]
-    public function CrossRelationCodeDataProvider(): array
+    public static function CrossRelationCodeDataProvider(): array
     {
         return [ // [schema, expected code file name]
             [static::MANY_TO_MANY_RELATION_CODE_SCHEMA, __DIR__ . '/expected_relation_code/many_to_many_relation_code_reference.txt'],
@@ -57,13 +57,12 @@ class CrossRelationCodeProducerCodeTest extends CompareGeneratedCodeTestCase
     }
 
     /**
-     * @dataProvider CrossRelationCodeDataProvider
      *
      * @param string $schema
      * @param string $fileName
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('CrossRelationCodeDataProvider')]
     public function testCrossRelationCode(string $schema, string $fileName): void
     {
         $code = $this->buildCodeForCrossRelation($schema);

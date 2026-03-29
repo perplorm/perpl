@@ -49,10 +49,10 @@ END;
     /**
      * Verifies that the correct SQL is generated for queries that use `limit()`.
      *
-     * @dataProvider dataLimit
      *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('dataLimit')]
     public function testLimit($limit, $expectedSql)
     {
         $query = Issue1463ItemQuery::create()->limit($limit);
@@ -63,7 +63,7 @@ END;
         $this->assertEquals($expectedSql, $actualSql, 'Generated SQL does not match expected SQL');
     }
 
-    public function dataLimit()
+    public static function dataLimit()
     {
         return [
 
@@ -125,10 +125,10 @@ END;
     /**
      * Verifies that the correct SQL is generated for queries that use `offset()`.
      *
-     * @dataProvider dataOffset
      *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('dataOffset')]
     public function testOffset($offset, $expectedSql)
     {
         $query = Issue1463ItemQuery::create()->offset($offset);
@@ -139,7 +139,7 @@ END;
         $this->assertEquals($expectedSql, $actualSql, 'Generated SQL does not match expected SQL');
     }
 
-    public function dataOffset()
+    public static function dataOffset()
     {
         return [
 
@@ -201,10 +201,10 @@ END;
     /**
      * Verifies that the correct SQL is generated for queries that use both `offset()` and `limit()`.
      *
-     * @dataProvider dataOffsetAndLimit
      *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('dataOffsetAndLimit')]
     public function testOffsetAndLimit($offset, $expectedSql)
     {
         $query = Issue1463ItemQuery::create()->offset($offset)->limit(999);
@@ -215,7 +215,7 @@ END;
         $this->assertEquals($expectedSql, $actualSql, 'Generated SQL does not match expected SQL');
     }
 
-    public function dataOffsetAndLimit()
+    public static function dataOffsetAndLimit()
     {
         return [
 

@@ -8,6 +8,7 @@
 
 namespace Propel\Tests\Common\Util;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Propel\Common\Exception\SetColumnConverterException;
 use Propel\Common\Util\SetColumnConverter;
@@ -23,14 +24,14 @@ use Propel\Tests\Helpers\ColorsBasicEnum;
 class SetColumnConverterTest extends TestCase
 {
     protected static $valueSet = ['a', 'b', 'c', 'd', 'e', 'f'];
+
     /**
-     * @dataProvider convertValuesProvider
-     *
      * @param array|null $values
      * @param string $validInteger
      *
      * @return void
      */
+    #[DataProvider('convertValuesProvider')]
     public function testconvertToBitmaskValidValues(array|null $values, $validInteger)
     {
         $intValue = SetColumnConverter::convertToBitmask($values, static::$valueSet);
@@ -57,13 +58,12 @@ class SetColumnConverterTest extends TestCase
     }
 
     /**
-     * @dataProvider convertValuesProvider
-     *
      * @param array $validArray
      * @param string $intValue
      *
      * @return void
      */
+    #[DataProvider('convertValuesProvider')]
     public function testconvertBitmaskToArrayValidValues(array $validArray, $intValue)
     {
         $arrayValue = SetColumnConverter::convertBitmaskToArray($intValue, static::$valueSet);
@@ -92,7 +92,7 @@ class SetColumnConverterTest extends TestCase
     /**
      * @return array<array>
      */
-    public function convertValuesProvider()
+    public static function convertValuesProvider()
     {
         return [
             [['a'], 1],
@@ -106,7 +106,7 @@ class SetColumnConverterTest extends TestCase
     /**
      * @return array<array>
      */
-    public function GetItemsInOrderDataProvider(): array
+    public static function GetItemsInOrderDataProvider(): array
     {
         return [
             [null, null],
@@ -117,13 +117,12 @@ class SetColumnConverterTest extends TestCase
     }
 
     /**
-     * @dataProvider GetItemsInOrderDataProvider
-     *
      * @param array|string|null $items
      * @param array|null $expected
      * 
      * @return void
      */
+    #[DataProvider('GetItemsInOrderDataProvider')]
     public function testGetItemsInOrder(array|string|null $items, array|null $expected): void
     {
         $orderedItems = SetColumnConverter::getItemsInOrder($items, static::$valueSet);
@@ -135,7 +134,7 @@ class SetColumnConverterTest extends TestCase
     /**
      * @return array<array>
      */
-    public function RequireValuesInSetDataProvider(): array
+    public static function RequireValuesInSetDataProvider(): array
     {
         return [
             ['z', '', "Illegal value in SET : Set 'a,b,c,d,e,f' does not contain 'z'"],
@@ -144,13 +143,12 @@ class SetColumnConverterTest extends TestCase
     }
 
     /**
-     * @dataProvider RequireValuesInSetDataProvider
-     *
      * @param array|string $items
      * @param string $locationDescription
      * @param string $expectedExeptionMessage
      * @return void
      */
+    #[DataProvider('RequireValuesInSetDataProvider')]
     public function testRequireValuesInSetException(array|string $items, string $locationDescription, string $expectedExeptionMessage): void
     {
         $this->expectException(PropelException::class);
@@ -175,7 +173,7 @@ class SetColumnConverterTest extends TestCase
     /**
      * @return array<array>
      */
-    public function ItemsCsvToArrayDataProvider(): array
+    public static function ItemsCsvToArrayDataProvider(): array
     {
         return [
             ['', []],
@@ -186,13 +184,12 @@ class SetColumnConverterTest extends TestCase
     }
 
     /**
-     * @dataProvider ItemsCsvToArrayDataProvider
-     * 
      * @param string $itemsCsv
      * @param array $expected
      *
      * @return void
      */
+    #[DataProvider('ItemsCsvToArrayDataProvider')]
     public function testItemsCsvToArray(string $itemsCsv, array $expected): void
     {
         $items = SetColumnConverter::itemsCsvToArray($itemsCsv);
@@ -202,7 +199,7 @@ class SetColumnConverterTest extends TestCase
     /**
      * @return array<array>
      */
-    public function RawInputToSetItemsDataProvider(): array
+    public static function RawInputToSetItemsDataProvider(): array
     {
         return [
             [0, []],
@@ -218,13 +215,12 @@ class SetColumnConverterTest extends TestCase
     }
 
     /**
-     * @dataProvider RawInputToSetItemsDataProvider
-     * 
      * @param array|string|int $value
      * @param array $expected
      *
      * @return void
      */
+    #[DataProvider('RawInputToSetItemsDataProvider')]
     public function testRawInputToSetItems(array|string|int $value, array $expected): void
     {
         $items = SetColumnConverter::rawInputToSetItems($value, static::$valueSet);
@@ -234,7 +230,7 @@ class SetColumnConverterTest extends TestCase
     /**
      * @return array<class-string<\UnitEnum, string[]>>[]
      */
-    public function GetEnumItemsDataProvider(): array
+    public static function GetEnumItemsDataProvider(): array
     {
         return [
             [ColorsBasicEnum::class, ['Red', 'Blue', 'Yellow']],
@@ -242,9 +238,7 @@ class SetColumnConverterTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider GetEnumItemsDataProvider
-     */
+    #[DataProvider('GetEnumItemsDataProvider')]
     public function testGetItemsFromEnum(string $enumClass, array $expected): void
     {
         $actual = SetColumnConverter::getItemsFromEnum($enumClass);

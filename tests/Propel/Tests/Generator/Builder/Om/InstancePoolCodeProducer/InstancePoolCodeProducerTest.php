@@ -8,6 +8,7 @@
 
 namespace Propel\Tests\Generator\Builder\Om\InstancePoolCodeProducer;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use Propel\Generator\Builder\Om\InstancePoolCodeProducer\InstancePoolCodeProducer;
 use Propel\Generator\Builder\Om\TableMapBuilder;
 use Propel\Generator\Config\QuickGeneratorConfig;
@@ -16,7 +17,7 @@ use Propel\Tests\TestCase;
 
 class InstancePoolCodeProducerTest extends TestCase
 {
-    public function ColumnValueToStringExpressionDataProvider(): array
+    public static function ColumnValueToStringExpressionDataProvider(): array
     {
         return [ // string $columnXml, string $varName, string $expected
             ['', '$foo', '$foo'],
@@ -31,9 +32,7 @@ class InstancePoolCodeProducerTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider ColumnValueToStringExpressionDataProvider
-     */
+    #[DataProvider('ColumnValueToStringExpressionDataProvider')]
     public function testColumnValueToStringExpression(string $columnXml, string $varName, string $expected): void
     {
         $this->assertBuildsSameColumnString(
@@ -44,7 +43,7 @@ class InstancePoolCodeProducerTest extends TestCase
         );
     }
 
-    public function RowValueToStringExpressionDataProvider(): array
+    public static function RowValueToStringExpressionDataProvider(): array
     {
         return [ // string $columnXml, string $varName, string $expected
             ['', '$foo', '$foo'],
@@ -58,9 +57,7 @@ class InstancePoolCodeProducerTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider RowValueToStringExpressionDataProvider
-     */
+    #[DataProvider('RowValueToStringExpressionDataProvider')]
     public function testRowValueToStringExpression(string $columnXml, string $varName, string $expected): void
     {
         $this->assertBuildsSameColumnString(
@@ -80,10 +77,9 @@ class InstancePoolCodeProducerTest extends TestCase
     }
 
     /**
-     * @dataProvider RowValueToStringExpressionDataProvider
-     *
      * @param callable $argBuilder(Column): array
      */
+    #[DataProvider('RowValueToStringExpressionDataProvider')]
     public function assertBuildsSameColumnString(string $columnXml, string $method, callable $argBuilder, string $expected): void
     {
         $column = $this->buildColumnFromSchema("<column name='FooCol' $columnXml />");
@@ -93,7 +89,7 @@ class InstancePoolCodeProducerTest extends TestCase
         $this->assertSame($expected, $expression);
     }
 
-    public function BuildPoolKeyFromVariableDataProvider(): array
+    public static function BuildPoolKeyFromVariableDataProvider(): array
     {
         return [ // array $varToColumnXml, bool $possiblyUnconverted, string $expected
             [['$foo' => 'type="DATE"'], false, '$foo->format(\'Y-m-d\')'],
@@ -102,9 +98,7 @@ class InstancePoolCodeProducerTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider BuildPoolKeyFromVariableDataProvider
-     */
+    #[DataProvider('BuildPoolKeyFromVariableDataProvider')]
     public function testBuildPoolKeyFromVariable(array $varToColumnXml, bool $possiblyUnconverted, string $expected): void
     {
         $varToColumn = array_map(fn ($columnXml) =>$this->buildColumnFromSchema("<column name='FooCol' $columnXml />"), $varToColumnXml);

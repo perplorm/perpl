@@ -840,7 +840,7 @@ XML;
         $this->assertEquals('Don Juan', $arr1['Title'], 'toArray() returns an associative array representation of the object');
     }
 
-    public function ToArrayDateTimeAsStringDataProvider(): array
+    public static function ToArrayDateTimeAsStringDataProvider(): array
     {
         $date = new DateTime('2015-01-04T16:00:02.123456Z');
 
@@ -851,9 +851,7 @@ XML;
         ];
     }
 
-    /**
-     * @dataProvider ToArrayDateTimeAsStringDataProvider
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('ToArrayDateTimeAsStringDataProvider')]
     public function testToArrayDateTimeAsString(string $modelClass, string $fieldPhpName, DateTime $dateTime, string $expectedDateOutput, string $message)
     {
         $actualOutput = (new $modelClass)->setByName($fieldPhpName, $dateTime)->toArray()[$fieldPhpName];
@@ -1272,10 +1270,9 @@ EOF;
     }
 
     /**
-     * @dataProvider conditionsForTestVisibility
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('conditionsForTestVisibility')]
     public function testMethodVisibility($method)
     {
         $cv = new Country();
@@ -1285,10 +1282,9 @@ EOF;
     }
 
     /**
-     * @dataProvider conditionsForTestReadOnly
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('conditionsForTestReadOnly')]
     public function testReadOnly($method)
     {
         $cv = new Country();

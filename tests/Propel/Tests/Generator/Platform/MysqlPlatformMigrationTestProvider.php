@@ -16,7 +16,7 @@ class MysqlPlatformMigrationTestProvider extends PlatformMigrationTestProvider
     /**
      * @return array
      */
-    public function providerForTestGetAddColumnFirstDDL()
+    public static function providerForTestGetAddColumnFirstDDL()
     {
         $schema = <<<EOF
 <database name="test" identifierQuoting="true">
@@ -26,7 +26,7 @@ class MysqlPlatformMigrationTestProvider extends PlatformMigrationTestProvider
     </table>
 </database>
 EOF;
-        $column = $this->getDatabaseFromSchema($schema)->getTable('foo')->getColumn('bar');
+        $column = static::getDatabaseFromSchema($schema)->getTable('foo')->getColumn('bar');
 
         return [[$column]];
     }

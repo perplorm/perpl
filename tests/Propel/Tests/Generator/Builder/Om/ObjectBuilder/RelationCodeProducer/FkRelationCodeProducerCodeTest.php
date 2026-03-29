@@ -25,7 +25,7 @@ class FkRelationCodeProducerCodeTest extends CompareGeneratedCodeTestCase
      * @return string[][]
      */
     #[ComparesGeneratedFile(textBuilder: 'buildCodeForRelation')]
-    public function RelationCodeDataProvider(): array
+    public static function RelationCodeDataProvider(): array
     {
         return [ // [schema, expected code file name]
             [static::ONE_TO_MANY_RELATION_CODE_SCHEMA, __DIR__ . '/expected_relation_code/one_to_many_relation_code_reference.txt'],
@@ -55,13 +55,12 @@ class FkRelationCodeProducerCodeTest extends CompareGeneratedCodeTestCase
     }
 
     /**
-     * @dataProvider RelationCodeDataProvider
      *
      * @param string $schema
      * @param string $fileName
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('RelationCodeDataProvider')]
     public function testFkRelationCode(string $schema, string $fileName): void
     {
         $code = $this->buildCodeForRelation($schema);

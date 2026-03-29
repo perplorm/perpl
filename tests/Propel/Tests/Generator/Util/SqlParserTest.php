@@ -21,7 +21,7 @@ use Propel\Tests\TestCase;
 
 class SqlParserTest extends TestCase
 {
-    public function stripSqlCommentsDataProvider()
+    public static function stripSqlCommentsDataProvider()
     {
         return [
             ['', ''],
@@ -39,10 +39,9 @@ class SqlParserTest extends TestCase
     }
 
     /**
-     * @dataProvider stripSqlCommentsDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('stripSqlCommentsDataProvider')]
     public function testStripSQLComments($input, $output)
     {
         $parser = new SqlParser();
@@ -51,7 +50,7 @@ class SqlParserTest extends TestCase
         $this->assertEquals($output, $parser->getSQL());
     }
 
-    public function convertLineFeedsToUnixStyleDataProvider()
+    public static function convertLineFeedsToUnixStyleDataProvider()
     {
         return [
             ['', ''],
@@ -64,10 +63,9 @@ class SqlParserTest extends TestCase
     }
 
     /**
-     * @dataProvider convertLineFeedsToUnixStyleDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('convertLineFeedsToUnixStyleDataProvider')]
     public function testConvertLineFeedsToUnixStyle($input, $output)
     {
         $parser = new SqlParser();
@@ -76,7 +74,7 @@ class SqlParserTest extends TestCase
         $this->assertEquals($output, $parser->getSQL());
     }
 
-    public function explodeIntoStatementsDataProvider()
+    public static function explodeIntoStatementsDataProvider()
     {
         return [
             ['', []],
@@ -93,10 +91,9 @@ class SqlParserTest extends TestCase
     }
 
     /**
-     * @dataProvider explodeIntoStatementsDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('explodeIntoStatementsDataProvider')]
     public function testExplodeIntoStatements($input, $output)
     {
         $parser = new SqlParser();

@@ -18,7 +18,7 @@ use Propel\Tests\TestCaseFixtures;
  */
 class ModelCriteriaPkFilterDetectionTest extends TestCaseFixtures
 {
-    public function UpdateAffectsSingleRowDataProvider(): array
+    public static function UpdateAffectsSingleRowDataProvider(): array
     {
         static::checkInit();
 
@@ -50,10 +50,9 @@ class ModelCriteriaPkFilterDetectionTest extends TestCaseFixtures
     }
 
     /**
-     * @dataProvider UpdateAffectsSingleRowDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('UpdateAffectsSingleRowDataProvider')]
     public function testUpdateAffectsSingleRow(string $description, bool $expected, ModelCriteria $query): void
     {
         $actual = $this->callMethod($query, 'updateAffectsSingleRow');

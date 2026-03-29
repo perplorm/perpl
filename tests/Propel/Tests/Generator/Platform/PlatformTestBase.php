@@ -16,16 +16,16 @@ use Propel\Tests\TestCase;
  */
 abstract class PlatformTestBase extends TestCase
 {
-    protected function getDatabaseFromSchema($schema)
+    protected static function getDatabaseFromSchema($schema)
     {
-        $xtad = new SchemaReader($this->getPlatform());
+        $xtad = new SchemaReader(static::getPlatform());
         $appData = $xtad->parseString($schema);
 
         return $appData->getDatabase();
     }
 
-    protected function getTableFromSchema($schema, $tableName = 'foo')
+    protected static function getTableFromSchema($schema, $tableName = 'foo')
     {
-        return $this->getDatabaseFromSchema($schema)->getTable($tableName);
+        return static::getDatabaseFromSchema($schema)->getTable($tableName);
     }
 }

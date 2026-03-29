@@ -26,7 +26,7 @@ use Propel\Tests\Bookstore\Map\BookTableMap;
  * @group database
  * @group mysql
  */
-class MysqlSchemaParserTest extends AbstractSchemaParserTest
+class MysqlSchemaParserTest extends AbstractSchemaParserTestBase
 {
     /**
      * @return string
@@ -88,7 +88,7 @@ EOT;
         $this->assertEquals('Book Title', $bookTable->getColumn('title')->getDescription());
     }
 
-    public function typeLiterals()
+    public static function typeLiterals()
     {
         return [
             // input type literal, out native type, out sql, out size, out precision
@@ -104,9 +104,7 @@ EOT;
         ];
     }
 
-    /**
-     * @dataProvider typeLiterals
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('typeLiterals')]
     public function testParseType(
         string $inputType,
         ...$expectedOutput)
@@ -157,7 +155,7 @@ EOT;
     /**
      * @return string[][]
      */
-    public function TextColumnDefaultValueDataProvider(): array
+    public static function TextColumnDefaultValueDataProvider(): array
     {
         return [
             ["_latin1\'Foo\'", 'Foo'],
@@ -173,13 +171,12 @@ EOT;
     }
 
     /**
-     * @dataProvider TextColumnDefaultValueDataProvider
      *
      * @param string $defaultValue
      * @param string $expected
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('TextColumnDefaultValueDataProvider')]
     public function testTextColumnDefaultValue(string $defaultValue, string $expected): void
     {
         $parser = new MysqlSchemaParser();

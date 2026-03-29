@@ -18,7 +18,7 @@ use Propel\Tests\TestCaseFixtures;
  */
 class CriteriaIsEmptyTest extends TestCaseFixtures
 {
-    public function IsEmptyDataProvider(): array
+    public static function IsEmptyDataProvider(): array
     {
         static::checkInit();
 
@@ -44,10 +44,9 @@ class CriteriaIsEmptyTest extends TestCaseFixtures
     }
 
     /**
-     * @dataProvider IsEmptyDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('IsEmptyDataProvider')]
     public function testIsEmpty(string $description, bool $expected, Criteria $query): void
     {
         $actual = $this->callMethod($query, 'isEmpty');

@@ -85,10 +85,9 @@ class XmlParserTest extends TestCase
     }
 
     /**
-     * @dataProvider arrayXmlConversionDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('arrayXmlConversionDataProvider')]
     public function testFromArray($arrayData, $xmlData, $type)
     {
         $parser = new XmlParser();
@@ -96,10 +95,9 @@ class XmlParserTest extends TestCase
     }
 
     /**
-     * @dataProvider arrayXmlConversionDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('arrayXmlConversionDataProvider')]
     public function testToXML($arrayData, $xmlData, $type)
     {
         $parser = new XmlParser();
@@ -107,10 +105,9 @@ class XmlParserTest extends TestCase
     }
 
     /**
-     * @dataProvider arrayXmlConversionDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('arrayXmlConversionDataProvider')]
     public function testToArray($arrayData, $xmlData, $type)
     {
         $parser = new XmlParser();
@@ -118,10 +115,9 @@ class XmlParserTest extends TestCase
     }
 
     /**
-     * @dataProvider arrayXmlConversionDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('arrayXmlConversionDataProvider')]
     public function testFromXML($arrayData, $xmlData, $type)
     {
         $parser = new XmlParser();
@@ -195,10 +191,9 @@ EOF;
     }
 
     /**
-     * @dataProvider listToXMLDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('listToXMLDataProvider')]
     public function testListToXML($list, $xml)
     {
         $parser = new XmlParser();
@@ -206,10 +201,9 @@ EOF;
     }
 
     /**
-     * @dataProvider listToXMLDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('listToXMLDataProvider')]
     public function testXMLToList($list, $xml)
     {
         $parser = new XmlParser();

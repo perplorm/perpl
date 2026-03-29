@@ -120,7 +120,7 @@ EOF;
         return $account;
     }
 
-    public function outputGroupDataProvider()
+    public static function outputGroupDataProvider()
     {
         $accountShort = [
             'EmployeeId' => 1,
@@ -193,10 +193,9 @@ EOF;
     }
 
     /**
-     * @dataProvider outputGroupDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('outputGroupDataProvider')]
     public function testOutputGroup($outputGroup, array $expected)
     {
         $account = $this->getPopulatedAccountObject();
@@ -206,10 +205,9 @@ EOF;
     }
 
     /**
-     * @dataProvider outputGroupDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('outputGroupDataProvider')]
     public function testGeneratedCollectionHasMethod()
     {
         $collectionClass = Map\OgEmployeeTableMap::getTableMap()->getCollectionClassName();
@@ -220,10 +218,9 @@ EOF;
     }
 
     /**
-     * @dataProvider outputGroupDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('outputGroupDataProvider')]
     public function testNonGeneratedCollectionWasUpdated()
     {
         $collectionClass = Map\OgAccountTableMap::getTableMap()->getCollectionClassName();

@@ -36,9 +36,9 @@ class ColumnToQueryOperatorCriterionTest extends TestCaseFixtures
     }
 
     /**
-     * @dataProvider operatorDataProvider
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('operatorDataProvider')]
     public function testCriterionCreatesClauseForOperator(string $operator)
     {
         $outer = AuthorQuery::create();
@@ -51,9 +51,9 @@ class ColumnToQueryOperatorCriterionTest extends TestCaseFixtures
     }
 
     /**
-     * @dataProvider operatorDataProvider
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('operatorDataProvider')]
     public function testCriterionCreateForRelation(string $operator)
     {
         $outer = AuthorQuery::create();
@@ -66,7 +66,7 @@ class ColumnToQueryOperatorCriterionTest extends TestCaseFixtures
         $this->assertCreatedSqlSame($expected, $in);
     }
 
-    public function operatorDataProvider(): array
+    public static function operatorDataProvider(): array
     {
         return [
             [' untrimmed operator '],

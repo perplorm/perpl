@@ -36,7 +36,7 @@ class QuickBuilderTest extends TestCase
         $this->assertTrue($builder->getPlatform() instanceof SqlitePlatform);
     }
 
-    public function simpleSchemaProvider(): array
+    public static function simpleSchemaProvider(): array
     {
         $xmlSchema = <<<EOF
 <database name="test_quick_build_2" namespace="MyNameSpace">
@@ -53,10 +53,9 @@ EOF;
     }
 
     /**
-     * @dataProvider simpleSchemaProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('simpleSchemaProvider')]
     public function testGetDatabase($builder): void
     {
         $database = $builder->getDatabase();
@@ -66,10 +65,9 @@ EOF;
     }
 
     /**
-     * @dataProvider simpleSchemaProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('simpleSchemaProvider')]
     public function testGetSQL($builder): void
     {
         $expected = <<<EOF
@@ -92,10 +90,9 @@ EOF;
     }
 
     /**
-     * @dataProvider simpleSchemaProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('simpleSchemaProvider')]
     public function testGetClasses($builder): void
     {
         $script = $builder->getClasses();
@@ -106,10 +103,9 @@ EOF;
     }
 
     /**
-     * @dataProvider simpleSchemaProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('simpleSchemaProvider')]
     public function testGetClassesLimitedClassTargets($builder): void
     {
         $script = $builder->getClasses([BuilderType::TableMap, BuilderType::ObjectBase, BuilderType::QueryBase]);
@@ -120,10 +116,9 @@ EOF;
     }
 
     /**
-     * @dataProvider simpleSchemaProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('simpleSchemaProvider')]
     public function testBuildClasses($builder): void
     {
         $builder->buildClasses();

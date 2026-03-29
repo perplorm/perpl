@@ -259,7 +259,7 @@ EOF;
         $this->assertEquals(['bar23'], $e[1]->getTags(), 'array columns are searchable by element using Criteria::CONTAINS_NONE');
     }
 
-    public function queryStructureDataProvider(): array
+    public static function queryStructureDataProvider(): array
     {
         $t = 'complex_column_type_entity_11';
         $sf = "SELECT  FROM $t WHERE $t.id=:p1";
@@ -272,10 +272,9 @@ EOF;
         ];
     }
     /**
-     * @dataProvider queryStructureDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('queryStructureDataProvider')]
     public function testQueryStructure(string|null $op, string $expected)
     {
         $p = [];

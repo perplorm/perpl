@@ -212,10 +212,9 @@ class ModelCriteriaTest extends BookstoreTestBase
     }
 
     /**
-     * @dataProvider conditionsForTestWhere
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('conditionsForTestWhere')]
     public function testWhere($clause, $value, $sql, $params)
     {
         $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\Book');
@@ -478,7 +477,7 @@ class ModelCriteriaTest extends BookstoreTestBase
         );
     }
 
-    public function filterByWithSubqueryDataProvider(): array
+    public static function filterByWithSubqueryDataProvider(): array
     {
         return [
             // operator input, operator in query
@@ -488,10 +487,9 @@ class ModelCriteriaTest extends BookstoreTestBase
     }
 
     /**
-     * @dataProvider filterByWithSubqueryDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('filterByWithSubqueryDataProvider')]
     public function testFilterByWithSubquery(string $description, ?string $operatorInput, string $sqlOperator)
     {
         $subquery = AuthorQuery::create()->filterByAge(40, Criteria::GREATER_EQUAL)->select('FirstName');
@@ -1574,10 +1572,9 @@ class ModelCriteriaTest extends BookstoreTestBase
     }
 
     /**
-     * @dataProvider conditionsForTestWithColumn
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('conditionsForTestWithColumn')]
     public function testWithColumn($clause, $alias, $selectTranslation)
     {
         $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\Book');
@@ -1604,10 +1601,9 @@ class ModelCriteriaTest extends BookstoreTestBase
     }
 
     /**
-     * @dataProvider conditionsForTestWithColumnAndQuotes
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('conditionsForTestWithColumnAndQuotes')]
     public function testWithColumnAndQuotes($clause, $alias, $selectTranslation)
     {
         $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\Author');
@@ -2411,10 +2407,9 @@ class ModelCriteriaTest extends BookstoreTestBase
     }
 
     /**
-     * @dataProvider conditionsForTestGetRelationName
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('conditionsForTestGetRelationName')]
     public function testGetRelationName($relation, $relationName)
     {
         $this->assertEquals($relationName, ModelCriteria::getrelationName($relation));

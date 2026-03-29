@@ -219,10 +219,9 @@ class ColumnTest extends ModelTestCase
     }
 
     /**
-     * @dataProvider provideDefaultValues
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('provideDefaultValues')]
     public function testGetDefaultValueString($mappingType, $value, $expected)
     {
         $defaultValue = $this
@@ -256,7 +255,7 @@ class ColumnTest extends ModelTestCase
         $this->assertSame($expected, $column->getDefaultValueString());
     }
 
-    public function provideDefaultValues()
+    public static function provideDefaultValues()
     {
         return [
             ['DOUBLE', 3.14, '3.14'],
@@ -426,10 +425,9 @@ class ColumnTest extends ModelTestCase
     }
 
     /**
-     * @dataProvider providePdoTypes
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('providePdoTypes')]
     public function testGetPdoType($mappingType, $pdoType)
     {
         $domain = $this->getDomainMock();
@@ -445,7 +443,7 @@ class ColumnTest extends ModelTestCase
         $this->assertSame($pdoType, $column->getPdoType());
     }
 
-    public function providePdoTypes()
+    public static function providePdoTypes()
     {
         return [
             ['CHAR', PDO::PARAM_STR],
@@ -563,10 +561,9 @@ class ColumnTest extends ModelTestCase
     }
 
     /**
-     * @dataProvider provideMappingTemporalTypes
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('provideMappingTemporalTypes')]
     public function testTemporalType($mappingType)
     {
         $domain = $this->getDomainMock();
@@ -589,7 +586,7 @@ class ColumnTest extends ModelTestCase
         $this->assertTrue($column->isTemporalType());
     }
 
-    public function provideMappingTemporalTypes()
+    public static function provideMappingTemporalTypes()
     {
         return [
             ['DATE'],
@@ -601,10 +598,9 @@ class ColumnTest extends ModelTestCase
     }
 
     /**
-     * @dataProvider provideMappingLobTypes
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('provideMappingLobTypes')]
     public function testLobType($mappingType, $phpType, $isPhpPrimitiveType)
     {
         $domain = $this->getDomainMock();
@@ -627,7 +623,7 @@ class ColumnTest extends ModelTestCase
         $this->assertTrue($column->isLobType());
     }
 
-    public function provideMappingLobTypes()
+    public static function provideMappingLobTypes()
     {
         return [
             ['VARBINARY', 'string', true],
@@ -637,10 +633,9 @@ class ColumnTest extends ModelTestCase
     }
 
     /**
-     * @dataProvider provideMappingBooleanTypes
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('provideMappingBooleanTypes')]
     public function testBooleanType($mappingType)
     {
         $domain = $this->getDomainMock();
@@ -663,7 +658,7 @@ class ColumnTest extends ModelTestCase
         $this->assertTrue($column->isBooleanType());
     }
 
-    public function provideMappingBooleanTypes()
+    public static function provideMappingBooleanTypes()
     {
         return [
             ['BOOLEAN'],
@@ -672,10 +667,9 @@ class ColumnTest extends ModelTestCase
     }
 
     /**
-     * @dataProvider provideMappingNumericTypes
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('provideMappingNumericTypes')]
     public function testNumericType($mappingType, $phpType, $isPrimitiveNumericType)
     {
         $domain = $this->getDomainMock();
@@ -699,7 +693,7 @@ class ColumnTest extends ModelTestCase
         $this->assertTrue($column->isNumericType());
     }
 
-    public function provideMappingNumericTypes()
+    public static function provideMappingNumericTypes()
     {
         return [
             ['SMALLINT', 'int', true],
@@ -715,10 +709,9 @@ class ColumnTest extends ModelTestCase
     }
 
     /**
-     * @dataProvider provideMappingUuidTypes
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('provideMappingUuidTypes')]
     public function testUuidType(string $columnType, string $phpType)
     {
         $domain = $this->getDomainMock();
@@ -741,7 +734,7 @@ class ColumnTest extends ModelTestCase
         $this->assertTrue($column->isUuidType());
     }
 
-    public function provideMappingUuidTypes()
+    public static function provideMappingUuidTypes()
     {
         return [
             // column type, php type, 
@@ -752,10 +745,9 @@ class ColumnTest extends ModelTestCase
 
 
     /**
-     * @dataProvider provideMappingTextTypes
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('provideMappingTextTypes')]
     public function testTextType($mappingType)
     {
         $domain = $this->getDomainMock();
@@ -778,7 +770,7 @@ class ColumnTest extends ModelTestCase
         $this->assertTrue($column->isTextType());
     }
 
-    public function provideMappingTextTypes()
+    public static function provideMappingTextTypes()
     {
         return [
             ['CHAR'],

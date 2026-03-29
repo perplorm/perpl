@@ -59,7 +59,7 @@ class Issue1489Test extends TestCase
       return $database->getTable('le_table')->getColumn('le_column');
     }
 
-    public function sizedTypes(){
+    public static function sizedTypes(){
       return [
         ['tinytext'],
         ['mediumtext'],
@@ -70,9 +70,7 @@ class Issue1489Test extends TestCase
       ];
     }
 
-    /**
-     * @dataProvider sizedTypes
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('sizedTypes')]
     public function testCompare(string $type){
       $schemaColumn = $this->buildSchemaColumn($type);
       $reversedColumn = $this->buildReversedColumn($type);

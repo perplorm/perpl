@@ -193,7 +193,7 @@ EOF;
         $this->assertEquals([], $table->getRelations());
     }
 
-    public function invalidFkTestDataProvider(): array
+    public static function invalidFkTestDataProvider(): array
     {
         return [
             [
@@ -213,10 +213,9 @@ EOF;
     }
 
     /**
-     * @dataProvider invalidFkTestDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('invalidFkTestDataProvider')]
     public function testMissingFkParametersThrowsException(string $description, string $parameters)
     {
         $schema = <<<EOF
@@ -244,7 +243,7 @@ EOF;
         $builder->getDatabase();
     }
 
-    public function addFkTestDataProvider(): array
+    public static function addFkTestDataProvider(): array
     {
         return [
             // description, behavior parameters, local fk, foreign table name, foreign column name
@@ -295,10 +294,9 @@ EOF;
     }
 
     /**
-     * @dataProvider addFkTestDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('addFkTestDataProvider')]
     public function testAddFkParameter(
         string $description,
         string $parameters,
@@ -430,7 +428,7 @@ EOF;
     /**
      * @return array
      */
-    public function tablePrefixDataProvider()
+    public static function tablePrefixDataProvider()
     {
         $schema = <<<XML
 <database name="archivable_behavior_test_0" tablePrefix="foo_">
@@ -478,10 +476,9 @@ SQL;
     }
 
     /**
-     * @dataProvider tablePrefixDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('tablePrefixDataProvider')]
     public function testGeneratedSqlWithTablePrefix($schema, $expectSQL, $expectClasses)
     {
         $builder = new QuickBuilder();
@@ -494,10 +491,9 @@ SQL;
     }
 
     /**
-     * @dataProvider tablePrefixDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('tablePrefixDataProvider')]
     public function testGeneratedClassesWithTablePrefix($schema, $expectSQL, $expectClasses)
     {
         $builder = new QuickBuilder();

@@ -71,10 +71,9 @@ EOF;
     }
 
     /**
-     * @dataProvider dataGetPackagePath
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('dataGetPackagePath')]
     public function testGetPackagePath($package, $expectedPath)
     {
         $builder = new OMBuilderMock();
@@ -83,7 +82,7 @@ EOF;
         $this->assertEquals($expectedPath, $builder->getPackagePath());
     }
 
-    public function dataGetPackagePath()
+    public static function dataGetPackagePath()
     {
         return [
             ['', ''],
@@ -109,7 +108,7 @@ EOF;
     /**
      * @return array<array{bool,string}>
      */
-    public function StrictTypesDataProvider(): array
+    public static function StrictTypesDataProvider(): array
     {
         return [
             [true, "<?php\n\ndeclare(strict_types = 1);\n\nnamespace"],
@@ -118,10 +117,9 @@ EOF;
     }
 
     /**
-     * @dataProvider StrictTypesDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('StrictTypesDataProvider')]
     public function testDeclareStrictTypes(bool $declareStrictType, string $expectedStart)
     {
         $builder = new class(new Table('Foo')) extends AbstractOMBuilder{

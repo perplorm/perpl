@@ -8,7 +8,9 @@
 
 namespace Propel\Tests\Generator\Model;
 
+use Propel\Generator\Model\Column;
 use Propel\Generator\Model\Index;
+use Propel\Generator\Model\PropelTypes;
 
 /**
  * Unit test suite for the Index model class.
@@ -46,10 +48,9 @@ class IndexTest extends ModelTestCase
     }
 
     /**
-     * @dataProvider provideTableSpecificAttributes
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('provideTableSpecificAttributes')]
     public function testCreateDefaultIndexName($tableName, $maxColumnNameLength, $indexName)
     {
         $database = $this->getDatabaseMock('bookstore');
@@ -70,7 +71,7 @@ class IndexTest extends ModelTestCase
         $this->assertSame($indexName, $index->getName());
     }
 
-    public function provideTableSpecificAttributes()
+    public static function provideTableSpecificAttributes()
     {
         return [
             [ 'books', 64, 'books_i_no_columns' ],
@@ -79,10 +80,9 @@ class IndexTest extends ModelTestCase
     }
 
     /**
-     * @dataProvider provideColumnDefinitions
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('provideColumnDefinitions')]
     public function testAddIndexedColumns($columns)
     {
         $index = new Index();
@@ -100,12 +100,12 @@ class IndexTest extends ModelTestCase
         $this->assertNull($index->getColumnSize('baz'));
     }
 
-    public function provideColumnDefinitions()
+    public static function provideColumnDefinitions()
     {
         $dataset[0][] = [
-            $this->getColumnMock('foo', [ 'size' => 100 ]),
-            $this->getColumnMock('bar', [ 'size' => 5   ]),
-            $this->getColumnMock('baz', [ 'size' => 0   ]),
+            new Column('foo', PropelTypes::VARCHAR, 100),
+            new Column('bar', PropelTypes::VARCHAR, 5),
+            new Column('baz', PropelTypes::VARCHAR, 0),
         ];
 
         $dataset[1][] = [
@@ -147,10 +147,9 @@ class IndexTest extends ModelTestCase
     }
 
     /**
-     * @dataProvider provideColumnAttributes
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('provideColumnAttributes')]
     public function testNoColumnAtPositionCaseSensitivity($name, $case)
     {
         $index = new Index();
@@ -159,7 +158,7 @@ class IndexTest extends ModelTestCase
         $this->assertFalse($index->hasColumnAtPosition(0, $name, 5, $case));
     }
 
-    public function provideColumnAttributes()
+    public static function provideColumnAttributes()
     {
         return [
             [ 'bar', false ],

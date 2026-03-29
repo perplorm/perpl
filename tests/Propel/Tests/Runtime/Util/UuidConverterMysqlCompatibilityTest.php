@@ -31,7 +31,7 @@ class UuidConverterMysqlCompatibilityTest extends BookstoreTestBase
         }
     }
 
-    public function operationsDataProvider(): array
+    public static function operationsDataProvider(): array
     {
         return [
             // description, mysql function , converter callback, input value, input bin
@@ -44,9 +44,7 @@ class UuidConverterMysqlCompatibilityTest extends BookstoreTestBase
         ];
     }
 
-    /**
-     * @dataProvider operationsDataProvider
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('operationsDataProvider')]
     public function testBinToUuidBehavesLikeInMysql($description, $sqlStatement, $callback, $inputBin)
     {
         $value = ($inputBin)

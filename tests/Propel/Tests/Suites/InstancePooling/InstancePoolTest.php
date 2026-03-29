@@ -44,7 +44,7 @@ use Propel\Tests\InstancePoolTest\VarcharPkTableQuery;
  */
 class InstancePoolTest extends BookstoreTestBase
 {
-    public function ItemDataProvider(): array
+    public static function ItemDataProvider(): array
     {
         return [
             [IntegerPkTable::class, IntegerPkTableQuery::class, IntegerPkTableTableMap::class, 42],
@@ -62,10 +62,9 @@ class InstancePoolTest extends BookstoreTestBase
     }
 
     /**
-     * @dataProvider ItemDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('ItemDataProvider')]
     public function testItemInPoolAfterSave(string $modelClass, string $queryClass, string $tablemapClass, $setPkArgs): void
     {
         if ($modelClass === DecimalPkTable::class) {

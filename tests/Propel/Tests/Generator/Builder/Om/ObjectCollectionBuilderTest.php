@@ -17,14 +17,13 @@ use Propel\Generator\Builder\Om\ObjectCollectionBuilder;
 class ObjectCollectionBuilderTest extends AgnosticBuilderTestCase
 {
     /**
-     * @dataProvider NoSkipDataProvider
      *
      * @param string $schema
      * @param string $tableName
      * @param bool $expectSkip
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('NoSkipDataProvider')]
     public function testSkip(string $description, string $schema, string $tableName, bool $expectNoSkip ): void
     {
         $builder = $this->createBuilder($schema, $tableName);
@@ -35,7 +34,7 @@ class ObjectCollectionBuilderTest extends AgnosticBuilderTestCase
     /**
      * @return array<array{string, string, string, bool}>
      */
-    public function NoSkipDataProvider(): array
+    public static function NoSkipDataProvider(): array
     {
         return [
             [
@@ -82,16 +81,15 @@ class ObjectCollectionBuilderTest extends AgnosticBuilderTestCase
     }
 
     /**
-     * @dataProvider ClassNameAndTypeDataProvider
      *
      * @param string $description
      * @param string $schema
      * @param string $tableName
      * @param string $expectedClassName
      * @param string $expectedType
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('ClassNameAndTypeDataProvider')]
     public function testCollectionClassNameAndType(string $description, string $schema, string $tableName, string $expectedClassName, string $expectedType): void
     {
         $builder = $this->createBuilder($schema, $tableName);
@@ -106,7 +104,7 @@ class ObjectCollectionBuilderTest extends AgnosticBuilderTestCase
     /**
      * @return array<array{string, string, string, string, string}>
      */
-    public function ClassNameAndTypeDataProvider(): array
+    public static function ClassNameAndTypeDataProvider(): array
     {
         return [
             [
@@ -138,15 +136,14 @@ class ObjectCollectionBuilderTest extends AgnosticBuilderTestCase
     }
 
     /**
-     * @dataProvider MappingDataProvider
      *
      * @param string $description
      * @param string $schema
      * @param string $tableName
      * @param array $expectedMapping
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('MappingDataProvider')]
     public function testRelationTableTypes(string $description, string $schema, string $tableName, array $expectedMapping): void
     {
         $builder = $this->createBuilder($schema, $tableName);
@@ -159,7 +156,7 @@ class ObjectCollectionBuilderTest extends AgnosticBuilderTestCase
     /**
      * @return array<array{string, string, string, string, string}>
      */
-    public function MappingDataProvider(): array
+    public static function MappingDataProvider(): array
     {
         return [
             [

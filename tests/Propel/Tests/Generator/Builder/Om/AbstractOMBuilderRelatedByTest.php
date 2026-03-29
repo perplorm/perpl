@@ -59,10 +59,9 @@ class AbstractOMBuilderRelatedByTest extends TestCase
     }
 
     /**
-     * @dataProvider getRelatedBySuffixDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('getRelatedBySuffixDataProvider')]
     public function testGetRelatedBySuffix($table, $index, $expectedSuffix, $expectedReverseSuffix)
     {
         $fk = $this->getForeignKey($table, $index);

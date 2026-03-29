@@ -17,10 +17,9 @@ use Propel\Tests\TestCase;
 class MappingModelTest extends TestCase
 {
     /**
-     * @dataProvider providerForGetDefaultValueForArray
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('providerForGetDefaultValueForArray')]
     public function testGetDefaultValueForArray(string $value, $expected)
     {
         $mappingModel = new TestableMappingModel();

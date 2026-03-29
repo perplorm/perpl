@@ -27,7 +27,7 @@ class CodeBuilderTest extends CompareGeneratedCodeTestCase
      * @return array<array{array{string,BuilderType,array|null}, string}>
      */
     #[ComparesGeneratedFile(textBuilder: 'buildCode')]
-    public function CodeBuilderDataProvider(): array
+    public static function CodeBuilderDataProvider(): array
     {
         $targetDir =  __DIR__ . '/expected_builder_code';
 
@@ -70,13 +70,12 @@ class CodeBuilderTest extends CompareGeneratedCodeTestCase
     }
 
     /**
-     * @dataProvider CodeBuilderDataProvider
      *
      * @param array{string,BuilderType,array|null} $builderArgs
      * @param string $fileName
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('CodeBuilderDataProvider')]
     public function testCodeBuilderOutput(array $builderArgs, string $fileName): void
     {
         $code = $this->buildCode(...$builderArgs);

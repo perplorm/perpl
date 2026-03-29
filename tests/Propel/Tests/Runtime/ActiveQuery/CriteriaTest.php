@@ -1270,10 +1270,9 @@ class CriteriaTest extends BookstoreTestBase
     }
 
     /**
-     * @dataProvider dataLimit
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('dataLimit')]
     public function testLimit($limit, $expected)
     {
         $c = new Criteria();
@@ -1283,7 +1282,7 @@ class CriteriaTest extends BookstoreTestBase
         $this->assertSame($c, $c2, 'setLimit() returns the current Criteria');
     }
 
-    public function dataLimit()
+    public static function dataLimit()
     {
         return [
             'Negative value' => [
@@ -1334,10 +1333,9 @@ class CriteriaTest extends BookstoreTestBase
     }
 
     /**
-     * @dataProvider dataOffset
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('dataOffset')]
     public function testOffset($offset, $expected)
     {
         $c = new Criteria();
@@ -1347,7 +1345,7 @@ class CriteriaTest extends BookstoreTestBase
         $this->assertSame($c, $c2, 'setOffset() returns the current Criteria');
     }
 
-    public function dataOffset()
+    public static function dataOffset()
     {
         return [
             'Negative value' => [

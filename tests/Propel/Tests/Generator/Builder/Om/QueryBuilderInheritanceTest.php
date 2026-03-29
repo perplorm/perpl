@@ -32,7 +32,7 @@ use Propel\Tests\Helpers\Bookstore\BookstoreTestBase;
  */
 class QueryBuilderInheritanceTest extends BookstoreTestBase
 {
-    public function constructProvider()
+    public static function constructProvider()
     {
         return [
             ['BookstoreCashierQuery'],
@@ -46,10 +46,9 @@ class QueryBuilderInheritanceTest extends BookstoreTestBase
     }
 
     /**
-     * @dataProvider constructProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('constructProvider')]
     public function testConstruct($class)
     {
         $class = 'Propel\\Tests\\Bookstore\\' . $class;

@@ -76,10 +76,9 @@ b2: 2
     }
 
     /**
-     * @dataProvider arrayYAMLConversionDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('arrayYAMLConversionDataProvider')]
     public function testFromArray($arrayData, $YAMLData, $type)
     {
         $parser = new YamlParser();
@@ -87,10 +86,9 @@ b2: 2
     }
 
     /**
-     * @dataProvider arrayYAMLConversionDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('arrayYAMLConversionDataProvider')]
     public function testToYAML($arrayData, $YAMLData, $type)
     {
         $parser = new YamlParser();
@@ -98,10 +96,9 @@ b2: 2
     }
 
     /**
-     * @dataProvider arrayYAMLConversionDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('arrayYAMLConversionDataProvider')]
     public function testToArray($arrayData, $YAMLData, $type)
     {
         $parser = new YamlParser();
@@ -109,10 +106,9 @@ b2: 2
     }
 
     /**
-     * @dataProvider arrayYAMLConversionDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('arrayYAMLConversionDataProvider')]
     public function testFromYAML($arrayData, $YAMLData, $type)
     {
         $parser = new YamlParser();
@@ -161,10 +157,9 @@ EOF;
     }
 
     /**
-     * @dataProvider listToYAMLDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('listToYAMLDataProvider')]
     public function testListToYAML($list, $yaml)
     {
         $parser = new YamlParser();
@@ -172,10 +167,9 @@ EOF;
     }
 
     /**
-     * @dataProvider listToYAMLDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('listToYAMLDataProvider')]
     public function testYAMLToList($list, $yaml)
     {
         $parser = new YamlParser();

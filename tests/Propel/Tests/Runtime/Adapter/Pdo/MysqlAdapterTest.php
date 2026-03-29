@@ -41,18 +41,17 @@ class MysqlAdapterTest extends TestCaseFixtures
     /**
      * @return string
      */
-    protected function getDriver()
+    protected static function getDriver(): string
     {
         return 'mysql';
     }
 
     /**
-     * @dataProvider getConParams
      *
      * @param array $conparams
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('getConParams')]
     public function testPrepareParamsThrowsException($conparams)
     {
         $db = new TestableMysqlAdapter();
@@ -62,10 +61,9 @@ class MysqlAdapterTest extends TestCaseFixtures
     }
 
     /**
-     * @dataProvider getConParams
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('getConParams')]
     public function testPrepareParams($conparams)
     {
         $db = new TestableMysqlAdapter();
@@ -77,10 +75,9 @@ class MysqlAdapterTest extends TestCaseFixtures
     }
 
     /**
-     * @dataProvider getConParams
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('getConParams')]
     public function testNoSetNameQueryExecuted($conparams)
     {
         $db = new TestableMysqlAdapter();

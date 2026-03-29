@@ -23,7 +23,7 @@ class IncomingRelationCodeProducerCodeTest extends CompareGeneratedCodeTestCase
      * @return string[][]
      */
     #[ComparesGeneratedFile(textBuilder: 'buildCodeForIncomingRelation')]
-    public function IncomingRelationCodeDataProvider(): array
+    public static function IncomingRelationCodeDataProvider(): array
     {
         return [ // [schema, expected code file name]
             [static::MANY_TO_ONE_RELATION_CODE_SCHEMA, __DIR__ . '/expected_relation_code/many_to_one_relation_code_reference.txt'],
@@ -62,13 +62,12 @@ class IncomingRelationCodeProducerCodeTest extends CompareGeneratedCodeTestCase
     }
 
     /**
-     * @dataProvider IncomingRelationCodeDataProvider
      *
      * @param string $schema
      * @param string $fileName
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('IncomingRelationCodeDataProvider')]
     public function testIncomingRelationCode(string $schema, string $fileName): void
     {
         $code = $this->buildCodeForIncomingRelation($schema);

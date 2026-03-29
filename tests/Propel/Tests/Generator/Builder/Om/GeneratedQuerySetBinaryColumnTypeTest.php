@@ -75,7 +75,7 @@ EOF;
     /**
      * @return array<array>
      */
-    public function TestWhereDataProvider(): array
+    public static function TestWhereDataProvider(): array
     {
         return [
             ['ComplexColumnTypeEntitySet2.Tags LIKE ?', 'bar23', 1, ['bar23']],
@@ -88,15 +88,14 @@ EOF;
     }
 
     /**
-     * @dataProvider TestWhereDataProvider
      *
      * @param string $clause
      * @param string|array $param
      * @param int $expectedRows
      * @param array|null $expectedTags
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('TestWhereDataProvider')]
     public function testWhere(string $clause, array|string|null $param, int $expectedRows, array|null $expectedTags)
     {
         $e = ComplexColumnTypeEntitySet2Query::create()
@@ -124,7 +123,7 @@ EOF;
     /**
      * @return array<array>
      */
-    public function FilterByDataProvider(): array
+    public static function FilterByDataProvider(): array
     {
         return [ // value, op, expected tags
             ['bar23', null, [['bar23']]],
@@ -153,9 +152,7 @@ EOF;
         ];
     }
 
-    /**
-     * @dataProvider FilterByDataProvider
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('FilterByDataProvider')]
     public function testFilterByColumn($value, string|null $op, array $expectedTags)
     {
         /** @var ObjectCollection $e */

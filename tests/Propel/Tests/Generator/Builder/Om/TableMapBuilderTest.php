@@ -409,7 +409,7 @@ class TableMapBuilderTest extends BookstoreTestBase
     /**
      * @return array
      */
-    public function stringifyDataProvider(): array
+    public static function stringifyDataProvider(): array
     {
         return [
             [1, 'int should stay int'],
@@ -429,13 +429,12 @@ class TableMapBuilderTest extends BookstoreTestBase
     }
 
     /**
-     * @dataProvider stringifyDataProvider
      *
      * @param bool|int|float|string|array|null $scalarData
      * @param string $message
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('stringifyDataProvider')]
     public function testStringify($scalarData, string $message): void
     {
         $builder = new class (new Table('any')) extends TableMapBuilder {

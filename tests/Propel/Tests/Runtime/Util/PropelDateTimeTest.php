@@ -162,10 +162,9 @@ class PropelDateTimeTest extends TestCase
     }
 
     /**
-     * @dataProvider provideValidNewInstanceValues
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('provideValidNewInstanceValues')]
     public function testNewInstance($value, $expected)
     {
         $originalTimezone = date_default_timezone_get();
@@ -178,10 +177,9 @@ class PropelDateTimeTest extends TestCase
     }
 
     /**
-     * @dataProvider provideValidNewInstanceValuesGmt1
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('provideValidNewInstanceValuesGmt1')]
     public function testNewInstanceGmt1($value, $expected)
     {
         $originalTimezone = date_default_timezone_get();
@@ -203,7 +201,7 @@ class PropelDateTimeTest extends TestCase
         $dt = PropelDateTime::newInstance('some string');
     }
 
-    public function provideValidNewInstanceValues()
+    public static function provideValidNewInstanceValues()
     {
         return [
             'Y-m-d' => ['2011-08-10', '2011-08-10 00:00:00'],
@@ -218,7 +216,7 @@ class PropelDateTimeTest extends TestCase
         ];
     }
 
-    public function provideValidNewInstanceValuesGmt1()
+    public static function provideValidNewInstanceValuesGmt1()
     {
         return [
             // "1312960848" : Wed, 10 Aug 2011 07:20:48 GMT

@@ -13,7 +13,7 @@ use Propel\Tests\Helpers\BaseTestCase;
 
 class UuidConverterTest extends BaseTestCase
 {
-    public function uuidDataProvider(): array
+    public static function uuidDataProvider(): array
     {
         return [
             // uuid, hex, hexWithSwap
@@ -24,9 +24,9 @@ class UuidConverterTest extends BaseTestCase
     }
 
     /**
-     * @dataProvider uuidDataProvider
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('uuidDataProvider')]
     public function testUuidToBinWithSwap($uuid, $hex, $hexWithSwap)
     {
         $result = UuidConverter::uuidToBin($uuid, true);
@@ -34,9 +34,9 @@ class UuidConverterTest extends BaseTestCase
     }
 
     /**
-     * @dataProvider uuidDataProvider
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('uuidDataProvider')]
     public function testUuidToBinWithoutSwap($uuid, $hex, $hexWithSwap)
     {
         $result = UuidConverter::uuidToBin($uuid, false);
@@ -52,9 +52,9 @@ class UuidConverterTest extends BaseTestCase
     }
 
     /**
-     * @dataProvider uuidDataProvider
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('uuidDataProvider')]
     public function testBinToUuidWithSwap($uuid, $hex, $hexWithSwap)
     {
         $bin = $hex ? hex2bin($hexWithSwap) : null;
@@ -63,10 +63,9 @@ class UuidConverterTest extends BaseTestCase
     }
 
     /**
-     * @dataProvider uuidDataProvider
-     * 
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('uuidDataProvider')]
     public function testBinToUuidWithoutSwap($uuid, $hex, $hexWithSwap)
     {
         $bin = $hex ? hex2bin($hex) : null;

@@ -62,10 +62,9 @@ class ObjectBuilderTest extends TestCase
     }
 
     /**
-     * @dataProvider getDefaultValueStringProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('getDefaultValueStringProvider')]
     public function testGetDefaultValueString(Column $column, string $expectedDefaultValue)
     {
         $columnCodeProducer = ColumnCodeProducerFactory::create($column, $this->builder);

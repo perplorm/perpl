@@ -67,9 +67,7 @@ class IconvTransliterationTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider iconvTransliterationSlugProvider
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('iconvTransliterationSlugProvider')]
     public function testIconvTransliteration(string $input, string $expected): void
     {
         $translit = iconv('utf-8', 'us-ascii//TRANSLIT', $input);

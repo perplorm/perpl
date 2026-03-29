@@ -174,7 +174,7 @@ class AbstractOMBuilderNamespaceTest extends TestCase
     /**
      * @return array
      */
-    public function namespaceDataProvider(): array
+    public static function namespaceDataProvider(): array
     {
         //[<table namespace>, <class namespace>, <message>]]
         return [
@@ -186,11 +186,10 @@ class AbstractOMBuilderNamespaceTest extends TestCase
     }
 
     /**
-     * @dataProvider namespaceDataProvider
      * @doesNotPerformAssertions
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('namespaceDataProvider')]
     public function testDeclareClassNamespaceIgnoresLeadingSlashInNamespace(string $tableNamespace, string $classNamespace, string $message): void
     {
         $table = new Table('Table1');
@@ -204,6 +203,8 @@ class AbstractOMBuilderNamespaceTest extends TestCase
         } catch(LogicException $e) {
             $this->fail($message);
         }
+
+        $this->expectNotToPerformAssertions();
     }
 }
 

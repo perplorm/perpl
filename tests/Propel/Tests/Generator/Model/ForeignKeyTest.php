@@ -518,10 +518,9 @@ class ForeignKeyTest extends ModelTestCase
     }
 
     /**
-     * @dataProvider provideOnActionBehaviors
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('provideOnActionBehaviors')]
     public function testNormalizeForeignKey($behavior, $normalized)
     {
         $fk = new ForeignKey();
@@ -529,7 +528,7 @@ class ForeignKeyTest extends ModelTestCase
         $this->assertSame($normalized, $fk->normalizeFKey($behavior));
     }
 
-    public function provideOnActionBehaviors()
+    public static function provideOnActionBehaviors()
     {
         return [
             [null, ''],
@@ -544,10 +543,9 @@ class ForeignKeyTest extends ModelTestCase
     }
 
     /**
-     * @dataProvider provideOnActionBehaviorsWithDefault
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('provideOnActionBehaviorsWithDefault')]
     public function testNormalizeForeignKeyWithDefault($behavior, $default, $normalized)
     {
         $fk = new ForeignKey();
@@ -555,7 +553,7 @@ class ForeignKeyTest extends ModelTestCase
         $this->assertSame($normalized, $fk->normalizeFKey($behavior, $default));
     }
 
-    public function provideOnActionBehaviorsWithDefault()
+    public static function provideOnActionBehaviorsWithDefault()
     {
         return [
             [null, 'RESTRICT', 'RESTRICT'],

@@ -20,12 +20,11 @@ use Propel\Tests\Helpers\Bookstore\BookstoreEmptyTestBase;
 class ModelCriteriaGroupByArrayTest extends BookstoreEmptyTestBase
 {
     /**
-     * @dataProvider dataForTestException
      *
      * @param mixed $groupBy
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('dataForTestException')]
     public function testGroupByArrayThrowException($groupBy)
     {
         $this->expectException(PropelException::class);
@@ -102,7 +101,7 @@ class ModelCriteriaGroupByArrayTest extends BookstoreEmptyTestBase
     /**
      * @return array
      */
-    public function dataForTestException()
+    public static function dataForTestException()
     {
         return [
             'empty string' => [''],

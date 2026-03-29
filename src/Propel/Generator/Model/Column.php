@@ -8,6 +8,7 @@ use Exception;
 use LogicException;
 use Propel\Common\Util\SetColumnConverter;
 use Propel\Generator\Exception\EngineException;
+use Propel\Generator\Exception\LogicException as ExceptionLogicException;
 use Propel\Generator\Platform\PlatformInterface;
 use function addcslashes;
 use function count;
@@ -228,6 +229,8 @@ class Column extends MappingModel
      * @param string $name The column's name
      * @param string|null $type The column's type
      * @param string|int|null $size The column's size
+     *
+     * @throws \LogicException
      */
     public function __construct(string $name, ?string $type = null, $size = null)
     {
@@ -235,10 +238,11 @@ class Column extends MappingModel
 
         if ($type !== null) {
             $this->setType($type);
-        }
-
-        if ($size !== null) {
-            $this->setSize((int)$size);
+            if ($size !== null) {
+                $this->setSize((int)$size);
+            }
+        } elseif ($size !== null) {
+            throw new ExceptionLogicException('Cannot set column size without type');
         }
     }
 

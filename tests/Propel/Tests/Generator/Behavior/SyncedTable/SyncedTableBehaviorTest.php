@@ -33,7 +33,7 @@ class SyncedTableBehaviorTest extends TestCase
     /**
      * @return array
      */
-    public function syncTestDataProvider(): array
+    public static function syncTestDataProvider(): array
     {
         return [
             [
@@ -762,7 +762,6 @@ class SyncedTableBehaviorTest extends TestCase
     }
 
     /**
-     * @dataProvider syncTestDataProvider
      *
      * @param string $message
      * @param string $behaviorAdditions
@@ -770,9 +769,9 @@ class SyncedTableBehaviorTest extends TestCase
      * @param string $syncedTableInputTags
      * @param string $auxiliaryTables
      * @param string $syncedTableOutputTags
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('syncTestDataProvider')]
     public function testSync(
         string $message,
         string $behaviorAdditions,

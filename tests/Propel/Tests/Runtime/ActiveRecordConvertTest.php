@@ -49,7 +49,7 @@ class ActiveRecordConvertTest extends TestCaseFixtures
         $this->book = $book;
     }
 
-    public function toXmlDataProvider()
+    public static function toXmlDataProvider()
     {
         $expected = <<<EOF
 <?xml version="1.0" encoding="UTF-8"?>
@@ -89,20 +89,18 @@ EOF;
     }
 
     /**
-     * @dataProvider toXmlDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('toXmlDataProvider')]
     public function testToXML($expected)
     {
         $this->assertEquals($expected, $this->book->toXML());
     }
 
     /**
-     * @dataProvider toXmlDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('toXmlDataProvider')]
     public function testFromXML($expected)
     {
         $book = new Book();
@@ -120,7 +118,7 @@ EOF;
         $this->assertEquals($this->book, $book);
     }
 
-    public function toYamlDataProvider()
+    public static function toYamlDataProvider()
     {
         $expected = <<<EOF
 Id: 9012
@@ -149,20 +147,18 @@ EOF;
     }
 
     /**
-     * @dataProvider toYamlDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('toYamlDataProvider')]
     public function testToYAML($expected)
     {
         $this->assertEquals($expected, $this->book->toYAML());
     }
 
     /**
-     * @dataProvider toYamlDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('toYamlDataProvider')]
     public function testFromYAML($expected)
     {
         $book = new Book();
@@ -180,7 +176,7 @@ EOF;
         $this->assertEquals($this->book, $book);
     }
 
-    public function toJsonDataProvider()
+    public static function toJsonDataProvider()
     {
         $phpName = <<<EOF
 {"Id":9012,"Title":"Don Juan","ISBN":"0140422161","Price":12.99,"PublisherId":1234,"AuthorId":5678,"Publisher":{"Id":1234,"Name":"Penguin","Books":[["*RECURSION*"]]},"Author":{"Id":5678,"FirstName":"George","LastName":"Byron","Email":null,"Age":null,"Books":[["*RECURSION*"]]}}
@@ -204,20 +200,18 @@ EOF;
     }
 
     /**
-     * @dataProvider toJsonDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('toJsonDataProvider')]
     public function testToJSON($expected, $type)
     {
         $this->assertEquals($expected, $this->book->toJSON(true, $type));
     }
 
     /**
-     * @dataProvider toJsonDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('toJsonDataProvider')]
     public function testfromJSON($expected, $type)
     {
         $book = new Book();
@@ -235,7 +229,7 @@ EOF;
         $this->assertEquals($this->book, $book);
     }
 
-    public function toCsvDataProvider()
+    public static function toCsvDataProvider()
     {
         $expected = "Id,Title,ISBN,Price,PublisherId,AuthorId,Publisher,Author\r\n9012,Don Juan,0140422161,12.99,1234,5678,\"a:3:{s:2:\\\"Id\\\";i:1234;s:4:\\\"Name\\\";s:7:\\\"Penguin\\\";s:5:\\\"Books\\\";a:1:{i:0;a:1:{i:0;s:11:\\\"*RECURSION*\\\";}}}\",\"a:6:{s:2:\\\"Id\\\";i:5678;s:9:\\\"FirstName\\\";s:6:\\\"George\\\";s:8:\\\"LastName\\\";s:5:\\\"Byron\\\";s:5:\\\"Email\\\";N;s:3:\\\"Age\\\";N;s:5:\\\"Books\\\";a:1:{i:0;a:1:{i:0;s:11:\\\"*RECURSION*\\\";}}}\"\r\n";
 
@@ -243,20 +237,18 @@ EOF;
     }
 
     /**
-     * @dataProvider toCsvDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('toCsvDataProvider')]
     public function testToCSV($expected)
     {
         $this->assertEquals($expected, $this->book->toCSV());
     }
 
     /**
-     * @dataProvider toCsvDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('toCsvDataProvider')]
     public function testfromCSV($expected)
     {
         $book = new Book();

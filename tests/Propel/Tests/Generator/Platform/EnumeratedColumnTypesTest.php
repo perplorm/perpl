@@ -26,7 +26,7 @@ use Propel\Tests\TestCase;
 
 class EnumeratedColumnTypesTest extends TestCase
 {
-    public function EnumAliasProvider(): array
+    public static function EnumAliasProvider(): array
     {
         $platformsWithoutNativeType = [
             DefaultPlatform::class,
@@ -58,15 +58,14 @@ class EnumeratedColumnTypesTest extends TestCase
     }
 
     /**
-     * @dataProvider EnumAliasProvider
      *
      * @param class-string<PlatformInterface> $platform
      * @param bool $defaultToNative
      * @param string $columnType
      * @param string $expectedColumnType
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('EnumAliasProvider')]
     public function testEnumAliasOnPlatform(string $platformClass, bool $defaultToNative, string $columnType, string $expectedColumnType): void
     {
         $columnXml = '<column name="column" type="' . $columnType . '" valueSet="A,B"/>';
@@ -79,7 +78,7 @@ class EnumeratedColumnTypesTest extends TestCase
     /**
      * @return string[][]
      */
-    public function SqlTypeDataProvider(): array
+    public static function SqlTypeDataProvider(): array
     {
         return [
             [PropelTypes::ENUM_BINARY, 'A,B', PropelTypes::TINYINT],
@@ -90,14 +89,13 @@ class EnumeratedColumnTypesTest extends TestCase
     }
 
     /**
-     * @dataProvider SqlTypeDataProvider
      *
      * @param string $columnType
      * @param string $valueSetCsv
      * @param string $expectedSqlType
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('SqlTypeDataProvider')]
     public function testSqlType(string $columnType, string $valueSetCsv, string $expectedSqlType): void
     {
         $columnXml = '<column name="enumerated_column" type="' . $columnType . '" valueSet="' . $valueSetCsv . '"/>';
@@ -109,7 +107,7 @@ class EnumeratedColumnTypesTest extends TestCase
     /**
      * @return array<class-string<\UnitEnum>, string>[]
      */
-    public function GetEnumItemsDataProvider(): array
+    public static function GetEnumItemsDataProvider(): array
     {
         return [
             [ColorsBasicEnum::class, "`foo` ENUM('Red','Blue','Yellow')"],
@@ -117,9 +115,7 @@ class EnumeratedColumnTypesTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider GetEnumItemsDataProvider
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('GetEnumItemsDataProvider')]
     public function testSetValuesFromPhpEnum(string $enumClass, string $expectedColumnDdl): void
     {
         $columnXml = '<column name="foo" type="ENUM_NATIVE" valueEnum="' . $enumClass . '"/>';

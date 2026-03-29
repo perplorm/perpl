@@ -17,13 +17,11 @@ use Propel\Tests\Helpers\Bookstore\BookstoreTestBase;
 /**
  * Abstract base class for database schema parser tests.
  *
- * @author Moritz Ringler
- *
  * @abstract
  *
  * @group database
  */
-abstract class AbstractSchemaParserTest extends BookstoreTestBase
+abstract class AbstractSchemaParserTestBase extends BookstoreTestBase
 {
     /*
      * HACK: tests were written using instance properties for parser and 
