@@ -68,7 +68,7 @@ jobs:
                     --health-retries=3
 
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v5
 
             - id: build-container
               uses: ./.github/actions/setup-php
@@ -104,10 +104,10 @@ jobs:
 
             - name: Code Coverage Report
               if: success() && matrix.php-version == '8.1' && matrix.symfony-version == '6-max'
-              uses: codecov/codecov-action@v1
+              uses: codecov/codecov-action@v6
               with:
                   flags: ${{ matrix.php-version }}, ${{ matrix.db-type }}, ${{ matrix.symfony-version }}
-                  file: tests/coverage.xml
+                  files: tests/coverage.xml
 
     static-analysis:
         name: 'Stan & Psalm'
@@ -121,7 +121,7 @@ jobs:
               - php-version: '8.5'
                 symfony-version: '8-max'
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v5
             - id: build-container
               uses: ./.github/actions/setup-php
               with:
@@ -139,7 +139,7 @@ jobs:
         name: 'Code Style (PHPCS)'
         runs-on: ubuntu-24.04
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v5
             - id: build-container
               uses: ./.github/actions/setup-php
               with:
@@ -169,7 +169,7 @@ jobs:
                 file-pattern: 'Map/*TableMap.php'
         name: '${{ matrix.check }} on ${{ matrix.type }} code'
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v5
             - id: build-container
               uses: ./.github/actions/setup-php
               with:
