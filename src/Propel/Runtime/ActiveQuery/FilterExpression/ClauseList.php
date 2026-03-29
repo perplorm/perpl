@@ -27,7 +27,7 @@ class ClauseList
      *
      * @var array<int, \Propel\Runtime\ActiveQuery\FilterExpression\ColumnFilterInterface>
      */
-    protected $clauses = [];
+    protected array $clauses = [];
 
     /**
      * Operators for connected filters
@@ -35,7 +35,7 @@ class ClauseList
      *
      * @var array<int, string>
      */
-    protected $conjunctions = [];
+    protected array $conjunctions = [];
 
     /**
      * Get the list of clauses in this Filter.
@@ -63,7 +63,7 @@ class ClauseList
      * @param \Propel\Runtime\ActiveQuery\FilterExpression\ColumnFilterInterface $filter
      * @param string $conjunction
      *
-     * @return static
+     * @return $this
      */
     public function addFilter(ColumnFilterInterface $filter, string $conjunction = self::AND_OPERATOR_LITERAL)
     {
@@ -82,9 +82,7 @@ class ClauseList
      */
     public function addAnd(ColumnFilterInterface $filter)
     {
-        $this->addFilter($filter, self::AND_OPERATOR_LITERAL);
-
-        return $this;
+        return $this->addFilter($filter, self::AND_OPERATOR_LITERAL);
     }
 
     /**
@@ -96,9 +94,7 @@ class ClauseList
      */
     public function addOr(ColumnFilterInterface $filter)
     {
-        $this->addFilter($filter, self::OR_OPERATOR_LITERAL);
-
-        return $this;
+        return $this->addFilter($filter, self::OR_OPERATOR_LITERAL);
     }
 
     /**
