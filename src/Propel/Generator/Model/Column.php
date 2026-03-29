@@ -9,13 +9,13 @@ use LogicException;
 use Propel\Common\Util\SetColumnConverter;
 use Propel\Generator\Exception\EngineException;
 use Propel\Generator\Platform\PlatformInterface;
+use function addcslashes;
 use function count;
 use function in_array;
 use function is_string;
 use function lcfirst;
 use function rtrim;
 use function sprintf;
-use function str_replace;
 use function strrpos;
 use function strtolower;
 use function strtoupper;
@@ -722,7 +722,7 @@ class Column extends MappingModel
         $classname = $this->parentTable->getPhpName() . 'TableMap';
         $const = $this->getConstantName();
 
-        return $classname . '::' . $const;
+        return "$classname::$const";
     }
 
     /**
@@ -732,20 +732,27 @@ class Column extends MappingModel
      */
     public function getConstantName(): string
     {
-        // was it overridden in schema.xml ?
-        if ($this->getTableMapName()) {
-            return self::CONSTANT_PREFIX . strtoupper($this->getTableMapName());
-        }
+        $identifier = $this->getCustomColumnIdentifier() ?: $this->getName();
 
-        return self::CONSTANT_PREFIX . strtoupper($this->getName());
+        return self::CONSTANT_PREFIX . strtoupper($identifier);
     }
 
     /**
-     * Returns the TableMap constant name that will identify this column.
+     * @deprecated Use aptly named {@see static::getCustomColumnIdentifier()}
      *
      * @return string|null
      */
     public function getTableMapName(): ?string
+    {
+        return $this->getCustomColumnIdentifier();
+    }
+
+    /**
+     * Get custom column identifier to be used in TableMap.
+     *
+     * @return string|null
+     */
+    public function getCustomColumnIdentifier(): ?string
     {
         return $this->tableMapName;
     }
@@ -1560,19 +1567,21 @@ class Column extends MappingModel
             return 'null';
         }
 
+        $value = $defaultValue->getValue();
+
         if ($this->isNumericType()) {
-            return (string)$defaultValue->getValue();
+            return (string)$value;
         }
 
         if ($this->isTextType() || $this->getDefaultValue()->isExpression()) {
-            return sprintf("'%s'", str_replace("'", "\'", (string)$defaultValue->getValue()));
+            return "'" . addcslashes((string)$value, "'") . "'";
         }
 
         if ($this->getType() === PropelTypes::BOOLEAN) {
-            return $this->booleanValue($defaultValue->getValue()) ? 'true' : 'false';
+            return $this->booleanValue($value) ? 'true' : 'false';
         }
 
-        return sprintf("'%s'", $defaultValue->getValue());
+        return "'$value'";
     }
 
     /**

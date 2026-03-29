@@ -79,7 +79,7 @@ class ObjectColumnCodeProducer extends ColumnCodeProducer
         $col = $this->column;
         $clo = $col->getLowercasedName();
         $cloUnserialized = $clo . '_unserialized';
-        $columnConstant = $this->objectBuilder->getColumnConstant($col);
+        $columnConstant = $this->builder->getColumnConstant($col);
 
         $script .= "
         \$serializedValue = serialize(\$v);

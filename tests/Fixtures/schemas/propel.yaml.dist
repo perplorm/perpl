@@ -20,6 +20,7 @@ propel:
           charset: utf8
 
   generator:
+    declareStrictTypesInBuilders: true
     defaultConnection: bookstore-schemas
     connections:
       - bookstore-schemas

@@ -52,7 +52,7 @@ class OgObjectModifier
             if (!$col->isTemporalType()) {
                 continue;
             }
-            $formatter = $builder->getTemporalFormatter($col);
+            $formatter = $builder->getPlatformOrFail()->getTemporalFormatter($col);
             $temporalColumnIndexesByFormatter[$formatter][] = $num;
         }
 

@@ -6,8 +6,6 @@ namespace Propel\Generator\Behavior\I18n;
 
 use Propel\Generator\Builder\Om\ObjectBuilder;
 use Propel\Generator\Model\Column;
-use Propel\Generator\Model\PropelTypes;
-use function in_array;
 use function preg_match;
 use function preg_replace;
 use function ucfirst;
@@ -285,20 +283,5 @@ class I18nBehaviorObjectBuilderModifier
         }";
         $replacement = "\$0$addition";
         $script = preg_replace($pattern, $replacement, $script);
-    }
-
-    /**
-     * @param string $columnType
-     *
-     * @return bool
-     */
-    protected function isDateType(string $columnType): bool
-    {
-        return in_array($columnType, [
-            PropelTypes::DATE,
-            PropelTypes::DATETIME,
-            PropelTypes::TIME,
-            PropelTypes::TIMESTAMP,
-        ], true);
     }
 }

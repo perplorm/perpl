@@ -200,6 +200,7 @@ abstract class AbstractManager
     public function getDatabases(): array
     {
         if ($this->databases === null) {
+            /** @var array<\Propel\Generator\Model\Database> $databases */
             $databases = [];
             foreach ($this->getDataModels() as $dataModel) {
                 foreach ($dataModel->getDatabases() as $database) {

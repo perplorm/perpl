@@ -283,7 +283,7 @@ class ManyToManyRelationCodeProducer extends AbstractManyToManyCodeProducer
 
         $ownIdentifierSingular = $this->names->getSourceIdentifier(false);
         $ownIdentifierPlural = $this->names->getSourceIdentifier(true);
-        $ownStubClassName = $this->objectBuilder->getObjectClassName();
+        $ownStubClassName = $this->builder->getObjectClassName();
 
         $script .= "
     /**{$phpDoc}

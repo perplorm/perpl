@@ -11,6 +11,7 @@ namespace Propel\Tests;
 use PHPUnit\Framework\TestCase as PHPUnitTestCase;
 use Propel\Generator\Builder\Util\SchemaReader;
 use Propel\Generator\Config\QuickGeneratorConfig;
+use Propel\Generator\Model\Column;
 use Propel\Generator\Model\Database;
 use Propel\Generator\Platform\PlatformInterface;
 use Propel\Generator\Platform\SqlitePlatform;
@@ -255,5 +256,22 @@ class TestCase extends PHPUnitTestCase
         $schema = $schemaReader->parseString($schema);
 
         return $schema->getDatabase(); // does final initialization
+    }
+
+    /**
+     * @param PlatformInterface $platform
+     * @param bool $defaultToNative
+     * @param string $schema
+     * @return Column|null
+     */
+    public function buildColumnFromSchema(
+        string $columnXml,
+        array|null $additionalConfig = null,
+        PlatformInterface|null $platform = null,
+    ): Column {
+        $schema = "<database><table name='table'>$columnXml</table></database";
+        $database = $this->buildDatabaseFromSchema($schema, $additionalConfig, $platform);
+
+        return $database->getTable('table')->getColumns()[0];
     }
 }

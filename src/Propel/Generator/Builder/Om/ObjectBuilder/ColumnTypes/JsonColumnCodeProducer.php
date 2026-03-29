@@ -108,7 +108,7 @@ class JsonColumnCodeProducer extends ColumnCodeProducer
         \$encodedValue = json_encode(\$v);
         if (\$encodedValue !== \$this->$clo) {
             \$this->$clo = \$encodedValue;
-            \$this->modifiedColumns[" . $this->objectBuilder->getColumnConstant($this->column) . "] = true;
+            \$this->modifiedColumns[" . $this->builder->getColumnConstant($this->column) . "] = true;
         }\n";
     }
 }

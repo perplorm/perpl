@@ -15,9 +15,7 @@
      */
     public function findPk($key, ?ConnectionInterface $con = null)
     {
-        if ($con === null) {
-            $con = Propel::getServiceContainer()->getReadConnection(<?= $tableMapClassName ?>::DATABASE_NAME);
-        }
+        $con ??= Propel::getServiceContainer()->getReadConnection(<?= $tableMapClassName ?>::DATABASE_NAME);
 
         $this->basePreSelect($con);
 
@@ -26,10 +24,7 @@
         }
 
         $poolKey = <?= $buildPoolKeyStatement ?>;
-        $obj = <?= $tableMapClassName ?>::getInstanceFromPool($poolKey);
-        if ($obj !== null) {
-            return $obj;
-        }
 
-        return $this->findPkSimple($key, $con);
+        return <?= $tableMapClassName ?>::getInstanceFromPool($poolKey) 
+            ?? $this->findPkSimple($key, $con);
     }

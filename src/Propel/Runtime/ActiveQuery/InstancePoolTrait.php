@@ -5,6 +5,7 @@ declare(strict_types = 1);
 namespace Propel\Runtime\ActiveQuery;
 
 use Countable;
+use Propel\Runtime\Exception\LogicException;
 use Propel\Runtime\Propel;
 use function count;
 use function is_array;
@@ -23,23 +24,18 @@ trait InstancePoolTrait
      * @param object $object
      * @param string|null $key
      *
+     * @throws \Propel\Runtime\Exception\LogicException
+     *
      * @return void
      */
     public static function addInstanceToPool(object $object, ?string $key = null): void
     {
-        if (!Propel::isInstancePoolingEnabled()) {
-            return;
-        }
-        if ($key === null) {
-            $key = static::getInstanceKey($object);
-        }
-        if (!$key) {
-            return;
-        }
-        self::$instances[$key] = $object;
+        throw new LogicException('Table without PK cannot use instance pool.');
     }
 
     /**
+     * @deprecated Does not work reliably, use {@see static::getPrimaryKeyHashFromRow()} or {@see static::getPrimaryKeyHashFromObject()}
+     *
      * @param mixed $value
      *
      * @return string|null
@@ -69,18 +65,13 @@ trait InstancePoolTrait
     /**
      * @param mixed $value
      *
+     * @throws \Propel\Runtime\Exception\LogicException
+     *
      * @return void
      */
     public static function removeInstanceFromPool($value): void
     {
-        if (Propel::isInstancePoolingEnabled() && $value !== null) {
-            $key = static::getInstanceKey($value);
-            if ($key) {
-                unset(self::$instances[$key]);
-            } else {
-                self::clearInstancePool();
-            }
-        }
+        throw new LogicException('Table without PK cannot use instance pool.');
     }
 
     /**
@@ -94,11 +85,7 @@ trait InstancePoolTrait
             return null;
         }
 
-        if (!isset(self::$instances[$key])) {
-            return null;
-        }
-
-        return self::$instances[$key];
+        return static::$instances[$key] ?? null;
     }
 
     /**

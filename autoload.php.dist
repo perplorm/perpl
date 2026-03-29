@@ -9,7 +9,8 @@ if (file_exists($file = __DIR__.'/vendor/autoload.php')) {
         __DIR__ . '/tests',
         __DIR__ . '/tests/Fixtures/bookstore/build/classes',
         __DIR__ . '/tests/Fixtures/schemas/build/classes',
-        __DIR__ . '/tests/Fixtures/quoting/build/classes'
+        __DIR__ . '/tests/Fixtures/quoting/build/classes',
+        __DIR__ . '/tests/Fixtures/instance-pool/build/classes',
     ));
     $loader->add('Propel\Tests\Fixtures', __DIR__ . '/tests/Fixtures/classes');
     $loader->register();

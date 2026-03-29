@@ -27,6 +27,9 @@ tests/Fixtures/namespaced/propel.yaml
 
 tests/Fixtures/schemas/propel.yaml
 
+tests/Fixtures/instance-pool/build/
+tests/Fixtures/instance-pool/propel.yaml
+
 tests/Fixtures/reverse/mysql/build/
 tests/Fixtures/reverse/mysql/propel.yaml
 

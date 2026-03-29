@@ -102,9 +102,19 @@ abstract class DataModelBuilder
     protected function init(Table $table, ?AbstractGeneratorConfig $generatorConfig): void
     {
         $this->table = $table;
-        if (!$generatorConfig) {
-            return;
+        if ($generatorConfig) {
+            $this->onGeneratorConfigAvailable($table, $generatorConfig);
         }
+    }
+
+    /**
+     * @param \Propel\Generator\Model\Table $table
+     * @param \Propel\Generator\Config\AbstractGeneratorConfig $generatorConfig
+     *
+     * @return void
+     */
+    protected function onGeneratorConfigAvailable(Table $table, AbstractGeneratorConfig $generatorConfig): void
+    {
         $this->generatorConfig = $generatorConfig;
         $this->nameProducer = new NameProducer($generatorConfig->getConfiguredPluralizer());
         $this->referencedClasses->setGeneratorConfig($generatorConfig);

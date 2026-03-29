@@ -142,7 +142,7 @@ class FkRelationCodeProducer extends AbstractRelationCodeProducer
         $relationIdentifierSingular = $this->relation->getIdentifier();
         $varName = '$' . lcfirst($relationIdentifierSingular);
         $reverseIdentifierSingular = $this->relation->getIdentifierReversed();
-        $ownStubClassName = $this->objectBuilder->getObjectClassName();
+        $ownStubClassName = $this->builder->getObjectClassName();
 
         $targetClassName = $this->targetTableNames->useObjectStubClassName();
         $targetTypeFq = $this->targetTableNames->useObjectStubClassName(false);
@@ -167,7 +167,7 @@ class FkRelationCodeProducer extends AbstractRelationCodeProducer
             $valueVarName = '$' . lcfirst($columnName);
 
             if ($rightValueOrColumn instanceof Column) {
-                $defaultValue = ColumnCodeProducerFactory::create($column, $this->objectBuilder)->getDefaultValueString();
+                $defaultValue = ColumnCodeProducerFactory::create($column, $this->builder)->getDefaultValueString();
                 $getterIdentifier = $rightValueOrColumn->getPhpName();
                 $val = "{$varName}->get{$getterIdentifier}()";
             } else {
@@ -201,7 +201,7 @@ class FkRelationCodeProducer extends AbstractRelationCodeProducer
         $fk = $this->relation;
         $varName = $this->getAttributeName();
         $relationIdentifierSingular = $fk->getIdentifier();
-        $ownStubClassName = $this->objectBuilder->getObjectClassName();
+        $ownStubClassName = $this->builder->getObjectClassName();
 
         $relationIdentifierReversedSingular = $fk->getIdentifierReversed();
         $relationIdentifierReversedPlural = $fk->getIdentifierReversed($this->getPluralizer());

@@ -18,6 +18,11 @@ use Propel\Generator\Model\Table;
  */
 class QueryInheritanceBuilder extends AbstractOMBuilder implements ExtensionBuilderInterface
 {
+    /**
+     * @var \Propel\Generator\Builder\Om\BuilderType|null
+     */
+    public const BUILDER_TYPE = BuilderType::QueryInheritance;
+
     protected EntityObjectClassNames $tableNames;
 
     /**

@@ -15,6 +15,11 @@ use const PHP_EOL;
 class ExtensionObjectBuilder extends AbstractObjectBuilder
 {
     /**
+     * @var \Propel\Generator\Builder\Om\BuilderType|null
+     */
+    public const BUILDER_TYPE = BuilderType::ObjectStub;
+
+    /**
      * Returns the name of the current class being built.
      *
      * @return string

@@ -15,7 +15,10 @@ use Propel\Generator\Platform\PlatformInterface;
 use Propel\Runtime\Collection\ObjectCollection;
 use Propel\Runtime\Exception\RuntimeException;
 use Propel\Runtime\Util\UuidConverter;
+use function array_any;
 use function array_filter;
+use function array_find;
+use function array_map;
 use function array_merge;
 use function array_slice;
 use function array_values;
@@ -26,6 +29,7 @@ use function in_array;
 use function is_array;
 use function is_string;
 use function lcfirst;
+use function reset;
 use function sprintf;
 use function strrpos;
 use function strtolower;
@@ -2020,14 +2024,7 @@ class Table extends ScopedMappingModel implements IdMethod
      */
     public function getPrimaryKey(): array
     {
-        $pk = [];
-        foreach ($this->columns as $col) {
-            if ($col->isPrimaryKey()) {
-                $pk[] = $col;
-            }
-        }
-
-        return $pk;
+        return array_values(array_filter($this->columns, fn (Column $col) => $col->isPrimaryKey()));
     }
 
     /**
@@ -2037,7 +2034,7 @@ class Table extends ScopedMappingModel implements IdMethod
      */
     public function hasPrimaryKey(): bool
     {
-        return count($this->getPrimaryKey()) > 0;
+        return array_any($this->columns, fn (Column $col) => $col->isPrimaryKey());
     }
 
     /**
@@ -2059,13 +2056,22 @@ class Table extends ScopedMappingModel implements IdMethod
      */
     public function getFirstPrimaryKeyColumn(): ?Column
     {
-        foreach ($this->columns as $col) {
-            if ($col->isPrimaryKey()) {
-                return $col;
-            }
-        }
+        return array_find($this->columns, fn (Column $col) => $col->isPrimaryKey());
+    }
 
-        return null;
+    /**
+     * @param bool $nullable
+     *
+     * @return string
+     */
+    public function getPrimaryKeyDocType(bool $nullable): string
+    {
+        $orNull = $nullable ? '|null' : '';
+        $columnTypes = array_map(fn (Column $col) => $col->resolveQualifiedType() . $orNull, $this->getPrimaryKey());
+
+        return count($columnTypes) > 1
+            ? 'array{' . implode(', ', $columnTypes) . '}'
+            : (reset($columnTypes) ?: 'null');
     }
 
     /**

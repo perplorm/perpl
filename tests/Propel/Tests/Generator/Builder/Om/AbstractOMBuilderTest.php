@@ -9,6 +9,8 @@
 namespace Propel\Tests\Generator\Builder\Om;
 
 use Propel\Generator\Builder\Om\AbstractOMBuilder;
+use Propel\Generator\Config\QuickGeneratorConfig;
+use Propel\Generator\Model\Table;
 use Propel\Tests\Bookstore\Author;
 use Propel\Tests\Bookstore\Book;
 use Propel\Tests\Bookstore\Publisher;
@@ -102,6 +104,38 @@ EOF;
             ['foo.bar/baz.om', 'foo.bar/baz/om'],
             ['foo.bar/baz.map', 'foo.bar/baz/map'],
         ];
+    }
+
+    /**
+     * @return array<array{bool,string}>
+     */
+    public function StrictTypesDataProvider(): array
+    {
+        return [
+            [true, "<?php\n\ndeclare(strict_types = 1);\n\nnamespace"],
+            [false, "<?php\n\nnamespace"],
+        ];
+    }
+
+    /**
+     * @dataProvider StrictTypesDataProvider
+     *
+     * @return void
+     */
+    public function testDeclareStrictTypes(bool $declareStrictType, string $expectedStart)
+    {
+        $builder = new class(new Table('Foo')) extends AbstractOMBuilder{
+            protected function addClassBody(string &$script): void {}
+            protected function addClassClose(string &$script): void{}
+            protected function addClassOpen(string &$script): void{}
+            public function getUnprefixedClassName(): string { return 'Foo';}
+            public function getNamespace(): string { return 'FooNamespace';}
+        };
+        $config = new QuickGeneratorConfig(['propel.generator.declareStrictTypesInBuilders' => $declareStrictType]);
+        $builder->setGeneratorConfig($config);
+        $content = $builder->build();
+
+        $this->assertStringStartsWith($expectedStart, $content);
     }
 }
 

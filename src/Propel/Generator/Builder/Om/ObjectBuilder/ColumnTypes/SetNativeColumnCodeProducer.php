@@ -49,7 +49,7 @@ class SetNativeColumnCodeProducer extends AbstractArrayColumnCodeProducer
             return $statement;
         }
         // MySQL does not support multiple default values, write values as regular modification
-        $columnIdentifier = $this->objectBuilder->getColumnConstant($this->column);
+        $columnIdentifier = $this->builder->getColumnConstant($this->column);
 
         return "$statement
         \$this->modifiedColumns[$columnIdentifier] = true;";
@@ -160,7 +160,7 @@ class SetNativeColumnCodeProducer extends AbstractArrayColumnCodeProducer
         $col = $this->column;
         $clo = $col->getLowercasedName();
         $cloConverted = $clo . '_converted';
-        $columnConstant = $this->objectBuilder->getColumnConstant($col);
+        $columnConstant = $this->builder->getColumnConstant($col);
         $tableMapClassName = $this->getTableMapClassName();
         $this->declareClass('\Propel\Common\Util\SetColumnConverter');
 
@@ -191,7 +191,7 @@ class SetNativeColumnCodeProducer extends AbstractArrayColumnCodeProducer
     {
         $this->declareClasses('Propel\Common\Util\SetColumnConverter');
         $tableMapClassName = $this->getTableMapClassName();
-        $columnConstant = $this->objectBuilder->getColumnConstant($this->column);
+        $columnConstant = $this->builder->getColumnConstant($this->column);
 
         return "SetColumnConverter::rawInputToSetItems($valueExpression, $tableMapClassName::getValueSet($columnConstant))";
     }

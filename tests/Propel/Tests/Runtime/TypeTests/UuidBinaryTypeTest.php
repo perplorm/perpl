@@ -142,4 +142,19 @@ class UuidBinaryTypeTest extends BookstoreTestBase
 
         $this->assertSame($updatedTitle, $book->getTitle());
     }
+
+    public function testUuidBinaryFromInstancePool(): void
+    {
+        BookUuidBinaryQuery::create()->deleteAll();
+        $uuid = 'b41a29db-cf78-4d43-83a9-4cd3e1e1b41a';
+        $book = new BookUuidBinary();
+        $book->setId($uuid)->setTitle('First Title')->save();
+
+        $updatedTitle = 'Second Title';
+        $book->setTitle($updatedTitle);
+
+        $loadedBook = BookUuidBinaryQuery::create()->findOneById($uuid);
+        $this->assertSame($book, $loadedBook, 'Should retrieve book from cache'); 
+        $this->assertSame($updatedTitle, $loadedBook->getTitle(), 'Should keep unsaved changes');       
+    }
 }

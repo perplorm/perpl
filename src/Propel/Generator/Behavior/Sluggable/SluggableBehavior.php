@@ -221,6 +221,12 @@ protected function createSlug(): string
     protected function addCreateRawSlug(string &$script): void
     {
         $pattern = $this->getParameter('slug_pattern');
+        if (!$pattern) {
+            $returnStatement = '$this->cleanupSlugPart($this->__toString())';
+        } else {
+            $getter = str_replace(['{', '}'], ['\' . $this->cleanupSlugPart((string)$this->get', '()) . \''], $pattern);
+            $returnStatement = "'$getter'";
+        }
         $script .= "
 /**
  * Create the slug from the appropriate columns
@@ -229,13 +235,7 @@ protected function createSlug(): string
  */
 protected function createRawSlug(): string
 {
-    ";
-        if ($pattern) {
-            $script .= "return '" . str_replace(['{', '}'], ['\' . $this->cleanupSlugPart((string)$this->get', '()) . \''], $pattern) . "';";
-        } else {
-            $script .= 'return $this->cleanupSlugPart($this->__toString());';
-        }
-        $script .= "
+    return $returnStatement;
 }
 ";
     }
@@ -247,6 +247,8 @@ protected function createRawSlug(): string
      */
     public function addCleanupSlugPart(string &$script): void
     {
+        $this->builder->declareGlobalFunction('setlocale', 'str_replace', 'preg_replace', 'trim', 'strtolower');
+        $this->builder->declareGlobalConstant('LC_CTYPE');
         $script .= "
 /**
  * Cleanup a string to make a slug of it
@@ -259,7 +261,7 @@ protected function createRawSlug(): string
 protected static function cleanupSlugPart(string \$slug, string \$replacement = '" . $this->getParameter('replacement') . "'): string
 {
     // set locale explicitly
-    \$localeOrigin = setlocale(LC_CTYPE, 0);
+    \$localeOrigin = setlocale(LC_CTYPE, '0');
     setlocale(LC_CTYPE, 'C.UTF-8');
 
     // transliterate
@@ -268,11 +270,7 @@ protected static function cleanupSlugPart(string \$slug, string \$replacement = 
     }
 
     // lowercase
-    if (function_exists('mb_strtolower')) {
-        \$slug = mb_strtolower(\$slug);
-    } else {
-        \$slug = strtolower(\$slug);
-    }
+    \$slug = function_exists('mb_strtolower') ? mb_strtolower(\$slug) : strtolower(\$slug);
 
     // remove accents resulting from OSX's iconv
     \$slug = str_replace(array('\'', '`', '^'), '', \$slug);
@@ -280,16 +278,11 @@ protected static function cleanupSlugPart(string \$slug, string \$replacement = 
     // replace non letter or digits with separator
     \$slug = preg_replace('" . $this->getParameter('replace_pattern') . "', \$replacement, \$slug);
 
-    // trim
     \$slug = trim(\$slug, \$replacement);
 
     setlocale(LC_CTYPE, \$localeOrigin);
 
-    if (empty(\$slug)) {
-        return 'n-a';
-    }
-
-    return \$slug;
+    return empty(\$slug) ? 'n-a' : \$slug;
 }
 ";
     }

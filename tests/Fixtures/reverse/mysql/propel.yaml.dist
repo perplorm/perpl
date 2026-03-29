@@ -20,6 +20,7 @@ propel:
           charset: utf8
   generator:
     defaultConnection: reverse-bookstore
+    declareStrictTypesInBuilders: true
     connections:
       - reverse-bookstore
     schema:

@@ -13,9 +13,7 @@ use function explode;
 use function get_class;
 use function is_string;
 use function sprintf;
-use function strpos;
 use function strrpos;
-use function substr;
 use function substr_replace;
 
 /**
@@ -227,18 +225,12 @@ class DatabaseMap
     }
 
     /**
-     * Does this database contain this specific table?
+     * @param string $name
      *
-     * @param string $name The String representation of the table.
-     *
-     * @return bool True if the database contains the table.
+     * @return bool
      */
     public function hasTable(string $name): bool
     {
-        if (strpos($name, '.') > 0) {
-            $name = substr($name, 0, strpos($name, '.'));
-        }
-
         return isset($this->tables[$name]);
     }
 

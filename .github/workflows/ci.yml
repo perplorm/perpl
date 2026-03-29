@@ -154,7 +154,7 @@ jobs:
         strategy:
           fail-fast: false
           matrix:
-            type: ['query', 'model']
+            type: ['query', 'model', 'tableMap']
             check: ['PHPCS', 'Stan']
             include:
               - check: PHPCS
@@ -162,9 +162,11 @@ jobs:
               - check: Stan
                 command: 'stan -- -a autoload.php.dist'
               - type: query
-                file-pattern: '*Query.php'
+                file-pattern: 'Base/*Query.php'
               - type: model
-                file-pattern: '*[^Query].php'
+                file-pattern: 'Base/*[^Query].php'
+              - type: tableMap
+                file-pattern: 'Map/*TableMap.php'
         name: '${{ matrix.check }} on ${{ matrix.type }} code'
         steps:
             - uses: actions/checkout@v3
@@ -177,4 +179,4 @@ jobs:
             - name: Run checks on generated code
               run: |
                 bin/perpl test:prepare --vendor=sqlite --dsn='sqlite:/tmp/perpl.sq3' --exclude-database \
-                && composer ${{ matrix.command }} tests/Fixtures/bookstore/build/classes/Propel/Tests/Bookstore/Base/${{ matrix.file-pattern }}
+                && composer ${{ matrix.command }} tests/Fixtures/bookstore/build/classes/Propel/Tests/Bookstore/${{ matrix.file-pattern }}

@@ -4,8 +4,9 @@ declare(strict_types = 1);
 
 namespace Propel\Generator\Builder\Om;
 
-use LogicException;
+use Propel\Generator\Builder\Om\InstancePoolCodeProducer\InstancePoolCodeProducer;
 use Propel\Generator\Builder\Util\EntityObjectClassNames;
+use Propel\Generator\Config\AbstractGeneratorConfig;
 use Propel\Generator\Model\Column;
 use Propel\Generator\Model\CrossRelation;
 use Propel\Generator\Model\ForeignKey;
@@ -23,7 +24,6 @@ use function count;
 use function implode;
 use function in_array;
 use function sprintf;
-use function str_replace;
 use function strrpos;
 use function substr;
 use function var_export;
@@ -36,7 +36,17 @@ use function var_export;
  */
 class QueryBuilder extends AbstractOMBuilder
 {
+    /**
+     * @var \Propel\Generator\Builder\Om\BuilderType|null
+     */
+    public const BUILDER_TYPE = BuilderType::QueryBase;
+
     protected EntityObjectClassNames $tableNames;
+
+    /**
+     * @var \Propel\Generator\Builder\Om\InstancePoolCodeProducer\InstancePoolCodeProducer<static>
+     */
+    protected $instancePoolCodeBuilder;
 
     /**
      * @param \Propel\Generator\Model\Table $table
@@ -45,6 +55,19 @@ class QueryBuilder extends AbstractOMBuilder
     {
         parent::__construct($table);
         $this->tableNames = $this->referencedClasses->useEntityObjectClassNames($table);
+    }
+
+    /**
+     * @param \Propel\Generator\Model\Table $table
+     * @param \Propel\Generator\Config\AbstractGeneratorConfig $generatorConfig
+     *
+     * @return void
+     */
+    #[\Override()]
+    protected function onGeneratorConfigAvailable(Table $table, AbstractGeneratorConfig $generatorConfig): void
+    {
+        parent::onGeneratorConfigAvailable($table, $generatorConfig);
+        $this->instancePoolCodeBuilder = new InstancePoolCodeProducer($table, $this);
     }
 
     /**
@@ -429,14 +452,12 @@ class QueryBuilder extends AbstractOMBuilder
             return;
         }
 
-        $buildPoolKeyStatement = $this->getBuildPoolKeyStatement($table->getPrimaryKey());
-        $buildPoolKeyStatement = str_replace('$key === null || ', '', $buildPoolKeyStatement); // remove null check to appease analyzer
         $script .= $this->renderTemplate('baseQueryFindPk', [
             'codeExample' => $codeExample,
             'pkType' => $pkType,
             'objectClassNameFq' => $objectClassNameFq,
             'tableMapClassName' => $this->getTableMapClassName(),
-            'buildPoolKeyStatement' => $buildPoolKeyStatement,
+            'buildPoolKeyStatement' => $this->instancePoolCodeBuilder->buildPoolKeyFromArrayAccess('$key', false),
         ]);
     }
 
@@ -478,8 +499,9 @@ class QueryBuilder extends AbstractOMBuilder
             'bindValueStatements' => $isBulkLoad ? '' : $this->buildPrimaryKeyColumnBindingStatements($table),
             'isBulkLoad' => $isBulkLoad,
             'classNameLiteral' => $usesConcreteInheritance ? '$cls' : $objectClassName,
-            'buildPoolKeyStatement' => $this->getBuildPoolKeyStatement($table->getPrimaryKey(), $isBulkLoad ? '$pk' : '$key'),
-            'buildPoolKeyStatementFromKey' => $isBulkLoad ? $this->getBuildPoolKeyStatement($table->getPrimaryKey()) : '',
+            'buildPoolKeyStatementFromKey' => $isBulkLoad
+                ? $this->instancePoolCodeBuilder->buildPoolKeyFromArrayAccess('$key', true)
+                : '',
         ]);
     }
 
@@ -540,30 +562,6 @@ class QueryBuilder extends AbstractOMBuilder
         }
 
         return $statements;
-    }
-
-    /**
-     * Build PHP statement that creates a hash key from column values.
-     *
-     * @param array<\Propel\Generator\Model\Column> $pkColumns Columns used to build hash.
-     * @param string $varLiteral The literal for the variable holding the key in the script.
-     *
-     * @throws \LogicException
-     *
-     * @return string
-     */
-    protected function getBuildPoolKeyStatement(array $pkColumns, string $varLiteral = '$key'): string
-    {
-        $numberOfPks = count($pkColumns);
-        if ($numberOfPks === 0) {
-            throw new LogicException("PoolKeyStatement cannot be created for table without PKs (in {$this->getQualifiedClassName()}).");
-        }
-        if ($numberOfPks === 1) {
-            return "(string)$varLiteral";
-        }
-        $this->declareGlobalFunction('serialize', 'array_map');
-
-        return "serialize(array_map(fn (\$k) => (string)\$k, $varLiteral))";
     }
 
     /**
@@ -662,7 +660,8 @@ class QueryBuilder extends AbstractOMBuilder
         }
 
         $script .= $this->renderTemplate('baseQueryFilterByPrimaryKey', [
-            'columnNames' => array_map(fn (Column $col) => $col->getName(), $pkColumns),
+            'pkType' => $this->getTable()->getPrimaryKeyDocType(false),
+            'columnPhpNames' => array_map(fn (Column $col) => $col->getPhpName(), $pkColumns),
         ]);
     }
 
@@ -682,7 +681,8 @@ class QueryBuilder extends AbstractOMBuilder
             return;
         }
         $script .= $this->renderTemplate('baseQueryFilterByPrimaryKeys', [
-            'pkColumnNames' => array_map(fn (Column $col) => $col->getName(), $table->getPrimaryKey()),
+            'pkType' => $this->getTable()->getPrimaryKeyDocType(false),
+            'columnPhpNames' => array_map(fn (Column $col) => $col->getPhpName(), $table->getPrimaryKey()),
         ]);
     }
 

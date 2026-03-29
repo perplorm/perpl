@@ -35,7 +35,8 @@
         $obj = null;
         $row = $stmt->fetch(PDO::FETCH_NUM);
         if ($row) {
-<?php endif; 
+<?php
+    endif; 
     if ($classNameLiteral === '$cls'): 
 ?>
             <?= $classNameLiteral ?> = <?= $tableMapClassName ?>::getOMClass($row, 0, false);
@@ -43,11 +44,7 @@
 <?php endif; ?>
             $obj = new <?= $classNameLiteral ?>();
             $obj->hydrate($row);
-<?php if ($isBulkLoad): ?>
-            $pk = $obj->getPrimaryKey();
-<?php endif; ?>
-            $poolKey = <?= $buildPoolKeyStatement ?>;
-            <?= $tableMapClassName ?>::addInstanceToPool($obj, $poolKey);
+            <?= $tableMapClassName ?>::addInstanceToPool($obj);
         }
         $stmt->closeCursor();
 

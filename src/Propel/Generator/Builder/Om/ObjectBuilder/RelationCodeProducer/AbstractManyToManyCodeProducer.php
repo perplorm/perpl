@@ -49,17 +49,14 @@ abstract class AbstractManyToManyCodeProducer extends AbstractRelationCodeProduc
 
     /**
      * @param \Propel\Generator\Model\Table $table
-     * @param \Propel\Generator\Config\AbstractGeneratorConfig|null $generatorConfig
+     * @param \Propel\Generator\Config\AbstractGeneratorConfig $generatorConfig
      *
      * @return void
      */
-    #[\Override]
-    protected function init(Table $table, ?AbstractGeneratorConfig $generatorConfig): void
+    #[\Override()]
+    protected function onGeneratorConfigAvailable(Table $table, AbstractGeneratorConfig $generatorConfig): void
     {
-        parent::init($table, $generatorConfig);
-        if (!$generatorConfig) {
-            return;
-        }
+        parent::onGeneratorConfigAvailable($table, $generatorConfig);
         $this->names = new CrossRelationNames(
             $this->crossRelation,
             static::ATTRIBUTE_PREFIX,
@@ -593,7 +590,7 @@ abstract class AbstractManyToManyCodeProducer extends AbstractRelationCodeProduc
             $inputArgs = "[$inputArgs]";
         }
 
-        $ownStubClassName = $this->objectBuilder->getObjectClassName();
+        $ownStubClassName = $this->builder->getObjectClassName();
 
         $script .= "
     /**

@@ -24,7 +24,6 @@ use Propel\Runtime\Exception\PropelException;
 use function addslashes;
 use function array_any;
 use function array_intersect;
-use function array_keys;
 use function array_map;
 use function array_values;
 use function count;
@@ -45,6 +44,11 @@ use function var_export;
  */
 class ObjectBuilder extends AbstractObjectBuilder
 {
+    /**
+     * @var \Propel\Generator\Builder\Om\BuilderType|null
+     */
+    public const BUILDER_TYPE = BuilderType::ObjectBase;
+
     /**
      * @var array<\Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes\ColumnCodeProducer>
      */
@@ -82,16 +86,24 @@ class ObjectBuilder extends AbstractObjectBuilder
     #[\Override]
     protected function init(Table $table, ?AbstractGeneratorConfig $generatorConfig): void
     {
-        parent::init($table, $generatorConfig);
-
         $this->columnCodeProducers = [];
         $this->fkRelationCodeProducers = [];
         $this->incomingRelationCodeProducers = [];
         $this->crossRelationCodeProducers = [];
 
-        if (!$generatorConfig) {
-            return;
-        }
+        parent::init($table, $generatorConfig);
+    }
+
+    /**
+     * @param \Propel\Generator\Model\Table $table
+     * @param \Propel\Generator\Config\AbstractGeneratorConfig $generatorConfig
+     *
+     * @return void
+     */
+    #[\Override()]
+    protected function onGeneratorConfigAvailable(Table $table, AbstractGeneratorConfig $generatorConfig): void
+    {
+        parent::onGeneratorConfigAvailable($table, $generatorConfig);
 
         foreach ($table->getColumns() as $column) {
             $this->columnCodeProducers[] = ColumnCodeProducerFactory::create($column, $this);
@@ -233,28 +245,6 @@ class ObjectBuilder extends AbstractObjectBuilder
                     throw new EngineException($message);
                 }
             }
-        }
-    }
-
-    /**
-     * Returns the appropriate formatter (from platform) for a date/time column.
-     *
-     * @param \Propel\Generator\Model\Column $column
-     *
-     * @return string|null
-     */
-    public function getTemporalFormatter(Column $column): ?string
-    {
-        switch ($column->getType()) {
-            case PropelTypes::DATE:
-                return $this->getPlatformOrFail()->getDateFormatter();
-            case PropelTypes::TIME:
-                return $this->getPlatformOrFail()->getTimeFormatter();
-            case PropelTypes::TIMESTAMP:
-            case PropelTypes::DATETIME:
-                return $this->getPlatformOrFail()->getTimestampFormatter();
-            default:
-                return null;
         }
     }
 
@@ -834,7 +824,7 @@ abstract class {$this->getUnqualifiedClassName()}$parentClass implements ActiveR
             $clo = $col->getLowercasedName();
             $accessor = "\$this->$clo";
             if ($col->isTemporalType()) {
-                $fmt = $this->getTemporalFormatter($col);
+                $fmt = $this->getPlatformOrFail()->getTemporalFormatter($col);
                 $accessor = "\$this->$clo && \$this->{$clo}->format('$fmt')";
             }
             $notEquals = '!==';
@@ -1333,9 +1323,10 @@ abstract class {$this->getUnqualifiedClassName()}$parentClass implements ActiveR
         foreach ($this->getTable()->getColumns() as $num => $col) {
             if ($col->isTemporalType()) {
                 $this->declareClass('DateTimeInterface');
+                $dateFormat = $this->getPlatformOrFail()->getTemporalFormatter($col);
                 $script .= "
         if (\$result[\$keys[$num]] instanceof DateTimeInterface) {
-            \$result[\$keys[$num]] = \$result[\$keys[$num]]->format('" . $this->getTemporalFormatter($col) . "');
+            \$result[\$keys[$num]] = \$result[\$keys[$num]]->format('$dateFormat');
         }\n";
             }
         }
@@ -1801,12 +1792,7 @@ $indent};";
             throw new PropelException('Cannot reload an unsaved object.');
         }
 
-        if (\$con === null) {
-            \$con = Propel::getServiceContainer()->getReadConnection({$tableMapClass}::DATABASE_NAME);
-        }
-
-        // We don't need to alter the object instance pool; we're just modifying this instance
-        // already in the pool.
+        \$con ??= Propel::getServiceContainer()->getReadConnection({$tableMapClass}::DATABASE_NAME);
 
         \$dataFetcher = {$queryClassName}::create(null, \$this->buildPkeyCriteria())->fetch(\$con);
         \$row = \$dataFetcher->fetch();
@@ -1985,14 +1971,14 @@ $indent};";
     {
         $table = $this->getTable();
         $pkeys = $table->getPrimaryKey();
-        $type = $pkeys[0]->getPhpType();
+        $type = $table->getPrimaryKeyDocType(true);
         $name = $pkeys[0]->getPhpName();
 
         $script .= "
     /**
      * Returns the primary key for this object (row).
      *
-     * @return $type|null
+     * @return $type
      */
     public function getPrimaryKey()
     {
@@ -2010,13 +1996,12 @@ $indent};";
      */
     protected function addGetPrimaryKeyMultiPK(string &$script): void
     {
-        $columnTypes = array_map(fn (Column $col) => "{$col->resolveQualifiedType()}|null", $this->getTable()->getPrimaryKey());
-        $pkType = 'array{' . implode(', ', $columnTypes) . '}';
+        $pkType = $this->getTable()->getPrimaryKeyDocType(true);
 
         $keyColumns = $this->getTable()->getPrimaryKey();
         $names = array_values(array_map(fn ($column) => $column->getPhpName(), $keyColumns));
-        $setters = array_map(fn ($index, $name) => "\$pks[{$index}] = \$this->get{$name}();", array_keys($names), $names);
-        $settersBlock = implode("\n        ", $setters);
+        $setters = array_map(fn ($name) => "\$this->get{$name}(),", $names);
+        $settersBlock = implode("\n            ", $setters);
         $script .= "
     /**
      * Returns the composite primary key for this object.
@@ -2026,12 +2011,10 @@ $indent};";
      */
     public function getPrimaryKey(): array
     {
-        \$pks = [];
-        {$settersBlock}
-
-        return \$pks;
-    }
-";
+        return [
+            $settersBlock
+        ];
+    }\n";
     }
 
     /**
@@ -2088,12 +2071,18 @@ $indent};";
     {
         $pkeys = $this->getTable()->getPrimaryKey();
         $col = $pkeys[0];
+        // HACK: monkey-patch ENUM_/SET_BINARY type
+        $ctype = match ($col->getType()) {
+            PropelTypes::ENUM_BINARY => 'string',
+            PropelTypes::SET_BINARY => 'array',
+            default => $col->getPhpType(),
+        };
         $clo = $col->getLowercasedName();
-        $ctype = $col->getPhpType();
+        $phpName = $col->getPhpName();
 
         $script .= "
     /**
-     * Generic method to set the primary key ($clo column).
+     * Generic method to set the primary key ([$clo] column).
      *
      * @param $ctype|null \$key Primary key.
      *
@@ -2101,9 +2090,8 @@ $indent};";
      */
     public function setPrimaryKey(?$ctype \$key = null): void
     {
-        \$this->set" . $col->getPhpName() . "(\$key);
-    }
-";
+        \$this->set{$phpName}(\$key);
+    }\n";
     }
 
     /**
@@ -2126,10 +2114,10 @@ $indent};";
     public function setPrimaryKey(array \$keys): void
     {";
         $i = 0;
-        foreach ($this->getTable()->getPrimaryKey() as $pk) {
+        foreach ($this->getTable()->getPrimaryKey() as $i => $pk) {
+            $phpName = $pk->getPhpName();
             $script .= "
-        \$this->set" . $pk->getPhpName() . "(\$keys[$i]);";
-            $i++;
+        \$this->set{$phpName}(\$keys[$i]);";
         }
         $script .= "
     }
@@ -2767,6 +2755,9 @@ $indent};";
         $table = $this->getTable();
         $reloadOnUpdate = $table->isReloadOnUpdate();
         $reloadOnInsert = $table->isReloadOnInsert();
+        $tableMapClassName = $this->getTableMapClassName();
+        $this->referencedClasses->registerFunction('assert');
+        $ownStubClassName = $this->getObjectClassName();
 
         $script .= "
         if (\$this->isDeleted()) {
@@ -2813,7 +2804,10 @@ $indent};";
                 \$this->postSave(\$con);";
             $this->applyBehaviorModifier('postSave', $script, '                ');
             $script .= "
-                " . $this->getTableMapClassName() . "::addInstanceToPool(\$this);
+                if (\$isInsert) {
+                    assert(\$this instanceof $ownStubClassName);
+                    $tableMapClassName::addInstanceToPool(\$this);
+                }
             } else {
                 \$affectedRows = 0;
             }
@@ -2856,7 +2850,8 @@ $indent};";
             }";
             }
             $script .= "
-            " . $this->getTableMapClassName() . "::addInstanceToPool(\$this);
+            assert(\$this instanceof $ownStubClassName);
+            $tableMapClassName::addInstanceToPool(\$this);
 
             return \$affectedRows;";
         }
@@ -2932,7 +2927,7 @@ $indent};";
         $this->addCopyInto($script);
 
         $script .= $this->renderTemplate('baseObjectCopy', [
-            'objectInstanceCreationCode' => $this->buildObjectInstanceCreationCode('$copyObj', '$clazz'),
+            'objectInstanceCreationCode' => '$copyObj = new $clazz();',
         ]);
     }
 

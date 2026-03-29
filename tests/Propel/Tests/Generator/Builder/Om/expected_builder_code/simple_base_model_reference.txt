@@ -3,6 +3,7 @@
 namespace Base;
 
 use Exception;
+use IdTable as ChildIdTable;
 use IdTableQuery as ChildIdTableQuery;
 use Map\IdTableTableMap;
 use PDO;
@@ -22,6 +23,7 @@ use RuntimeException;
 use function array_diff;
 use function array_key_exists;
 use function array_keys;
+use function assert;
 use function crc32;
 use function implode;
 use function json_encode;
@@ -449,12 +451,7 @@ abstract class IdTable implements ActiveRecordInterface
             throw new PropelException('Cannot reload an unsaved object.');
         }
 
-        if ($con === null) {
-            $con = Propel::getServiceContainer()->getReadConnection(IdTableTableMap::DATABASE_NAME);
-        }
-
-        // We don't need to alter the object instance pool; we're just modifying this instance
-        // already in the pool.
+        $con ??= Propel::getServiceContainer()->getReadConnection(IdTableTableMap::DATABASE_NAME);
 
         $dataFetcher = ChildIdTableQuery::create(null, $this->buildPkeyCriteria())->fetch($con);
         $row = $dataFetcher->fetch();
@@ -546,7 +543,10 @@ abstract class IdTable implements ActiveRecordInterface
                     $this->postUpdate($con);
                 }
                 $this->postSave($con);
-                IdTableTableMap::addInstanceToPool($this);
+                if ($isInsert) {
+                    assert($this instanceof ChildIdTable);
+                    IdTableTableMap::addInstanceToPool($this);
+                }
             } else {
                 $affectedRows = 0;
             }
@@ -909,7 +909,7 @@ abstract class IdTable implements ActiveRecordInterface
     }
 
     /**
-     * Generic method to set the primary key (id column).
+     * Generic method to set the primary key ([id] column).
      *
      * @param int|null $key Primary key.
      *
@@ -1142,8 +1142,6 @@ abstract class IdTable implements ActiveRecordInterface
     }
 
     /**
-     * Derived method to catches calls to undefined methods.
-     *
      * Provides magic import/export method support (fromXML()/toXML(), fromYAML()/toYAML(), etc.).
      * Allows to define default __call() behavior if you overwrite __call()
      *
@@ -1152,7 +1150,7 @@ abstract class IdTable implements ActiveRecordInterface
      *
      * @throws \Propel\Runtime\Exception\BadMethodCallException
      *
-     * @return array|string
+     * @return mixed
      */
     public function __call($name, $params)
     {

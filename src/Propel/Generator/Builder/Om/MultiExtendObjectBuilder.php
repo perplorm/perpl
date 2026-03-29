@@ -17,6 +17,11 @@ use Propel\Generator\Model\Inheritance;
 class MultiExtendObjectBuilder extends AbstractObjectBuilder implements ExtensionBuilderInterface
 {
     /**
+     * @var \Propel\Generator\Builder\Om\BuilderType|null
+     */
+    public const BUILDER_TYPE = BuilderType::ObjectInheritanceStub;
+
+    /**
      * The current child "object" we are operating on.
      *
      * @var \Propel\Generator\Model\Inheritance|null

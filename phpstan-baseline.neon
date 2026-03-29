@@ -281,12 +281,6 @@ parameters:
 			path: src/Propel/Runtime/Connection/ProfilerStatementWrapper.php
 
 		-
-			message: '#^Call to an undefined method Propel\\Runtime\\Map\\TableMap\:\:populateObject\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: src/Propel/Runtime/Formatter/ObjectFormatter.php
-
-		-
 			message: '#^Propel\\Runtime\\Collection\\ArrayCollection does not accept array\<string, mixed\>\|string\.$#'
 			identifier: offsetAssign.valueType
 			count: 1

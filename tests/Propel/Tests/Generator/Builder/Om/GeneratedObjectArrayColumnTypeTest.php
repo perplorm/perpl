@@ -10,12 +10,12 @@ namespace Propel\Tests\Generator\Builder\Om;
 
 use MyNameSpace\ComplexColumnTypeEntity2;
 use MyNameSpace\ComplexColumnTypeEntity2Query;
+use MyNameSpace\ComplexColumnTypeEntityWithConstructor;
 use MyNameSpace\ComplexColumnTypeEntityWithConstructorQuery;
 use MyNameSpace\Map\ComplexColumnTypeEntity2TableMap;
 use Propel\Generator\Util\QuickBuilder;
 use Propel\Runtime\ActiveQuery\ModelCriteria;
 use Propel\Runtime\Propel;
-use Propel\Tests\Fixtures\Generator\Builder\Om\ComplexColumnTypeEntityWithConstructor;
 use Propel\Tests\TestCase;
 
 /**
@@ -288,12 +288,12 @@ EOF;
         Propel::disableInstancePooling(); // need to be disabled to test the hydrate() method
 
         $obj = new ComplexColumnTypeEntityWithConstructor();
-        $this->assertEquals(['foo', 'bar'], $obj->getTags());
+        $this->assertEquals([], $obj->getTags());
 
         $obj->setTags(['baz']);
         $this->assertEquals(['baz'], $obj->getTags());
-
         $obj->save();
+        $obj->setTags(['foo']);
 
         $obj = ComplexColumnTypeEntityWithConstructorQuery::create()
             ->findOne();

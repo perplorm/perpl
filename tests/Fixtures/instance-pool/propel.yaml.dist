@@ -1,0 +1,32 @@
+# Configuration file for `instance-pool-test` fixtures
+propel:
+  general:
+    project: instance-pool-test
+
+  database:
+    connections:
+      instance-pool-test:
+        adapter: ##DATABASE_VENDOR##
+        classname: \Propel\Runtime\Connection\DebugPDO
+        dsn: ##DATABASE_URL##
+        user: ##DATABASE_USER##
+        password: ##DATABASE_PASSWORD##
+        options:
+          ATTR_PERSISTENT: false
+        attributes:
+          ATTR_EMULATE_PREPARES: true
+        #Propel specific settings
+        settings:
+          charset: utf8
+
+  generator:
+    defaultConnection: instance-pool-test
+    connections:
+      - instance-pool-test
+    targetPackage: instance-pool-test
+    declareStrictTypesInBuilders: true
+
+  runtime:
+    defaultConnection: instance-pool-test
+    connections:
+      - instance-pool-test

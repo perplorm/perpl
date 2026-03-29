@@ -177,7 +177,7 @@ class ColumnTest extends ModelTestCase
         $this->assertSame('is_published', $column->getName());
         $this->assertSame('IsPublished', $column->getPhpName());
         $this->assertSame('boolean', $column->getPhpType());
-        $this->assertSame('IS_PUBLISHED', $column->getTableMapName());
+        $this->assertSame('IS_PUBLISHED', $column->getCustomColumnIdentifier());
         $this->assertSame('public', $column->getAccessorVisibility());
         $this->assertSame('public', $column->getMutatorVisibility());
         $this->assertFalse($column->isPrimaryString());
@@ -825,7 +825,7 @@ class ColumnTest extends ModelTestCase
         $column->setTable($table);
         $column->setTableMapName('created_at');
 
-        $this->assertSame('created_at', $column->getTableMapName());
+        $this->assertSame('created_at', $column->getCustomColumnIdentifier());
         $this->assertSame('COL_CREATED_AT', $column->getConstantName());
         $this->assertSame('ArticleTableMap::COL_CREATED_AT', $column->getFQConstantName());
     }

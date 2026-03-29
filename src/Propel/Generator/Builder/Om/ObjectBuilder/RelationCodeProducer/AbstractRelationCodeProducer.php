@@ -4,12 +4,14 @@ declare(strict_types = 1);
 
 namespace Propel\Generator\Builder\Om\ObjectBuilder\RelationCodeProducer;
 
-use Propel\Generator\Builder\Om\ObjectBuilder\ObjectCodeProducer;
+use Propel\Generator\Builder\Om\AbstractSubsectionCodeProducer;
 
 /**
  * Generates a database loader file, which is used to register all table maps with the DatabaseMap.
+ *
+ * @extends \Propel\Generator\Builder\Om\AbstractSubsectionCodeProducer<\Propel\Generator\Builder\Om\ObjectBuilder>
  */
-abstract class AbstractRelationCodeProducer extends ObjectCodeProducer
+abstract class AbstractRelationCodeProducer extends AbstractSubsectionCodeProducer
 {
     /**
      * @param string $script

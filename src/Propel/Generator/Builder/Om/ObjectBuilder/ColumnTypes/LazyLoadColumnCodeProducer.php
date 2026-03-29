@@ -23,7 +23,7 @@ class LazyLoadColumnCodeProducer extends ColumnCodeProducer
     public function __construct(ColumnCodeProducer $columnCodeProducer)
     {
         $this->columnCodeProducer = $columnCodeProducer;
-        parent::__construct($columnCodeProducer->column, $columnCodeProducer->objectBuilder);
+        parent::__construct($columnCodeProducer->column, $columnCodeProducer->builder);
     }
 
     /**
@@ -221,7 +221,7 @@ class LazyLoadColumnCodeProducer extends ColumnCodeProducer
         $this->declareGlobalFunction('current');
         $platform = $this->getPlatform();
         $clo = $this->column->getLowercasedName();
-        $columnConstant = $this->objectBuilder->getColumnConstant($this->column);
+        $columnConstant = $this->builder->getColumnConstant($this->column);
         $queryClassName = $this->getQueryClassName();
 
         // pdo_sqlsrv driver requires the use of PDOStatement::bindColumn() or a hex string will be returned
@@ -267,7 +267,7 @@ class LazyLoadColumnCodeProducer extends ColumnCodeProducer
             $script .= "
             \$this->$clo = (\$firstColumn !== null) ? new " . $this->column->getPhpType() . '($firstColumn) : null;';
         } elseif ($this->column->getType() === PropelTypes::UUID_BINARY) {
-            $uuidSwapFlag = $this->objectBuilder->getUuidSwapFlagLiteral();
+            $uuidSwapFlag = $this->builder->getUuidSwapFlagLiteral();
             $this->declareGlobalFunction('is_resource', 'stream_get_contents');
             $script .= "
             if (is_resource(\$firstColumn)) {

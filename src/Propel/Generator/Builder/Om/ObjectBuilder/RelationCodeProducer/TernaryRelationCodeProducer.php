@@ -486,7 +486,7 @@ class TernaryRelationCodeProducer extends AbstractManyToManyCodeProducer
         {$foreignObjectName}->set{$primaryKey->getPhpName()}(\$$paramName);";
         }
 
-        $ownStubClassName = $this->objectBuilder->getObjectClassName();
+        $ownStubClassName = $this->builder->getObjectClassName();
 
         $script .= "
         assert(\$this instanceof $ownStubClassName);

@@ -70,7 +70,7 @@ class EnumeratedColumnTypesTest extends TestCase
     public function testEnumAliasOnPlatform(string $platformClass, bool $defaultToNative, string $columnType, string $expectedColumnType): void
     {
         $columnXml = '<column name="column" type="' . $columnType . '" valueSet="A,B"/>';
-        $column = $this->buildColumnFromSchema(new $platformClass, $defaultToNative, $columnXml);
+        $column = $this->buildColumnForPlatform(new $platformClass, $defaultToNative, $columnXml);
         $actualColumnType = $column->getType();
 
         $this->assertSame($expectedColumnType, $actualColumnType);
@@ -101,7 +101,7 @@ class EnumeratedColumnTypesTest extends TestCase
     public function testSqlType(string $columnType, string $valueSetCsv, string $expectedSqlType): void
     {
         $columnXml = '<column name="enumerated_column" type="' . $columnType . '" valueSet="' . $valueSetCsv . '"/>';
-        $column = $this->buildColumnFromSchema(new MysqlPlatform(), false, $columnXml);
+        $column = $this->buildColumnForPlatform(new MysqlPlatform(), false, $columnXml);
 
         $this->assertSame($column->getSqlType(), $expectedSqlType);
     }
@@ -124,7 +124,7 @@ class EnumeratedColumnTypesTest extends TestCase
     {
         $columnXml = '<column name="foo" type="ENUM_NATIVE" valueEnum="' . $enumClass . '"/>';
         $platform = new MysqlPlatform();
-        $column = $this->buildColumnFromSchema($platform, false, $columnXml);
+        $column = $this->buildColumnForPlatform($platform, false, $columnXml);
         $ddl = $platform->getColumnDDL($column);
 
         $this->assertEquals($expectedColumnDdl, $ddl);
@@ -137,19 +137,9 @@ class EnumeratedColumnTypesTest extends TestCase
      *
      * @return Column
      */
-    public function buildColumnFromSchema(PlatformInterface $platform, bool $defaultToNative, string $columnXml): Column
+    public function buildColumnForPlatform(PlatformInterface $platform, bool $defaultToNative, string $columnXml): Column
     {
-        $schema = <<<EOF
-                <database>
-                    <table name="table">
-                        $columnXml
-                    </table>
-                </database>
-EOF;
-        $extraConfig = ['propel' => ['generator' => ['defaultToNativeEnumeratedColumnTypes' => $defaultToNative]]];
-        $schema = $this->buildDatabaseFromSchema($schema, $extraConfig, $platform);
-
-        return $schema->getTable('table')->getColumns()[0];
+        return $this->buildColumnFromSchema($columnXml, ['propel.generator.defaultToNativeEnumeratedColumnTypes' => $defaultToNative], $platform);
     }
 
     /**
@@ -161,7 +151,7 @@ EOF;
     public function buildCodeBuilder(string $columnType, BuilderType $builderType): AbstractOMBuilder
     {
         $columnXml = '<column name="enumerated_column" type="' . $columnType . '" valueSet="A,B"/>';
-        $column = $this->buildColumnFromSchema(new MysqlPlatform(), false, $columnXml);
+        $column = $this->buildColumnForPlatform(new MysqlPlatform(), false, $columnXml);
         $config = new QuickGeneratorConfig();
 
         return $config->loadConfiguredBuilder($column->getTable(), $builderType);

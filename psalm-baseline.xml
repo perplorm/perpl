@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<files psalm-version="6.13.1@1e3b7f0a8ab32b23197b91107adc0a7ed8a05b51">
+<files psalm-version="6.16.1@f1f5de594dc76faf8784e02d3dc4716c91c6f6ac">
   <file src="src/Propel/Common/Config/ConfigurationManager.php">
     <UnsupportedPropertyReferenceUsage>
       <code><![CDATA[$configSection = &$this->config[$section]]]></code>
@@ -89,6 +89,14 @@
     <NullableReturnStatement>
       <code><![CDATA[$table->getColumn($columnName)]]></code>
     </NullableReturnStatement>
+  </file>
+  <file src="src/Propel/Generator/Builder/Om/InstancePoolCodeProducer/InstancePoolCodeProducer.php">
+    <ParadoxicalCondition>
+      <code><![CDATA[$col->isLobType(),
+            $col->isPhpObjectType() => "is_callable([$varName, '__toString']) ? (string)$varName : $varName"]]></code>
+      <code><![CDATA[$col->isNumericType(),
+            $col->isPhpPrimitiveNumericType() => "(string)$varName"]]></code>
+    </ParadoxicalCondition>
   </file>
   <file src="src/Propel/Generator/Builder/Util/SchemaReader.php">
     <UnsupportedPropertyReferenceUsage>

@@ -840,25 +840,24 @@ XML;
         $this->assertEquals('Don Juan', $arr1['Title'], 'toArray() returns an associative array representation of the object');
     }
 
-    /**
-     * @return void
-     */
-    public function testToArrayDateTimeAsString()
+    public function ToArrayDateTimeAsStringDataProvider(): array
     {
-        $date = new DateTime('2015-01-04T16:00:02Z');
+        $date = new DateTime('2015-01-04T16:00:02.123456Z');
 
-        $review = new Review();
-        $review->setReviewDate($date);
+        return [
+            [Review::class, 'ReviewDate', $date, '2015-01-04', 'toArray() formats DATE columns as Y-m-d'],
+            [Bookstore::class, 'StoreOpenTime', $date, '16:00:02.123456', 'toArray() formats TIME columns as H:i:s.u'],
+            [BookClubList::class,'CreatedAt', $date, '2015-01-04 16:00:02.123456', 'toArray() formats TIMESTAMP columns as Y-m-d H:i:s.u'],
+        ];
+    }
 
-        $bookstore = new Bookstore();
-        $bookstore->setStoreOpenTime($date);
-
-        $bookClubList = new BookClubList();
-        $bookClubList->setCreatedAt($date);
-
-        $this->assertEquals('2015-01-04', $review->toArray()['ReviewDate'], 'toArray() format colums of type DATE as Y-m-d');
-        $this->assertEquals('16:00:02.000000', $bookstore->toArray()['StoreOpenTime'], 'toArray() format toArray() colums of type TIME as H:i:s.u');
-        $this->assertEquals('2015-01-04 16:00:02.000000', $bookClubList->toArray()['CreatedAt'], 'toArray() format toArray() colums of type TIMESTAMP as Y-m-d H:i:s.u');
+    /**
+     * @dataProvider ToArrayDateTimeAsStringDataProvider
+     */
+    public function testToArrayDateTimeAsString(string $modelClass, string $fieldPhpName, DateTime $dateTime, string $expectedDateOutput, string $message)
+    {
+        $actualOutput = (new $modelClass)->setByName($fieldPhpName, $dateTime)->toArray()[$fieldPhpName];
+        $this->assertSame($expectedDateOutput, $actualOutput, $message); // 03/2026: if this fails because of millisecond output, try updating DB schema (./tests/bin/setup.<vendor>.sh)
     }
 
     /**
@@ -866,7 +865,7 @@ XML;
      */
     public function testWithColumn()
     {
-        $book = BookQuery::create()->withColumn('Title', 'TitleCopy')->findOne();
+        $book = BookQuery::create()->addAsColumn('TitleCopy', 'Title')->findOne();
         $bookArray = $book->toArray();
         $this->assertEquals($book->getTitleCopy(), $bookArray['TitleCopy']);
     }

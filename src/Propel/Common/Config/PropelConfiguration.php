@@ -73,13 +73,21 @@ class PropelConfiguration implements ConfigurationInterface
                 ->arrayNode('paths')
                     ->addDefaultsIfNotSet()
                     ->children()
+                        // optional variable
                         ->scalarNode('projectDir')->defaultValue('.')->end()
+                        // location of schema.xml
                         ->scalarNode('schemaDir')->defaultValue('.')->end()
+                        // default value for commands with --output-dir parameter
                         ->scalarNode('outputDir')->defaultValue('.')->end()
+                        // generated classes base (root of namespace)
                         ->scalarNode('phpDir')->defaultValue('./generated-classes')->end()
+                        // generated config files (config:convert, loader script from model:build)
                         ->scalarNode('phpConfDir')->defaultValue('./generated-conf')->end()
+                        // table loader file (defaults to phpConfDir)
                         ->scalarNode('loaderScriptDir')->end()
+                        // DB initialization scripts (sql:insert & user generated)
                         ->scalarNode('sqlDir')->defaultValue('./generated-sql')->end()
+                        // target for migration files
                         ->scalarNode('migrationDir')->defaultValue('./generated-migrations')->end()
                         ->scalarNode('composerDir')->defaultNull()->end()
                     ->end()
@@ -354,6 +362,7 @@ class PropelConfiguration implements ConfigurationInterface
                         ->booleanNode('packageObjectModel')->defaultTrue()->end()
                         ->booleanNode('namespaceAutoPackage')->defaultTrue()->end()
                         ->booleanNode('recursive')->defaultFalse()->end()
+                        ->booleanNode('declareStrictTypesInBuilders')->defaultFalse()->end() // optional, as it might break user-written behaviors
                         ->booleanNode('defaultToNativeEnumeratedColumnTypes')->defaultFalse()->end()
                         ->arrayNode('connections')
                             ->prototype('scalar')->end()

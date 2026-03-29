@@ -27,7 +27,7 @@ class GeneratedObjectWithDateImmutableClassTest extends TestCase
 <database name="a_database" namespace="Foo">
     <table name="some_table_a">
         <column name="id" phpName="Id" type="INTEGER" primaryKey="true" autoIncrement="true" required="true"/>
-        <column name="created_at" phpName="CreatedAt" type="TIMESTAMP"/>
+        <column name="created_at" phpName="CreatedAt" type="TIMESTAMP" size="6" />
     </table>
 </database>
 EOF;
@@ -52,7 +52,7 @@ EOF;
 <database name="a_database" namespace="Foo">
     <table name="some_table_b">
         <column name="id" phpName="Id" type="INTEGER" primaryKey="true" autoIncrement="true" required="true"/>
-        <column name="created_at" phpName="CreatedAt" type="TIMESTAMP"/>
+        <column name="created_at" phpName="CreatedAt" type="TIMESTAMP" size="6" />
     </table>
 </database>
 EOF;

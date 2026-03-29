@@ -419,7 +419,7 @@ class ReferencedClasses
             ...$this->buildImportGlobalItems(),
         ];
 
-        return implode("\n", $importStatements) . "\n";
+        return !$importStatements ? '' : implode("\n", $importStatements) . "\n";
     }
 
     /**

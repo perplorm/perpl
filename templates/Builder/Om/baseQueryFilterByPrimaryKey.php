@@ -1,20 +1,22 @@
+<?php
+    $pkSize = count($columnPhpNames);
+?>
 
     /**
      * Filter the query by primary key
      *
-     * @param mixed $key Primary key to use for the query
+     * @param <?= $pkType ?> $key
      *
-     * @return $this
+     * @return static
      */
     public function filterByPrimaryKey($key)
     {
-<?php if (count($columnNames) === 1): ?>
-        $resolvedColumn = $this->resolveLocalColumnByName('<?= $columnNames[0]?>');
-        $this->addUsingOperator($resolvedColumn, $key, Criteria::EQUAL);
-<?php else: foreach ($columnNames as $index => $columnName):?>
-        $resolvedColumn<?= $index ?> = $this->resolveLocalColumnByName('<?= $columnName ?>');
-        $this->addUsingOperator($resolvedColumn<?= $index ?>, $key[<?= $index ?>], Criteria::EQUAL);
-<?php endforeach; endif; ?>
-
-        return $this;
+<?php if ($pkSize === 1): ?>
+        return $this->filterBy<?= $columnPhpNames[0] ?>($key);
+<?php else:?>
+        return $this  
+<?php foreach ($columnPhpNames as $index => $columnPhpName):?>
+                ->filterBy<?= $columnPhpName ?>($key[<?= $index ?>])<?= $index === $pkSize-1 ? ';' : "\n" ?>
+<?php endforeach; ?>           
+<?php endif; ?>
     }

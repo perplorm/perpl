@@ -469,11 +469,9 @@ class Database extends ScopedMappingModel
      */
     public function hasTable(string $name, bool $caseInsensitive = false): bool
     {
-        if ($caseInsensitive) {
-            return isset($this->tablesByLowercaseName[strtolower($name)]);
-        }
-
-        return isset($this->tablesByName[$name]);
+        return $caseInsensitive
+            ? isset($this->tablesByLowercaseName[strtolower($name)])
+            : isset($this->tablesByName[$name]);
     }
 
     /**

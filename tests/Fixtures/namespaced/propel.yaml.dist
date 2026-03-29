@@ -24,6 +24,7 @@ propel:
     connections:
       - bookstore_namespaced
     targetPackage: bookstore
+    declareStrictTypesInBuilders: true
 
   runtime:
     defaultConnection: bookstore_namespaced
