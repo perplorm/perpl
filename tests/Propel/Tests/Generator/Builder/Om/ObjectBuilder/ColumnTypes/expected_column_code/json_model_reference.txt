@@ -58,3 +58,10 @@ getApplyDefaultValueStatement:
 
 buildCreateFromFilterValueExpression:
 $value
+
+getHydrateStatement:
+
+            $this->json_column = $value !== null ? (string)$value : null;
+
+getAccessValueStatement:
+$this->json_column

@@ -53,3 +53,10 @@ getApplyDefaultValueStatement:
 
 buildCreateFromFilterValueExpression:
 $value
+
+getHydrateStatement:
+
+            $this->manually_typed_column = ($value === null) ? null : new ChildFooType($value);
+
+getAccessValueStatement:
+$this->manually_typed_column

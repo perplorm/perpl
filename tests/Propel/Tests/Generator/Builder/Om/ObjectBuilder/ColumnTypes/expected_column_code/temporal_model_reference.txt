@@ -71,3 +71,11 @@ getApplyDefaultValueStatement:
 
 buildCreateFromFilterValueExpression:
 $value
+
+getHydrateStatement:
+
+            $this->temporal_column_date_object = null;
+            $this->temporal_column = $value === '0000-00-00 00:00:00' ? null : $value;
+
+getAccessValueStatement:
+$this->temporal_column

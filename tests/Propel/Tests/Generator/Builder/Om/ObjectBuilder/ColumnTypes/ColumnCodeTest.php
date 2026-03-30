@@ -33,11 +33,13 @@ class ColumnCodeTest extends CompareGeneratedCodeTestCase
             [['<column name="object_column" type="OBJECT"/>', null, null], __DIR__ . '/expected_column_code/object_model_reference.txt'],
             [['<column name="json_column" type="JSON"/>', null, null], __DIR__ . '/expected_column_code/json_model_reference.txt'],
             [['<column name="blob_column" type="BLOB"/>', null, null], __DIR__ . '/expected_column_code/lob_model_reference.txt'],
-            [['<column name="uuid_column" type="uuid"/>', null, null], __DIR__ . '/expected_column_code/uuid_model_reference.txt'],
+            [['<column name="uuid_column" type="UUID"/>', null, null], __DIR__ . '/expected_column_code/uuid_model_reference.txt'],
+            [['<column name="uuid_binary_column" type="UUID_BINARY"/>', null, null], __DIR__ . '/expected_column_code/uuid_binary_model_reference.txt'],
             [['<column name="bin_enum_column" type="ENUM_BINARY" valueSet="foo,bar"/>', null, null], __DIR__ . '/expected_column_code/enum_binary_model_reference.txt'],
             [['<column name="bin_set_column" type="SET_BINARY" valueSet="foo,bar"/>', null, null], __DIR__ . '/expected_column_code/set_binary_model_reference.txt'],
             [['<column name="native_enum_column" type="ENUM_NATIVE" valueSet="foo,bar"/>', null, $mysqlPlatform], __DIR__ . '/expected_column_code/enum_native_model_reference.txt'],
             [['<column name="native_set_column" type="SET_NATIVE" valueSet="foo,bar"/>', null, $mysqlPlatform], __DIR__ . '/expected_column_code/set_native_model_reference.txt'],
+            [['<column name="lazy_loaded_blob_column" type="BLOB" lazyLoad="true"/>', null, null], __DIR__ . '/expected_column_code/lazy_lob_model_reference.txt'],
         ];
     }
 
@@ -62,7 +64,9 @@ class ColumnCodeTest extends CompareGeneratedCodeTestCase
         ])
         . $this->buildCodeFileContent('getDefaultValueString', $codeProducer->getDefaultValueString())
         . $this->buildCodeFileContent('getApplyDefaultValueStatement', $codeProducer->getApplyDefaultValueStatement())
-        . $this->buildCodeFileContent('buildCreateFromFilterValueExpression', $codeProducer->buildCreateFromFilterValueExpression('$value'));
+        . $this->buildCodeFileContent('buildCreateFromFilterValueExpression', $codeProducer->buildCreateFromFilterValueExpression('$value'))
+        . $this->buildCodeFileContent('getHydrateStatement', $codeProducer->getHydrateStatement('$value'))
+        . $this->buildCodeFileContent('getAccessValueStatement', $codeProducer->getAccessValueStatement('$value'));
 
         return $script;
     }

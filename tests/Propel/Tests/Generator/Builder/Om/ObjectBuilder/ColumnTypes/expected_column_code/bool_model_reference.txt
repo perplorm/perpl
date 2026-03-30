@@ -74,3 +74,10 @@ getApplyDefaultValueStatement:
 
 buildCreateFromFilterValueExpression:
 $value
+
+getHydrateStatement:
+
+            $this->bool_column = $value !== null ? (bool)$value : null;
+
+getAccessValueStatement:
+$this->bool_column

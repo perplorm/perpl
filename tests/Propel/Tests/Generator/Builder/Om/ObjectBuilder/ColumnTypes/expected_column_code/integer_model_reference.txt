@@ -57,3 +57,10 @@ getApplyDefaultValueStatement:
 
 buildCreateFromFilterValueExpression:
 $value
+
+getHydrateStatement:
+
+            $this->integer_column = $value !== null ? (int)$value : null;
+
+getAccessValueStatement:
+$this->integer_column

@@ -57,3 +57,10 @@ getApplyDefaultValueStatement:
 
 buildCreateFromFilterValueExpression:
 $value
+
+getHydrateStatement:
+
+            $this->var_char_column = $value !== null ? (string)$value : null;
+
+getAccessValueStatement:
+$this->var_char_column

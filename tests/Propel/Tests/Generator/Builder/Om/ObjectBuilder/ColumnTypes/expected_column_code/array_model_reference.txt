@@ -63,3 +63,11 @@ getApplyDefaultValueStatement:
 
 buildCreateFromFilterValueExpression:
 is_array($value) ? $value : static::unserializeArray($value)
+
+getHydrateStatement:
+
+            $this->array_column = $value;
+            $this->array_column_deserialized = null;
+
+getAccessValueStatement:
+$this->array_column

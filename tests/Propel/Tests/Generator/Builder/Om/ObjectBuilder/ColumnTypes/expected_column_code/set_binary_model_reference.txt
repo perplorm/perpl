@@ -83,3 +83,11 @@ getApplyDefaultValueStatement:
 
 buildCreateFromFilterValueExpression:
 SetColumnConverter::convertBitmaskToArray($value, TableTableMap::getValueSet(TableTableMap::COL_BIN_SET_COLUMN))
+
+getHydrateStatement:
+
+            $this->bin_set_column = $value;
+            $this->bin_set_column_converted = null;
+
+getAccessValueStatement:
+$this->bin_set_column

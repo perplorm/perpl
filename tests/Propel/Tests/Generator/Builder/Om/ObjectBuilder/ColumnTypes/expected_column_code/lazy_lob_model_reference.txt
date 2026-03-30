@@ -1,0 +1,113 @@
+Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes\LazyLoadColumnCodeProducer
+
+
+addColumnAttributes():
+
+    /**
+     * Value of [lazy_loaded_blob_column] field.
+     *
+     * @var resource|string|null
+     */
+    protected $lazy_loaded_blob_column;
+
+    /**
+     * Whether the lazy-loaded $lazy_loaded_blob_column value has been loaded from database.
+     * This is necessary to avoid repeated lookups if $lazy_loaded_blob_column column is NULL in the db.
+     */
+    protected bool $lazy_loaded_blob_column_is_loaded = false;
+
+
+addAccessor():
+
+    /**
+     * Get the [lazy_loaded_blob_column] column value.
+     *
+     * @param \Propel\Runtime\Connection\ConnectionInterface|null $con An optional ConnectionInterface connection to use for fetching this lazy-loaded column.
+     *
+     * @return resource|string|null
+     */
+    public function getLazyLoadedBlobColumn(?ConnectionInterface $con = null)
+    {
+        if (!$this->lazy_loaded_blob_column_is_loaded && $this->lazy_loaded_blob_column === null && !$this->isNew()) {
+            $this->loadLazyLoadedBlobColumn($con);
+        }
+
+        return $this->lazy_loaded_blob_column;
+    }
+
+    /**
+     * Load the value for the lazy-loaded [lazy_loaded_blob_column] column.
+     *
+     * This method performs an additional query to return the value for
+     * the [lazy_loaded_blob_column] column, since it is not populated by
+     * the hydrate() method.
+     *
+     * @param $con ConnectionInterface (optional) The ConnectionInterface connection to use.
+     *
+     * @throws \Propel\Runtime\Exception\PropelException - any underlying error will be wrapped and re-thrown.
+     *
+     * @return void
+     */
+    protected function loadLazyLoadedBlobColumn(?ConnectionInterface $con = null)
+    {
+        $c = $this->buildPkeyCriteria();
+        $c->addSelectColumn(TableTableMap::COL_LAZY_LOADED_BLOB_COLUMN);
+        try {
+            $dataFetcher = ChildTableQuery::create(null, $c)->fetch($con);
+            $row = $dataFetcher->fetch();
+            $dataFetcher->close();
+
+            $firstColumn = is_bool($row) ? null : current($row);
+
+            $this->lazy_loaded_blob_column = $this->writeResource($firstColumn);
+            $this->lazy_loaded_blob_column_is_loaded = true;
+        } catch (Exception $e) {
+            throw new PropelException('Error loading value for [lazy_loaded_blob_column] column on demand.', 0, $e);
+        }
+    }
+
+
+addMutator():
+
+    /**
+     * Set the value of [lazy_loaded_blob_column] column.
+     *
+     * @param resource|string|null $v New value
+     *
+     * @return $this
+     */
+    public function setLazyLoadedBlobColumn($v)
+    {
+        // explicitly set the is-loaded flag to true for this lazy load col;
+        // it doesn't matter if the value is actually set or not (logic below) as
+        // any attempt to set the value means that no db lookup should be performed
+        // when the getLazyLoadedBlobColumn() method is called.
+        $this->lazy_loaded_blob_column_is_loaded = true;
+
+        // Because BLOB columns are streams in PDO we have to assume that they are
+        // always modified when a new value is passed in.  For example, the contents
+        // of the stream itself may have changed externally.
+        $this->lazy_loaded_blob_column = $this->writeResource($v);
+
+        $this->modifiedColumns[TableTableMap::COL_LAZY_LOADED_BLOB_COLUMN] = true;
+
+        return $this;
+    }
+
+
+getDefaultValueString:
+null
+
+getApplyDefaultValueStatement:
+
+        $this->lazy_loaded_blob_column = null;
+
+buildCreateFromFilterValueExpression:
+$value
+
+getHydrateStatement:
+
+            $this->lazy_loaded_blob_column = $value;
+
+getAccessValueStatement:
+$this->lazy_loaded_blob_column

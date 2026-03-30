@@ -55,3 +55,10 @@ getApplyDefaultValueStatement:
 
 buildCreateFromFilterValueExpression:
 $value
+
+getHydrateStatement:
+
+            $this->blob_column = $this->writeResource($value);
+
+getAccessValueStatement:
+$this->blob_column

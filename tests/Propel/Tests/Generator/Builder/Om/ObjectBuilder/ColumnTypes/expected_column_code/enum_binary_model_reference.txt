@@ -72,3 +72,10 @@ getApplyDefaultValueStatement:
 
 buildCreateFromFilterValueExpression:
 TableTableMap::getValueSet(TableTableMap::COL_BIN_ENUM_COLUMN)[$value] ?? $value
+
+getHydrateStatement:
+
+            $this->bin_enum_column = $value !== null ? (int)$value : null;
+
+getAccessValueStatement:
+$this->bin_enum_column
