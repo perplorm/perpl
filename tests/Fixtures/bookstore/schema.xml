@@ -165,6 +165,7 @@
         <column name="job_title" type="VARCHAR" size="32" description="Employee job title"/>
         <column name="supervisor_id" type="INTEGER" description="Fkey to supervisor."/>
         <column name="photo" type="BLOB" lazyLoad="true"/>
+        <column name="salary" type="NUMERIC" size="12" scale="2"/>
         <foreign-key foreignTable="bookstore_employee" phpName="Supervisor" refPhpName="Subordinate" onDelete="setnull">
             <reference local="supervisor_id" foreign="id"/>
         </foreign-key>

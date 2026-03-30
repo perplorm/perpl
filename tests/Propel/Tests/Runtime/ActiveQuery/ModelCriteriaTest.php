@@ -1126,7 +1126,7 @@ class ModelCriteriaTest extends BookstoreTestBase
         $c->join('sup.Subordinate sub');
         $c->where('sub.Name = ?', 'Foo');
         $employees = BookstoreEmployeeQuery::create(null, $c)->find($con);
-        $expectedSQL = $this->getSql("SELECT bookstore_employee.id, bookstore_employee.class_key, bookstore_employee.name, bookstore_employee.job_title, bookstore_employee.supervisor_id FROM bookstore_employee INNER JOIN bookstore_employee sup ON (bookstore_employee.supervisor_id=sup.id) INNER JOIN bookstore_employee sub ON (sup.id=sub.supervisor_id) WHERE sub.name = 'Foo'");
+        $expectedSQL = $this->getSql("SELECT bookstore_employee.id, bookstore_employee.class_key, bookstore_employee.name, bookstore_employee.job_title, bookstore_employee.supervisor_id, bookstore_employee.salary FROM bookstore_employee INNER JOIN bookstore_employee sup ON (bookstore_employee.supervisor_id=sup.id) INNER JOIN bookstore_employee sub ON (sup.id=sub.supervisor_id) WHERE sub.name = 'Foo'");
         $this->assertEquals($expectedSQL, $con->getLastExecutedQuery(), 'join() allows the use of relation alias in further joins()');
     }
 

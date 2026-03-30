@@ -482,7 +482,7 @@ class PropelTypes
         self::LONGVARCHAR => PDO::PARAM_STR,
         self::CLOB => PDO::PARAM_STR,
         self::CLOB_EMU => PDO::PARAM_STR,
-        self::NUMERIC => PDO::PARAM_INT,
+        self::NUMERIC => PDO::PARAM_STR,
         self::DECIMAL => PDO::PARAM_STR,
         self::TINYINT => PDO::PARAM_INT,
         self::SMALLINT => PDO::PARAM_INT,
