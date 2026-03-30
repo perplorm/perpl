@@ -160,7 +160,7 @@ abstract class AbstractFilter extends ClauseList implements ColumnFilterInterfac
     /**
      * Build parameters, possibly without building statement.
      *
-     * Used for example when using query-cache behavior.
+     * Used for example when using the former query-cache behavior.
      *
      * Basic implementation does not avoid building the statement.
      *
