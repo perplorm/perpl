@@ -53,15 +53,17 @@ function updateFile(TestCase $comparingTest, ComparesGeneratedFile $attribute, a
 $fileNames = findTestFileNames();
 $reflectionClasses = createTestFileReflectionsWithAttribute($fileNames);
 
+$findComparingMethods = fn(ReflectionMethod $m) => $m->getAttributes(ComparesGeneratedFile::class);
+
 foreach ($reflectionClasses as $reflection) {
-    $fileComparisonMethods = array_filter($reflection->getMethods(), fn(ReflectionMethod $m) => $m->getAttributes(ComparesGeneratedFile::class));
-    if (!$fileComparisonMethods) {
+    $referenceComparingMethods = array_filter($reflection->getMethods(), $findComparingMethods);
+    if (!$referenceComparingMethods) {
         continue;
     }
     /** @var \Propel\Tests\TestCase $comparingTest */
-    $comparingTest = $reflection->newInstance();
+    $comparingTest = $reflection->newInstanceWithoutConstructor();
 
-    foreach ($fileComparisonMethods as $method) {
+    foreach ($referenceComparingMethods as $method) {
         $dataProvider = $method->getName();
         /** @var ComparesGeneratedFile $attribute */
         $attribute = $method->getAttributes(ComparesGeneratedFile::class)[0]->newInstance();

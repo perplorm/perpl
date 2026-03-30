@@ -2086,11 +2086,11 @@ $indent};";
      *
      * @param $ctype|null \$key Primary key.
      *
-     * @return void
+     * @return \$this
      */
-    public function setPrimaryKey(?$ctype \$key = null): void
+    public function setPrimaryKey(?$ctype \$key = null)
     {
-        \$this->set{$phpName}(\$key);
+        return \$this->set{$phpName}(\$key);
     }\n";
     }
 
@@ -2103,25 +2103,25 @@ $indent};";
      */
     protected function addSetPrimaryKeyMultiPK(string &$script): void
     {
+        $docType = $this->getTable()->getPrimaryKeyDocType(false);
         $script .= "
     /**
      * Set the [composite] primary key.
      *
-     * @param array \$keys The elements of the composite key (order must match the order in XML file).
+     * @param $docType \$keys The elements of the composite key (order must match the order in XML file).
      *
-     * @return void
+     * @return \$this
      */
-    public function setPrimaryKey(array \$keys): void
-    {";
-        $i = 0;
+    public function setPrimaryKey(array \$keys)
+    {
+        return \$this";
         foreach ($this->getTable()->getPrimaryKey() as $i => $pk) {
             $phpName = $pk->getPhpName();
             $script .= "
-        \$this->set{$phpName}(\$keys[$i]);";
+            ->set{$phpName}(\$keys[$i])";
         }
-        $script .= "
-    }
-";
+        $script .= ";
+    }\n";
     }
 
     /**

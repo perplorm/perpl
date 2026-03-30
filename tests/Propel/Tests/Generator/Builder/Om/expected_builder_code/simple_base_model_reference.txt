@@ -913,11 +913,11 @@ abstract class IdTable implements ActiveRecordInterface
      *
      * @param int|null $key Primary key.
      *
-     * @return void
+     * @return $this
      */
-    public function setPrimaryKey(?int $key = null): void
+    public function setPrimaryKey(?int $key = null)
     {
-        $this->setId($key);
+        return $this->setId($key);
     }
 
     /**
