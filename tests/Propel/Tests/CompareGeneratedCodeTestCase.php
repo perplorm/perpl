@@ -1,6 +1,11 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Propel\Tests;
+
+use Exception;
+use function sprintf;
 
 /**
  * Parent class for tests that compare code builder output against file content.
@@ -9,10 +14,14 @@ namespace Propel\Tests;
  */
 class CompareGeneratedCodeTestCase extends TestCase
 {
+    /**
+     * @var string
+     */
     public const HOW_TO_UPDATE_MESSAGE = 'Reference file does not match anymore. Update by calling `./tests/bin/rebuild-reference-files` (from Perpl root dir).';
 
     /**
      * Summary of generateCodeFileContent
+     *
      * @param mixed $obj
      * @param array<string> $methods
      *
@@ -33,5 +42,14 @@ class CompareGeneratedCodeTestCase extends TestCase
     public function buildCodeFileContent(string $header, string $code): string
     {
         return "\n\n$header:\n$code";
+    }
+
+    public function buildWithPossibleExceptionMessage(callable $buildCode)
+    {
+        try {
+            return $buildCode();
+        } catch (Exception $e) {
+            return sprintf('Threw %s: %s', $e::class, $e->getMessage());
+        }
     }
 }

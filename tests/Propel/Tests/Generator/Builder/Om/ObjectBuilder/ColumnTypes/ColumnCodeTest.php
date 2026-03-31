@@ -6,6 +6,7 @@ namespace Propel\Tests\Generator\Builder\Om\ObjectBuilder\ColumnTypes;
 
 use Propel\Generator\Builder\Om\AbstractOMBuilder;
 use Propel\Generator\Builder\Om\BuilderType;
+use Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes\ColumnCodeProducer;
 use Propel\Generator\Config\QuickGeneratorConfig;
 use Propel\Generator\Model\Column;
 use Propel\Generator\Platform\MysqlPlatform;
@@ -15,7 +16,7 @@ use Propel\Tests\CompareGeneratedCodeTestCase;
 
 class ColumnCodeTest extends CompareGeneratedCodeTestCase
 {
- /**
+    /**
      * @return array<array>
      */
     #[ComparesGeneratedFile(textBuilder: 'buildObjectClassCode')]
@@ -52,10 +53,7 @@ class ColumnCodeTest extends CompareGeneratedCodeTestCase
      */
     public function buildObjectClassCode(string $columnXml, array|null $config, PlatformInterface|null $platform): string
     {
-        /** @var \Propel\Generator\Builder\Om\ObjectBuilder $builder */
-        $builder = $this->buildCodeBuilder($columnXml, BuilderType::ObjectBase, $config, $platform);
-        /** @var \Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes\ColumnCodeProducer $builder */
-        $codeProducer = $this->getObjectPropertyValue($builder, 'columnCodeProducers')[0];
+        $codeProducer = $this->buildCodeProducer($columnXml, $config, $platform);
 
         $script = $this->generateCodeFileContentScript($codeProducer, [
             'addColumnAttributes',
@@ -65,8 +63,9 @@ class ColumnCodeTest extends CompareGeneratedCodeTestCase
         . $this->buildCodeFileContent('getDefaultValueString', $codeProducer->getDefaultValueString())
         . $this->buildCodeFileContent('getApplyDefaultValueStatement', $codeProducer->getApplyDefaultValueStatement())
         . $this->buildCodeFileContent('buildCreateFromFilterValueExpression', $codeProducer->buildCreateFromFilterValueExpression('$value'))
-        . $this->buildCodeFileContent('getHydrateStatement', $codeProducer->getHydrateStatement('$value'))
-        . $this->buildCodeFileContent('getAccessValueStatement', $codeProducer->getAccessValueStatement('$value'));
+        . $this->buildCodeFileContent('getHydrateStatement', $this->buildWithPossibleExceptionMessage(fn () => $codeProducer->getHydrateStatement('$value'))) // throws an exception on lazy-loaded columns
+        . $this->buildCodeFileContent('getAccessValueStatement', $codeProducer->getAccessValueStatement())
+        ;
 
         return $script;
     }
@@ -155,10 +154,18 @@ class ColumnCodeTest extends CompareGeneratedCodeTestCase
         array|null $extraConfig = null,
         PlatformInterface|null $platform = null
     ): AbstractOMBuilder {
-        $column = static::buildColumnFromSchema($columnXml);
+        $column = static::buildColumnFromSchema($columnXml, $extraConfig, $platform);
         $config = new QuickGeneratorConfig($extraConfig);
 
         return $config->loadConfiguredBuilder($column->getTable(), $builderType);
+    }
+
+    public function buildCodeProducer(string $columnXml, array|null $extraConfig = null, PlatformInterface|null $platform = null): ColumnCodeProducer
+    {
+        /** @var \Propel\Generator\Builder\Om\ObjectBuilder $builder */
+        $builder = $this->buildCodeBuilder($columnXml, BuilderType::ObjectBase, $extraConfig, $platform);
+
+        return $this->getObjectPropertyValue($builder, 'columnCodeProducers')[0];
     }
 
     /**

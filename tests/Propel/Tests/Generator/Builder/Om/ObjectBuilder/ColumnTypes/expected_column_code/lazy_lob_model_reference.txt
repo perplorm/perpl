@@ -106,8 +106,7 @@ buildCreateFromFilterValueExpression:
 $value
 
 getHydrateStatement:
-
-            $this->lazy_loaded_blob_column = $value;
+Threw LogicException: Lazy-load column should never be hydrated directly.
 
 getAccessValueStatement:
 $this->lazy_loaded_blob_column

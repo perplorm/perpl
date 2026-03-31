@@ -4,10 +4,10 @@ declare(strict_types = 1);
 
 namespace Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes;
 
+use LogicException;
 use Propel\Generator\Config\AbstractGeneratorConfig;
 use Propel\Generator\Model\PropelTypes;
 use Propel\Generator\Model\Table;
-use Propel\Generator\Platform\OraclePlatform;
 use Propel\Generator\Platform\SqlsrvPlatform;
 
 class LazyLoadColumnCodeProducer extends ColumnCodeProducer
@@ -124,6 +124,19 @@ class LazyLoadColumnCodeProducer extends ColumnCodeProducer
     public function getDefaultValueString(): string
     {
         return $this->columnCodeProducer->getDefaultValueString();
+    }
+
+    /**
+     * @param string $valueVariable
+     *
+     * @throws \LogicException
+     *
+     * @return string
+     */
+    #[\Override]
+    public function getHydrateStatement(string $valueVariable): string
+    {
+        throw new LogicException('Lazy-load column should never be hydrated directly.');
     }
 
     /**
@@ -270,72 +283,37 @@ class LazyLoadColumnCodeProducer extends ColumnCodeProducer
      */
     protected function addLazyLoaderBody(string &$script): void
     {
-        $this->declareGlobalFunction('current');
+        $this->declareGlobalFunction('current', 'is_bool', 'current');
         $platform = $this->getPlatform();
-        $fieldAttribute = $this->getAttributeName();
         $isLoadedAttribute = $this->getIsLoadedAttributeName();
         $columnConstant = $this->builder->getColumnConstant($this->column);
         $queryClassName = $this->getQueryClassName();
         $clo = $this->column->getLowercasedName();
+        $hydrateFieldStatement = "\n" . $this->columnCodeProducer->getHydrateStatement('$firstColumn');
 
-        // pdo_sqlsrv driver requires the use of PDOStatement::bindColumn() or a hex string will be returned
-        if ($this->column->getType() === PropelTypes::BLOB && $platform instanceof SqlsrvPlatform) {
-            $script .= "
+        $script .= "
         \$c = \$this->buildPkeyCriteria();
         \$c->addSelectColumn($columnConstant);
         try {
-            \$row = [0 => null];
-            \$dataFetcher = {$queryClassName}::create(null, \$c)->fetch(\$con);
+            \$dataFetcher = {$queryClassName}::create(null, \$c)->fetch(\$con);";
+
+        if (!$platform instanceof SqlsrvPlatform || $this->column->getType() !== PropelTypes::BLOB) {
+            $script .= "
+            \$row = \$dataFetcher->fetch();";
+        } else {
+            // pdo_sqlsrv driver requires the use of PDOStatement::bindColumn() or a hex string will be returned
+            $script .= "
             if (\$dataFetcher instanceof PDODataFetcher) {
-                \$dataFetcher->bindColumn(1, \$row[0], PDO::PARAM_LOB, 0, PDO::SQLSRV_ENCODING_BINARY);
+                \$param = [0 => null];
+                \$dataFetcher->bindColumn(1, \$param[0], PDO::PARAM_LOB, 0, PDO::SQLSRV_ENCODING_BINARY);
             }
-            \$row = \$dataFetcher->fetch(PDO::FETCH_BOUND);
-            \$dataFetcher->close();";
-        } else {
-            $script .= "
-        \$c = \$this->buildPkeyCriteria();
-        \$c->addSelectColumn($columnConstant);
-        try {
-            \$dataFetcher = {$queryClassName}::create(null, \$c)->fetch(\$con);
-            \$row = \$dataFetcher->fetch();
-            \$dataFetcher->close();";
-        }
-
-        $script .= "\n
-            \$firstColumn = is_bool(\$row) ? null : current(\$row);\n";
-
-        if ($this->column->getType() === PropelTypes::CLOB && $platform instanceof OraclePlatform) {
-            // PDO_OCI returns a stream for CLOB objects, while other PDO adapters return a string...
-            $this->declareGlobalFunction('stream_get_contents');
-            $script .= "
-            if (\$firstColumn) {
-                $fieldAttribute = stream_get_contents(\$firstColumn);
-            }";
-        } elseif ($this->column->isLobType() && !$platform->hasStreamBlobImpl()) {
-            $script .= "
-            $fieldAttribute = \$this->writeResource(\$firstColumn);";
-        } elseif ($this->column->isPhpPrimitiveType()) {
-            $phpType = $this->column->getPhpType();
-            $script .= "
-            $fieldAttribute = (\$firstColumn !== null) ? ($phpType)\$firstColumn : null;";
-        } elseif ($this->column->isPhpObjectType()) {
-            $phpType = $this->column->getPhpType();
-            $script .= "
-            $fieldAttribute = (\$firstColumn !== null) ? new $phpType(\$firstColumn) : null;";
-        } elseif ($this->column->getType() === PropelTypes::UUID_BINARY) {
-            $uuidSwapFlag = $this->builder->getUuidSwapFlagLiteral();
-            $this->declareGlobalFunction('is_resource', 'stream_get_contents');
-            $script .= "
-            if (is_resource(\$firstColumn)) {
-                \$firstColumn = stream_get_contents(\$firstColumn);
-            }
-            $fieldAttribute = UuidConverter::binToUuid(\$firstColumn, $uuidSwapFlag);";
-        } else {
-            $script .= "
-            $fieldAttribute = \$firstColumn;";
+            \$row = \$dataFetcher->fetch(PDO::FETCH_BOUND);";
         }
 
         $script .= "
+            \$dataFetcher->close();
+
+            \$firstColumn = is_bool(\$row) ? null : current(\$row);{$hydrateFieldStatement}
             $isLoadedAttribute = true;
         } catch (Exception \$e) {
             throw new PropelException('Error loading value for [$clo] column on demand.', 0, \$e);
