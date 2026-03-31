@@ -176,8 +176,9 @@ class TemporalColumnCodeProducer extends AbstractDeserializableColumnCodeProduce
             // 00:00:00 is a valid time, so no need to check for that.
         }
 
-        $descriptionReturnValueNull = $column->isNotNull() ? '' : ', NULL if column is NULL';
+        $descriptionReturnValueNull = $column->isNotNull() ? '' : ', null if column is null';
         $descriptionReturnMysqlInvalidDate = $handleMysqlDate ? ", and 0 if column value is $mysqlInvalidDateString" : '';
+        $format = $this->getPlatform()->getTemporalFormatter($this->column);
 
         $script .= "
     /**
@@ -185,10 +186,11 @@ class TemporalColumnCodeProducer extends AbstractDeserializableColumnCodeProduce
      *
      * @psalm-return (\$format is null ? {$dateTimeClass}|\DateTimeInterface|null : string|null)
      *
-     * @param string|null \$format The date/time format string (either date()-style or strftime()-style).
-     *   If format is NULL, then the raw $dateTimeClass object will be returned.{$additionalParam}
+     * @param string|null \$format Datetime format string. If null, the method returns a $dateTimeClass object.
+     *                      For efficiency, storage format '$format' is returned without internal transformation.{$additionalParam}
      *
-     * @return {$dateTimeClass}{$orDateTimeInterface}|string|null Formatted date/time value as string or $dateTimeClass object (if format is NULL){$descriptionReturnValueNull}{$descriptionReturnMysqlInvalidDate}.
+     * @return {$dateTimeClass}{$orDateTimeInterface}|string|null Formatted date/time value as string or $dateTimeClass
+     *                  object (if format is null){$descriptionReturnValueNull}{$descriptionReturnMysqlInvalidDate}.
      */";
     }
 
@@ -259,8 +261,13 @@ class TemporalColumnCodeProducer extends AbstractDeserializableColumnCodeProduce
         $stringAttribute = $this->getAttributeName();
         $objectAttribute = $this->getDeserializedAttributeName();
         $createInstanceStatement = $this->buildCreateInstanceStatement();
+        $format = $this->getPlatform()->getTemporalFormatter($this->column);
 
         $script .= "
+        if (\$format === '$format') {
+            return $stringAttribute;
+        }
+
         if (!$objectAttribute && $stringAttribute) {
             $objectAttribute = $createInstanceStatement;
         }

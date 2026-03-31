@@ -1119,6 +1119,10 @@ abstract class {$this->getUnqualifiedClassName()}$parentClass implements ActiveR
         $hasFks = $this->getTable()->hasRelations();
         $objectClassName = $this->getUnqualifiedClassName();
         $defaultKeyType = $this->getDefaultKeyType();
+        $tableMapClassName = $this->getTableMapClassName();
+        $fkParam = $hasFks ? ',
+        bool $includeForeignObjects = false' : '';
+
         $script .= "
     /**
      * Exports the object as an array.
@@ -1142,41 +1146,31 @@ abstract class {$this->getUnqualifiedClassName()}$parentClass implements ActiveR
     public function toArray(
         string \$keyType = TableMap::$defaultKeyType,
         bool \$includeLazyLoadColumns = true,
-        array \$alreadyDumpedObjects = []" . ($hasFks ? ',
-        bool $includeForeignObjects = false' : '') . "
+        array \$alreadyDumpedObjects = []{$fkParam}
     ): array {
         if (isset(\$alreadyDumpedObjects['$objectClassName'][\$this->hashCode()])) {
             return ['*RECURSION*'];
         }
         \$alreadyDumpedObjects['$objectClassName'][\$this->hashCode()] = true;
-        \$keys = " . $this->getTableMapClassName() . "::getFieldNames(\$keyType);
+        \$keys = $tableMapClassName::getFieldNames(\$keyType);
         \$result = [";
-        foreach ($this->getTable()->getColumns() as $num => $col) {
-            $columnName = $col->getPhpName();
-            if ($col->isLazyLoad()) {
-                $script .= "
-            \$keys[$num] => (\$includeLazyLoadColumns) ? \$this->get{$columnName}() : null,";
-            } else {
-                $script .= "
-            \$keys[$num] => \$this->get{$columnName}(),";
-            }
-        }
-        $script .= "
-        ];";
 
         foreach ($this->getTable()->getColumns() as $num => $col) {
-            if ($col->isTemporalType()) {
-                $this->declareClass('DateTimeInterface');
-                $dateFormat = $this->getPlatformOrFail()->getTemporalFormatter($col);
-                $script .= "
-        if (\$result[\$keys[$num]] instanceof DateTimeInterface) {
-            \$result[\$keys[$num]] = \$result[\$keys[$num]]->format('$dateFormat');
-        }\n";
-            }
+            $columnName = $col->getPhpName();
+            $getter = match (true) {
+                $col->isLazyLoad() => "(\$includeLazyLoadColumns) ? \$this->get{$columnName}() : null",
+                $col->isTemporalType() => "\$this->get{$columnName}('" . $this->getPlatformOrFail()->getTemporalFormatter($col) . "')",
+                default => "\$this->get{$columnName}()",
+            };
+
+            $script .= "
+            \$keys[$num] => $getter,";
         }
+
         $script .= "
-        \$virtualColumns = \$this->virtualColumns;
-        foreach (\$virtualColumns as \$key => \$virtualColumn) {
+        ];
+
+        foreach (\$this->virtualColumns as \$key => \$virtualColumn) {
             \$result[\$key] = \$virtualColumn;
         }\n";
 

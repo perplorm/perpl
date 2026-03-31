@@ -23,13 +23,18 @@ addAccessor():
      *
      * @psalm-return ($format is null ? \DateTime|\DateTimeInterface|null : string|null)
      *
-     * @param string|null $format The date/time format string (either date()-style or strftime()-style).
-     *   If format is NULL, then the raw \DateTime object will be returned.
+     * @param string|null $format Datetime format string. If null, the method returns a \DateTime object.
+     *                      For efficiency, storage format 'Y-m-d H:i:s' is returned without internal transformation.
      *
-     * @return \DateTime|\DateTimeInterface|string|null Formatted date/time value as string or \DateTime object (if format is NULL), NULL if column is NULL, and 0 if column value is 0000-00-00 00:00:00.
+     * @return \DateTime|\DateTimeInterface|string|null Formatted date/time value as string or \DateTime
+     *                  object (if format is null), null if column is null, and 0 if column value is 0000-00-00 00:00:00.
      */
     public function getTemporalColumn($format = null)
     {
+        if ($format === 'Y-m-d H:i:s') {
+            return $this->temporal_column;
+        }
+
         if (!$this->temporal_column_date_object && $this->temporal_column) {
             $this->temporal_column_date_object = PropelDateTime::newInstance($this->temporal_column, null, '\DateTime');
         }

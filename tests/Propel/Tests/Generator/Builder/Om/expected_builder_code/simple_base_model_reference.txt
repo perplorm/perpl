@@ -733,8 +733,8 @@ abstract class IdTable implements ActiveRecordInterface
         $result = [
             $keys[0] => $this->getId(),
         ];
-        $virtualColumns = $this->virtualColumns;
-        foreach ($virtualColumns as $key => $virtualColumn) {
+
+        foreach ($this->virtualColumns as $key => $virtualColumn) {
             $result[$key] = $virtualColumn;
         }
 
