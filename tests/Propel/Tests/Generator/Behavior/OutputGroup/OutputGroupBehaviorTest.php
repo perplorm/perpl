@@ -51,7 +51,7 @@ class OutputGroupBehaviorTest extends TestCase
         <column name="password" type="VARCHAR" size="100" ignoreGroup="public"/>
         <column name="enabled" type="BOOLEAN" ignoreGroup="public"/>
         <column name="not_enabled" type="BOOLEAN" ignoreGroup="public"/>
-        <column name="created" type="TIMESTAMP"/>
+        <column name="created" type="TIMESTAMP" size="6"/>
         <column name="role_id" type="INTEGER"/>
         <column name="authenticator" type="VARCHAR" size="32"/>
 
@@ -120,7 +120,7 @@ EOF;
         return $account;
     }
 
-    public function outputGroupDataProvider()
+    public static function outputGroupDataProvider()
     {
         $accountShort = [
             'EmployeeId' => 1,
@@ -193,10 +193,9 @@ EOF;
     }
 
     /**
-     * @dataProvider outputGroupDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('outputGroupDataProvider')]
     public function testOutputGroup($outputGroup, array $expected)
     {
         $account = $this->getPopulatedAccountObject();
@@ -206,10 +205,9 @@ EOF;
     }
 
     /**
-     * @dataProvider outputGroupDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('outputGroupDataProvider')]
     public function testGeneratedCollectionHasMethod()
     {
         $collectionClass = Map\OgEmployeeTableMap::getTableMap()->getCollectionClassName();
@@ -220,10 +218,9 @@ EOF;
     }
 
     /**
-     * @dataProvider outputGroupDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('outputGroupDataProvider')]
     public function testNonGeneratedCollectionWasUpdated()
     {
         $collectionClass = Map\OgAccountTableMap::getTableMap()->getCollectionClassName();

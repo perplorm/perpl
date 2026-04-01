@@ -21,10 +21,9 @@ class XmlToArrayConverterTest extends TestCase
     use DataProviderTrait;
 
     /**
-     * @dataProvider providerForXmlToArrayConverter
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('providerForXmlToArrayConverter')]
     public function testConvertFromString(string $xml, $expected)
     {
         $actual = XmlToArrayConverter::convert($xml);
@@ -33,10 +32,9 @@ class XmlToArrayConverterTest extends TestCase
     }
 
     /**
-     * @dataProvider providerForXmlToArrayConverter
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('providerForXmlToArrayConverter')]
     public function testConvertFromFile($xml, $expected)
     {
         $file = $this->newFile('testconvert.xml', $xml);
@@ -46,10 +44,9 @@ class XmlToArrayConverterTest extends TestCase
     }
 
     /**
-     * @dataProvider providerForXmlToArrayConverterXmlInclusions
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('providerForXmlToArrayConverterXmlInclusions')]
     public function testConvertFromFileWithXmlInclusion($xmlLoad, $xmlInclude, $expected)
     {
         $this->newFile('testconvert.xml', $xmlLoad);

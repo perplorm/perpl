@@ -1,14 +1,12 @@
 <?php if ($behaviorCallScript): ?>
     /**
-     * Catches calls to undefined methods.
-     *
      * Provides magic import/export method support (fromXML()/toXML(), fromYAML()/toYAML(), etc.).
      * Allows to define default __call() behavior if you overwrite __call()
      *
      * @param string $name
      * @param mixed $params
      *
-     * @return array|string
+     * @return mixed
      */
     public function __call($name, $params)
     {
@@ -19,8 +17,6 @@
 
 <?php endif?>
     /**
-     * Derived method to catches calls to undefined methods.
-     *
      * Provides magic import/export method support (fromXML()/toXML(), fromYAML()/toYAML(), etc.).
      * Allows to define default __call() behavior if you overwrite __call()
      *
@@ -29,7 +25,7 @@
      *
      * @throws \Propel\Runtime\Exception\BadMethodCallException
      *
-     * @return array|string
+     * @return mixed
      */
     public function __<?= $behaviorCallScript ? 'parentCall' : 'call'?>($name, $params)
     {

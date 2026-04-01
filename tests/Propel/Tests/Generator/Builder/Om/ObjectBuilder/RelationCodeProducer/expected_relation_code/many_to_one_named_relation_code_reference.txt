@@ -1,0 +1,325 @@
+Propel\Generator\Builder\Om\ObjectBuilder\RelationCodeProducer\OneToManyRelationCodeProducer
+
+
+addAttributes():
+
+    /**
+     * Objects associated via LeTeam relation (1:n).
+     */
+    protected TeamCollection|null $collLeTeams = null;
+
+    /**
+     * If $collLeTeams contains all objects in LeTeam relation.
+     */
+    protected bool $collLeTeamsPartial = false;
+
+
+addOnReloadCode():
+
+            $this->collLeTeams = null;
+
+addScheduledForDeletionAttribute():
+
+    /**
+     * Items of LeTeams relation marked for deletion.
+     *
+     * @var \Propel\Runtime\Collection\ObjectCollection<\Team>|null
+     */
+    protected ObjectCollection|null $leTeamsScheduledForDeletion = null;
+
+
+addDeleteScheduledItemsCode():
+
+        if ($this->leTeamsScheduledForDeletion !== null) {
+            if (!$this->leTeamsScheduledForDeletion->isEmpty()) {
+                foreach ($this->leTeamsScheduledForDeletion as $leTeam) {
+                    // need to save related object because we set the relation to null
+                    $leTeam->save($con);
+                }
+                $this->leTeamsScheduledForDeletion = null;
+            }
+        }
+
+        if ($this->collLeTeams !== null) {
+            foreach ($this->collLeTeams as $referrerFK) {
+                if (!$referrerFK->isDeleted() && ($referrerFK->isNew() || $referrerFK->isModified())) {
+                    $affectedRows += $referrerFK->save($con);
+                }
+            }
+        }
+
+
+addClearReferencesCode():
+
+            if ($this->collLeTeams) {
+                foreach ($this->collLeTeams as $o) {
+                    $o->clearAllReferences($deep);
+                }
+            }
+
+addMethods():
+
+    /**
+     * Initializes the collLeTeams collection.
+     *
+     * By default this just sets the collLeTeams collection to an empty array (like clearcollLeTeams());
+     * however, you may wish to override this method in your stub class to provide setting appropriate
+     * to your application -- for example, setting the initial array to the values stored in database.
+     *
+     * @param bool $overrideExisting If set to true, the method call initializes
+     *                                        the collection even if it is not empty
+     *
+     * @return void
+     */
+    public function initLeTeams(bool $overrideExisting = true): void
+    {
+        if ($this->collLeTeams !== null && !$overrideExisting) {
+            return;
+        }
+
+        $this->collLeTeams = new TeamCollection();
+        $this->collLeTeams->setModel('\Team');
+    }
+
+    /**
+     * Reset is the collLeTeams collection loaded partially.
+     *
+     * @param bool $isPartial
+     *
+     * @return void
+     */
+    public function resetPartialLeTeams(bool $isPartial = true): void
+    {
+        $this->collLeTeamsPartial = $isPartial;
+    }
+
+    /**
+     * Clears out the collLeTeams collection
+     *
+     * This does not modify the database; however, it will remove any associated objects, causing
+     * them to be refetched by subsequent calls to accessor method.
+     *
+     * @return static
+     */
+    public function clearLeTeams(): static
+    {
+        $this->collLeTeams = null;
+
+        return $this;
+    }
+
+    /**
+     * Gets user objects which contain a foreign key that references this object.
+     *
+     * If the $criteria is not null, it is used to always fetch the results from the database.
+     * Otherwise the results are fetched from the database the first time, then cached.
+     * Next time the same method is called without $criteria, the cached collection is returned.
+     * If this User is new, it will return
+     * an empty collection or the current collection; the criteria is ignored on a new object.
+     *
+     * @param \Propel\Runtime\ActiveQuery\Criteria|null $criteria
+     * @param \Propel\Runtime\Connection\ConnectionInterface|null $con
+     *
+     * @return \Base\Collection\TeamCollection
+     */
+    public function getLeTeams(?Criteria $criteria = null, ?ConnectionInterface $con = null): TeamCollection
+    {
+        $partial = $this->collLeTeamsPartial && !$this->isNew();
+        if ($this->collLeTeams && !$criteria && !$partial) {
+            return $this->collLeTeams;
+        }
+
+        if ($this->isNew()) {
+            // return empty collection
+            if ($this->collLeTeams === null) {
+                $this->initLeTeams();
+
+                return $this->collLeTeams;
+            }
+
+            $collLeTeams = new TeamCollection();
+            $collLeTeams->setModel('\Team');
+
+            return $collLeTeams;
+        }
+
+        $collLeTeams = ChildTeamQuery::create(null, $criteria)
+            ->filterByUser($this)
+            ->findObjects($con);
+
+        if ($criteria) {
+            if ($this->collLeTeamsPartial !== false && count($collLeTeams)) {
+                $this->initLeTeams(false);
+
+                foreach ($collLeTeams as $obj) {
+                    if (!$this->collLeTeams->contains($obj)) {
+                        $this->collLeTeams->append($obj);
+                    }
+                }
+
+                $this->collLeTeamsPartial = true;
+            }
+
+            return $collLeTeams;
+        }
+
+        if ($this->collLeTeamsPartial && $this->collLeTeams) {
+            foreach ($this->collLeTeams as $obj) {
+                if ($obj->isNew()) {
+                    $collLeTeams[] = $obj;
+                }
+            }
+        }
+
+        $this->collLeTeams = $collLeTeams;
+        $this->collLeTeamsPartial = false;
+
+        return $this->collLeTeams;
+    }
+
+    /**
+     * Sets a collection of user objects related by a one-to-many relationship
+     * to the current object.
+     *
+     * It will also schedule objects for deletion based on a diff between old objects (aka persisted)
+     * and new objects from the given Propel collection.
+     *
+     * @param \Propel\Runtime\Collection\Collection<\Team> $leTeams
+     * @param \Propel\Runtime\Connection\ConnectionInterface|null $con
+     *
+     * @return static
+     */
+    public function setLeTeams(Collection $leTeams, ?ConnectionInterface $con = null): static
+    {
+        $leTeamsToDelete = $this->getLeTeams(null, $con)->diff($leTeams);
+
+        $this->leTeamsScheduledForDeletion = $leTeamsToDelete;
+
+        foreach ($leTeamsToDelete as $leTeamRemoved) {
+            $leTeamRemoved->setUser(null);
+        }
+
+        $this->collLeTeams = null;
+        foreach ($leTeams as $leTeam) {
+            $this->addLeTeam($leTeam);
+        }
+
+        $this->collLeTeamsPartial = false;
+        $this->collLeTeams = $leTeams instanceof TeamCollection
+            ? $leTeams : new TeamCollection($leTeams->getData());
+
+        return $this;
+    }
+
+    /**
+     * Returns the number of related user objects.
+     *
+     * @param \Propel\Runtime\ActiveQuery\Criteria|null $criteria
+     * @param bool $distinct
+     * @param \Propel\Runtime\Connection\ConnectionInterface|null $con
+     *
+     * @return int Count of related user objects.
+     */
+    public function countLeTeams(?Criteria $criteria = null, bool $distinct = false, ?ConnectionInterface $con = null): int
+    {
+        $partial = $this->collLeTeamsPartial && !$this->isNew();
+        if ($this->collLeTeams === null || $criteria !== null || $partial) {
+            if ($this->isNew() && $this->collLeTeams === null) {
+                return 0;
+            }
+
+            if ($partial && !$criteria) {
+                return count($this->getLeTeams());
+            }
+
+            $query = ChildTeamQuery::create(null, $criteria);
+            if ($distinct) {
+                $query->distinct();
+            }
+
+            return $query
+                ->filterByUser($this)
+                ->count($con);
+        }
+
+        return count($this->collLeTeams);
+    }
+
+    /**
+     * Method called to associate a ChildTeam object to this object
+     * through the ChildTeam foreign key attribute.
+     *
+     * @param \Team $childTeam
+     *
+     * @return $this
+     */
+    public function addLeTeam(ChildTeam $childTeam)
+    {
+        if ($this->collLeTeams === null) {
+            $this->initLeTeams();
+            $this->collLeTeamsPartial = true;
+        }
+
+        if (!$this->collLeTeams->contains($childTeam)) {
+            $this->doAddLeTeam($childTeam);
+
+            if ($this->leTeamsScheduledForDeletion && $this->leTeamsScheduledForDeletion->contains($childTeam)) {
+                $this->leTeamsScheduledForDeletion->remove($this->leTeamsScheduledForDeletion->search($childTeam));
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param \Team $leTeam The ChildTeam object to add.
+     *
+     * @return void
+     */
+    protected function doAddLeTeam(ChildTeam $leTeam): void
+    {
+        $this->collLeTeams->append($leTeam);
+        assert($this instanceof ChildUser);
+        $leTeam->setUser($this);
+    }
+
+    /**
+     * @param \Team $leTeam The ChildTeam object to remove.
+     *
+     * @return static
+     */
+    public function removeLeTeam(ChildTeam $leTeam): static
+    {
+        if ($this->getLeTeams()->contains($leTeam)) {
+            $pos = $this->collLeTeams->search($leTeam);
+            $this->collLeTeams->remove($pos);
+            if ($this->leTeamsScheduledForDeletion === null) {
+                $this->leTeamsScheduledForDeletion = clone $this->collLeTeams;
+                $this->leTeamsScheduledForDeletion->clear();
+            }
+            $this->leTeamsScheduledForDeletion->append($leTeam);
+            $leTeam->setUser(null);
+        }
+
+        return $this;
+    }
+
+
+addInitRelations:
+
+    /**
+     * Initializes a collection based on the name of a relation.
+     * Avoids crafting an 'init[$relationName]s' method name
+     * that wouldn't work when StandardEnglishPluralizer is used.
+     *
+     * @param string $relationName The name of the relation to initialize
+     *
+     * @return void
+     */
+    public function initRelation($relationName): void
+    {
+        match ($relationName) {
+            'LeTeam' => $this->initLeTeams(),
+            default => null
+        };
+    }

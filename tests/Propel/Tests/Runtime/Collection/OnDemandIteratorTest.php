@@ -6,7 +6,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Propel\Tests\Runtime\collection;
+namespace Propel\Tests\Runtime\Collection;
 
 use Propel\Runtime\ActiveQuery\ModelCriteria;
 use Propel\Runtime\ActiveQuery\PropelQuery;

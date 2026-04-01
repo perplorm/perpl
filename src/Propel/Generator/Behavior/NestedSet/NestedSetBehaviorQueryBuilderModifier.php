@@ -1050,17 +1050,13 @@ static public function fixLevels(" . ($useScope ? '$scope, ' : '') . "?Connectio
             $script .= "
             // class must be set each time from the record row
             \$cls = $tableMapClassName::getOMClass(\$row, 0);
-            \$cls = substr('.'.\$cls, strrpos('.'.\$cls, '.') + 1);
-            " . $this->builder->buildObjectInstanceCreationCode('$obj', '$cls') . "
-            \$obj->hydrate(\$row);
-            $tableMapClassName::addInstanceToPool(\$obj, \$key);";
-        } else {
-            $script .= "
-            " . $this->builder->buildObjectInstanceCreationCode('$obj', '$cls') . "
-            \$obj->hydrate(\$row);
-            $tableMapClassName::addInstanceToPool(\$obj, \$key);";
+            \$cls = substr('.'.\$cls, strrpos('.'.\$cls, '.') + 1);";
         }
         $script .= "
+            \$obj = new \$cls();
+            \$obj->hydrate(\$row);
+            $tableMapClassName::addInstanceToPool(\$obj, \$key);
+            
         }
 
         // compute level

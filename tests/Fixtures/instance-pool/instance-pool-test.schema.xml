@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+<database
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:noNamespaceSchemaLocation="../../../resources/xsd/database.xsd"
+  name="instance-pool-test"
+  defaultIdMethod="native"
+  namespace="Propel\Tests\InstancePoolTest"
+  schema="instance_pool"
+>
+    <!--  
+    
+    Used to test instance pooling.
+    Should contain tables using all possible db column types as primary key.
+    
+    -->
+
+    <table name="integer_pk_table">
+        <column name="id" type="INTEGER" required="true" primaryKey="true"/>
+        <column name="payload" type="VARCHAR"/>
+    </table>
+
+    <table name="varchar_pk_table">
+        <column name="id" type="VARCHAR" size="32" required="true" primaryKey="true"/>
+        <column name="payload" type="VARCHAR"/>
+    </table>
+
+    <table name="uuid_binary_pk_table">
+        <column name="id" type="UUID_BINARY" required="true" primaryKey="true"/>
+        <column name="payload" type="VARCHAR"/>
+    </table>
+
+    <table name="decimal_pk_table">
+        <column name="id" type="NUMERIC" size="10" scale="5" required="true" primaryKey="true"/>
+        <column name="payload" type="VARCHAR"/>
+    </table>
+
+    <table name="float_pk_table">
+        <column name="id" type="FLOAT" required="true" primaryKey="true"/>
+        <column name="payload" type="VARCHAR"/>
+    </table>
+
+    <table name="date_pk_table">
+        <column name="id" type="DATE" required="true" primaryKey="true"/>
+        <column name="payload" type="VARCHAR"/>
+    </table>
+
+    <table name="datetime_pk_table">
+        <column name="id" type="DATETIME" required="true" primaryKey="true"/>
+        <column name="payload" type="VARCHAR"/>
+    </table>
+
+    <table name="datetime_fractional_pk_table">
+        <column name="id" type="DATETIME" size="6" required="true" primaryKey="true"/>
+        <column name="payload" type="VARCHAR"/>
+    </table>
+
+    <table name="enum_binary_pk_table">
+        <column name="id" type="ENUM_BINARY" valueSet="foo,bar,baz" required="true" primaryKey="true"/>
+        <column name="payload" type="VARCHAR"/>
+    </table>
+
+    <table name="set_binary_pk_table">
+        <column name="id" type="SET_BINARY" valueSet="foo,bar,baz" required="true" primaryKey="true"/>
+        <column name="payload" type="VARCHAR"/>
+    </table>
+
+    <!-- Column types are not usable as PK (might be workable with adjustments, but not worth the effort for now)
+
+    <table name="object_pk_table">
+        <column name="id" type="OBJECT" length="42" required="true" primaryKey="true"/>
+        <column name="payload" type="VARCHAR"/>
+        <index name="object_pk_index">
+            <index-column name="id" size="42"/>
+        </index>
+    </table >
+
+    <table name="array_pk_table">
+        <column name="id" type="ARRAY" required="true" primaryKey="true"/>
+        <column name="payload" type="VARCHAR"/>
+    </table>
+
+    -->
+
+    <table name="composite_pk_table">
+        <column name="uuid_pk" type="UUID_BINARY" required="true" primaryKey="true"/>
+        <column name="bool_pk" type="BOOLEAN" required="true" primaryKey="true"/>
+        <column name="varchar_pk" type="VARCHAR" required="true" primaryKey="true"/>
+        <column name="payload" type="VARCHAR"/>
+    </table>
+
+</database>

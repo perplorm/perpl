@@ -19,31 +19,26 @@ class SelectQuerySqlBuilderTest extends TestCaseFixtures
     /**
      * @var bool
      */
-    protected $configLoaded = false;
-
-    /**
-     * @var bool
-     */
-    protected $setupWasExecuted = false;
+    protected static bool $setupWasExecuted = false;
 
     /**
      * @return void
      */
-    protected function loadConfig(): void
+    protected static function loadConfig(): void
     {
-        if ($this->configLoaded) {
+        if (static::$setupWasExecuted) {
             return;
         }
-        parent::setUp();
-        $this->setupWasExecuted = true;
+        parent::setUpBeforeClass();
+        static::$setupWasExecuted = true;
     }
 
     /**
      * @return mixed[][]
      */
-    public function havingClauseDataProvider(): array
+    public static function havingClauseDataProvider(): array
     {
-        $this->loadConfig();
+        static::loadConfig();
 
         return [
             // [<criteria>, <having clause>, <params>, <message>]]
@@ -83,15 +78,14 @@ class SelectQuerySqlBuilderTest extends TestCaseFixtures
     }
 
     /**
-     * @dataProvider havingClauseDataProvider
      *
      * @param \Propel\Runtime\ActiveQuery\Criteria $query
      * @param string|null $expectedClause
      * @param array $expectedParams
      * @param string $message
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('havingClauseDataProvider')]
     public function testBuildHavingClause(Criteria $query, ?string $expectedClause, array $expectedParams, string $message): void
     {
         $params = [];
@@ -113,7 +107,7 @@ class SelectQuerySqlBuilderTest extends TestCaseFixtures
     /**
      * @return mixed[][]
      */
-    public function fromClauseDataProvider(): array
+    public static function fromClauseDataProvider(): array
     {
         return [
             // [<query>, <from tables>, <expected clause>, <expected params>, <message>]
@@ -126,16 +120,15 @@ class SelectQuerySqlBuilderTest extends TestCaseFixtures
     }
 
     /**
-     * @dataProvider fromClauseDataProvider
      *
      * @param \Propel\Runtime\ActiveQuery\Criteria $query
      * @param array $fromTables
      * @param string $expectedClause
      * @param array $expectedParams
      * @param string $message
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('fromClauseDataProvider')]
     public function testBuildFromClause(Criteria $query, array $fromTables, string $expectedClause, array $expectedParams, string $message): void
     {
         $builder = new class ($query) extends SelectQuerySqlBuilder{
@@ -156,11 +149,11 @@ class SelectQuerySqlBuilderTest extends TestCaseFixtures
     /**
      * @return mixed[][]
      */
-    public function removeRecursiveSubqueryTableAliasesDataProvider(): array
+    public static function removeRecursiveSubqueryTableAliasesDataProvider(): array
     {
-        $this->loadConfig();
+        static::loadConfig();
 
-        $query = BookQuery::create()->addSelectQuery(BookQuery::create(), 'subquery');
+        $query = BookQuery::create()->addSubquery(BookQuery::create(), 'subquery');
 
         return [
             // [<query>, <from table names>, <expected table names>, <message>]
@@ -170,15 +163,14 @@ class SelectQuerySqlBuilderTest extends TestCaseFixtures
     }
 
     /**
-     * @dataProvider removeRecursiveSubqueryTableAliasesDataProvider
      *
      * @param \Propel\Runtime\ActiveQuery\Criteria $query
      * @param array $fromTableNames
      * @param array $expectedTableNames
      * @param string $message
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('removeRecursiveSubqueryTableAliasesDataProvider')]
     public function testRemoveRecursiveSubqueryTableAliases(Criteria $query, array $fromTableNames, array $expectedTableNames, string $message): void
     {
         $builder = new class ($query) extends SelectQuerySqlBuilder{

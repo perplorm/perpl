@@ -104,10 +104,9 @@ class InModelCriterionTest extends BaseTestCase
     }
 
     /**
-     * @dataProvider providerForNotEmptyValues
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('providerForNotEmptyValues')]
     public function testAppendPsToWithNotEmptyValueCreatesAnInCondition($notEmptyValue)
     {
         $cton = new InModelCriterion(new Criteria(), 'A.COL IN ?', 'A.COL', $notEmptyValue);
@@ -132,10 +131,9 @@ class InModelCriterionTest extends BaseTestCase
     }
 
     /**
-     * @dataProvider providerForEmptyValues
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('providerForEmptyValues')]
     public function testAppendPsToWithInAndEmptyValueCreatesAnAlwaysFalseCondition($emptyValue)
     {
         $cton = new InModelCriterion(new Criteria(), 'A.COL IN ?', 'A.COL', $emptyValue);
@@ -150,10 +148,9 @@ class InModelCriterionTest extends BaseTestCase
     }
 
    /**
-    * @dataProvider providerForEmptyValues
-    *
-    * @return void
-    */
+     * @return void
+     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('providerForEmptyValues')]
     public function testAppendPsToWithNotInAndEmptyValueCreatesAnAlwaysTrueCondition($emptyValue)
     {
         $cton = new InModelCriterion(new Criteria(), 'A.COL NOT IN ?', 'A.COL', $emptyValue);
@@ -168,10 +165,9 @@ class InModelCriterionTest extends BaseTestCase
     }
 
    /**
-    * @dataProvider providerForEmptyValues
-    *
-    * @return void
-    */
+     * @return void
+     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('providerForEmptyValues')]
     public function testAppendPsToWithNotInAndEmptyValueIsCaseInsensitive($emptyValue)
     {
         $cton = new InModelCriterion(new Criteria(), 'A.COL not in ?', 'A.COL', $emptyValue);

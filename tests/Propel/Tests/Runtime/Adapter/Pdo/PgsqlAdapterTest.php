@@ -23,7 +23,7 @@ class PgsqlAdapterTest extends TestCaseFixtures
     /**
      * @return string
      */
-    protected function getDriver()
+    protected static function getDriver(): string
     {
         return 'pgsql';
     }

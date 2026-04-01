@@ -6,7 +6,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Propel\Tests\Runtime\TypeTest;
+namespace Propel\Tests\Runtime\TypeTests;
 
 use Propel\Runtime\Util\UuidConverter;
 use Propel\Tests\Bookstore\Book2;
@@ -21,8 +21,7 @@ use Propel\Tests\Helpers\Bookstore\BookstoreTestBase;
  */
 class UuidBinaryTypeTest extends BookstoreTestBase
 {
-    /** @var string */
-    protected $uuid = 'ffb35e14-6bd9-409b-a3f5-f176bfe54ebb';
+    protected static string $uuid = 'ffb35e14-6bd9-409b-a3f5-f176bfe54ebb';
 
     /** @var \Propel\Tests\Bookstore\Book2 */
     protected $book;
@@ -34,7 +33,7 @@ class UuidBinaryTypeTest extends BookstoreTestBase
         if(!$this->book){
             Book2Query::create()->deleteAll();
             $this->book = new Book2();
-            $this->book->setUuidBin($this->uuid)->save();
+            $this->book->setUuidBin(static::$uuid)->save();
         }
         Book2TableMap::clearInstancePool();
     }
@@ -45,10 +44,10 @@ class UuidBinaryTypeTest extends BookstoreTestBase
     public function testModelRestoresUuid()
     {
         $retrievedBook = Book2Query::create()->findOneById($this->book->getId());
-        $this->assertSame($this->uuid, $retrievedBook->getUuidBin());
+        $this->assertSame(static::$uuid, $retrievedBook->getUuidBin());
     }
 
-    public function uuidFilterDataProvider(): array
+    public static function uuidFilterDataProvider(): array
     {
         return [
             // description, uuid value
@@ -70,9 +69,9 @@ class UuidBinaryTypeTest extends BookstoreTestBase
     }
 
     /**
-     * @dataProvider uuidFilterDataProvider
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('uuidFilterDataProvider')]
     public function testQueryConvertsUuidParamToBin(string $description, $uuidValue)
     {
         $params = [];
@@ -83,22 +82,21 @@ class UuidBinaryTypeTest extends BookstoreTestBase
         $this->assertSame($expectedBin, $paramValue, $description . ' - Uuid query params should be converted');
     }
 
-    public function queryConfiguratorDataProvider(){
-        $uuidBin = UuidConverter::uuidToBin($this->uuid, true);
+    public static function queryConfiguratorDataProvider(){
+        $uuidBin = UuidConverter::uuidToBin(static::$uuid, true);
 
         return [
             // description, configurator
             //['where string', fn(Book2Query $query) => $query->where("book2.uuid_bin = '$uuidBin'")],
             ['where with param', fn(Book2Query $query) => $query->where("book2.uuid_bin = ?", $uuidBin, \PDO::PARAM_LOB)],
-            ['filterBy', fn(Book2Query $query) => $query->filterByUuidBin($this->uuid)],
+            ['filterBy', fn(Book2Query $query) => $query->filterByUuidBin(static::$uuid)],
         ];
     }
 
     /**
-     * @dataProvider queryConfiguratorDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('queryConfiguratorDataProvider')]
     public function testQueryResolvesUuidFilter(string $description, $queryConfigurator)
     {
         $bookQuery = Book2Query::create();
@@ -141,5 +139,20 @@ class UuidBinaryTypeTest extends BookstoreTestBase
         $book->reload();
 
         $this->assertSame($updatedTitle, $book->getTitle());
+    }
+
+    public function testUuidBinaryFromInstancePool(): void
+    {
+        BookUuidBinaryQuery::create()->deleteAll();
+        $uuid = 'b41a29db-cf78-4d43-83a9-4cd3e1e1b41a';
+        $book = new BookUuidBinary();
+        $book->setId($uuid)->setTitle('First Title')->save();
+
+        $updatedTitle = 'Second Title';
+        $book->setTitle($updatedTitle);
+
+        $loadedBook = BookUuidBinaryQuery::create()->findOneById($uuid);
+        $this->assertSame($book, $loadedBook, 'Should retrieve book from cache'); 
+        $this->assertSame($updatedTitle, $loadedBook->getTitle(), 'Should keep unsaved changes');       
     }
 }

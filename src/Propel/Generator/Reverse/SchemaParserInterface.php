@@ -4,7 +4,7 @@ declare(strict_types = 1);
 
 namespace Propel\Generator\Reverse;
 
-use Propel\Generator\Config\GeneratorConfigInterface;
+use Propel\Generator\Config\AbstractGeneratorConfig;
 use Propel\Generator\Model\Database;
 use Propel\Generator\Platform\PlatformInterface;
 use Propel\Runtime\Connection\ConnectionInterface;
@@ -33,11 +33,11 @@ interface SchemaParserInterface
     /**
      * Sets the GeneratorConfig to use in the parsing.
      *
-     * @param \Propel\Generator\Config\GeneratorConfigInterface $config
+     * @param \Propel\Generator\Config\AbstractGeneratorConfig $config
      *
      * @return void
      */
-    public function setGeneratorConfig(GeneratorConfigInterface $config): void;
+    public function setGeneratorConfig(AbstractGeneratorConfig $config): void;
 
     /**
      * Gets array of warning messages.

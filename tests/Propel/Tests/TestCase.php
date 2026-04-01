@@ -11,19 +11,21 @@ namespace Propel\Tests;
 use PHPUnit\Framework\TestCase as PHPUnitTestCase;
 use Propel\Generator\Builder\Util\SchemaReader;
 use Propel\Generator\Config\QuickGeneratorConfig;
+use Propel\Generator\Model\Column;
 use Propel\Generator\Model\Database;
 use Propel\Generator\Platform\PlatformInterface;
 use Propel\Generator\Platform\SqlitePlatform;
 use ReflectionClass;
 use ReflectionProperty;
 use function is_object;
+use function sprintf;
 
 class TestCase extends PHPUnitTestCase
 {
     /**
      * @return string
      */
-    protected function getDriver()
+    protected static function getDriver(): string
     {
         return 'sqlite';
     }
@@ -38,11 +40,9 @@ class TestCase extends PHPUnitTestCase
      *
      * @return mixed
      */
-    protected function getSql($sql, $source = 'mysql', $target = null)
+    protected static function getSql($sql, $source = 'mysql', $target = null)
     {
-        if (!$target) {
-            $target = $this->getDriver();
-        }
+        $target ??= static::getDriver();
 
         if ($target === 'sqlite' && $source === 'mysql') {
             return preg_replace('/`([^`]*)`/', '[$1]', $sql);
@@ -64,57 +64,57 @@ class TestCase extends PHPUnitTestCase
      *
      * @return bool
      */
-    protected function isDb($db = 'mysql')
+    protected static function isDb($db = 'mysql')
     {
-        return $this->getDriver() == $db;
+        return static::getDriver() == $db;
     }
 
     /**
      * @return bool
      */
-    protected function runningOnPostgreSQL()
+    protected static function runningOnPostgreSQL()
     {
-        return $this->isDb('pgsql');
+        return static::isDb('pgsql');
     }
 
     /**
      * @return bool
      */
-    protected function runningOnMySQL()
+    protected static function runningOnMySQL()
     {
-        return $this->isDb('mysql');
+        return static::isDb('mysql');
     }
 
     /**
      * @return bool
      */
-    protected function runningOnSQLite()
+    protected static function runningOnSQLite()
     {
-        return $this->isDb('sqlite');
+        return static::isDb('sqlite');
     }
 
     /**
      * @return bool
      */
-    protected function runningOnOracle()
+    protected static function runningOnOracle()
     {
-        return $this->isDb('oracle');
+        return static::isDb('oracle');
     }
 
     /**
      * @return bool
      */
-    protected function runningOnMSSQL()
+    protected static function runningOnMSSQL()
     {
-        return $this->isDb('mssql');
+        return static::isDb('mssql');
     }
 
     /**
      * @return \Propel\Generator\Platform\PlatformInterface
      */
-    protected function getPlatform(): PlatformInterface
+    protected static function getPlatform(): PlatformInterface
     {
-        $className = sprintf('\\Propel\\Generator\\Platform\\%sPlatform', ucfirst($this->getDriver()));
+        $className = sprintf('\\Propel\\Generator\\Platform\\%sPlatform', ucfirst(static::getDriver()));
 
         return new $className();
     }
@@ -124,13 +124,11 @@ class TestCase extends PHPUnitTestCase
      *
      * @return \Propel\Generator\Reverse\SchemaParserInterface
      */
-    protected function getParser($con)
+    protected static function getParser($con)
     {
-        $className = sprintf('\\Propel\\Generator\\Reverse\\%sSchemaParser', ucfirst($this->getDriver()));
+        $className = sprintf('\\Propel\\Generator\\Reverse\\%sSchemaParser', ucfirst(static::getDriver()));
 
-        $obj = new $className($con);
-
-        return $obj;
+        return new $className($con);
     }
 
     /**
@@ -141,12 +139,13 @@ class TestCase extends PHPUnitTestCase
      * @param class-string|object $obj Instance with protected or private methods
      * @param string $name Name of the protected or private method
      * @param array $args Argumens for method
+     * @param class-string|null $referenceClass Optional parent class owning the property
      *
      * @return mixed Result of method call
      */
-    public function callMethod(string|object $obj, string $name, array $args = [])
+    public function callMethod(string|object $obj, string $name, array $args = [], string|null $referenceClass = null)
     {
-        $class = new ReflectionClass($obj);
+        $class = new ReflectionClass($referenceClass ?? $obj);
         $method = $class->getMethod($name);
         if (version_compare(PHP_VERSION, '8.1.0', '<')) {
             $method->setAccessible(true); // Use this if you are running PHP older than 8.1.0
@@ -158,7 +157,7 @@ class TestCase extends PHPUnitTestCase
     /**
      * Get private or protected property.
      *
-     * @param object|class-string $obj Instance with protected or private property
+     * @param class-string|object $obj Instance with protected or private property
      * @param string $name Name of the protected or private property
      *
      * @return ReflectionProperty
@@ -177,30 +176,32 @@ class TestCase extends PHPUnitTestCase
     /**
      * Get private or protected property value.
      *
-     * @param object|class-string $obj Instance with protected or private property
+     * @param class-string|object $obj Instance with protected or private property
      * @param string $name Name of the protected or private property
+     * @param class-string|null $referenceClass Optional parent class owning the property
      *
      * @return mixed
      */
-    public function getObjectPropertyValue($obj, string $name)
+    public function getObjectPropertyValue($obj, string $name, string|null $referenceClass = null)
     {
         $getValueParam = is_object($obj) ? $obj : null;
 
-        return $this->getReflectionProperty($obj, $name)->getValue($getValueParam);
+        return $this->getReflectionProperty($referenceClass ?? $obj, $name)->getValue($getValueParam);
     }
 
     /**
      * Set private or protected property
      *
-     * @param object|class-string $obj Instance with protected or private property
+     * @param class-string|object $obj Instance with protected or private property
      * @param string $name Name of the protected or private property
      * @param mixed $value New value for property
+     * @param class-string|null $referenceClass Optional parent class owning the property
      *
      * @return void
      */
-    public function setObjectPropertyValue($obj, string $name, $value): void
+    public function setObjectPropertyValue($obj, string $name, $value, string|null $referenceClass = null): void
     {
-        $this->getReflectionProperty($obj, $name)->setValue($obj, $value);
+        $this->getReflectionProperty($referenceClass ?? $obj, $name)->setValue($obj, $value);
     }
 
     /**
@@ -240,10 +241,10 @@ class TestCase extends PHPUnitTestCase
      * @param string $schema
      * @return Database|null
      */
-    public function buildDatabaseFromSchema(
+    public static function buildDatabaseFromSchema(
         string $schema,
-        array|null $additionalConfig,
-        PlatformInterface|null $platform,
+        array|null $additionalConfig = null,
+        PlatformInterface|null $platform = null,
     ): Database {
         $config = new QuickGeneratorConfig($additionalConfig);
         $platform ??= new SqlitePlatform();
@@ -253,5 +254,22 @@ class TestCase extends PHPUnitTestCase
         $schema = $schemaReader->parseString($schema);
 
         return $schema->getDatabase(); // does final initialization
+    }
+
+    /**
+     * @param PlatformInterface $platform
+     * @param bool $defaultToNative
+     * @param string $schema
+     * @return Column|null
+     */
+    public static function buildColumnFromSchema(
+        string $columnXml,
+        array|null $additionalConfig = null,
+        PlatformInterface|null $platform = null,
+    ): Column {
+        $schema = "<database><table name='table'>$columnXml</table></database";
+        $database = static::buildDatabaseFromSchema($schema, $additionalConfig, $platform);
+
+        return $database->getTable('table')->getColumns()[0];
     }
 }

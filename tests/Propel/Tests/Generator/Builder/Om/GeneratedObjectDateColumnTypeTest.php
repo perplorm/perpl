@@ -45,13 +45,25 @@ XML;
         $dateValue = new DateTimeImmutable('2021-06-25 12:26');
         $entity->setDatecolumn($dateValue);
 
+        $invokedCounts = $this->exactly(2);
         $insertStatement = $this->createMockInsertStatement();
         $insertStatement
+            ->expects($invokedCounts)
             ->method('bindValue')
+            ->willReturnCallback(function (...$args) use ($invokedCounts, $dateValue) {
+                $expectedArgs = $invokedCounts->numberOfInvocations() === 1
+                    ? [':p0', null, PDO::PARAM_INT]
+                    : [':p1', $dateValue->format('Y-m-d'), PDO::PARAM_STR];
+
+                $this->assertEquals($expectedArgs, $args);
+
+                return true;
+            });
+            /*
             ->withConsecutive(
                 [':p0', null, PDO::PARAM_INT],
                 [':p1', $dateValue->format('Y-m-d'), PDO::PARAM_STR]
-            );
+            );*/
 
         $con = $this->createMockConnection();
         $con

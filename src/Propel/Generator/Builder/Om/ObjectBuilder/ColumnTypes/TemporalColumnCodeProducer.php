@@ -60,7 +60,7 @@ class TemporalColumnCodeProducer extends ColumnCodeProducer
             return $defaultValue;
         }
 
-        $fmt = $this->objectBuilder->getTemporalFormatter($this->column);
+        $fmt = $this->getPlatformOrFail()->getTemporalFormatter($this->column);
         try {
             if (
                 !($this->getPlatform() instanceof MysqlPlatform &&
@@ -242,7 +242,7 @@ class TemporalColumnCodeProducer extends ColumnCodeProducer
         $dateTimeClass = $this->resolveColumnDateTimeClass($this->column);
         $this->declareClasses('\Propel\Runtime\Util\PropelDateTime');
 
-        $fmt = var_export($this->objectBuilder->getTemporalFormatter($col), true);
+        $fmt = var_export($this->getPlatformOrFail()->getTemporalFormatter($col), true);
 
         $script .= "
         \$dt = PropelDateTime::newInstance(\$v, null, '$dateTimeClass');
@@ -275,7 +275,7 @@ class TemporalColumnCodeProducer extends ColumnCodeProducer
 
         $script .= "
                 \$this->$clo = \$dt === null ? null : clone \$dt;
-                \$this->modifiedColumns[" . $this->objectBuilder->getColumnConstant($col) . "] = true;
+                \$this->modifiedColumns[" . $this->builder->getColumnConstant($col) . "] = true;
             }
         } // if either are not null
 ";

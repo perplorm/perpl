@@ -9,9 +9,12 @@
 namespace Propel\Tests\Generator\Reverse;
 
 use PDO;
+use Propel\Generator\Config\QuickGeneratorConfig;
 use Propel\Generator\Model\Column;
 use Propel\Generator\Model\Table;
 use Propel\Generator\Model\ColumnDefaultValue;
+use Propel\Generator\Model\Database;
+use Propel\Generator\Platform\DefaultPlatform;
 use Propel\Generator\Reverse\MysqlSchemaParser;
 use Propel\Tests\Bookstore\Map\BookTableMap;
 
@@ -23,7 +26,7 @@ use Propel\Tests\Bookstore\Map\BookTableMap;
  * @group database
  * @group mysql
  */
-class MysqlSchemaParserTest extends AbstractSchemaParserTest
+class MysqlSchemaParserTest extends AbstractSchemaParserTestBase
 {
     /**
      * @return string
@@ -85,7 +88,7 @@ EOT;
         $this->assertEquals('Book Title', $bookTable->getColumn('title')->getDescription());
     }
 
-    public function typeLiterals()
+    public static function typeLiterals()
     {
         return [
             // input type literal, out native type, out sql, out size, out precision
@@ -101,9 +104,7 @@ EOT;
         ];
     }
 
-    /**
-     * @dataProvider typeLiterals
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('typeLiterals')]
     public function testParseType(
         string $inputType,
         ...$expectedOutput)
@@ -149,5 +150,112 @@ EOT;
         $updatedAtColumn = $onUpdateTable->getColumn('updated');
         $this->assertEquals(ColumnDefaultValue::TYPE_EXPR, $updatedAtColumn->getDefaultValue()->getType());
         $this->assertEquals('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP', $updatedAtColumn->getDefaultValue()->getValue());
+    }
+
+    /**
+     * @return string[][]
+     */
+    public static function TextColumnDefaultValueDataProvider(): array
+    {
+        return [
+            ["_latin1\'Foo\'", 'Foo'],
+            ["_utf8mb3\'Foo\'", 'Foo'],
+            ["_utf8mb3\'Saying \\\'Foo\\\' means nothing\'", "Saying 'Foo' means nothing"],
+            ["_utf8mb3\'Saying \"Foo\" means nothing\'", 'Saying "Foo" means nothing'],
+            ["_utf8mb4\'\'", ''],
+            ["'Saying \'Foo\' means nothing'", "Saying 'Foo' means nothing"],
+            ["'Foo'", 'Foo'],
+            ["''", ''],
+            ['', ''],
+        ];
+    }
+
+    /**
+     *
+     * @param string $defaultValue
+     * @param string $expected
+     * @return void
+     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('TextColumnDefaultValueDataProvider')]
+    public function testTextColumnDefaultValue(string $defaultValue, string $expected): void
+    {
+        $parser = new MysqlSchemaParser();
+        $actual = $this->callMethod($parser, 'unwrapDefaultValueString', [$defaultValue]);
+
+        $this->assertSame($expected, $actual);
+    }
+
+    /**
+     * @return void
+     */
+    public function testTextDefaultValues(): void
+    {
+        $serverVersion = $this->con->getAttribute(PDO::ATTR_SERVER_VERSION);
+        $isMariaDb = stripos($serverVersion, 'mariadb') !== false;
+
+        if ($isMariaDb) {
+            if (version_compare(preg_replace('/^.*?(\d+\.\d+\.\d+).*$/', '$1', $serverVersion), '10.2.1', '<')) {
+                $this->markTestSkipped('TEXT columns with DEFAULT values require MariaDB 10.2.1+');
+            }
+        } else {
+            if (version_compare($serverVersion, '8.0.13', '<')) {
+                $this->markTestSkipped('TEXT columns with DEFAULT values require MySQL 8.0.13+');
+            }
+        }
+
+        $this->con->exec('DROP TABLE IF EXISTS test_text_defaults');
+        $this->con->exec("CREATE TABLE test_text_defaults (
+            id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+            content_text TEXT DEFAULT ('hello text'),
+            content_text_escaped TEXT DEFAULT ('foo says \'bar\''),
+            content_text_empty TEXT DEFAULT (''),
+            content_text_not_null TEXT NOT NULL,
+            content_text_none TEXT
+        )");
+
+        try {
+            $parser = new MysqlSchemaParser($this->con);
+            $parser->setGeneratorConfig(new QuickGeneratorConfig());
+
+            $database = new Database();
+            $database->setPlatform(new DefaultPlatform());
+            $parser->parse($database);
+
+            $table = $database->getTable('test_text_defaults');
+            $this->assertNotNull($table, 'Table test_text_defaults should be parsed');
+
+            // TEXT with default value
+            $contentText = $table->getColumn('content_text');
+            $this->assertNotNull($contentText, 'Column content_text should exist');
+            $this->assertNotNull($contentText->getDefaultValue(), 'TEXT column default value should be preserved');
+            $this->assertEquals(ColumnDefaultValue::TYPE_VALUE, $contentText->getDefaultValue()->getType());
+            $this->assertEquals('hello text', $contentText->getDefaultValue()->getValue());
+
+            // TEXT with default value
+            $contentText = $table->getColumn('content_text_escaped');
+            $this->assertNotNull($contentText, 'Column content_text should exist');
+            $this->assertNotNull($contentText->getDefaultValue(), 'TEXT column default value should be preserved');
+            $this->assertEquals(ColumnDefaultValue::TYPE_VALUE, $contentText->getDefaultValue()->getType());
+            $this->assertEquals("foo says 'bar'", $contentText->getDefaultValue()->getValue());
+
+            // TEXT with empty string default
+            $contentTextEmpty = $table->getColumn('content_text_empty');
+            $this->assertNotNull($contentTextEmpty, 'Column content_text_empty should exist');
+            $this->assertNotNull($contentTextEmpty->getDefaultValue(), 'TEXT column with empty default should be preserved');
+            $this->assertEquals(ColumnDefaultValue::TYPE_VALUE, $contentTextEmpty->getDefaultValue()->getType());
+            $this->assertEquals('', $contentTextEmpty->getDefaultValue()->getValue());
+
+            // TEXT NOT NULL without default
+            $contentTextNotNull = $table->getColumn('content_text_not_null');
+            $this->assertNotNull($contentTextNotNull, 'Column content_text_not_null should exist');
+            $this->assertNull($contentTextNotNull->getDefaultValue(), 'TEXT NOT NULL column without default should have no default');
+
+            // TEXT without default (nullable, implicit DEFAULT NULL)
+            $contentTextNone = $table->getColumn('content_text_none');
+            $this->assertNotNull($contentTextNone, 'Column content_text_none should exist');
+            $this->assertNull($contentTextNone->getDefaultValue(), 'TEXT column without explicit default should have no default');
+        } finally {
+            $this->con->exec('DROP TABLE IF EXISTS test_text_defaults');
+        }
     }
 }

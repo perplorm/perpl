@@ -15,6 +15,11 @@ use LogicException;
 class InterfaceBuilder extends AbstractObjectBuilder
 {
     /**
+     * @var \Propel\Generator\Builder\Om\BuilderType|null
+     */
+    public const BUILDER_TYPE = BuilderType::Interface;
+
+    /**
      * Returns the name of the current class being built.
      *
      * @throws \LogicException

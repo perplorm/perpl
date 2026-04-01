@@ -6,7 +6,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Propel\Tests\Generator\Builder\Om;
+namespace Propel\Tests\Generator\Builder\Om\ObjectBuilder\ColumnTypes;
 
 use Propel\Generator\Builder\Om\ObjectBuilder;
 use Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes\ColumnCodeProducer;
@@ -18,7 +18,7 @@ use Propel\Tests\TestCase;
  */
 class ColumnCodeProducerTest extends TestCase
 {
-    public function columnAttributeConfigurationDataProvider(): array
+    public static function columnAttributeConfigurationDataProvider(): array
     {
         return [
             ['should produce typed column attributes by default', 'protected int|null $id = null;', []],
@@ -27,9 +27,9 @@ class ColumnCodeProducerTest extends TestCase
     }
 
     /**
-     * @dataProvider columnAttributeConfigurationDataProvider
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('columnAttributeConfigurationDataProvider')]
     public function testAddDefaultColumnAttributeConfiguration(string $description, $expectedDeclaration, array $additionalGeneratorConfig): void
     {
         $schema = <<<EOT

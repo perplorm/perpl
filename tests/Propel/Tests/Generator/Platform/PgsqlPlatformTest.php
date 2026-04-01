@@ -25,7 +25,7 @@ class PgsqlPlatformTest extends PlatformTestProvider
      *
      * @return \Propel\Generator\Platform\PgsqlPlatform
      */
-    protected function getPlatform(): PlatformInterface
+    protected static function getPlatform(): PlatformInterface
     {
         return new PgsqlPlatform();
     }
@@ -38,11 +38,11 @@ class PgsqlPlatformTest extends PlatformTestProvider
         $table = new Table('foo');
         $table->setIdMethod(IdMethod::NATIVE);
         $col = new Column('bar');
-        $col->getDomain()->copy($this->getPlatform()->getDomainForType('INTEGER'));
+        $col->getDomain()->copy(static::getPlatform()->getDomainForType('INTEGER'));
         $col->setAutoIncrement(true);
         $table->addColumn($col);
         $expected = 'foo_bar_seq';
-        $this->assertEquals($expected, $this->getPlatform()->getSequenceName($table));
+        $this->assertEquals($expected, static::getPlatform()->getSequenceName($table));
     }
 
     /**
@@ -57,18 +57,17 @@ class PgsqlPlatformTest extends PlatformTestProvider
         $table->addIdMethodParameter($idMethodParameter);
         $table->setIdMethod(IdMethod::NATIVE);
         $col = new Column('bar');
-        $col->getDomain()->copy($this->getPlatform()->getDomainForType('INTEGER'));
+        $col->getDomain()->copy(static::getPlatform()->getDomainForType('INTEGER'));
         $col->setAutoIncrement(true);
         $table->addColumn($col);
         $expected = 'foo_sequence';
-        $this->assertEquals($expected, $this->getPlatform()->getSequenceName($table));
+        $this->assertEquals($expected, static::getPlatform()->getSequenceName($table));
     }
 
     /**
-     * @dataProvider providerForTestGetAddTablesDDL
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('providerForTestGetAddTablesDDL')]
     public function testGetAddTablesDDL($schema)
     {
         $database = $this->getDatabaseFromSchema($schema);
@@ -113,19 +112,18 @@ ALTER TABLE "book" ADD CONSTRAINT "book_fk_ea464c"
 COMMIT;
 
 EOF;
-        $this->assertEquals($expected, $this->getPlatform()->getAddTablesDDL($database));
+        $this->assertEquals($expected, static::getPlatform()->getAddTablesDDL($database));
     }
 
     /**
-     * @dataProvider providerForTestGetAddTablesSkipSQLDDL
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('providerForTestGetAddTablesSkipSQLDDL')]
     public function testGetAddTablesDDLSkipSQL($schema)
     {
         $database = $this->getDatabaseFromSchema($schema);
         $expected = '';
-        $this->assertEquals($expected, $this->getPlatform()->getAddTablesDDL($database));
+        $this->assertEquals($expected, static::getPlatform()->getAddTablesDDL($database));
     }
 
     /**
@@ -216,14 +214,13 @@ SET search_path TO public;
 COMMIT;
 
 EOF;
-        $this->assertEquals($expected, $this->getPlatform()->getAddTablesDDL($database));
+        $this->assertEquals($expected, static::getPlatform()->getAddTablesDDL($database));
     }
 
     /**
-     * @dataProvider providerForTestGetAddTablesDDLSchema
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('providerForTestGetAddTablesDDLSchema')]
     public function testGetAddTablesDDLSchemas($schema)
     {
         $database = $this->getDatabaseFromSchema($schema);
@@ -287,14 +284,13 @@ ALTER TABLE "x"."book_summary" ADD CONSTRAINT "book_summary_fk_23450f"
 COMMIT;
 
 EOF;
-        $this->assertEquals($expected, $this->getPlatform()->getAddTablesDDL($database));
+        $this->assertEquals($expected, static::getPlatform()->getAddTablesDDL($database));
     }
 
     /**
-     * @dataProvider providerForTestGetAddTableDDLSimplePK
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('providerForTestGetAddTableDDLSimplePK')]
     public function testGetAddTableDDLSimplePK($schema)
     {
         $table = $this->getTableFromSchema($schema);
@@ -310,14 +306,13 @@ CREATE TABLE "foo"
 COMMENT ON TABLE "foo" IS 'This is foo table';
 
 EOF;
-        $this->assertEquals($expected, $this->getPlatform()->getAddTableDDL($table));
+        $this->assertEquals($expected, static::getPlatform()->getAddTableDDL($table));
     }
 
     /**
-     * @dataProvider providerForTestGetAddTableDDLCompositePK
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('providerForTestGetAddTableDDLCompositePK')]
     public function testGetAddTableDDLCompositePK($schema)
     {
         $table = $this->getTableFromSchema($schema);
@@ -332,14 +327,13 @@ CREATE TABLE "foo"
 );
 
 EOF;
-        $this->assertEquals($expected, $this->getPlatform()->getAddTableDDL($table));
+        $this->assertEquals($expected, static::getPlatform()->getAddTableDDL($table));
     }
 
     /**
-     * @dataProvider providerForTestGetAddTableDDLUniqueIndex
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('providerForTestGetAddTableDDLUniqueIndex')]
     public function testGetAddTableDDLUniqueIndex($schema)
     {
         $table = $this->getTableFromSchema($schema);
@@ -354,7 +348,7 @@ CREATE TABLE "foo"
 );
 
 EOF;
-        $this->assertEquals($expected, $this->getPlatform()->getAddTableDDL($table));
+        $this->assertEquals($expected, static::getPlatform()->getAddTableDDL($table));
     }
 
     /**
@@ -386,14 +380,13 @@ CREATE TABLE "foo"
 SET search_path TO public;
 
 EOF;
-        $this->assertEquals($expected, $this->getPlatform()->getAddTableDDL($table));
+        $this->assertEquals($expected, static::getPlatform()->getAddTableDDL($table));
     }
 
     /**
-     * @dataProvider providerForTestGetAddTableDDLSchema
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('providerForTestGetAddTableDDLSchema')]
     public function testGetAddTableDDLSchema($schema)
     {
         $table = $this->getTableFromSchema($schema, 'Woopah.foo');
@@ -407,7 +400,7 @@ CREATE TABLE "Woopah"."foo"
 );
 
 EOF;
-        $this->assertEquals($expected, $this->getPlatform()->getAddTableDDL($table));
+        $this->assertEquals($expected, static::getPlatform()->getAddTableDDL($table));
     }
 
     /**
@@ -435,7 +428,7 @@ CREATE TABLE "foo"
 );
 
 EOF;
-        $this->assertEquals($expected, $this->getPlatform()->getAddTableDDL($table));
+        $this->assertEquals($expected, static::getPlatform()->getAddTableDDL($table));
     }
 
     /**
@@ -466,7 +459,7 @@ COMMENT ON COLUMN "foo"."id" IS 'identifier column';
 COMMENT ON COLUMN "foo"."bar" IS 'your name here';
 
 EOF;
-        $this->assertEquals($expected, $this->getPlatform()->getAddTableDDL($table));
+        $this->assertEquals($expected, static::getPlatform()->getAddTableDDL($table));
     }
 
     /**
@@ -478,7 +471,7 @@ EOF;
         $expected = '
 DROP TABLE IF EXISTS "foo" CASCADE;
 ';
-        $this->assertEquals($expected, $this->getPlatform()->getDropTableDDL($table));
+        $this->assertEquals($expected, static::getPlatform()->getDropTableDDL($table));
     }
 
     /**
@@ -506,14 +499,13 @@ DROP TABLE IF EXISTS "foo" CASCADE;
 SET search_path TO public;
 
 EOF;
-        $this->assertEquals($expected, $this->getPlatform()->getDropTableDDL($table));
+        $this->assertEquals($expected, static::getPlatform()->getDropTableDDL($table));
     }
 
     /**
-     * @dataProvider providerForTestGetAddTableDDLSchema
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('providerForTestGetAddTableDDLSchema')]
     public function testGetDropTableDDLSchema($schema)
     {
         $table = $this->getTableFromSchema($schema, 'Woopah.foo');
@@ -522,7 +514,7 @@ EOF;
 DROP TABLE IF EXISTS "Woopah"."foo" CASCADE;
 
 EOF;
-        $this->assertEquals($expected, $this->getPlatform()->getDropTableDDL($table));
+        $this->assertEquals($expected, static::getPlatform()->getDropTableDDL($table));
     }
 
     /**
@@ -540,7 +532,7 @@ DROP TABLE IF EXISTS "foo" CASCADE;
 
 DROP SEQUENCE "foo_sequence";
 ';
-        $this->assertEquals($expected, $this->getPlatform()->getDropTableDDL($table));
+        $this->assertEquals($expected, static::getPlatform()->getDropTableDDL($table));
     }
 
     /**
@@ -549,13 +541,13 @@ DROP SEQUENCE "foo_sequence";
     public function testGetColumnDDL()
     {
         $c = new Column('foo');
-        $c->getDomain()->copy($this->getPlatform()->getDomainForType('DOUBLE'));
+        $c->getDomain()->copy(static::getPlatform()->getDomainForType('DOUBLE'));
         $c->getDomain()->replaceScale(2);
         $c->getDomain()->replaceSize(3);
         $c->setNotNull(true);
         $c->getDomain()->createDefaultValue(123);
         $expected = '"foo" DOUBLE PRECISION DEFAULT 123 NOT NULL';
-        $this->assertEquals($expected, $this->getPlatform()->getColumnDDL($c));
+        $this->assertEquals($expected, static::getPlatform()->getColumnDDL($c));
     }
 
     /**
@@ -564,16 +556,16 @@ DROP SEQUENCE "foo_sequence";
     public function testGetColumnDDLAutoIncrement()
     {
         $database = new Database();
-        $database->setPlatform($this->getPlatform());
+        $database->setPlatform(static::getPlatform());
         $table = new Table('foo_table');
         $table->setIdMethod(IdMethod::NATIVE);
         $database->addTable($table);
         $column = new Column('foo');
-        $column->getDomain()->copy($this->getPlatform()->getDomainForType(PropelTypes::BIGINT));
+        $column->getDomain()->copy(static::getPlatform()->getDomainForType(PropelTypes::BIGINT));
         $column->setAutoIncrement(true);
         $table->addColumn($column);
         $expected = '"foo" bigserial';
-        $this->assertEquals($expected, $this->getPlatform()->getColumnDDL($column));
+        $this->assertEquals($expected, static::getPlatform()->getColumnDDL($column));
     }
 
     /**
@@ -582,14 +574,14 @@ DROP SEQUENCE "foo_sequence";
     public function testGetColumnDDLCustomSqlType()
     {
         $column = new Column('foo');
-        $column->getDomain()->copy($this->getPlatform()->getDomainForType('DOUBLE'));
+        $column->getDomain()->copy(static::getPlatform()->getDomainForType('DOUBLE'));
         $column->getDomain()->replaceScale(2);
         $column->getDomain()->replaceSize(3);
         $column->setNotNull(true);
         $column->getDomain()->createDefaultValue(123);
         $column->getDomain()->replaceSqlType('DECIMAL(5,6)');
         $expected = '"foo" DECIMAL(5,6) DEFAULT 123 NOT NULL';
-        $this->assertEquals($expected, $this->getPlatform()->getColumnDDL($column));
+        $this->assertEquals($expected, static::getPlatform()->getColumnDDL($column));
     }
 
     /**
@@ -602,7 +594,7 @@ DROP SEQUENCE "foo_sequence";
         $column->setPrimaryKey(true);
         $table->addColumn($column);
         $expected = 'PRIMARY KEY ("bar")';
-        $this->assertEquals($expected, $this->getPlatform()->getPrimaryKeyDDL($table));
+        $this->assertEquals($expected, static::getPlatform()->getPrimaryKeyDDL($table));
     }
 
     /**
@@ -618,68 +610,63 @@ DROP SEQUENCE "foo_sequence";
         $column2->setPrimaryKey(true);
         $table->addColumn($column2);
         $expected = 'PRIMARY KEY ("bar1","bar2")';
-        $this->assertEquals($expected, $this->getPlatform()->getPrimaryKeyDDL($table));
+        $this->assertEquals($expected, static::getPlatform()->getPrimaryKeyDDL($table));
     }
 
     /**
-     * @dataProvider providerForTestPrimaryKeyDDL
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('providerForTestPrimaryKeyDDL')]
     public function testGetDropPrimaryKeyDDL($table)
     {
         $expected = '
 ALTER TABLE "foo" DROP CONSTRAINT "foo_pkey";
 ';
-        $this->assertEquals($expected, $this->getPlatform()->getDropPrimaryKeyDDL($table));
+        $this->assertEquals($expected, static::getPlatform()->getDropPrimaryKeyDDL($table));
     }
 
     /**
-     * @dataProvider providerForTestPrimaryKeyDDL
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('providerForTestPrimaryKeyDDL')]
     public function testGetAddPrimaryKeyDDL($table)
     {
         $expected = '
 ALTER TABLE "foo" ADD PRIMARY KEY ("bar");
 ';
-        $this->assertEquals($expected, $this->getPlatform()->getAddPrimaryKeyDDL($table));
+        $this->assertEquals($expected, static::getPlatform()->getAddPrimaryKeyDDL($table));
     }
 
     /**
-     * @dataProvider providerForTestGetIndexDDL
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('providerForTestGetIndexDDL')]
     public function testAddIndexDDL($index)
     {
         $expected = '
 CREATE INDEX "babar" ON "foo" ("bar1","bar2");
 ';
-        $this->assertEquals($expected, $this->getPlatform()->getAddIndexDDL($index));
+        $this->assertEquals($expected, static::getPlatform()->getAddIndexDDL($index));
     }
 
     /**
-     * @dataProvider providerForTestGetUniqueIndexDDL
      *
      * @param \Propel\Generator\Model\Unique $index
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('providerForTestGetUniqueIndexDDL')]
     public function testAddUniqueIndexDDL(Unique $index): void
     {
         $expected = '
 ALTER TABLE "foo" ADD CONSTRAINT "babar" UNIQUE ("bar1");
 ';
-        $this->assertEquals($expected, $this->getPlatform()->getAddIndexDDL($index));
+        $this->assertEquals($expected, static::getPlatform()->getAddIndexDDL($index));
     }
 
     /**
-     * @dataProvider providerForTestGetIndicesDDL
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('providerForTestGetIndicesDDL')]
     public function testAddIndicesDDL($table)
     {
         $expected = '
@@ -687,49 +674,45 @@ CREATE INDEX "babar" ON "foo" ("bar1","bar2");
 
 CREATE INDEX "foo_index" ON "foo" ("bar1");
 ';
-        $this->assertEquals($expected, $this->getPlatform()->getAddIndicesDDL($table));
+        $this->assertEquals($expected, static::getPlatform()->getAddIndicesDDL($table));
     }
 
     /**
-     * @dataProvider providerForTestGetIndexDDL
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('providerForTestGetIndexDDL')]
     public function testDropIndexDDL($index)
     {
         $expected = '
 DROP INDEX "babar";
 ';
-        $this->assertEquals($expected, $this->getPlatform()->getDropIndexDDL($index));
+        $this->assertEquals($expected, static::getPlatform()->getDropIndexDDL($index));
     }
 
     /**
-     * @dataProvider providerForTestGetIndexDDL
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('providerForTestGetIndexDDL')]
     public function testGetIndexDDL($index)
     {
         $expected = 'INDEX "babar" ("bar1","bar2")';
-        $this->assertEquals($expected, $this->getPlatform()->getIndexDDL($index));
+        $this->assertEquals($expected, static::getPlatform()->getIndexDDL($index));
     }
 
     /**
-     * @dataProvider providerForTestGetUniqueDDL
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('providerForTestGetUniqueDDL')]
     public function testGetUniqueDDL($index)
     {
         $expected = 'CONSTRAINT "babar" UNIQUE ("bar1","bar2")';
-        $this->assertEquals($expected, $this->getPlatform()->getUniqueDDL($index));
+        $this->assertEquals($expected, static::getPlatform()->getUniqueDDL($index));
     }
 
     /**
-     * @dataProvider providerForTestGetForeignKeysDDL
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('providerForTestGetForeignKeysDDL')]
     public function testGetAddForeignKeysDDL($table)
     {
         $expected = '
@@ -743,14 +726,13 @@ ALTER TABLE "foo" ADD CONSTRAINT "foo_baz_fk"
     REFERENCES "baz" ("id")
     ON DELETE SET NULL;
 ';
-        $this->assertEquals($expected, $this->getPlatform()->getAddForeignKeysDDL($table));
+        $this->assertEquals($expected, static::getPlatform()->getAddForeignKeysDDL($table));
     }
 
     /**
-     * @dataProvider providerForTestGetForeignKeyDDL
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('providerForTestGetForeignKeyDDL')]
     public function testGetAddForeignKeyDDL($fk)
     {
         $expected = '
@@ -759,67 +741,62 @@ ALTER TABLE "foo" ADD CONSTRAINT "foo_bar_fk"
     REFERENCES "bar" ("id")
     ON DELETE CASCADE;
 ';
-        $this->assertEquals($expected, $this->getPlatform()->getAddForeignKeyDDL($fk));
+        $this->assertEquals($expected, static::getPlatform()->getAddForeignKeyDDL($fk));
     }
 
     /**
-     * @dataProvider providerForTestGetForeignKeySkipSqlDDL
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('providerForTestGetForeignKeySkipSqlDDL')]
     public function testGetAddForeignKeySkipSqlDDL($fk)
     {
         $expected = '';
-        $this->assertEquals($expected, $this->getPlatform()->getAddForeignKeyDDL($fk));
+        $this->assertEquals($expected, static::getPlatform()->getAddForeignKeyDDL($fk));
     }
 
     /**
-     * @dataProvider providerForTestGetForeignKeyDDL
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('providerForTestGetForeignKeyDDL')]
     public function testGetDropForeignKeyDDL($fk)
     {
         $expected = '
 ALTER TABLE "foo" DROP CONSTRAINT "foo_bar_fk";
 ';
-        $this->assertEquals($expected, $this->getPlatform()->getDropForeignKeyDDL($fk));
+        $this->assertEquals($expected, static::getPlatform()->getDropForeignKeyDDL($fk));
     }
 
     /**
-     * @dataProvider providerForTestGetForeignKeySkipSqlDDL
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('providerForTestGetForeignKeySkipSqlDDL')]
     public function testGetDropForeignKeySkipSqlDDL($fk)
     {
         $expected = '';
-        $this->assertEquals($expected, $this->getPlatform()->getDropForeignKeyDDL($fk));
+        $this->assertEquals($expected, static::getPlatform()->getDropForeignKeyDDL($fk));
     }
 
     /**
-     * @dataProvider providerForTestGetForeignKeyDDL
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('providerForTestGetForeignKeyDDL')]
     public function testGetForeignKeyDDL($fk)
     {
         $expected = 'CONSTRAINT "foo_bar_fk"
     FOREIGN KEY ("bar_id")
     REFERENCES "bar" ("id")
     ON DELETE CASCADE';
-        $this->assertEquals($expected, $this->getPlatform()->getForeignKeyDDL($fk));
+        $this->assertEquals($expected, static::getPlatform()->getForeignKeyDDL($fk));
     }
 
     /**
-     * @dataProvider providerForTestGetForeignKeySkipSqlDDL
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('providerForTestGetForeignKeySkipSqlDDL')]
     public function testGetForeignKeySkipSqlDDL($fk)
     {
         $expected = '';
-        $this->assertEquals($expected, $this->getPlatform()->getForeignKeyDDL($fk));
+        $this->assertEquals($expected, static::getPlatform()->getForeignKeyDDL($fk));
     }
 
     /**
@@ -832,7 +809,7 @@ ALTER TABLE "foo" DROP CONSTRAINT "foo_bar_fk";
 -- foo bar
 -----------------------------------------------------------------------
 ";
-        $this->assertEquals($expected, $this->getPlatform()->getCommentBlockDDL('foo bar'));
+        $this->assertEquals($expected, static::getPlatform()->getCommentBlockDDL('foo bar'));
     }
 
     /**
@@ -841,14 +818,13 @@ ALTER TABLE "foo" DROP CONSTRAINT "foo_bar_fk";
     public function assertCreateTableMatches(string $expected, $schema, ?string $tableName = 'foo' )
     {
         $table = $this->getTableFromSchema($schema, $tableName);
-        $this->assertEquals($expected, $this->getPlatform()->getAddTableDDL($table));
+        $this->assertEquals($expected, static::getPlatform()->getAddTableDDL($table));
     }
 
     /**
-     * @dataProvider providerForTestCreateSchemaWithUuidColumns
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('providerForTestCreateSchemaWithUuidColumns')]
     public function testCreateSchemaWithUuidColumns($schema)
     {
         $expected = <<< 'EOT'
@@ -865,10 +841,9 @@ EOT;
     }
 
     /**
-     * @dataProvider providerForTestCreateSchemaWithUuidBinaryColumns
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('providerForTestCreateSchemaWithUuidBinaryColumns')]
     public function testCreateSchemaWithUuidBinaryColumns($schema)
     {
         $expected = <<< 'EOT'

@@ -123,7 +123,7 @@ class BoolColumnCodeProducer extends ColumnCodeProducer
         $this->declareGlobalFunction('in_array', 'is_string', 'strtolower');
         $col = $this->column;
         $clo = $col->getLowercasedName();
-        $columnConstant = $this->objectBuilder->getColumnConstant($col);
+        $columnConstant = $this->builder->getColumnConstant($col);
 
         $script .= "
         if (\$v !== null) {

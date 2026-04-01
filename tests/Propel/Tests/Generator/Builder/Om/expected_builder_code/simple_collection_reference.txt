@@ -1,0 +1,41 @@
+<?php
+
+namespace Base\Collection;
+
+use Propel\Runtime\ActiveQuery\Criteria;
+use Propel\Runtime\Collection\ObjectCollection;
+use Propel\Runtime\Connection\ConnectionInterface;
+use Propel\Runtime\Formatter\ObjectFormatter;
+
+/**
+ * Custom collection for RelationTable.
+ *
+ * @extends \Propel\Runtime\Collection\ObjectCollection<\RelationTable>
+ */
+class RelationTableCollection extends ObjectCollection
+{
+    /**
+     * @param array $data
+     */
+    public function __construct(array $data = [])
+    {
+        parent::__construct($data);
+        $this->setModel('\RelationTable');
+        $this->setFormatter(new ObjectFormatter());
+    }
+
+    /**
+     * @param \Propel\Runtime\ActiveQuery\Criteria|null $criteria
+     * @param \Propel\Runtime\Connection\ConnectionInterface|null $con
+     *
+     * @return \Base\Collection\FkTableCollection
+     */
+    public function populateLeRelatedObjects(?Criteria $criteria = null, ?ConnectionInterface $con = null): FkTableCollection
+    {
+        /** @var \Base\Collection\FkTableCollection $collection */
+        $collection = $this->populateRelation('LeRelatedObject', $criteria, $con);
+
+        return $collection;
+    }
+
+}

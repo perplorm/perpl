@@ -65,7 +65,7 @@ EOF;
         QuickBuilder::buildSchema($schema);
     }
 
-    public function groupDataProvider(): array
+    public static function groupDataProvider(): array
     {
         $group1Data = [
             'column_index' => [2],
@@ -130,10 +130,9 @@ EOF;
     }
 
     /**
-     * @dataProvider groupDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('groupDataProvider')]
     public function testGetOutputGroupData($groupName, array $expectedGroupData)
     {
         $groupData = GeneratedTableMapOutputGroupTestTableTableMap::getOutputGroupData($groupName);

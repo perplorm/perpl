@@ -156,14 +156,9 @@ EOF;
     {
         $brokenSchema = 'lorem ipsum';
         $this->expectException(SchemaException::class);
-        try {
-            $this->reader->parseString($brokenSchema);
-        } catch (\Exception $e) {
-            $message = $e->getMessage();
-            $this->assertStringContainsString('XML error: Not well-formed', $message);
+        $this->expectExceptionMessage('XML error: Not well-formed');
 
-            throw $e;
-        }
+        $this->reader->parseString($brokenSchema);
     }
 
     /**
@@ -183,14 +178,9 @@ EOF;
 </database>
 EOF;
         $this->expectException(SchemaException::class);
-        try {
-            $this->reader->parseString($schemaWithMissingColumnName);
-        } catch (\Exception $e) {
-            $message = $e->getMessage();
-            $this->assertStringContainsString('Parameter misses expected attribute "name"', $message);
+        $this->expectExceptionMessage('Parameter misses expected attribute `name`');
 
-            throw $e;
-        }
+        $this->reader->parseString($schemaWithMissingColumnName);
     }
 
     /**
@@ -201,14 +191,9 @@ EOF;
         $schemaWithoutDatabase = '<table name="leTable"></table>';
         $xmlFileName = 'LeSchema.xml';
         $this->expectException(SchemaException::class);
-        try {
-            $this->reader->parseString($schemaWithoutDatabase, $xmlFileName);
-        } catch (\Exception $e) {
-            $message = $e->getMessage();
-            $this->assertStringContainsString($xmlFileName, $message);
+        $this->expectExceptionMessage($xmlFileName);
 
-            throw $e;
-        }
+        $this->reader->parseString($schemaWithoutDatabase, $xmlFileName);
     }
 
     /**

@@ -4,15 +4,18 @@ declare(strict_types = 1);
 
 namespace Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes;
 
+use Propel\Generator\Builder\Om\AbstractSubsectionCodeProducer;
 use Propel\Generator\Builder\Om\ObjectBuilder;
-use Propel\Generator\Builder\Om\ObjectBuilder\ObjectCodeProducer;
 use Propel\Generator\Model\Column;
 use function array_intersect;
 use function explode;
 use function settype;
 use function var_export;
 
-class ColumnCodeProducer extends ObjectCodeProducer
+/**
+ * @extends \Propel\Generator\Builder\Om\AbstractSubsectionCodeProducer<\Propel\Generator\Builder\Om\ObjectBuilder>
+ */
+class ColumnCodeProducer extends AbstractSubsectionCodeProducer
 {
     /**
      * @var \Propel\Generator\Model\Column
@@ -160,7 +163,7 @@ class ColumnCodeProducer extends ObjectCodeProducer
         $defaultValue = $this->getDefaultValueString();
         if ($this->column->isPhpObjectType()) {
             $assumedClassName = $this->declareClass($this->column->getPhpType());
-            $defaultValue = "new $assumedClassName($defaultValue )";
+            $defaultValue = "new $assumedClassName($defaultValue)";
         }
 
         return "
@@ -384,7 +387,7 @@ class ColumnCodeProducer extends ObjectCodeProducer
         }\n";
         }
 
-        $columnConstant = $this->objectBuilder->getColumnConstant($this->column);
+        $columnConstant = $this->builder->getColumnConstant($this->column);
         $script .= "
         if (\$this->$clo !== \$v) {
             \$this->$clo = \$v;
@@ -408,7 +411,7 @@ class ColumnCodeProducer extends ObjectCodeProducer
                 if (!$colFK) {
                     continue;
                 }
-                $attributeName = $this->objectBuilder->getFKVarName($fk);
+                $attributeName = $this->builder->getFKVarName($fk);
 
                 $script .= "
         if (\$this->$attributeName !== null && \$this->{$attributeName}->get{$colFK->getPhpName()}() !== \$v) {
@@ -427,14 +430,14 @@ class ColumnCodeProducer extends ObjectCodeProducer
                 $colFK = $tblFK->getColumn($fk->getMappedForeignColumn($this->column->getName()));
 
                 if ($refFK->isLocalPrimaryKey()) {
-                    $varName = $this->objectBuilder->getPKRefFKVarName($refFK);
+                    $varName = $this->builder->getPKRefFKVarName($refFK);
                     $script .= "
         // update associated " . $tblFK->getPhpName() . "
         if (\$this->$varName !== null) {
             \$this->{$varName}->set" . $colFK->getPhpName() . "(\$v);
         }\n";
                 } else {
-                    $collName = $this->objectBuilder->getRefFKCollVarName($refFK);
+                    $collName = $this->builder->getRefFKCollVarName($refFK);
                     $script .= "
 
         // update associated " . $tblFK->getPhpName() . "

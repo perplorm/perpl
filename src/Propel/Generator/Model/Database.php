@@ -4,9 +4,10 @@ declare(strict_types = 1);
 
 namespace Propel\Generator\Model;
 
-use Propel\Generator\Config\GeneratorConfigInterface;
+use Propel\Generator\Config\AbstractGeneratorConfig;
 use Propel\Generator\Exception\EngineException;
 use Propel\Generator\Exception\InvalidArgumentException;
+use Propel\Generator\Exception\SchemaException;
 use Propel\Generator\Platform\PlatformInterface;
 use function array_search;
 use function count;
@@ -468,11 +469,9 @@ class Database extends ScopedMappingModel
      */
     public function hasTable(string $name, bool $caseInsensitive = false): bool
     {
-        if ($caseInsensitive) {
-            return isset($this->tablesByLowercaseName[strtolower($name)]);
-        }
-
-        return isset($this->tablesByName[$name]);
+        return $caseInsensitive
+            ? isset($this->tablesByLowercaseName[strtolower($name)])
+            : isset($this->tablesByName[$name]);
     }
 
     /**
@@ -572,12 +571,16 @@ class Database extends ScopedMappingModel
      * @param \Propel\Generator\Model\Table|array $table
      *
      * @throws \Propel\Generator\Exception\EngineException
+     * @throws \Propel\Generator\Exception\SchemaException
      *
      * @return \Propel\Generator\Model\Table
      */
     public function addTable($table): Table
     {
         if (!$table instanceof Table) {
+            if (empty($table['name'])) {
+                throw new SchemaException('Table misses required attribute `name`');
+            }
             $tbl = new Table($table['name']);
             $tbl->setDatabase($this);
             $tbl->loadMapping($table);
@@ -801,10 +804,10 @@ class Database extends ScopedMappingModel
     /**
      * Returns the GeneratorConfigInterface object.
      *
-     * @return \Propel\Generator\Config\GeneratorConfigInterface|null
+     * @return \Propel\Generator\Config\AbstractGeneratorConfig|null
      */
     #[\Override]
-    public function getGeneratorConfig(): ?GeneratorConfigInterface
+    public function getGeneratorConfig(): ?AbstractGeneratorConfig
     {
         return $this->parentSchema?->getGeneratorConfig();
     }

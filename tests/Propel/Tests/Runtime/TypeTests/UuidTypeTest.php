@@ -6,7 +6,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Propel\Tests\Runtime\TypeTest;
+namespace Propel\Tests\Runtime\TypeTests;
 
 use Propel\Tests\Bookstore\Base\Book2Query;
 use Propel\Tests\Bookstore\Book2;

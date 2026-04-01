@@ -20,7 +20,9 @@ use Propel\Runtime\Parser\AbstractParser;
 use Propel\Runtime\Propel;
 use Serializable;
 use Traversable;
+use function array_map;
 use function array_pop;
+use function array_reduce;
 use function array_search;
 use function array_shift;
 use function array_unshift;
@@ -62,17 +64,14 @@ use const E_USER_NOTICE;
  */
 class Collection implements ArrayAccess, IteratorAggregate, Countable, Serializable
 {
-    /**
-     * @var string|null
-     */
-    protected $model;
+    protected string|null $model = null;
 
     /**
      * The fully qualified classname of the model
      *
      * @var class-string<RowFormat>|null
      */
-    protected $fullyQualifiedModel;
+    protected string|null $fullyQualifiedModel = null;
 
     /**
      * @var \Propel\Runtime\Formatter\AbstractFormatter<RowFormat, static>
@@ -82,7 +81,7 @@ class Collection implements ArrayAccess, IteratorAggregate, Countable, Serializa
     /**
      * @var array<RowFormat>
      */
-    protected $data = [];
+    protected array $data = [];
 
     /**
      * @deprecated should not have a pluralzier.
@@ -744,5 +743,37 @@ class Collection implements ArrayAccess, IteratorAggregate, Countable, Serializa
     public function hashCode(): string
     {
         return spl_object_hash($this);
+    }
+
+    /**
+     * Apply $callback to each element and return the results as array.
+     *
+     * To load related objects in an ObjectCollection, prefer {@see ObjectCollection::populateRelation()}.
+     *
+     * @template ReturnType
+     *
+     * @param callable(RowFormat):ReturnType $callback
+     *
+     * @return array<ReturnType>
+     */
+    public function map(callable $callback): array
+    {
+        return array_map($callback, $this->data);
+    }
+
+    /**
+     * Apply $callback to each element and return the result as array.
+     *
+     * @template InitialType
+     * @template AggregateType
+     *
+     * @param callable(InitialType|AggregateType, RowFormat):AggregateType $callback
+     * @param InitialType $initial
+     *
+     * @return InitialType|AggregateType
+     */
+    public function reduce(callable $callback, $initial)
+    {
+        return array_reduce($this->data, $callback, $initial);
     }
 }

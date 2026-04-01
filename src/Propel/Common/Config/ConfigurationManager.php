@@ -26,7 +26,9 @@ use function file_exists;
 use function getcwd;
 use function implode;
 use function in_array;
+use function is_array;
 use function is_dir;
+use function is_int;
 use function is_string;
 use function ksort;
 use function str_ends_with;
@@ -74,9 +76,8 @@ class ConfigurationManager
                 throw new RuntimeException('Cannot get the current working directory');
             }
         }
-        if ($extraConf === null) {
-            $extraConf = [];
-        }
+        $extraConf = static::deflateConfigurationArray($extraConf ?? []);
+
         $this->config = $this->loadConfig($path, $extraConf);
         $this->process();
     }
@@ -130,7 +131,7 @@ class ConfigurationManager
      * is expressed by:
      * <code>'database.adapter.mysql.tableType</code>
      *
-     * @psalm-return ($isRequired ? array|int|bool|string : array|scalar|null)
+     * @psalm-return ($isRequired is true ? array|string|int|bool : array|string|int|bool|null)
      *
      * @param string $path The name of property, expressed as a dot separated level hierarchy
      * @param bool $isRequired
@@ -200,7 +201,7 @@ class ConfigurationManager
      */
     public function getConfigPropertyRequired(string $path): array|int|bool|string
     {
-        return $this->getConfigProperty($path, true) ?? '';
+        return $this->getConfigProperty($path, true);
     }
 
     /**
@@ -407,7 +408,7 @@ class ConfigurationManager
     }
 
     /**
-     * @param array<string, mixed> $maybeKeyValues
+     * @param array<mixed> $maybeKeyValues
      * @param string $separator
      *
      * @throws \RuntimeException
@@ -422,6 +423,14 @@ class ConfigurationManager
         $deflatedConfigs = [];
         $wrapArray = fn (array $config, string $key) => [$key => $config];
         foreach ($maybeKeyValues as $maybePath => $payload) {
+            if (is_array($payload)) {
+                $payload = static::deflateConfigurationArray($payload, $separator);
+            }
+            if (is_int($maybePath)) {
+                $deflatedConfigs[] = [$maybePath => $payload];
+
+                continue;
+            }
             $sections = explode($separator, $maybePath);
             $lastKey = array_pop($sections);
             $reversedSections = array_reverse($sections);

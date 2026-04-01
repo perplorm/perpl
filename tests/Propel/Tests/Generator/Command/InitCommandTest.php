@@ -133,7 +133,7 @@ class InitCommandTest extends TestCaseFixtures
             $inputs[] = $dsnData['type'];
         }
 
-        if ($this->getDriver() !== 'sqlite') {
+        if (static::getDriver() !== 'sqlite') {
             $inputs[] = $dsnData['host'] ?? '';
             $inputs[] = $dsnData['port'] ?? '';
         }

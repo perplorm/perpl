@@ -142,13 +142,13 @@ class ObjectFormatter extends AbstractFormatter
             $obj = $this->objects[$serializedPk];
         }
 
-        //TODO: is this var even useable? populateObject() also seems dead.
         /** @var array<string, object> $hydrationChain */
         $hydrationChain = [];
 
         // related objects added using with()
+        $indexType = $this->getDataFetcher()->getIndexType();
         foreach ($this->getWith() as $modelWith) {
-            [$endObject, $col] = $modelWith->getTableMap()->populateObject($row, $col, $this->getDataFetcher()->getIndexType());
+            [$endObject, $col] = $modelWith->getTableMap()->populateObject($row, $col, $indexType);
 
             if ($modelWith->getLeftPhpName() !== null && !isset($hydrationChain[$modelWith->getLeftPhpName()])) {
                 continue;

@@ -1,0 +1,76 @@
+#!/usr/bin/env php
+<?php
+
+use Propel\Tests\Attributes\ComparesGeneratedFile;
+use Propel\Tests\TestCase;
+use Symfony\Component\Finder\Finder;
+
+require_once __DIR__ . '/../../autoload.php.dist';
+
+function findTestFileNames(): array
+{
+    $finder = new Finder();
+    $finder->files()->name('*Test.php')->in(__DIR__ . '/../Propel/Tests');
+
+    $fileNames = [];
+    foreach ($finder as $file) {
+        preg_match('/namespace ([^;]+)/m', $file->getContents(), $matches);
+        $namespace = $matches[1] ?? null;
+        if (!$namespace) {
+            continue;
+        }
+        $fileNames[] = "\\$namespace\\" . $file->getBasename('.php');
+    }
+
+    return $fileNames;
+}
+
+/**
+ * @param array $fileNames
+ * @return ReflectionClass[]
+ */
+function createTestFileReflectionsWithAttribute(array $fileNames): array
+{
+    $reflectionClasses = array_map(fn(string $name) => new \ReflectionClass($name), $fileNames);
+    $isTestCaseWithAttribute = fn(ReflectionClass $r) => $r->isSubclassOf(TestCase::class) && array_any($r->getMethods(), fn($m) => (bool) $m->getAttributes(ComparesGeneratedFile::class));
+
+    return array_filter($reflectionClasses, $isTestCaseWithAttribute);
+}
+
+function updateFile(TestCase $comparingTest, ComparesGeneratedFile $attribute, array $entry): void
+{
+    $fileName = $attribute->getFileName($entry);
+    if (!str_starts_with($fileName, dirname(__DIR__))) {
+        throw new RuntimeException("Path $fileName is not inside test directory.");
+    }
+    $text = $attribute->textBuilder
+        ? $attribute->buildText($comparingTest, $entry)
+        : $attribute->getText($entry);
+
+    file_put_contents($fileName, $text);
+}
+
+$fileNames = findTestFileNames();
+$reflectionClasses = createTestFileReflectionsWithAttribute($fileNames);
+
+$findComparingMethods = fn(ReflectionMethod $m) => $m->getAttributes(ComparesGeneratedFile::class);
+
+foreach ($reflectionClasses as $reflection) {
+    $referenceComparingMethods = array_filter($reflection->getMethods(), $findComparingMethods);
+    if (!$referenceComparingMethods) {
+        continue;
+    }
+    /** @var \Propel\Tests\TestCase $comparingTest */
+    $comparingTest = $reflection->newInstanceWithoutConstructor();
+
+    foreach ($referenceComparingMethods as $method) {
+        $dataProvider = $method->getName();
+        /** @var ComparesGeneratedFile $attribute */
+        $attribute = $method->getAttributes(ComparesGeneratedFile::class)[0]->newInstance();
+        $data = $comparingTest->$dataProvider();
+
+        foreach ($data as $entry) {
+            updateFile($comparingTest, $attribute, $entry);
+        }
+    }
+}

@@ -9,8 +9,8 @@
 namespace Propel\Tests\Generator\Model;
 
 use Propel\Generator\Builder\Util\SchemaReader;
-use Propel\Generator\Exception\BehaviorNotFoundException;
 use Propel\Generator\Exception\LogicException;
+use Propel\Generator\Exception\SchemaException;
 use Propel\Generator\Model\Behavior;
 use Propel\Generator\Model\Table;
 use Propel\Tests\Helpers\MultipleBehavior;
@@ -165,7 +165,7 @@ EOF;
    */
     public function testUnknownBehavior()
     {
-        $this->expectException(BehaviorNotFoundException::class);
+        $this->expectException(SchemaException::class);
 
         $schemaReader = new SchemaReader();
         $schema = <<<EOF

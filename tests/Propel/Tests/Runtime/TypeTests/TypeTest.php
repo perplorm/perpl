@@ -6,7 +6,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Propel\Tests\Runtime\TypeTest;
+namespace Propel\Tests\Runtime\TypeTests;
 
 use Propel\Tests\Bookstore\Map\TypeObjectTableMap;
 use Propel\Tests\Bookstore\TypeObject;

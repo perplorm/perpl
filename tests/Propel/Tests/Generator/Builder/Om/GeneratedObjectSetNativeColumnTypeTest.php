@@ -102,7 +102,7 @@ EOF;
     /**
      * @return array[]
      */
-    public function DefaultValueDataProvider(): array
+    public static function DefaultValueDataProvider(): array
     {
         return [
             ['Tags', []],
@@ -112,13 +112,12 @@ EOF;
     }
 
     /**
-     * @dataProvider DefaultValueDataProvider
-     * 
+     *
      * @param string $columnName
      * @param array $expectedDefaultValues
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('DefaultValueDataProvider')]
     public function testDefaultValuesAfterCreate(string $columnName, array $expectedDefaultValues): void
     {
         $e = new NativeSetEntity();
@@ -126,13 +125,12 @@ EOF;
     }
 
     /**
-     * @dataProvider DefaultValueDataProvider
-     * 
+     *
      * @param string $columnName
      * @param array $expectedDefaultValues
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('DefaultValueDataProvider')]
     public function testDefaultValuesAfterPersist(string $columnName, array $expectedDefaultValues)
     {
         $e = new NativeSetEntity();

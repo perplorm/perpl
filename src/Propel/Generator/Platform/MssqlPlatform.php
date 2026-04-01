@@ -304,11 +304,13 @@ END
     }
 
     /**
+     * @param bool $withMilliseconds
+     *
      * @return string
      */
     #[\Override]
-    public function getTimestampFormatter(): string
+    public function getTimestampFormatter(bool $withMilliseconds = false): string
     {
-        return 'Y-m-d H:i:s';
+        return parent::getTimestampFormatter($withMilliseconds);
     }
 }

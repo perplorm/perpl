@@ -16,7 +16,7 @@ trait DataProviderTrait
     /**
      * @return string[][]
      */
-    public function providerForInvalidConnections()
+    public static function providerForInvalidConnections()
     {
         return [
             ["
@@ -113,7 +113,7 @@ propel:
     /**
      * @return string[][]
      */
-    public function providerForInvalidDefaultConnection()
+    public static function providerForInvalidDefaultConnection()
     {
         return [
             ["
@@ -176,7 +176,7 @@ propel:
     /**
      * @return array
      */
-    public function providerForXmlToArrayConverter()
+    public static function providerForXmlToArrayConverter()
     {
         $moviesXml = <<<EOF
 <?xml version='1.0' standalone='yes'?>
@@ -329,7 +329,7 @@ EOF;
     /**
      * @return array
      */
-    public function providerForXmlToArrayConverterXmlInclusions()
+    public static function providerForXmlToArrayConverterXmlInclusions()
     {
         $xmlOne = <<<EOF
 <?xml version="1.0" encoding="UTF-8"?>

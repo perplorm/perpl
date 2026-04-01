@@ -64,7 +64,7 @@ class InheritanceTest extends TestCase
         $this->assertSame('Foo\Bar', $inheritance->getClassName());
     }
 
-    public function singleInheritanceTestDataProvider(){
+    public static function singleInheritanceTestDataProvider(){
         return [
             // string $type, $key, string $expectedClasskey
             ['varchar', 'le_key', "LE_KEY = 'le_key'"],
@@ -77,9 +77,9 @@ class InheritanceTest extends TestCase
     }
 
     /**
-     * @dataProvider singleInheritanceTestDataProvider
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('singleInheritanceTestDataProvider')]
     public function testSingleInheritanceKeyType(string $type, $key, string $expectedClasskey)
     {
         

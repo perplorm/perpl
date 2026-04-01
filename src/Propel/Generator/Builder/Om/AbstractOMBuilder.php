@@ -28,7 +28,6 @@ use function sprintf;
 use function str_replace;
 use function strlen;
 use function strpos;
-use function strtoupper;
 use function strtr;
 use function substr;
 use function var_export;
@@ -44,6 +43,13 @@ use const PREG_SET_ORDER;
 abstract class AbstractOMBuilder extends DataModelBuilder
 {
     use PathTrait;
+
+    /**
+     * Has to be set on concrete builders
+     *
+     * @var \Propel\Generator\Builder\Om\BuilderType|null
+     */
+    public const BUILDER_TYPE = null;
 
     /**
      * @param \Propel\Generator\Model\Table $table
@@ -75,20 +81,18 @@ abstract class AbstractOMBuilder extends DataModelBuilder
 
         $ignoredNamespace = ltrim((string)$this->getNamespace(), '\\');
         $useStatements = $this->buildUseStatements($ignoredNamespace ?: 'namespace');
-        if ($useStatements) {
-            $script = $useStatements . $script;
-        }
-
         $namespaceStatement = $this->buildNamespaceStatement();
-        if ($namespaceStatement) {
-            $script = $namespaceStatement . $script;
-        }
+        $strictTypesStatement = $this->declaresStrictTypes() ? "declare(strict_types = 1);\n\n" : '';
 
-        $script = "<?php
+        return $this->clean("<?php\n\n{$strictTypesStatement}{$namespaceStatement}{$useStatements}{$script}");
+    }
 
-" . $script;
-
-        return $this->clean($script);
+    /**
+     * @return bool
+     */
+    protected function declaresStrictTypes(): bool
+    {
+        return (bool)($this->getBuildProperty('generator.declareStrictTypesInBuilders') ?? true);
     }
 
     /**
@@ -107,8 +111,7 @@ abstract class AbstractOMBuilder extends DataModelBuilder
     }
 
     /**
-     * Creates a $obj = new Book(); code snippet. Can be used by frameworks, for instance, to
-     * extend this behavior, e.g. initialize the object after creating the instance or so.
+     * @deprecated Just do "$objName = new $clsName();".
      *
      * @param string $objName
      * @param string $clsName
@@ -205,12 +208,9 @@ abstract class AbstractOMBuilder extends DataModelBuilder
      */
     public function getPackage(): string|null
     {
-        $pkg = ($this->getTable()->getPackage() ?: $this->getDatabaseOrFail()->getPackage());
-        if (!$pkg) {
-            $pkg = (string)$this->getBuildPropertyString('generator.targetPackage');
-        }
-
-        return $pkg;
+        return ($this->getTable()->getPackage()
+            ?: $this->getDatabaseOrFail()->getPackage())
+            ?: (string)$this->getBuildPropertyString('generator.targetPackage');
     }
 
     /**
@@ -263,13 +263,13 @@ abstract class AbstractOMBuilder extends DataModelBuilder
     /**
      * return the string for the class namespace
      *
-     * @return string|null
+     * @return string
      */
-    public function buildNamespaceStatement(): ?string
+    public function buildNamespaceStatement(): string
     {
         $namespace = $this->getNamespace();
 
-        return $namespace ? "namespace $namespace;\n\n" : null;
+        return $namespace ? "namespace $namespace;\n\n" : '';
     }
 
     /**
@@ -297,18 +297,9 @@ abstract class AbstractOMBuilder extends DataModelBuilder
      */
     public function getColumnConstant(Column $col, ?string $classname = null): string
     {
-        if ($classname === null) {
-            return $this->getBuildPropertyString('generator.objectModel.classPrefix') . $col->getFQConstantName();
-        }
-
-        // was it overridden in schema.xml ?
-        if ($col->getTableMapName()) {
-            $const = strtoupper($col->getTableMapName());
-        } else {
-            $const = strtoupper($col->getName());
-        }
-
-        return $classname . '::' . Column::CONSTANT_PREFIX . $const;
+        return !$classname
+            ? $this->getBuildPropertyString('generator.objectModel.classPrefix') . $col->getFQConstantName()
+            : $classname . '::' . $col->getConstantName();
     }
 
     /**
@@ -615,7 +606,7 @@ abstract class AbstractOMBuilder extends DataModelBuilder
      */
     protected function generateTimestampBlock(): string
     {
-        if ($this->getBuildProperty('generator.objectModel.addTimeStamp')) {
+        if (!$this->getBuildProperty('generator.objectModel.addTimeStamp')) {
             return '';
         }
         $now = gmdate('c');

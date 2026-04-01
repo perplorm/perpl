@@ -798,7 +798,7 @@ class Criteria
      * @param mixed $value
      * @param string|int|null $comparison A String.
      *
-     * @return static A modified Criteria object.
+     * @return $this
      */
     public function add($columnOrClause, $value = null, $comparison = null)
     {
@@ -841,7 +841,7 @@ class Criteria
      * @param mixed $value
      * @param int|null $pdoType
      *
-     * @return static
+     * @return $this
      */
     public function setUpdateValue($columnIdentifierOrMap, $value, $pdoType = null)
     {
@@ -872,7 +872,7 @@ class Criteria
      * @param mixed $values Must match number of placeholders (`?`) in $expression.
      * @param mixed $pdoTypes Must match number of values. If null, resolved ColumnMap will be used to determine type (and possibly unwrap value).
      *
-     * @return static
+     * @return $this
      */
     public function setUpdateExpression($columnIdentifierOrMap, string $expression, $values = null, $pdoTypes = null)
     {
@@ -906,7 +906,7 @@ class Criteria
      *
      * @throws \Propel\Runtime\Exception\PropelException
      *
-     * @return static A modified Criteria object.
+     * @return $this
      */
     public function addJoin($left, $right, ?string $joinType = null)
     {
@@ -1124,7 +1124,7 @@ class Criteria
      * Adds a DISTINCT clause to the query
      * Alias for Criteria::setDistinct()
      *
-     * @return static
+     * @return $this
      */
     public function distinct()
     {
@@ -1289,7 +1289,7 @@ class Criteria
      *
      * @param string|int $limit Maximum number of results to return by the query
      *
-     * @return static
+     * @return $this
      */
     public function limit($limit)
     {
@@ -1326,7 +1326,7 @@ class Criteria
      *
      * @param string|int $offset Offset of the first result to return
      *
-     * @return static
+     * @return $this
      */
     public function offset($offset)
     {
@@ -1783,7 +1783,7 @@ class Criteria
      *
      * @throws \Propel\Runtime\Exception\PropelException
      *
-     * @return $this A modified Criteria object.
+     * @return $this
      */
     public function addHaving($columnOrClause, $value = null, $comparison = null, ?int $pdoType = null)
     {
@@ -1877,7 +1877,7 @@ class Criteria
      * @param mixed|null $condition
      * @param bool $preferColumnCondition
      *
-     * @return static A modified Criteria object.
+     * @return $this
      */
     public function addAnd($columnOrClause, $value = null, $condition = null, bool $preferColumnCondition = true)
     {
@@ -1900,7 +1900,7 @@ class Criteria
      * @param mixed $condition
      * @param bool $preferColumnCondition
      *
-     * @return static A modified Criteria object.
+     * @return $this
      */
     public function addOr($columnOrClause, $value = null, $condition = null, bool $preferColumnCondition = true)
     {
@@ -1914,7 +1914,7 @@ class Criteria
      * @param string|int|null $condition
      * @param bool $preferColumnCondition
      *
-     * @return static
+     * @return $this
      */
     protected function addFilterWithConjunction(string $andOr, $columnOrClause, $value = null, $condition = null, bool $preferColumnCondition = true)
     {
@@ -1931,7 +1931,7 @@ class Criteria
      *
      * @param string|null $andOr Default Operator to combine filters.
      *
-     * @return static
+     * @return $this
      */
     public function combineFilters(?string $andOr = null)
     {
@@ -1947,7 +1947,7 @@ class Criteria
      *
      * Call {@see static::combineFilters()} to open parentheses.
      *
-     * @return static
+     * @return $this
      */
     public function endCombineFilters()
     {
@@ -1967,7 +1967,7 @@ class Criteria
      * (necessary for Propel 1.4 compatibility).
      * If false, the condition is combined with the last existing condition.
      *
-     * @return static A modified Criteria object.
+     * @return $this
      */
     public function addUsingOperator($columnOrClause, $value = null, ?string $operator = null, bool $preferColumnCondition = true)
     {
@@ -2416,7 +2416,7 @@ class Criteria
      *
      * @param bool $doAutoAdd
      *
-     * @return static
+     * @return $this
      */
     public function setAutoAddTable(bool $doAutoAdd)
     {

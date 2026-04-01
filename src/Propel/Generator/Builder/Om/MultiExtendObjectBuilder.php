@@ -17,6 +17,11 @@ use Propel\Generator\Model\Inheritance;
 class MultiExtendObjectBuilder extends AbstractObjectBuilder implements ExtensionBuilderInterface
 {
     /**
+     * @var \Propel\Generator\Builder\Om\BuilderType|null
+     */
+    public const BUILDER_TYPE = BuilderType::ObjectInheritanceStub;
+
+    /**
      * The current child "object" we are operating on.
      *
      * @var \Propel\Generator\Model\Inheritance|null
@@ -112,7 +117,7 @@ class MultiExtendObjectBuilder extends AbstractObjectBuilder implements Extensio
         if ($this->getChild()->getAncestor()) {
             $ancestorClassName = $this->getChild()->getAncestor();
             if ($this->getDatabase()->hasTableByPhpName($ancestorClassName)) {
-                $this->declareClassFromBuilder($this->getNewStubObjectBuilder($this->getDatabase()->getTableByPhpName($ancestorClassName)));
+                $this->declareClassFromBuilder($this->getStubObjectBuilder($this->getDatabase()->getTableByPhpName($ancestorClassName)));
             } else {
                 $this->declareClassNamespace($ancestorClassName, $this->getNamespace());
             }

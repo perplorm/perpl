@@ -152,7 +152,7 @@ class ModelCriteria extends BaseModelCriteria
      * @param mixed $value A value for the condition
      * @param string|null $comparison What to use for the column comparison, defaults to Criteria::EQUAL or Criteria::IN for subqueries
      *
-     * @return static
+     * @return $this
      */
     public function filterBy(string $columnPhpName, $value, ?string $comparison = null)
     {
@@ -211,7 +211,7 @@ class ModelCriteria extends BaseModelCriteria
      * @param mixed $value A value for the condition
      * @param int|null $bindingType
      *
-     * @return static
+     * @return $this
      */
     public function where($clause, $value = null, ?int $bindingType = null)
     {
@@ -243,7 +243,7 @@ class ModelCriteria extends BaseModelCriteria
      * @param \Propel\Runtime\ActiveQuery\ModelCriteria $existsQueryCriteria the query object used in the EXISTS statement
      * @param string $operator Either ExistsQueryCriterion::TYPE_EXISTS or ExistsQueryCriterion::TYPE_NOT_EXISTS. Defaults to EXISTS
      *
-     * @return static
+     * @return $this
      */
     public function whereExists(ActiveQueryModelCriteria $existsQueryCriteria, string $operator = ExistsQueryCriterion::TYPE_EXISTS)
     {
@@ -257,7 +257,7 @@ class ModelCriteria extends BaseModelCriteria
      *
      * @param \Propel\Runtime\ActiveQuery\ModelCriteria $existsQueryCriteria
      *
-     * @return static
+     * @return $this
      */
     public function whereNotExists(ActiveQueryModelCriteria $existsQueryCriteria)
     {
@@ -283,7 +283,7 @@ class ModelCriteria extends BaseModelCriteria
      * @param mixed $value A value for the condition
      * @param int|null $bindingType
      *
-     * @return static
+     * @return $this
      */
     public function having($clause, $value = null, ?int $bindingType = null)
     {
@@ -313,7 +313,7 @@ class ModelCriteria extends BaseModelCriteria
      *
      * @throws \Propel\Runtime\Exception\UnexpectedValueException
      *
-     * @return static
+     * @return $this
      */
     public function orderBy(string $columnName, string $order = Criteria::ASC)
     {
@@ -321,14 +321,12 @@ class ModelCriteria extends BaseModelCriteria
         $qualifiedColumnName = $resolvedColumn->getColumnExpressionInQuery();
 
         $order = strtoupper($order);
-        switch ($order) {
-            case Criteria::ASC:
-                return $this->addAscendingOrderByColumn($qualifiedColumnName);
-            case Criteria::DESC:
-                return $this->addDescendingOrderByColumn($qualifiedColumnName);
-            default:
-                throw new UnexpectedValueException('ModelCriteria::orderBy() only accepts Criteria::ASC or Criteria::DESC as argument');
-        }
+
+        return match ($order) {
+            Criteria::ASC => $this->addAscendingOrderByColumn($qualifiedColumnName),
+            Criteria::DESC => $this->addDescendingOrderByColumn($qualifiedColumnName),
+            default => throw new UnexpectedValueException('ModelCriteria::orderBy() only accepts Criteria::ASC or Criteria::DESC as argument'),
+        };
     }
 
     /**
@@ -1026,7 +1024,7 @@ class ModelCriteria extends BaseModelCriteria
      * @param \Propel\Runtime\ActiveQuery\ModelCriteria $criteria The primary criteria
      * @param \Propel\Runtime\ActiveQuery\Join|null $previousJoin The previousJoin for this ModelCriteria
      *
-     * @return static
+     * @return $this
      */
     public function setPrimaryCriteria(ModelCriteria $criteria, ?Join $previousJoin)
     {
@@ -1099,7 +1097,7 @@ class ModelCriteria extends BaseModelCriteria
     * @param string|null $alias alias for the subQuery
     * @param bool $addAliasAndSelectColumns Set to false if you want to manually add the aliased select columns
     *
-    * @return static
+    * @return $this
     */
     public function addSelectQuery(Criteria $subQueryCriteria, ?string $alias = null, bool $addAliasAndSelectColumns = true)
     {

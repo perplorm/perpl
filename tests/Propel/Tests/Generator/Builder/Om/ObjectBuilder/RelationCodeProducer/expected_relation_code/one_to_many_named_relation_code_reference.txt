@@ -1,0 +1,72 @@
+Propel\Generator\Builder\Om\ObjectBuilder\RelationCodeProducer\FkRelationCodeProducer
+
+
+addAttributes():
+
+    /**
+     * ChildTeam associated via LeTeam relation (n:1).
+     */
+    protected ChildTeam|null $aLeTeam = null;
+
+
+addOnReloadCode():
+
+            $this->aLeTeam = null;
+
+addDeleteScheduledItemsCode():
+
+        if ($this->aLeTeam !== null) {
+            if ($this->aLeTeam->isModified() || $this->aLeTeam->isNew()) {
+                $affectedRows += $this->aLeTeam->save($con);
+            }
+            $this->setLeTeam($this->aLeTeam);
+        }
+
+
+addClearReferencesCode():
+
+        $this->aLeTeam = null;
+
+addMethods():
+
+    /**
+     * Declares an association between this object and a ChildTeam object.
+     *
+     * @param \Team|null $leTeam
+     *
+     * @return $this
+     */
+    public function setLeTeam(?ChildTeam $leTeam = null)
+    {
+        $mainTeamId = $leTeam ? $leTeam->getId() : null;
+        $this->setMainTeamId($mainTeamId);
+
+        $this->aLeTeam = $leTeam;
+        assert($this instanceof ChildUser);
+        $leTeam?->addUser($this);
+
+        return $this;
+    }
+
+    /**
+     * Get the associated LeTeam object
+     *
+     * @param \Propel\Runtime\Connection\ConnectionInterface|null $con Optional Connection object.
+     *
+     * @return \Team|null
+     */
+    public function getLeTeam(?ConnectionInterface $con = null)
+    {
+        if ($this->aLeTeam === null && ($this->main_team_id !== null && $this->main_team_id !== 0)) {
+            $this->aLeTeam = ChildTeamQuery::create()->findPk($this->main_team_id, $con);
+            /* The following can be used additionally to
+                guarantee the related object contains a reference
+                to this object.  This level of coupling may, however, be
+                undesirable since it could result in an only partially populated collection
+                in the referenced object.
+                $this->aLeTeam->addUsers($this);
+             */
+        }
+
+        return $this->aLeTeam;
+    }

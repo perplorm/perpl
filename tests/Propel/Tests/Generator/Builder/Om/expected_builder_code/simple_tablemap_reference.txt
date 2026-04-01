@@ -1,0 +1,508 @@
+<?php
+
+namespace Map;
+
+use Base\Collection\IdTableCollection;
+use IdTable;
+use IdTableQuery;
+use Propel\Runtime\ActiveQuery\ColumnResolver\ColumnExpression\LocalColumnExpression;
+use Propel\Runtime\ActiveQuery\Criteria;
+use Propel\Runtime\ActiveQuery\InstancePoolTrait;
+use Propel\Runtime\Connection\ConnectionInterface;
+use Propel\Runtime\DataFetcher\DataFetcherInterface;
+use Propel\Runtime\Exception\PropelException;
+use Propel\Runtime\Map\TableMap;
+use Propel\Runtime\Map\TableMapTrait;
+use Propel\Runtime\Propel;
+use function assert;
+use function is_array;
+use function is_object;
+use function trigger_deprecation;
+
+/**
+ * This class defines the structure of the 'id_table' table.
+ *
+ *
+ * This map class is used by Propel to do runtime db structure discovery.
+ * For example, the createSelectSql() method checks the type of a given column used in an
+ * ORDER BY clause to know whether it needs to apply SQL to make the ORDER BY case-insensitive
+ * (i.e. if it's a text column type).
+ */
+class IdTableTableMap extends TableMap
+{
+    use InstancePoolTrait;
+    use TableMapTrait;
+
+    /**
+     * @deprecated Not used. If you know the class, generate dot-path yourself.
+     *
+     * @var string
+     */
+    public const CLASS_NAME = '.Map.IdTableTableMap';
+
+    /**
+     * Default database name.
+     *
+     * @var string
+     */
+    public const DATABASE_NAME = '';
+
+    /**
+     * @var string
+     */
+    public const TABLE_NAME = 'id_table';
+
+    /**
+     * @var string
+     */
+    public const TABLE_PHP_NAME = 'IdTable';
+
+    /**
+     * Model class
+     *
+     * @var class-string<\IdTable>
+     */
+    public const OM_CLASS = IdTable::class;
+
+    /**
+     * @deprecated Not needed (generate from {@see self::OM_CLASS}.
+     *
+     * @var string
+     */
+    public const CLASS_DEFAULT = 'IdTable';
+
+    /**
+     * @var int
+     */
+    public const NUM_COLUMNS = 1;
+
+    /**
+     * @var int
+     */
+    public const NUM_LAZY_LOAD_COLUMNS = 0;
+
+    /**
+     * The number of columns to hydrate (NUM_COLUMNS - NUM_LAZY_LOAD_COLUMNS)
+     *
+     * @var int
+     */
+    public const NUM_HYDRATE_COLUMNS = 1;
+
+    /**
+     * Identifies the [id] column
+     *
+     * @var string
+     */
+    public const COL_ID = 'id_table.id';
+
+    /**
+     * The default string format for model objects of the related table
+     *
+     * @var string
+     */
+    public const DEFAULT_STRING_FORMAT = 'YAML';
+
+    /**
+     * @var class-string<\Base\Collection\IdTableCollection>
+     */
+    public const DEFAULT_OBJECT_COLLECTION = IdTableCollection::class;
+
+    /**
+     * Field name lookup.
+     *
+     * first dimension keys are the type constants
+     * e.g. self::$fieldNames[self::TYPE_PHPNAME][0] = 'Id'
+     *
+     * @var array<string, list<string>|list<int>>
+     */
+    protected static $fieldNames = [
+        // phpcs:disable SlevomatCodingStandard.Whitespaces.DuplicateSpaces.DuplicateSpaces
+        self::TYPE_PHPNAME =>   ['Id'],
+        self::TYPE_CAMELNAME => ['id'],
+        self::TYPE_COLNAME =>   [self::COL_ID],
+        self::TYPE_FIELDNAME => ['id'],
+        self::TYPE_NUM =>       [0],
+        // phpcs:enable
+    ];
+
+    /**
+     * Maps field names in different cases to field index.
+     *
+     * first dimension keys are the type constants
+     * e.g. self::$fieldKeys[self::TYPE_PHPNAME]['Id'] = 0
+     *
+     * @var array<string, array<string, int>|list<int>>
+     */
+    protected static $fieldKeys = [
+        // phpcs:disable SlevomatCodingStandard.Whitespaces.DuplicateSpaces.DuplicateSpaces
+        self::TYPE_PHPNAME =>   ['Id' => 0],
+        self::TYPE_CAMELNAME => ['id' => 0],
+        self::TYPE_COLNAME =>   [self::COL_ID => 0],
+        self::TYPE_FIELDNAME => ['id' => 0],
+        self::TYPE_NUM =>       [0],
+        // phpcs:enable
+    ];
+
+    /**
+     * Holds a list of column names and their normalized version.
+     *
+     * @var array<string, string>
+     */
+    protected $normalizedColumnNameMap = [
+        'Id' => 'ID',
+        'IdTable.Id' => 'ID',
+        'id' => 'ID',
+        'idTable.id' => 'ID',
+        'IdTableTableMap::COL_ID' => 'ID',
+        'COL_ID' => 'ID',
+        'id_table.id' => 'ID',
+    ];
+
+    /**
+     * Initialize the table attributes and columns
+     * Relations are not initialized by this method since they are lazy loaded
+     *
+     * @return void
+     */
+    public function initialize(): void
+    {
+        // attributes
+        $this->setName('id_table');
+        $this->setPhpName('IdTable');
+        $this->setIdentifierQuoting(false);
+        $this->setClassName('\\IdTable');
+        $this->setPackage('');
+        $this->setUseIdGenerator(true);
+        // columns
+        $this->addPrimaryKey('id', 'Id', 'INTEGER', true, null, null);
+    }
+
+    /**
+     * Build the RelationMap objects for this table relationships
+     *
+     * @return void
+     */
+    public function buildRelations(): void
+    {
+    }
+
+    /**
+     * Adds an object to the instance pool.
+     *
+     * Propel keeps cached copies of objects in an instance pool when they are retrieved
+     * from the database. In some cases you may need to explicitly add objects
+     * to the cache in order to ensure that the same objects are always returned by find*()
+     * and findPk*() calls.
+     *
+     * @param \IdTable $obj
+     * @param string|null $key Optional internal key if it was already generated
+     *
+     * @return void
+     */
+    public static function addInstanceToPool($obj, string|null $key = null): void
+    {
+        if (!Propel::isInstancePoolingEnabled()) {
+            return;
+        }
+
+        $key ??= (string)$obj->getId();
+
+        self::$instances[$key] = $obj;
+    }
+
+    /**
+     * Removes an object from the instance pool.
+     *
+     * Propel keeps cached copies of objects in an instance pool when they are retrieved
+     * from the database. In some cases -- especially when you override doDelete
+     * methods in your stub classes -- you may need to explicitly remove objects
+     * from the cache in order to prevent returning objects that no longer exist.
+     *
+     * Passing in a Criteria clears the whole cache and is deprecated.
+     *
+     * @param \IdTable|\Propel\Runtime\ActiveQuery\Criteria|int|null $value A IdTable object or a primary key value.
+     *
+     * @return void
+     */
+    public static function removeInstanceFromPool($value): void
+    {
+        if (!Propel::isInstancePoolingEnabled() || $value === null) {
+            return;
+        }
+
+        if ($value instanceof Criteria) {
+            self::$instances = [];
+
+            return;
+        }
+
+        $key = $value instanceof IdTable
+            ? (string)$value->getId()
+            : (string)$value;
+
+        unset(self::$instances[$key]);
+    }
+
+    /**
+     * Method to invalidate the instance pool of all tables related to IdTable
+     * by a foreign key with ON DELETE CASCADE
+     *
+     * @return void
+     */
+    public static function clearRelatedInstancePool(): void
+    {
+    }
+
+    /**
+     * Returns a serialized version of the primary key as unique identifier of the row.
+     *
+     * @param array<mixed> $row Resultset row.
+     * @param int $offset The 0-based offset for reading from the resultset row.
+     * @param string $indexType One of the class type constants TableMap::TYPE_PHPNAME, TableMap::TYPE_CAMELNAME
+     *                           TableMap::TYPE_COLNAME, TableMap::TYPE_FIELDNAME, TableMap::TYPE_NUM
+     *
+     * @return string|null The primary key hash of the row or null if value cannot be resolved
+     */
+    public static function getPrimaryKeyHashFromRow(array $row, int $offset = 0, string $indexType = TableMap::TYPE_NUM): ?string
+    {
+        $id = $row[$indexType === TableMap::TYPE_NUM ? 0 + $offset : static::translateFieldName('Id', TableMap::TYPE_PHPNAME, $indexType)];
+        $id = $id === null ? null : (string)$id;
+
+        return $id;
+    }
+
+    /**
+     * Returns a serialized version of the primary key as unique identifier of the model instance.
+     *
+     * @param \IdTable $idTable
+     *
+     * @return string|null
+     */
+    public static function getPrimaryKeyHashFromObject(IdTable $idTable): string|null
+    {
+        return (string)$idTable->getId();
+    }
+
+    /**
+     * Retrieves the primary key from the DB resultset row
+     * For tables with a single-column primary key, that simple pkey value will be returned.
+     * For tables with a multi-column primary key, an array of the primary key columns will be returned.
+     *
+     * @param array<mixed> $row Resultset row.
+     * @param int $offset The 0-based offset for reading from the resultset row.
+     * @param string $indexType One of the class type constants TableMap::TYPE_PHPNAME, TableMap::TYPE_CAMELNAME
+     *                           TableMap::TYPE_COLNAME, TableMap::TYPE_FIELDNAME, TableMap::TYPE_NUM
+     *
+     * @return int
+     */
+    public static function getPrimaryKeyFromRow(array $row, int $offset = 0, string $indexType = TableMap::TYPE_NUM)
+    {
+        return (int)$row[$indexType === TableMap::TYPE_NUM ? 0 + $offset : self::translateFieldName('Id', TableMap::TYPE_PHPNAME, $indexType)];
+    }
+
+    /**
+     * The class that the tableMap will make instances of.
+     *
+     * If $withPrefix is true, the returned path
+     * uses a dot-path notation which is translated into a path
+     * relative to a location on the PHP include_path.
+     * (e.g. path.to.MyClass -> 'path/to/MyClass.php')
+     *
+     * @psalm-return ($withPrefix is true ? string : class-string<\IdTable>)
+     *
+     * @param bool $withPrefix If true, namespace will be separated by dots, regular backslashes otherwise.
+     *
+     * @return class-string<\IdTable>|string
+     */
+    public static function getOMClass(bool $withPrefix = true): string
+    {
+        return $withPrefix ? 'IdTable' : static::OM_CLASS;
+    }
+
+    /**
+     * Populates an object of the default type or an object that inherit from the default.
+     *
+     * @param array $row Row returned by DataFetcher->fetch().
+     * @param int $offset The 0-based offset for reading from the resultset row.
+     * @param string $indexType The index type of $row. Mostly DataFetcher->getIndexType().
+     *                           One of the class type constants TableMap::TYPE_PHPNAME, TableMap::TYPE_CAMELNAME
+     *                           TableMap::TYPE_COLNAME, TableMap::TYPE_FIELDNAME, TableMap::TYPE_NUM.
+     *
+     * @return array{\IdTable|null, int} Hydrated object and number of hydrated columns
+     */
+    public static function populateObject(array $row, int $offset = 0, string $indexType = TableMap::TYPE_NUM): array
+    {
+        $key = static::getPrimaryKeyHashFromRow($row, $offset, $indexType);
+        /** @var \IdTable|null $obj */
+        $obj = static::getInstanceFromPool($key);
+        if ($obj) {
+            $nextColumnIndex = $offset + static::NUM_HYDRATE_COLUMNS;
+        } else {
+            $cls = static::OM_CLASS;
+            $obj = new $cls();
+            $nextColumnIndex = $obj->hydrate($row, $offset, false, $indexType);
+            static::addInstanceToPool($obj, $key);
+        }
+
+        return [$obj, $nextColumnIndex];
+    }
+
+    /**
+     * The returned array will contain objects of the default type or
+     * objects that inherit from the default.
+     *
+     * @param \Propel\Runtime\DataFetcher\DataFetcherInterface $dataFetcher
+     *
+     * @return array<object>
+     */
+    public static function populateObjects(DataFetcherInterface $dataFetcher): array
+    {
+        $results = [];
+
+        while ($row = $dataFetcher->fetch()) {
+            assert(is_array($row));
+            $key = static::getPrimaryKeyHashFromRow($row, 0, $dataFetcher->getIndexType());
+            /** @var \IdTable|null $obj */
+            $obj = static::getInstanceFromPool($key);
+            if (!$obj) {
+                $obj = new IdTable();
+                $obj->hydrate($row);
+                static::addInstanceToPool($obj, $key);
+            }
+            $results[] = $obj;
+        }
+
+        return $results;
+    }
+
+    /**
+     * Add all the columns needed to create a new object.
+     *
+     * Note: any columns that were marked with lazyLoad="true" in the
+     * XML schema will not be added to the select list and only loaded
+     * on demand.
+     *
+     * @param \Propel\Runtime\ActiveQuery\Criteria $criteria Object containing the columns to add.
+     * @param string|null $alias Optional table alias
+     *
+     * @return void
+     */
+    public static function addSelectColumns(Criteria $criteria, ?string $alias = null): void
+    {
+        $tableMap = static::getTableMap();
+        $tableAlias = $alias ?: 'id_table';
+        $criteria->addSelectColumn(new LocalColumnExpression($criteria, $tableAlias, $tableMap->columns['ID']));
+    }
+
+    /**
+     * Remove all the columns needed to create a new object.
+     *
+     * Note: any columns that were marked with lazyLoad="true" in the
+     * XML schema will not be removed as they are only loaded on demand.
+     *
+     * @param \Propel\Runtime\ActiveQuery\Criteria $criteria Object containing the columns to remove.
+     * @param string|null $alias Optional table alias
+     *
+     * @return void
+     */
+    public static function removeSelectColumns(Criteria $criteria, ?string $alias = null): void
+    {
+        if ($alias === null) {
+            $criteria->removeSelectColumn(static::COL_ID);
+        } else {
+            $criteria->removeSelectColumn("$alias.id");
+        }
+    }
+
+    /**
+     * Returns the TableMap related to this object.
+     * This method is not needed for general use but a specific application could have a need.
+     *
+     * @return static
+     */
+    public static function getTableMap(): TableMap
+    {
+        /** @var static $tableMap */
+        $tableMap = Propel::getServiceContainer()->getDatabaseMap(static::DATABASE_NAME)->getTable(static::TABLE_NAME);
+
+        return $tableMap;
+    }
+
+    /**
+     * @deprecated Delete via model or IdTableQuery.
+     *
+     * Performs a DELETE on the database, given a IdTable or Criteria object OR a primary key value.
+     *
+     * @param mixed $values Criteria or IdTable object or primary key or array of primary keys
+     *              which is used to create the DELETE statement
+     * @param \Propel\Runtime\Connection\ConnectionInterface|null $con the connection to use
+     *
+     * @return int The number of affected rows (if supported by underlying database driver). This includes CASCADE-related rows
+     *                         if supported by native driver or if emulated using Propel.
+     */
+    public static function doDelete($values, ?ConnectionInterface $con = null): int
+    {
+        trigger_deprecation('Propel', '2.0', 'TableMap::doDelete() should not be used anymore, delete via model or IdTableQuery');
+
+        $con ??= Propel::getServiceContainer()->getWriteConnection(static::DATABASE_NAME);
+
+        if ($values instanceof Criteria) {
+            $criteria = $values;
+        } elseif ($values instanceof IdTable) {
+            $criteria = $values->buildPkeyCriteria();
+        } else { // it's a primary key, or an array of pks
+            $criteria = new Criteria(static::DATABASE_NAME);
+            $criteria->addAnd(static::COL_ID, (array)$values, Criteria::IN);
+        }
+
+        if ($values instanceof Criteria) {
+            static::clearInstancePool();
+        } elseif (!is_object($values)) { // it's a primary key, or an array of pks
+            foreach ((array)$values as $singleval) {
+                static::removeInstanceFromPool($singleval);
+            }
+        }
+
+        return IdTableQuery::create(null, $criteria)->delete($con);
+    }
+
+    /**
+     * Deletes all rows from the id_table table.
+     *
+     * @param \Propel\Runtime\Connection\ConnectionInterface|null $con the connection to use
+     *
+     * @return int The number of affected rows (if supported by underlying database driver).
+     */
+    public static function doDeleteAll(?ConnectionInterface $con = null): int
+    {
+        return IdTableQuery::create()->doDeleteAll($con);
+    }
+
+    /**
+     * Performs an INSERT on the database, given a IdTable or Criteria object.
+     *
+     * @param \Propel\Runtime\ActiveQuery\Criteria|\IdTable $criteria
+     * @param \Propel\Runtime\Connection\ConnectionInterface|null $con
+     *
+     * @throws \Propel\Runtime\Exception\PropelException
+     *
+     * @return mixed The new primary key.
+     */
+    public static function doInsert($criteria, ?ConnectionInterface $con = null)
+    {
+        $con ??= Propel::getServiceContainer()->getWriteConnection(static::DATABASE_NAME);
+
+        if ($criteria instanceof Criteria) {
+            $criteria = clone $criteria;
+            $criteria->turnFiltersToUpdateValues();
+        } else {
+            $criteria = $criteria->buildCriteria(); // build Criteria from IdTable object
+        }
+
+        if ($criteria->hasUpdateValue(static::COL_ID)) {
+            throw new PropelException('Cannot insert a value for auto-increment primary key (static::COL_ID)');
+        }
+
+        return IdTableQuery::create(null, $criteria)->doInsert($con);
+    }
+}

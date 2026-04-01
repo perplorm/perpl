@@ -17,15 +17,14 @@ use Propel\Tests\TestCase;
 class ObjectBuilderValidationTest extends TestCase
 {
     /**
-     * @dataProvider ExceptionSchemaDataProducer
      *
      * @param string $description
      * @param string $schema
      * @param string $tableName
      * @param string $exceptionClass
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('ExceptionSchemaDataProducer')]
     public function testExceptionIsThrown(string $description, string $tableName, string $schema, string $exceptionClass): void
     {
         $objectBuilder = $this->createObjectBuilder($schema, $tableName);
@@ -33,7 +32,7 @@ class ObjectBuilderValidationTest extends TestCase
         $this->callMethod($objectBuilder, 'validateModel');
     }
 
-    public function ExceptionSchemaDataProducer(): array
+    public static function ExceptionSchemaDataProducer(): array
     {
         return [
             [
@@ -155,15 +154,14 @@ class ObjectBuilderValidationTest extends TestCase
     }
 
     /**
-     * @dataProvider NoExceptionSchemaDataProducer
      *
      * @param string $description
      * @param string $schema
      * @param string $tableName
      * @param string $exceptionClass
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('NoExceptionSchemaDataProducer')]
     public function testNoException(string $description, string $tableName, string $schema): void
     {
         $objectBuilder = $this->createObjectBuilder($schema, $tableName);
@@ -172,7 +170,7 @@ class ObjectBuilderValidationTest extends TestCase
     }
 
 
-    public function NoExceptionSchemaDataProducer(): array
+    public static function NoExceptionSchemaDataProducer(): array
     {
         return [
             [

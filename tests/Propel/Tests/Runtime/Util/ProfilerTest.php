@@ -123,7 +123,7 @@ class ProfilerTest extends BaseTestCase
         $this->assertSame('     Time: 34.5ms | Memory: 240kB | Delta: -95.3kB | Peak: 335kB | ', $res);
     }
 
-    public function providerForTestFormatMemory()
+    public static function providerForTestFormatMemory()
     {
         return [
             [1234567890, number_format(1.15, 2) . 'GB'],
@@ -140,16 +140,15 @@ class ProfilerTest extends BaseTestCase
     }
 
     /**
-     * @dataProvider providerForTestFormatMemory
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('providerForTestFormatMemory')]
     public function testFormatMemory($input, $output)
     {
         $this->assertSame(Profiler::formatMemory($input), $output);
     }
 
-    public function providerForTestFormatMemoryPrecision()
+    public static function providerForTestFormatMemoryPrecision()
     {
         return [
             [1, number_format(10) . 'kB'],
@@ -162,16 +161,15 @@ class ProfilerTest extends BaseTestCase
     }
 
     /**
-     * @dataProvider providerForTestFormatMemoryPrecision
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('providerForTestFormatMemoryPrecision')]
     public function testFormatMemoryPrecision($input, $output)
     {
         $this->assertSame(Profiler::formatMemory(12345.6789, $input), $output);
     }
 
-    public function providerForTestFormatDuration()
+    public static function providerForTestFormatDuration()
     {
         return [
             [1234567890, number_format(1230000000) . 's '],
@@ -191,16 +189,15 @@ class ProfilerTest extends BaseTestCase
     }
 
     /**
-     * @dataProvider providerForTestFormatDuration
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('providerForTestFormatDuration')]
     public function testFormatDuration($input, $output)
     {
         $this->assertEquals(Profiler::formatDuration($input), $output);
     }
 
-    public function providerForTestFormatDurationPrecision()
+    public static function providerForTestFormatDurationPrecision()
     {
         return [
             [1, number_format(100) . 's '],
@@ -213,16 +210,15 @@ class ProfilerTest extends BaseTestCase
     }
 
     /**
-     * @dataProvider providerForTestFormatDurationPrecision
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('providerForTestFormatDurationPrecision')]
     public function testFormatDurationPrecision($input, $output)
     {
         $this->assertSame(Profiler::formatDuration(123.456789, $input), $output);
     }
 
-    public function providerForTestToPrecision()
+    public static function providerForTestToPrecision()
     {
         return [
             [1234567890, number_format(1230000000)],
@@ -247,16 +243,15 @@ class ProfilerTest extends BaseTestCase
     }
 
     /**
-     * @dataProvider providerForTestToPrecision
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('providerForTestToPrecision')]
     public function testToPrecision($input, $output)
     {
         $this->assertSame(Profiler::toPrecision($input), $output);
     }
 
-    public function providerForTestToPrecisionPrecision()
+    public static function providerForTestToPrecisionPrecision()
     {
         return [
             [0, '0'],
@@ -270,10 +265,9 @@ class ProfilerTest extends BaseTestCase
     }
 
     /**
-     * @dataProvider providerForTestToPrecisionPrecision
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('providerForTestToPrecisionPrecision')]
     public function testToPrecisionPrecision($input, $output)
     {
         $this->assertSame(Profiler::toPrecision(123.456789, $input), $output);

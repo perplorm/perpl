@@ -13,6 +13,11 @@ namespace Propel\Generator\Builder\Om;
 class ExtensionQueryBuilder extends AbstractOMBuilder
 {
     /**
+     * @var \Propel\Generator\Builder\Om\BuilderType|null
+     */
+    public const BUILDER_TYPE = BuilderType::QueryStub;
+
+    /**
      * Returns the name of the current class being built.
      *
      * @return string

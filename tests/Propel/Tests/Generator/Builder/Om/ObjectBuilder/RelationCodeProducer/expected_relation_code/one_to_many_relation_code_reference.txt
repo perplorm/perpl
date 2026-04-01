@@ -1,0 +1,72 @@
+Propel\Generator\Builder\Om\ObjectBuilder\RelationCodeProducer\FkRelationCodeProducer
+
+
+addAttributes():
+
+    /**
+     * ChildTeam associated via Team relation (n:1).
+     */
+    protected ChildTeam|null $aTeam = null;
+
+
+addOnReloadCode():
+
+            $this->aTeam = null;
+
+addDeleteScheduledItemsCode():
+
+        if ($this->aTeam !== null) {
+            if ($this->aTeam->isModified() || $this->aTeam->isNew()) {
+                $affectedRows += $this->aTeam->save($con);
+            }
+            $this->setTeam($this->aTeam);
+        }
+
+
+addClearReferencesCode():
+
+        $this->aTeam = null;
+
+addMethods():
+
+    /**
+     * Declares an association between this object and a ChildTeam object.
+     *
+     * @param \Team|null $team
+     *
+     * @return $this
+     */
+    public function setTeam(?ChildTeam $team = null)
+    {
+        $mainTeamId = $team ? $team->getId() : null;
+        $this->setMainTeamId($mainTeamId);
+
+        $this->aTeam = $team;
+        assert($this instanceof ChildUser);
+        $team?->addUser($this);
+
+        return $this;
+    }
+
+    /**
+     * Get the associated Team object
+     *
+     * @param \Propel\Runtime\Connection\ConnectionInterface|null $con Optional Connection object.
+     *
+     * @return \Team|null
+     */
+    public function getTeam(?ConnectionInterface $con = null)
+    {
+        if ($this->aTeam === null && ($this->main_team_id !== null && $this->main_team_id !== 0)) {
+            $this->aTeam = ChildTeamQuery::create()->findPk($this->main_team_id, $con);
+            /* The following can be used additionally to
+                guarantee the related object contains a reference
+                to this object.  This level of coupling may, however, be
+                undesirable since it could result in an only partially populated collection
+                in the referenced object.
+                $this->aTeam->addUsers($this);
+             */
+        }
+
+        return $this->aTeam;
+    }

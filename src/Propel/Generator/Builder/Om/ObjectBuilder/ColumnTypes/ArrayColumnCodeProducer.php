@@ -113,7 +113,7 @@ class ArrayColumnCodeProducer extends AbstractArrayColumnCodeProducer
         if (\$this->$cloUnserialized !== \$v) {
             \$this->$cloUnserialized = \$v;
             \$this->$clo = static::serializeArray(\$v);
-            \$this->modifiedColumns[" . $this->objectBuilder->getColumnConstant($col) . "] = true;
+            \$this->modifiedColumns[" . $this->builder->getColumnConstant($col) . "] = true;
         }\n";
     }
 

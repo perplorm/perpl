@@ -158,7 +158,7 @@ class OneToManyRelationCodeProducer extends AbstractIncomingRelationCode
         $relationIdentifierPlural = $this->relation->getIdentifierReversed($this->getPluralizer());
         $attributeName = $this->getAttributeName();
         $targetCollectionClassName = $this->targetTableNames->useCollectionClassName();
-        $modelClassNameFq = $this->getClassNameFromBuilder($this->getNewStubObjectBuilder($table), true);
+        $modelClassNameFq = $this->getClassNameFromBuilder($this->getStubObjectBuilder($table), true);
 
         $script .= "
     /**
@@ -496,7 +496,7 @@ class OneToManyRelationCodeProducer extends AbstractIncomingRelationCode
         $lowerRelatedObjectClassName = lcfirst($relatedObjectClassName);
         $varName = $this->getAttributeName();
         $reversedRelationIdentifier = $this->relation->getIdentifier();
-        $ownStubClassName = $this->objectBuilder->getObjectClassName();
+        $ownStubClassName = $this->builder->getObjectClassName();
 
         $script .= "
     /**

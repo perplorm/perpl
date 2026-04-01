@@ -17,14 +17,8 @@ use function lcfirst;
  */
 abstract class AbstractIncomingRelationCode extends AbstractRelationCodeProducer
 {
-    /**
-     * @var \Propel\Generator\Model\ForeignKey
-     */
-    protected $relation;
+    protected ForeignKey $relation;
 
-    /**
-     * @var \Propel\Generator\Builder\Util\EntityObjectClassNames
-     */
     protected EntityObjectClassNames $targetTableNames;
 
     /**

@@ -21,6 +21,7 @@ propel:
 
   generator:
     targetPackage: quoting
+    declareStrictTypesInBuilders: true
     defaultConnection: quoting
     connections:
       - quoting

@@ -6,7 +6,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Propel\Tests\Generator\Behavior;
+namespace Propel\Tests\Generator\Behavior\ConcreteInheritance;
 
 use ConcreteArticleSetPk;
 use ConcreteArticleSetPkQuery;
@@ -361,17 +361,23 @@ EOF;
     {
         ConcreteContentSetPkQuery::create()->deleteAll();
         ConcreteArticleSetPkQuery::create()->deleteAll();
+        $article = new ConcreteArticleSetPk();
+        $article->setId(4);
+        $article->save();
+        $article = new ConcreteArticleSetPk();
+        $article->setId(4);
+
+        set_error_handler(static function (int $errno, string $errstr): never {
+            throw new PropelException($errstr, $errno);
+        }, E_WARNING);
+
+        $this->expectException(PropelException::class);
         try {
-            $article = new ConcreteArticleSetPk();
-            $article->setId(4);
             $article->save();
-            $article = new ConcreteArticleSetPk();
-            $article->setId(4);
-            $article->save();
-            $this->fail('getParentOrCreate() returns a new parent object on new child objects with pk set');
-        } catch (PropelException $e) {
-            $this->assertTrue(true, 'getParentOrCreate() returns a new parent object on new child objects with pk set');
+        } finally {
+            restore_error_handler();
         }
+        $this->fail('getParentOrCreate() returns a new parent object on new child objects with pk set');
     }
 
     /**

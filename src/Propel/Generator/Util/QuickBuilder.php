@@ -6,9 +6,10 @@ namespace Propel\Generator\Util;
 
 use Exception;
 use PDO;
+use Propel\Generator\Builder\Om\BuilderType;
 use Propel\Generator\Builder\Om\TableMapBuilder;
 use Propel\Generator\Builder\Util\SchemaReader;
-use Propel\Generator\Config\GeneratorConfigInterface;
+use Propel\Generator\Config\AbstractGeneratorConfig;
 use Propel\Generator\Config\QuickGeneratorConfig;
 use Propel\Generator\Exception\BuildException;
 use Propel\Generator\Model\Database;
@@ -26,6 +27,8 @@ use Propel\Runtime\Connection\StatementInterface;
 use Propel\Runtime\Propel;
 use RuntimeException;
 use function array_filter;
+use function array_map;
+use function array_slice;
 use function count;
 use function explode;
 use function file_put_contents;
@@ -88,7 +91,7 @@ class QuickBuilder
     protected $platform;
 
     /**
-     * @var \Propel\Generator\Config\GeneratorConfigInterface|null
+     * @var \Propel\Generator\Config\AbstractGeneratorConfig|null
      */
     protected $config;
 
@@ -101,11 +104,6 @@ class QuickBuilder
      * @var \Propel\Generator\Reverse\SchemaParserInterface|null
      */
     protected $parser;
-
-    /**
-     * @var array
-     */
-    protected $classTargets = ['tablemap', 'object', 'objectstub', 'collection', 'query', 'querystub'];
 
     /**
      * Identifier quoting for reversed database.
@@ -207,11 +205,11 @@ class QuickBuilder
     /**
      * Setter for the config property
      *
-     * @param \Propel\Generator\Config\GeneratorConfigInterface $config
+     * @param \Propel\Generator\Config\AbstractGeneratorConfig $config
      *
      * @return void
      */
-    public function setConfig(GeneratorConfigInterface $config): void
+    public function setConfig(AbstractGeneratorConfig $config): void
     {
         $this->config = $config;
     }
@@ -219,9 +217,9 @@ class QuickBuilder
     /**
      * Getter for the config property
      *
-     * @return \Propel\Generator\Config\GeneratorConfigInterface
+     * @return \Propel\Generator\Config\AbstractGeneratorConfig
      */
-    public function getConfig(): GeneratorConfigInterface
+    public function getConfig(): AbstractGeneratorConfig
     {
         if ($this->config === null) {
             $this->config = new QuickGeneratorConfig();
@@ -290,11 +288,19 @@ class QuickBuilder
     }
 
     /**
+     * @return array<\Propel\Generator\Builder\Om\BuilderType>
+     */
+    public static function getDefaultClassTargets(): array
+    {
+        return [BuilderType::TableMap, BuilderType::ObjectBase, BuilderType::ObjectStub, BuilderType::Collection, BuilderType::QueryBase, BuilderType::QueryStub];
+    }
+
+    /**
      * @param string|null $dsn
      * @param string|null $user
      * @param string|null $pass
      * @param \Propel\Runtime\Adapter\AdapterInterface|null $adapter
-     * @param array|null $classTargets
+     * @param array<\Propel\Generator\Builder\Om\BuilderType>|null $classTargets
      *
      * @return \Propel\Runtime\Connection\ConnectionWrapper
      */
@@ -307,7 +313,7 @@ class QuickBuilder
     ): ConnectionWrapper {
         $dsn = $dsn ?? 'sqlite::memory:';
         $adapter = $adapter ?? new SqliteAdapter();
-        $classTargets = $classTargets ?? $this->classTargets;
+        $classTargets ??= static::getDefaultClassTargets();
 
         $pdo = new PdoConnection($dsn, $user, $pass, [], $adapter->getPdoSubclass());
         $con = new ConnectionWrapper($pdo);
@@ -440,27 +446,20 @@ class QuickBuilder
     }
 
     /**
-     * @param array|null $classTargets
+     * @param array<\Propel\Generator\Builder\Om\BuilderType>|null $classTargets
      *
      * @return string
      */
     public function getBuildName(?array $classTargets = null): string
     {
-        $tables = [];
-        foreach ($this->getDatabase()->getTables() as $table) {
-            if (count($tables) > 3) {
-                break;
-            }
-            $tables[] = $table->getName();
-        }
-        $name = implode('_', $tables);
-        if (!$classTargets || count($classTargets) === 5) {
-            $name .= '-all';
-        } else {
-            $name .= '-' . implode('_', $classTargets);
-        }
+        $firstThreeTables = array_slice($this->getDatabase()->getTables(), 0, 3);
+        $tableNames = array_map(fn (Table $table) => $table->getName(), $firstThreeTables);
+        $tableNamesString = implode('_', $tableNames);
+        $targetsString = $classTargets === static::getDefaultClassTargets()
+            ? 'all'
+            : implode('_', array_map(fn ($t) => $t->value, $classTargets));
 
-        return $name;
+        return "$tableNamesString-$targetsString";
     }
 
     /**
@@ -470,63 +469,61 @@ class QuickBuilder
      * physical filesystem, which is supposed to be for debugging purpose, the classes reside on separate file,
      * for easier debug.
      *
-     * @param array<string>|null $classTargets array('tablemap', 'object', 'query', 'objectstub', 'querystub')
+     * @param array<\Propel\Generator\Builder\Om\BuilderType>|null $classTargets
      *
      * @return void
      */
     public function buildClasses(?array $classTargets = null): void
     {
-        $classes = $classTargets ?? ['tablemap', 'object', 'objectstub', 'collection', 'query', 'querystub'];
+        $classTargets ??= static::getDefaultClassTargets();
         $tables = $this->getDatabase()->getTables();
 
         $includes = $this->isVfs()
-            ? $this->buildClassesToVirtual($classes, $tables)
-            : $this->buildClassesToPhysical($classes, $tables);
+            ? $this->buildClassesToVirtual($classTargets, $tables)
+            : $this->buildClassesToPhysical($classTargets, $tables);
 
         foreach ($includes as $tempFile) {
             include $tempFile;
         }
 
-        if (in_array('tablemap', $classes, true)) {
+        if (in_array(BuilderType::TableMap, $classTargets, true)) {
             $this->registerTableMaps();
         }
     }
 
     /**
-     * @param array<string>|null $classTargets
+     * @param array<\Propel\Generator\Builder\Om\BuilderType>|null $classTargets
      *
      * @return string
      */
     public function getClasses(?array $classTargets = null): string
     {
-        $script = '';
-        foreach ($this->getDatabase()->getTables() as $table) {
-            $script .= $this->getClassesForTable($table, $classTargets);
-        }
+        $tables = $this->getDatabase()->getTables();
+        $classCode = array_map(fn (Table $table) => $this->getClassesForTable($table, $classTargets), $tables);
 
-        return $script;
+        return implode('', $classCode);
     }
 
     /**
      * @param \Propel\Generator\Model\Table $table
-     * @param array<string>|null $classTargets
+     * @param array<\Propel\Generator\Builder\Om\BuilderType>|null $classTargets
      *
      * @return string
      */
     public function getClassesForTable(Table $table, ?array $classTargets = null): string
     {
-        $classTargets = $classTargets ?? $this->classTargets;
+        $classTargets ??= static::getDefaultClassTargets();
         $script = '';
 
         foreach ($classTargets as $target) {
             /** @var \Propel\Generator\Builder\Om\AbstractOMBuilder $abstractBuilder */
-            $abstractBuilder = $this->getConfig()->getConfiguredBuilder($table, $target);
+            $abstractBuilder = $this->getConfig()->loadConfiguredBuilder($table, $target);
             $class = $abstractBuilder->build();
             $script .= $this->fixNamespaceDeclarations($class);
             $script .= $this->buildInheritanceClassesCode($target, $table);
 
-            if ($target === 'object' && $table->getInterface()) {
-                $interface = $this->getConfig()->getConfiguredBuilder($table, 'interface')->build();
+            if ($target === BuilderType::ObjectBase && $table->getInterface()) {
+                $interface = $this->getConfig()->loadInterfaceBuilder($table)->build();
                 $script .= $this->fixNamespaceDeclarations($interface);
             }
         }
@@ -547,17 +544,17 @@ class QuickBuilder
     /**
      * Build code for classes defined via inheritance in schema.xml.
      *
-     * @param string $target
+     * @param \Propel\Generator\Builder\Om\BuilderType $target
      * @param \Propel\Generator\Model\Table $table
      *
      * @return string
      */
-    protected function buildInheritanceClassesCode(string $target, Table $table): string
+    protected function buildInheritanceClassesCode(BuilderType $target, Table $table): string
     {
         $childTarget = match ($target) {
-            'query' => 'queryinheritance',
-            'objectstub' => 'objectmultiextend',
-            'querystub' => 'queryinheritancestub',
+            BuilderType::QueryBase => BuilderType::QueryInheritance,
+            BuilderType::ObjectStub => BuilderType::ObjectInheritanceStub,
+            BuilderType::QueryStub => BuilderType::QueryInheritanceStub,
             default => null
         };
         $column = $table->getChildrenColumn();
@@ -572,10 +569,10 @@ class QuickBuilder
             }
 
             /** @var \Propel\Generator\Builder\Om\AbstractOMBuilder&\Propel\Generator\Builder\Om\ExtensionBuilderInterface $builder */
-            $builder = $this->getConfig()->getConfiguredBuilder($table, $childTarget);
+            $builder = $this->getConfig()->loadConfiguredBuilder($table, $childTarget);
             $builder->setChild($child);
-            $class = $builder->build();
-            $code .= $this->fixNamespaceDeclarations($class);
+            $classCode = $builder->build();
+            $code .= $this->fixNamespaceDeclarations($classCode);
         }
 
         return $code;
@@ -654,7 +651,7 @@ class QuickBuilder
 
             $code = str_replace($useStatements, '', $code);
 
-            return "\nnamespace\n{\n" . $code . "\n}\n";
+            return "\nnamespace\n{\n{$code}\n}\n";
         }
 
         return $code;
@@ -681,23 +678,26 @@ class QuickBuilder
     /**
      * Create separate classes to write to physical filesystem.
      *
-     * @param array<string> $classes
+     * @param array<\Propel\Generator\Builder\Om\BuilderType> $targets
      * @param array<\Propel\Generator\Model\Table> $tables Array of Table objects
      *
      * @return array<string> The files to include
      */
-    private function buildClassesToPhysical(array $classes, array $tables): array
+    private function buildClassesToPhysical(array $targets, array $tables): array
     {
         $includes = [];
         $hashFromCwd = substr(sha1((string)getcwd()), 0, 10);
-        $dirName = sys_get_temp_dir() . '/perplQuickBuild/v' . Propel::VERSION . '-' . $hashFromCwd . '/';
+        $version = Propel::VERSION;
+        $dirName = sys_get_temp_dir() . "/perplQuickBuild/v{$version}-$hashFromCwd/";
         if (!is_dir($dirName)) {
             mkdir($dirName, 0777, true);
         }
         foreach ($tables as $table) {
-            foreach ($classes as $class) {
-                $code = $this->getClassesForTable($table, [$class]);
-                $tempFile = $dirName . str_replace('\\', '-', $table->getPhpName()) . "-$class.php";
+            foreach ($targets as $target) {
+                $code = $this->getClassesForTable($table, [$target]);
+                $cleanerNamespace = str_replace('\\', '-', $table->getPhpName());
+                $targetId = $target->value;
+                $tempFile = "{$dirName}{$cleanerNamespace}-$targetId.php";
                 file_put_contents($tempFile, "<?php\n" . $code);
                 $includes[] = $tempFile;
             }
@@ -709,12 +709,12 @@ class QuickBuilder
     /**
      * Create an all-classes file to write to virtual filesystem.
      *
-     * @param array<string> $classes
+     * @param array<\Propel\Generator\Builder\Om\BuilderType> $targets
      * @param array<\Propel\Generator\Model\Table> $tables Array of Table objects
      *
      * @return array<string> The one element array, containing the file to include
      */
-    private function buildClassesToVirtual(array $classes, array $tables): array
+    private function buildClassesToVirtual(array $targets, array $tables): array
     {
         $allCode = '';
         $allCodeName = [];
@@ -724,11 +724,11 @@ class QuickBuilder
             if (count($allCodeName) < 5) {
                 $allCodeName[] = $table->getPhpName();
             }
-            $allCode .= $this->getClassesForTable($table, $classes);
+            $allCode .= $this->getClassesForTable($table, $targets);
         }
 
         $tempFile = $this->newFile('propelQuickBuild/' . implode('_', $allCodeName) . '.php');
-        file_put_contents($tempFile->url(), "<?php\n" . $allCode);
+        file_put_contents($tempFile->url(), "<?php\n$allCode");
         $includes[] = $tempFile->url();
 
         return $includes;

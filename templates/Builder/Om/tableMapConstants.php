@@ -1,61 +1,75 @@
     /**
-     * The (dot-path) name of this class
+     * @deprecated Not used. If you know the class, generate dot-path yourself.
+     *
+     * @var string
      */
     public const CLASS_NAME = '<?= $className ?>';
 
     /**
-     * The default database name for this class
+     * Default database name.
+     *
+     * @var string
      */
     public const DATABASE_NAME = '<?= $dbName ?>';
 
     /**
-     * The table name for this class
+     * @var string
      */
     public const TABLE_NAME = '<?= $tableName ?>';
 
     /**
-     * The PHP name of this class (PascalCase)
+     * @var string
      */
     public const TABLE_PHP_NAME = '<?= $tablePhpName ?>';
-
+    
     /**
-     * The related Propel class for this table
+     * <?= $isAbstract ? 'Default model class (abstract)' : 'Model class'?> 
+     *
+     * @var class-string<<?= $omClassNameFq ?>>
      */
-    public const OM_CLASS = '<?= $omClassName ?>';
+    public const OM_CLASS = <?= $omClassName ?>::class;
 
     /**
-     * A class that can be returned by this tableMap
+     * @deprecated Not needed (generate from {@see self::OM_CLASS}.
+     *
+     * @var string
      */
-    public const CLASS_DEFAULT = '<?= $classPath ?>';
+    public const CLASS_DEFAULT = '<?= $stubClassPath ?>';
 
     /**
-     * The total number of columns
+     * @var int
      */
     public const NUM_COLUMNS = <?= $nbColumns ?>;
 
     /**
-     * The number of lazy-loaded columns
+     * @var int
      */
     public const NUM_LAZY_LOAD_COLUMNS = <?= $nbLazyLoadColumns ?>;
 
     /**
      * The number of columns to hydrate (NUM_COLUMNS - NUM_LAZY_LOAD_COLUMNS)
+     *
+     * @var int
      */
     public const NUM_HYDRATE_COLUMNS = <?= $nbHydrateColumns ?>;
 <?php foreach ($columns as $col) : ?>
 
     /**
-     * the column name for the <?= $col->getName() ?> field
+     * Identifies the [<?= $col->getName() ?>] column
+     *
+     * @var string
      */
     public const <?= $col->getConstantName() ?> = '<?= $tableName ?>.<?= $col->getName() ?>';
 <?php endforeach; ?>
 
     /**
      * The default string format for model objects of the related table
+     *
+     * @var string
      */
     public const DEFAULT_STRING_FORMAT = '<?= $stringFormat ?>';
 
     /**
      * @var class-string<<?= $objectCollectionType ?>>
      */
-    public const DEFAULT_OBJECT_COLLECTION = '<?= $objectCollectionClassName ?>';
+    public const DEFAULT_OBJECT_COLLECTION = <?= $objectCollectionClassName ?>::class;

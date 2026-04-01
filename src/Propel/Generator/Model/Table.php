@@ -4,7 +4,7 @@ declare(strict_types = 1);
 
 namespace Propel\Generator\Model;
 
-use Propel\Generator\Config\GeneratorConfigInterface;
+use Propel\Generator\Config\AbstractGeneratorConfig;
 use Propel\Generator\Exception\BuildException;
 use Propel\Generator\Exception\EngineException;
 use Propel\Generator\Exception\InvalidArgumentException;
@@ -15,7 +15,10 @@ use Propel\Generator\Platform\PlatformInterface;
 use Propel\Runtime\Collection\ObjectCollection;
 use Propel\Runtime\Exception\RuntimeException;
 use Propel\Runtime\Util\UuidConverter;
+use function array_any;
 use function array_filter;
+use function array_find;
+use function array_map;
 use function array_merge;
 use function array_slice;
 use function array_values;
@@ -26,11 +29,13 @@ use function in_array;
 use function is_array;
 use function is_string;
 use function lcfirst;
+use function reset;
 use function sprintf;
 use function strrpos;
 use function strtolower;
 use function strtoupper;
 use function substr_replace;
+use function var_export;
 
 /**
  * Data about a table used in an application.
@@ -170,8 +175,6 @@ class Table extends ScopedMappingModel implements IdMethod
     protected ?string $defaultStringFormat = null;
 
     /**
-     * Constructs a table object with a name
-     *
      * @param string $name table name
      */
     public function __construct(string $name)
@@ -564,12 +567,16 @@ class Table extends ScopedMappingModel implements IdMethod
      * @param \Propel\Generator\Model\Column|array $col
      *
      * @throws \Propel\Generator\Exception\EngineException
+     * @throws \Propel\Generator\Exception\SchemaException
      *
      * @return \Propel\Generator\Model\Column
      */
     public function addColumn($col): Column
     {
         if (is_array($col)) {
+            if (empty($col['name'])) {
+                throw new SchemaException("Column on table `{$this->commonName}` misses required attribute `name` Attributes:" . var_export($col, true));
+            }
             $column = new Column($col['name']);
             $column->setTable($this);
             $column->loadMapping($col);
@@ -1138,10 +1145,10 @@ class Table extends ScopedMappingModel implements IdMethod
     /**
      * Retrieves the configuration object.
      *
-     * @return \Propel\Generator\Config\GeneratorConfigInterface|null
+     * @return \Propel\Generator\Config\AbstractGeneratorConfig|null
      */
     #[\Override]
-    public function getGeneratorConfig(): GeneratorConfigInterface|null
+    public function getGeneratorConfig(): AbstractGeneratorConfig|null
     {
         return $this->database?->getGeneratorConfig();
     }
@@ -2017,14 +2024,7 @@ class Table extends ScopedMappingModel implements IdMethod
      */
     public function getPrimaryKey(): array
     {
-        $pk = [];
-        foreach ($this->columns as $col) {
-            if ($col->isPrimaryKey()) {
-                $pk[] = $col;
-            }
-        }
-
-        return $pk;
+        return array_values(array_filter($this->columns, fn (Column $col) => $col->isPrimaryKey()));
     }
 
     /**
@@ -2034,7 +2034,7 @@ class Table extends ScopedMappingModel implements IdMethod
      */
     public function hasPrimaryKey(): bool
     {
-        return count($this->getPrimaryKey()) > 0;
+        return array_any($this->columns, fn (Column $col) => $col->isPrimaryKey());
     }
 
     /**
@@ -2056,13 +2056,22 @@ class Table extends ScopedMappingModel implements IdMethod
      */
     public function getFirstPrimaryKeyColumn(): ?Column
     {
-        foreach ($this->columns as $col) {
-            if ($col->isPrimaryKey()) {
-                return $col;
-            }
-        }
+        return array_find($this->columns, fn (Column $col) => $col->isPrimaryKey());
+    }
 
-        return null;
+    /**
+     * @param bool $nullable
+     *
+     * @return string
+     */
+    public function getPrimaryKeyDocType(bool $nullable): string
+    {
+        $orNull = $nullable ? '|null' : '';
+        $columnTypes = array_map(fn (Column $col) => $col->resolveQualifiedType() . $orNull, $this->getPrimaryKey());
+
+        return count($columnTypes) > 1
+            ? 'array{' . implode(', ', $columnTypes) . '}'
+            : (reset($columnTypes) ?: 'null');
     }
 
     /**

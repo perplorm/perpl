@@ -20,8 +20,8 @@ class PrintPropelDirectoriesCommandTest extends TestCaseFixtures
     /**
      * @return bool
      */
-    protected function isSymfonyBelow54(){
-        return !class_exists('\Symfony\Component\Filesystem\Path');
+    protected function hasSymfonyFilesystem(){
+        return class_exists('\Symfony\Component\Filesystem\Path'); // not available before Symfony 5.4
     }
 
     /**
@@ -29,7 +29,7 @@ class PrintPropelDirectoriesCommandTest extends TestCaseFixtures
      */
     public function testMissingSymfonyComponentError(): void
     {
-        if (!$this->isSymfonyBelow54()) {
+        if ($this->hasSymfonyFilesystem()) {
             $this->markTestSkipped("Tests error for Symfony below 5.4");
         }
 
@@ -44,7 +44,7 @@ class PrintPropelDirectoriesCommandTest extends TestCaseFixtures
      */
     public function testPrintNoSchema(): void
     {
-        if ($this->isSymfonyBelow54()) {
+        if (!$this->hasSymfonyFilesystem()) {
             $this->markTestSkipped("Requires Symfony 5.4 or above");
         }
 
@@ -74,7 +74,7 @@ Directory structure and files according to current config (directories marked as
      */
     public function testPrintNamespacedFixtures(): void
     {
-        if ($this->isSymfonyBelow54()) {
+        if (!$this->hasSymfonyFilesystem()) {
             $this->markTestSkipped("Requires Symfony 5.4 or above");
         }
 

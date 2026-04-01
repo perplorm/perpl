@@ -100,7 +100,7 @@ class SetBinaryColumnCodeProducer extends AbstractArrayColumnCodeProducer
         $cloConverted = $clo . '_converted';
 
         $tableMapClassName = $this->getTableMapClassName();
-        $columnConstantExpression = $this->objectBuilder->getColumnConstant($this->column);
+        $columnConstantExpression = $this->builder->getColumnConstant($this->column);
 
         $script .= "
         if (\$this->$cloConverted === null) {
@@ -177,7 +177,7 @@ class SetBinaryColumnCodeProducer extends AbstractArrayColumnCodeProducer
         $cloConverted = $clo . '_converted';
         $script .= "
         if (\$this->$cloConverted === null || count(array_diff(\$this->$cloConverted, \$v)) > 0 || count(array_diff(\$v, \$this->$cloConverted)) > 0) {
-            \$valueSet = " . $this->getTableMapClassName() . '::getValueSet(' . $this->objectBuilder->getColumnConstant($col) . ");
+            \$valueSet = " . $this->getTableMapClassName() . '::getValueSet(' . $this->builder->getColumnConstant($col) . ");
             try {
                 \$v = SetColumnConverter::convertToBitmask(\$v, \$valueSet);
             } catch (SetColumnConverterException \$e) {
@@ -186,7 +186,7 @@ class SetBinaryColumnCodeProducer extends AbstractArrayColumnCodeProducer
             if (\$this->$clo !== \$v) {
                 \$this->$cloConverted = null;
                 \$this->$clo = \$v;
-                \$this->modifiedColumns[" . $this->objectBuilder->getColumnConstant($col) . "] = true;
+                \$this->modifiedColumns[" . $this->builder->getColumnConstant($col) . "] = true;
             }
         }\n";
     }
@@ -203,7 +203,7 @@ class SetBinaryColumnCodeProducer extends AbstractArrayColumnCodeProducer
     {
         $this->declareClasses('Propel\Common\Util\SetColumnConverter');
         $tableMapClassName = $this->getTableMapClassName();
-        $columnConstant = $this->objectBuilder->getColumnConstant($this->column);
+        $columnConstant = $this->builder->getColumnConstant($this->column);
 
         return "SetColumnConverter::convertBitmaskToArray($valueExpression, $tableMapClassName::getValueSet($columnConstant))";
     }

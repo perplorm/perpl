@@ -20,7 +20,7 @@ class CriteriaCombineFiltersTest extends BaseTestCase
     /**
      * @return array<array{string, Criteria, string}>>
      */
-    public function CombineFiltersDataProvider(): array
+    public static function CombineFiltersDataProvider(): array
     {
         Propel::getServiceContainer()->initDatabaseMaps([]);
         return [
@@ -213,10 +213,9 @@ class CriteriaCombineFiltersTest extends BaseTestCase
     }
 
     /**
-     * @dataProvider CombineFiltersDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('CombineFiltersDataProvider')]
     public function testCombineFilters(string $description, Criteria $c, $expectedCondition): void
     {
         $condition = $c->getFilterCollector()->__toString();

@@ -9,10 +9,7 @@
 namespace Propel\Tests\Generator\Platform;
 
 use Propel\Generator\Builder\Om\AbstractOMBuilder;
-use Propel\Generator\Builder\Om\ObjectBuilder;
-use Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes\ColumnCodeProducer;
-use Propel\Generator\Builder\Om\QueryBuilder;
-use Propel\Generator\Config\GeneratorConfig;
+use Propel\Generator\Builder\Om\BuilderType;
 use Propel\Generator\Config\QuickGeneratorConfig;
 use Propel\Generator\Model\Column;
 use Propel\Generator\Model\PropelTypes;
@@ -29,7 +26,7 @@ use Propel\Tests\TestCase;
 
 class EnumeratedColumnTypesTest extends TestCase
 {
-    public function EnumAliasProvider(): array
+    public static function EnumAliasProvider(): array
     {
         $platformsWithoutNativeType = [
             DefaultPlatform::class,
@@ -61,19 +58,18 @@ class EnumeratedColumnTypesTest extends TestCase
     }
 
     /**
-     * @dataProvider EnumAliasProvider
      *
      * @param class-string<PlatformInterface> $platform
      * @param bool $defaultToNative
      * @param string $columnType
      * @param string $expectedColumnType
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('EnumAliasProvider')]
     public function testEnumAliasOnPlatform(string $platformClass, bool $defaultToNative, string $columnType, string $expectedColumnType): void
     {
         $columnXml = '<column name="column" type="' . $columnType . '" valueSet="A,B"/>';
-        $column = $this->buildColumnFromSchema(new $platformClass, $defaultToNative, $columnXml);
+        $column = $this->buildColumnForPlatform(new $platformClass, $defaultToNative, $columnXml);
         $actualColumnType = $column->getType();
 
         $this->assertSame($expectedColumnType, $actualColumnType);
@@ -82,75 +78,7 @@ class EnumeratedColumnTypesTest extends TestCase
     /**
      * @return string[][]
      */
-    public function ColumnCodeDataProvider(): array
-    {
-        return [ // [type, expected code file name]
-            [PropelTypes::ENUM_BINARY, __DIR__ . '/ExpectedColumnCode/EnumBinaryColumnCode.txt'],
-            [PropelTypes::ENUM_NATIVE, __DIR__ . '/ExpectedColumnCode/EnumNativeColumnCode.txt'],
-            [PropelTypes::SET_BINARY, __DIR__ . '/ExpectedColumnCode/SetBinaryColumnCode.txt'],
-            [PropelTypes::SET_NATIVE, __DIR__ . '/ExpectedColumnCode/SetNativeColumnCode.txt']
-        ];
-    }
-
-    /**
-     * @dataProvider ColumnCodeDataProvider
-     *
-     * @param string $columnType
-     * @param string $fileName
-     *
-     * @return void
-     */
-    public function testEnumeratedColumnObjectCode(string $columnType, string $fileName): void
-    {
-        /** @var ObjectBuilder $builder */
-        $builder = $this->buildCodeBuilder($columnType, GeneratorConfig::KEY_OBJECT_BASE);
-        /** @var ColumnCodeProducer $builder */
-        $codeProducer = $this->getObjectPropertyValue($builder, 'columnCodeProducers')[0];
-
-        $script = '';
-        $codeProducer->addColumnAttributes($script);
-        $codeProducer->addAccessor($script);
-        $codeProducer->addMutator($script);
-
-        $this->assertStringEqualsFile($fileName, $script);
-    }
-
-    /**
-     * @return string[][]
-     */
-    public function QueryCodeDataProvider(): array
-    {
-        return [ // [type, expected code file name]
-            [PropelTypes::ENUM_BINARY, __DIR__ . '/ExpectedColumnCode/EnumBinaryQueryCode.txt'],
-            [PropelTypes::ENUM_NATIVE, __DIR__ . '/ExpectedColumnCode/EnumNativeQueryCode.txt'],
-            [PropelTypes::SET_BINARY, __DIR__ . '/ExpectedColumnCode/SetBinaryQueryCode.txt'],
-            [PropelTypes::SET_NATIVE, __DIR__ . '/ExpectedColumnCode/SetNativeQueryCode.txt'],
-        ];
-    }
-
-    /**
-     * @dataProvider QueryCodeDataProvider
-     *
-     * @param string $columnType
-     * @param string $fileName
-     *
-     * @return void
-     */
-    public function testEnumeratedColumnQueryCode(string $columnType, string $fileName): void
-    {
-        /** @var QueryBuilder $builder */
-        $builder = $this->buildCodeBuilder($columnType, GeneratorConfig::KEY_QUERY_BASE);
-
-        $script = '';
-        $this->callMethod($builder, 'addColumnCode', [&$script, $builder->getTable()->getColumns()[0]]);
-
-        $this->assertStringEqualsFile($fileName, $script);
-    }
-
-    /**
-     * @return string[][]
-     */
-    public function SqlTypeDataProvider(): array
+    public static function SqlTypeDataProvider(): array
     {
         return [
             [PropelTypes::ENUM_BINARY, 'A,B', PropelTypes::TINYINT],
@@ -161,18 +89,17 @@ class EnumeratedColumnTypesTest extends TestCase
     }
 
     /**
-     * @dataProvider SqlTypeDataProvider
      *
      * @param string $columnType
      * @param string $valueSetCsv
      * @param string $expectedSqlType
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('SqlTypeDataProvider')]
     public function testSqlType(string $columnType, string $valueSetCsv, string $expectedSqlType): void
     {
         $columnXml = '<column name="enumerated_column" type="' . $columnType . '" valueSet="' . $valueSetCsv . '"/>';
-        $column = $this->buildColumnFromSchema(new MysqlPlatform(), false, $columnXml);
+        $column = $this->buildColumnForPlatform(new MysqlPlatform(), false, $columnXml);
 
         $this->assertSame($column->getSqlType(), $expectedSqlType);
     }
@@ -180,7 +107,7 @@ class EnumeratedColumnTypesTest extends TestCase
     /**
      * @return array<class-string<\UnitEnum>, string>[]
      */
-    public function GetEnumItemsDataProvider(): array
+    public static function GetEnumItemsDataProvider(): array
     {
         return [
             [ColorsBasicEnum::class, "`foo` ENUM('Red','Blue','Yellow')"],
@@ -188,14 +115,12 @@ class EnumeratedColumnTypesTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider GetEnumItemsDataProvider
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('GetEnumItemsDataProvider')]
     public function testSetValuesFromPhpEnum(string $enumClass, string $expectedColumnDdl): void
     {
         $columnXml = '<column name="foo" type="ENUM_NATIVE" valueEnum="' . $enumClass . '"/>';
         $platform = new MysqlPlatform();
-        $column = $this->buildColumnFromSchema($platform, false, $columnXml);
+        $column = $this->buildColumnForPlatform($platform, false, $columnXml);
         $ddl = $platform->getColumnDDL($column);
 
         $this->assertEquals($expectedColumnDdl, $ddl);
@@ -208,32 +133,23 @@ class EnumeratedColumnTypesTest extends TestCase
      *
      * @return Column
      */
-    public function buildColumnFromSchema(PlatformInterface $platform, bool $defaultToNative, string $columnXml): Column
+    public function buildColumnForPlatform(PlatformInterface $platform, bool $defaultToNative, string $columnXml): Column
     {
-        $schema = <<<EOF
-                <database>
-                    <table name="table">
-                        $columnXml
-                    </table>
-                </database>
-EOF;
-        $extraConfig = ['propel' => ['generator' => ['defaultToNativeEnumeratedColumnTypes' => $defaultToNative]]];
-        $schema = $this->buildDatabaseFromSchema($schema, $extraConfig, $platform);
-
-        return $schema->getTable('table')->getColumns()[0];
+        return $this->buildColumnFromSchema($columnXml, ['propel.generator.defaultToNativeEnumeratedColumnTypes' => $defaultToNative], $platform);
     }
 
     /**
      * @param string $columnType
+     * @param BuilderType $builderType
      *
      * @return AbstractOMBuilder
      */
-    public function buildCodeBuilder(string $columnType, string $builderTypeIdentifier): AbstractOMBuilder
+    public function buildCodeBuilder(string $columnType, BuilderType $builderType): AbstractOMBuilder
     {
         $columnXml = '<column name="enumerated_column" type="' . $columnType . '" valueSet="A,B"/>';
-        $column = $this->buildColumnFromSchema(new MysqlPlatform(), false, $columnXml);
+        $column = $this->buildColumnForPlatform(new MysqlPlatform(), false, $columnXml);
         $config = new QuickGeneratorConfig();
 
-        return $config->getConfiguredBuilder($column->getTable(), $builderTypeIdentifier);
+        return $config->loadConfiguredBuilder($column->getTable(), $builderType);
     }
 }

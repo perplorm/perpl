@@ -1,0 +1,29 @@
+
+    /**
+     * Filter the query on the bool_column column
+     *
+     * Example usage:
+     * <code>
+     * $query->filterByBoolColumn(true); // WHERE bool_column = true
+     * $query->filterByBoolColumn('yes'); // WHERE bool_column = true
+     * </code>
+     *
+     * @param string|bool|null $boolColumn The value to use as filter.
+     *      Non-boolean arguments are converted using the following rules:
+     *          - 1, '1', 'true', 'on', and 'yes' are converted to boolean true
+     *          - 0, '0', 'false', 'off', and 'no' are converted to boolean false
+     *      Check on string values is case insensitive (so 'FaLsE' is seen as 'false').
+     * @param string|null $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return $this
+     */
+    public function filterByBoolColumn($boolColumn = null, ?string $comparison = null)
+    {
+        $resolvedColumn = $this->resolveLocalColumnByName('bool_column');
+        if (is_string($boolColumn)) {
+            $boolColumn = in_array(strtolower($boolColumn), ['false', 'off', '-', 'no', 'n', '0', ''], true) ? false : true;
+        }
+        $this->addUsingOperator($resolvedColumn, $boolColumn, $comparison);
+
+        return $this;
+    }

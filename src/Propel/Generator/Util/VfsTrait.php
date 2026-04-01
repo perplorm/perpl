@@ -18,16 +18,14 @@ trait VfsTrait
     /**
      * @var \org\bovigo\vfs\vfsStreamDirectory
      */
-    private $root;
+    private vfsStreamDirectory|null $root = null;
 
     /**
      * @return \org\bovigo\vfs\vfsStreamDirectory
      */
     public function getRoot(): vfsStreamDirectory
     {
-        if ($this->root === null) {
-            $this->root = vfsStream::setup();
-        }
+        $this->root ??= vfsStream::setup();
 
         return $this->root;
     }

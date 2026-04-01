@@ -1,0 +1,74 @@
+Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes\EnumBinaryColumnCodeProducer
+
+
+addColumnAttributes():
+
+    /**
+     * The value for the bin_enum_column field.
+     */
+    protected int|null $bin_enum_column = null;
+
+
+addAccessor():
+
+    /**
+     * Get the [bin_enum_column] column value.
+     *
+     * @throws \Propel\Runtime\Exception\PropelException
+     *
+     * @return string|null
+     */
+    public function getBinEnumColumn()
+    {
+        if ($this->bin_enum_column === null) {
+            return null;
+        }
+        $valueSet = TableTableMap::getValueSet(TableTableMap::COL_BIN_ENUM_COLUMN);
+        if (!isset($valueSet[$this->bin_enum_column])) {
+            throw new PropelException('Unknown stored enum key: ' . $this->bin_enum_column);
+        }
+
+        return $valueSet[$this->bin_enum_column];
+    }
+
+
+addMutator():
+
+    /**
+     * Set the value of [bin_enum_column] column.
+     *
+     * @param string|null $v new value
+     *
+     * @throws \Propel\Runtime\Exception\PropelException
+     *
+     * @return $this
+     */
+    public function setBinEnumColumn($v)
+    {
+        if ($v !== null) {
+            $valueSet = TableTableMap::getValueSet(TableTableMap::COL_BIN_ENUM_COLUMN);
+            $keyId = array_search($v, $valueSet);
+            if (!is_int($keyId)) {
+                throw new PropelException("Value '$v' is not accepted in this enumerated column");
+            }
+            $v = $keyId;
+        }
+
+        if ($this->bin_enum_column !== $v) {
+            $this->bin_enum_column = $v;
+            $this->modifiedColumns[TableTableMap::COL_BIN_ENUM_COLUMN] = true;
+        }
+
+        return $this;
+    }
+
+
+getDefaultValueString:
+null
+
+getApplyDefaultValueStatement:
+
+        $this->bin_enum_column = null;
+
+buildCreateFromFilterValueExpression:
+TableTableMap::getValueSet(TableTableMap::COL_BIN_ENUM_COLUMN)[$value] ?? $value

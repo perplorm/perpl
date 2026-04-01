@@ -62,7 +62,7 @@ class AggregateColumnRelationBehavior extends Behavior
     public function objectAttributes(AbstractOMBuilder $builder): string
     {
         $relationName = $this->getRelationName($builder);
-        $relatedClass = $builder->getClassNameFromBuilder($builder->getNewStubObjectBuilder($this->getForeignTable()));
+        $relatedClass = $builder->getClassNameFromBuilder($builder->getStubObjectBuilder($this->getForeignTable()));
         $aggregateName = $this->getParameter('aggregate_name');
 
         return "/**
@@ -112,7 +112,7 @@ protected \$old{$relationName}{$aggregateName};
         $relationName = $this->getRelationName($builder);
         $varName = '$' . lcfirst($relationName);
         $aggregateName = $this->getParameter('aggregate_name');
-        $relatedClass = $builder->getClassNameFromBuilder($builder->getNewStubObjectBuilder($this->getForeignTable()));
+        $relatedClass = $builder->getClassNameFromBuilder($builder->getStubObjectBuilder($this->getForeignTable()));
         $search = "    public function set{$relationName}(?{$relatedClass} $varName = null)
     {";
         $replace = $search . "
@@ -205,7 +205,7 @@ protected \$old{$relationName}{$aggregateName};
         $variableName = '$' . lcfirst($relationName . $this->getParameter('aggregate_name'));
 
         $foreignKey = $this->getForeignKey();
-        $aggregatedObjectCollectionBuilder = $builder->getNewObjectCollectionBuilder($foreignKey->getForeignTable());
+        $aggregatedObjectCollectionBuilder = $builder->getObjectCollectionBuilder($foreignKey->getForeignTable());
         $aggregatedObjectCollectionClassName = $builder->declareClassFromBuilder($aggregatedObjectCollectionBuilder);
         $aggregatedObjectCollectionClassNameFq = '\\' . $aggregatedObjectCollectionBuilder->getQualifiedClassName();
 
@@ -239,7 +239,7 @@ protected ?$aggregatedObjectCollectionClassName {$variableName}s = null;\n";
     protected function addQueryFindRelated(AbstractOMBuilder $builder): string
     {
         $foreignKey = $this->getForeignKey();
-        $foreignQueryBuilder = $builder->getNewStubQueryBuilder($foreignKey->getForeignTable());
+        $foreignQueryBuilder = $builder->getStubQueryBuilder($foreignKey->getForeignTable());
         $relationName = $this->getRelationName($builder);
         $foreignQueryName = $builder->declareClassFromBuilder($foreignQueryBuilder);
 

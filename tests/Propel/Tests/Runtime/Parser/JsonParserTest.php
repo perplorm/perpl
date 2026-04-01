@@ -36,10 +36,9 @@ class JsonParserTest extends TestCase
     }
 
     /**
-     * @dataProvider arrayJsonConversionDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('arrayJsonConversionDataProvider')]
     public function testFromArray($arrayData, $jsonData, $type)
     {
         $parser = new JsonParser();
@@ -47,10 +46,9 @@ class JsonParserTest extends TestCase
     }
 
     /**
-     * @dataProvider arrayJsonConversionDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('arrayJsonConversionDataProvider')]
     public function testToJSON($arrayData, $jsonData, $type)
     {
         $parser = new JsonParser();
@@ -58,10 +56,9 @@ class JsonParserTest extends TestCase
     }
 
     /**
-     * @dataProvider arrayJsonConversionDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('arrayJsonConversionDataProvider')]
     public function testToArray($arrayData, $jsonData, $type)
     {
         $parser = new JsonParser();
@@ -69,10 +66,9 @@ class JsonParserTest extends TestCase
     }
 
     /**
-     * @dataProvider arrayJsonConversionDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('arrayJsonConversionDataProvider')]
     public function testFromJSON($arrayData, $jsonData, $type)
     {
         $parser = new JsonParser();
@@ -94,10 +90,9 @@ EOF;
     }
 
     /**
-     * @dataProvider listToJSONDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('listToJSONDataProvider')]
     public function testListToJSON($list, $json)
     {
         $parser = new JsonParser();
@@ -105,10 +100,9 @@ EOF;
     }
 
     /**
-     * @dataProvider listToJSONDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('listToJSONDataProvider')]
     public function testJSONToList($list, $json)
     {
         $parser = new JsonParser();

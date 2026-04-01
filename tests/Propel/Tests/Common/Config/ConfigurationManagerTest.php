@@ -9,6 +9,7 @@
 namespace Propel\Tests\Common\Config;
 
 use org\bovigo\vfs\vfsStream;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Propel\Common\Config\ConfigurationManager;
 use Propel\Common\Config\Exception\InvalidArgumentException;
 use Propel\Tests\TestCase;
@@ -460,10 +461,9 @@ EOF;
     }
 
     /**
-     * @dataProvider providerForInvalidConnections
-     *
      * @return void
      */
+    #[DataProvider('providerForInvalidConnections')]
     public function testRuntimeOrGeneratorConnectionIsNotInConfiguredConnectionsThrowsException($yamlConf, $section)
     {
         $this->expectException(InvalidConfigurationException::class);
@@ -473,10 +473,9 @@ EOF;
     }
 
     /**
-     * @dataProvider providerForInvalidDefaultConnection
-     *
      * @return void
      */
+    #[DataProvider('providerForInvalidDefaultConnection')]
     public function testRuntimeOrGeneratorDefaultConnectionIsNotInConfiguredConnectionsThrowsException($yamlConf, $section)
     {
         $this->expectException(InvalidConfigurationException::class);
@@ -864,7 +863,7 @@ EOF;
   /**
    * @return array<array>
    */
-  public function deflateConfigurationDataProvider(): array
+  public static function deflateConfigurationDataProvider(): array
   {
     return [
       [['foo' => 42], ['foo' => 42]],
@@ -874,12 +873,12 @@ EOF;
   }
 
   /**
-   * @dataProvider deflateConfigurationDataProvider
-   *
    * @param array $flattenedConfig
    * @param array $expectedArray
+   *
    * @return void
    */
+  #[DataProvider('deflateConfigurationDataProvider')]
   public function testDeflateConfiguration(array $flattenedConfig, array $expectedArray)
   {
     $actualArray = ConfigurationManager::deflateConfigurationArray($flattenedConfig);

@@ -4,7 +4,7 @@ declare(strict_types = 1);
 
 namespace Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes;
 
-use Propel\Generator\Config\GeneratorConfigInterface;
+use Propel\Generator\Config\AbstractGeneratorConfig;
 use Propel\Generator\Model\PropelTypes;
 use Propel\Generator\Model\Table;
 use Propel\Generator\Platform\OraclePlatform;
@@ -23,17 +23,17 @@ class LazyLoadColumnCodeProducer extends ColumnCodeProducer
     public function __construct(ColumnCodeProducer $columnCodeProducer)
     {
         $this->columnCodeProducer = $columnCodeProducer;
-        parent::__construct($columnCodeProducer->column, $columnCodeProducer->objectBuilder);
+        parent::__construct($columnCodeProducer->column, $columnCodeProducer->builder);
     }
 
     /**
      * @param \Propel\Generator\Model\Table $table
-     * @param \Propel\Generator\Config\GeneratorConfigInterface|null $generatorConfig
+     * @param \Propel\Generator\Config\AbstractGeneratorConfig|null $generatorConfig
      *
      * @return void
      */
     #[\Override]
-    protected function init(Table $table, ?GeneratorConfigInterface $generatorConfig): void
+    protected function init(Table $table, ?AbstractGeneratorConfig $generatorConfig): void
     {
         parent::init($table, $generatorConfig);
         $this->columnCodeProducer->init($table, $generatorConfig);
@@ -221,7 +221,7 @@ class LazyLoadColumnCodeProducer extends ColumnCodeProducer
         $this->declareGlobalFunction('current');
         $platform = $this->getPlatform();
         $clo = $this->column->getLowercasedName();
-        $columnConstant = $this->objectBuilder->getColumnConstant($this->column);
+        $columnConstant = $this->builder->getColumnConstant($this->column);
         $queryClassName = $this->getQueryClassName();
 
         // pdo_sqlsrv driver requires the use of PDOStatement::bindColumn() or a hex string will be returned
@@ -267,7 +267,7 @@ class LazyLoadColumnCodeProducer extends ColumnCodeProducer
             $script .= "
             \$this->$clo = (\$firstColumn !== null) ? new " . $this->column->getPhpType() . '($firstColumn) : null;';
         } elseif ($this->column->getType() === PropelTypes::UUID_BINARY) {
-            $uuidSwapFlag = $this->objectBuilder->getUuidSwapFlagLiteral();
+            $uuidSwapFlag = $this->builder->getUuidSwapFlagLiteral();
             $this->declareGlobalFunction('is_resource', 'stream_get_contents');
             $script .= "
             if (is_resource(\$firstColumn)) {

@@ -34,15 +34,14 @@ class MysqlMigrateUuidColumnTest extends MigrationTestCase
     }
 
     /**
-     * @dataProvider migrationDataProvider
      *
      * @param string $description
      * @param string $fromColumns
      * @param string $toColumns
      * @param array|null $values
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('migrationDataProvider')]
     public function testMigrations(string $description, string $fromColumns, string $toColumns, ?array $values)
     {
         $this->applyWithFail($description . ' - failed to apply initial schema', $fromColumns, false);
@@ -113,7 +112,7 @@ EOF;
     /**
      * @return array
      */
-    public function migrationDataProvider(): array
+    public static function migrationDataProvider(): array
     {
         $uuid = '6cb1a126-2b34-4856-9a39-455d8b5efd29';
         $bin = hex2bin('48562b346cb1a1269a39455d8b5efd29');

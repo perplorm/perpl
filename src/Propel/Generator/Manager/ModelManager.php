@@ -5,6 +5,7 @@ declare(strict_types = 1);
 namespace Propel\Generator\Manager;
 
 use Propel\Generator\Builder\Om\AbstractOMBuilder;
+use Propel\Generator\Builder\Om\BuilderType;
 use Propel\Generator\Builder\Om\TableMapLoaderScriptBuilder;
 use SplFileInfo;
 use Symfony\Component\Filesystem\Filesystem;
@@ -70,8 +71,8 @@ class ModelManager extends AbstractManager
                     // -----------------------------------------------------------------------------------------
 
                     // these files are always created / overwrite any existing files
-                    foreach (['object', 'tablemap', 'query', 'collection'] as $target) {
-                        $builder = $generatorConfig->getConfiguredBuilder($table, $target);
+                    foreach ([BuilderType::ObjectBase, BuilderType::TableMap, BuilderType::QueryBase, BuilderType::Collection] as $target) {
+                        $builder = $generatorConfig->loadConfiguredBuilder($table, $target);
                         $nbWrittenFiles += $this->doBuild($builder);
                     }
 
@@ -80,8 +81,8 @@ class ModelManager extends AbstractManager
                     // -----------------------------------------------------------------------------------------
 
                     // these classes are only generated if they don't already exist
-                    foreach (['objectstub', 'querystub'] as $target) {
-                        $builder = $generatorConfig->getConfiguredBuilder($table, $target);
+                    foreach ([BuilderType::ObjectStub, BuilderType::QueryStub] as $target) {
+                        $builder = $generatorConfig->loadConfiguredBuilder($table, $target);
                         $nbWrittenFiles += $this->doBuild($builder, false);
                     }
 
@@ -91,21 +92,21 @@ class ModelManager extends AbstractManager
 
                     // If table has enumerated children (uses inheritance) then create the empty child stub classes if they don't already exist.
                     $col = $table->getChildrenColumn();
-                    if ($col && $col->isEnumeratedClasses()) {
+                    if ($col?->isEnumeratedClasses()) {
                         foreach ($col->getChildren() as $child) {
-                            foreach (['queryinheritance'] as $target) {
+                            foreach ([BuilderType::QueryInheritance] as $target) {
                                 if (!$child->getAncestor() && $child->getClassName() === $table->getPhpName()) {
                                     continue;
                                 }
                                 /** @var \Propel\Generator\Builder\Om\QueryInheritanceBuilder $builder */
-                                $builder = $generatorConfig->getConfiguredBuilder($table, $target);
+                                $builder = $generatorConfig->loadConfiguredBuilder($table, $target);
                                 $builder->setChild($child);
                                 $nbWrittenFiles += $this->doBuild($builder);
                             }
 
-                            foreach (['objectmultiextend', 'queryinheritancestub'] as $target) {
+                            foreach ([BuilderType::ObjectInheritanceStub, BuilderType::QueryInheritanceStub] as $target) {
                                 /** @var \Propel\Generator\Builder\Om\MultiExtendObjectBuilder $builder */
-                                $builder = $generatorConfig->getConfiguredBuilder($table, $target);
+                                $builder = $generatorConfig->loadConfiguredBuilder($table, $target);
                                 $builder->setChild($child);
                                 $nbWrittenFiles += $this->doBuild($builder, false);
                             }
@@ -118,7 +119,7 @@ class ModelManager extends AbstractManager
 
                     // Create [empty] interface if it does not already exist
                     if ($table->getInterface()) {
-                        $builder = $generatorConfig->getConfiguredBuilder($table, 'interface');
+                        $builder = $generatorConfig->loadConfiguredBuilder($table, BuilderType::Interface);
                         $nbWrittenFiles += $this->doBuild($builder, false);
                     }
 

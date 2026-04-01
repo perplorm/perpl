@@ -1,0 +1,57 @@
+Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes\ColumnCodeProducer
+
+
+addColumnAttributes():
+
+    /**
+     * The value for the native_enum_column field.
+     */
+    protected string|null $native_enum_column = null;
+
+
+addAccessor():
+
+    /**
+     * Get the [native_enum_column] column value.
+     *
+     * @return string|null
+     */
+    public function getNativeEnumColumn()
+    {
+        return $this->native_enum_column;
+    }
+
+
+addMutator():
+
+    /**
+     * Set the value of [native_enum_column] column.
+     *
+     * @param string|null $v New value
+     *
+     * @return $this
+     */
+    public function setNativeEnumColumn($v)
+    {
+        if ($v !== null) {
+            $v = (string)$v;
+        }
+
+        if ($this->native_enum_column !== $v) {
+            $this->native_enum_column = $v;
+            $this->modifiedColumns[TableTableMap::COL_NATIVE_ENUM_COLUMN] = true;
+        }
+
+        return $this;
+    }
+
+
+getDefaultValueString:
+null
+
+getApplyDefaultValueStatement:
+
+        $this->native_enum_column = null;
+
+buildCreateFromFilterValueExpression:
+$value

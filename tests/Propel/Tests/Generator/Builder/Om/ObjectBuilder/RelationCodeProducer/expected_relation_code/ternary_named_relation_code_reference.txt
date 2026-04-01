@@ -1,0 +1,511 @@
+Propel\Generator\Builder\Om\ObjectBuilder\RelationCodeProducer\TernaryRelationCodeProducer
+
+
+addAttributes():
+
+    /**
+     * Objects associated via LeTeamLeEventDate relation (n:m).
+     */
+    protected ObjectCombinationCollection|null $combinationLeTeamLeEventDates = null;
+
+    /**
+     * If $combinationLeTeamLeEventDates contains all objects in LeTeamLeEventDate relation.
+     */
+    protected bool $combinationLeTeamLeEventDatesIsPartial = false;
+
+
+addScheduledForDeletionAttribute():
+
+    /**
+     * Items of LeTeamLeEventDate relation marked for deletion.
+     */
+    protected ObjectCombinationCollection|null $leTeamLeEventDatesScheduledForDeletion = null;
+
+
+addMethods():
+
+    /**
+     * Clears out the combinationLeTeamLeEventDates collection
+     *
+     * This does not modify the database; however, it will remove any associated objects, causing
+     * them to be refetched by subsequent calls to accessor method.
+     *
+     * @return void
+     */
+    public function clearLeTeamLeEventDates(): void
+    {
+        $this->combinationLeTeamLeEventDates = null; // important to set this to NULL since that means it is uninitialized
+    }
+
+    /**
+     * Initializes the combinationLeTeamLeEventDates crossRef collection.
+     *
+     * By default this just sets the combinationLeTeamLeEventDates collection to an empty collection (like clearLeTeamLeEventDates());
+     * however, you may wish to override this method in your stub class to provide setting appropriate
+     * to your application -- for example, setting the initial array to the values stored in database.
+     *
+     * @return void
+     */
+    public function initLeTeamLeEventDates(): void
+    {
+        $this->combinationLeTeamLeEventDates = new ObjectCombinationCollection();
+        $this->combinationLeTeamLeEventDatesIsPartial = true;
+    }
+
+    /**
+     * Checks if the combinationLeTeamLeEventDates collection is loaded.
+     *
+     * @return bool
+     */
+    public function isLeTeamLeEventDatesLoaded(): bool
+    {
+        return $this->combinationLeTeamLeEventDates !== null;
+    }
+
+    /**
+     * Returns a new query object pre configured with filters from current object and given arguments to query the database.
+     *
+     * @param \Event $leEvent
+     * @param string|null $date
+     * @param \Propel\Runtime\ActiveQuery\Criteria|null $criteria
+     *
+     * @return ChildTeamQuery
+     */
+    public function createLeTeamsQuery(ChildEvent $leEvent, ?string $date = null, ?Criteria $criteria = null): ChildTeamQuery
+    {
+        $query = ChildTeamQuery::create($criteria)
+            ->filterByLeUser($this);
+
+        $teamUserQuery = $query->useTeamUserQuery();
+
+        if ($leEvent !== null) {
+            $teamUserQuery->filterByLeEvent($leEvent);
+        }
+
+        if ($date !== null) {
+            $teamUserQuery->filterByDate($date);
+        }
+
+        $teamUserQuery->endUse();
+
+        return $query;
+    }
+
+    /**
+     * Returns a new query object pre configured with filters from current object and given arguments to query the database.
+     *
+     * @param \Team $leTeam
+     * @param string|null $date
+     * @param \Propel\Runtime\ActiveQuery\Criteria|null $criteria
+     *
+     * @return ChildEventQuery
+     */
+    public function createLeEventsQuery(ChildTeam $leTeam, ?string $date = null, ?Criteria $criteria = null): ChildEventQuery
+    {
+        $query = ChildEventQuery::create($criteria)
+            ->filterByLeUser($this);
+
+        $teamUserQuery = $query->useTeamUserQuery();
+
+        if ($leTeam !== null) {
+            $teamUserQuery->filterByLeTeam($leTeam);
+        }
+
+        if ($date !== null) {
+            $teamUserQuery->filterByDate($date);
+        }
+
+        $teamUserQuery->endUse();
+
+        return $query;
+    }
+
+    /**
+     * Gets a combined collection of array{\Team, \Event, string} objects related by a many-to-many relationship
+     * to the current object by way of the team_user cross-reference table.
+     *
+     * If the $criteria is not null, it is used to always fetch the results from the database.
+     * Otherwise the results are fetched from the database the first time, then cached.
+     * Next time the same method is called without $criteria, the cached collection is returned.
+     * If this User is new, it will return
+     * an empty collection or the current collection; the criteria is ignored on a new object.
+     *
+     * @param \Propel\Runtime\ActiveQuery\Criteria|null $criteria Optional query object to filter the query
+     * @param \Propel\Runtime\Connection\ConnectionInterface|null $con Optional connection object
+     *
+     * @return \Propel\Runtime\Collection\ObjectCombinationCollection<array{\Team, \Event, string}>
+     */
+    public function getLeTeamLeEventDates(?Criteria $criteria = null, ?ConnectionInterface $con = null): ObjectCombinationCollection
+    {
+        $partial = $this->combinationLeTeamLeEventDatesIsPartial && !$this->isNew();
+        if ($this->combinationLeTeamLeEventDates !== null && !$partial && !$criteria) {
+            return $this->combinationLeTeamLeEventDates;
+        }
+
+        if ($this->isNew()) {
+            // return empty collection
+            if ($this->combinationLeTeamLeEventDates === null) {
+                $this->initLeTeamLeEventDates();
+            }
+
+            return $this->combinationLeTeamLeEventDates;
+        }
+
+        $query = ChildTeamUserQuery::create(null, $criteria)
+            ->filterByLeUser($this)
+            ->joinLeTeam()
+            ->joinLeEvent()
+            ;
+
+        $items = $query->find($con);
+        $combinationLeTeamLeEventDates = new ObjectCombinationCollection();
+        foreach ($items as $item) {
+            $combination = [];
+
+            $combination[] = $item->getLeTeam();
+            $combination[] = $item->getLeEvent();
+            $combination[] = $item->getDate();
+
+            $combinationLeTeamLeEventDates[] = $combination;
+        }
+
+        if ($criteria) {
+            return $combinationLeTeamLeEventDates;
+        }
+
+        if ($partial && $this->combinationLeTeamLeEventDates) {
+            //make sure that already added objects gets added to the list of the database.
+            foreach ($this->combinationLeTeamLeEventDates as $obj) {
+                if (!$combinationLeTeamLeEventDates->contains($obj)) {
+                    $combinationLeTeamLeEventDates[] = $obj;
+                }
+            }
+        }
+
+        $this->combinationLeTeamLeEventDates = $combinationLeTeamLeEventDates;
+        $this->combinationLeTeamLeEventDatesIsPartial = false;
+
+        return $this->combinationLeTeamLeEventDates;
+    }
+
+    /**
+     * Returns a not cached ObjectCollection of Team objects. This will hit always the databases.
+     * If you have attached new Team object to this object you need to call `save` first to get
+     * the correct return value. Use getLeTeamLeEventDates() to get the current internal state.
+     *
+     * @param \Event $leEvent
+     * @param string|null $date
+     * @param \Propel\Runtime\ActiveQuery\Criteria|null $criteria
+     * @param \Propel\Runtime\Connection\ConnectionInterface|null $con
+     *
+     * @return \Base\Collection\TeamCollection
+     */
+    public function getLeTeams(ChildEvent $leEvent, ?string $date = null, ?Criteria $criteria = null, ?ConnectionInterface $con = null)
+    {
+        return $this->createLeTeamsQuery($leEvent, $date, $criteria)->find($con);
+    }
+
+    /**
+     * Returns a not cached ObjectCollection of Event objects. This will hit always the databases.
+     * If you have attached new Event object to this object you need to call `save` first to get
+     * the correct return value. Use getLeTeamLeEventDates() to get the current internal state.
+     *
+     * @param \Team $leTeam
+     * @param string|null $date
+     * @param \Propel\Runtime\ActiveQuery\Criteria|null $criteria
+     * @param \Propel\Runtime\Connection\ConnectionInterface|null $con
+     *
+     * @return \Base\Collection\EventCollection
+     */
+    public function getLeEvents(ChildTeam $leTeam, ?string $date = null, ?Criteria $criteria = null, ?ConnectionInterface $con = null)
+    {
+        return $this->createLeEventsQuery($leTeam, $date, $criteria)->find($con);
+    }
+
+    /**
+     * Sets a collection of LeTeamLeEventDate objects related by a many-to-many relationship
+     * to the current object by way of the team_user cross-reference table.
+     * It will also schedule objects for deletion based on a diff between old objects (aka persisted)
+     * and new objects from the given Propel collection.
+     *
+     * @param \Propel\Runtime\Collection\Collection<array{\Team, \Event, string}> $leTeamLeEventDates A Propel collection.
+     * @param \Propel\Runtime\Connection\ConnectionInterface|null $con Optional connection object
+     *
+     * @return static
+     */
+    public function setLeTeamLeEventDates(Collection $leTeamLeEventDates, ?ConnectionInterface $con = null): static
+    {
+        $this->clearLeTeamLeEventDates();
+        $currentLeTeamLeEventDates = $this->getLeTeamLeEventDates();
+
+        $leTeamLeEventDatesScheduledForDeletion = $currentLeTeamLeEventDates->diff($leTeamLeEventDates);
+
+        foreach ($leTeamLeEventDatesScheduledForDeletion as $toDelete) {
+            $this->removeLeTeamLeEventDate(...$toDelete);
+        }
+
+        foreach ($leTeamLeEventDates as $leTeamLeEventDate) {
+            if (!$currentLeTeamLeEventDates->contains($leTeamLeEventDate)) {
+                $this->doAddLeTeamLeEventDate(...$leTeamLeEventDate);
+            }
+        }
+
+        $this->combinationLeTeamLeEventDatesIsPartial = false;
+        $this->combinationLeTeamLeEventDates = $leTeamLeEventDates instanceof ObjectCombinationCollection
+            ? $leTeamLeEventDates : new ObjectCombinationCollection($leTeamLeEventDates->getData());
+
+        return $this;
+    }
+
+    /**
+     * Gets the number of LeTeamLeEventDate objects related by a many-to-many relationship
+     * to the current object by way of the team_user cross-reference table.
+     *
+     * @param \Propel\Runtime\ActiveQuery\Criteria|null $criteria Optional query object to filter the query
+     * @param bool $distinct Set to true to force count distinct
+     * @param \Propel\Runtime\Connection\ConnectionInterface|null $con Optional connection object
+     *
+     * @return int The number of related LeTeamLeEventDate objects
+     */
+    public function countLeTeamLeEventDates(?Criteria $criteria = null, bool $distinct = false, ?ConnectionInterface $con = null): int
+    {
+        $partial = $this->combinationLeTeamLeEventDatesIsPartial && !$this->isNew();
+        if ($this->combinationLeTeamLeEventDates && !$criteria && !$partial) {
+            return count($this->combinationLeTeamLeEventDates);
+        }
+
+        if ($this->isNew() && $this->combinationLeTeamLeEventDates === null) {
+            return 0;
+        }
+
+        if ($partial && !$criteria) {
+            return count($this->getLeTeamLeEventDates());
+        }
+
+        $query = ChildTeamQuery::create(null, $criteria);
+        if ($distinct) {
+            $query->distinct();
+        }
+
+        return $query
+            ->filterByLeUser($this)
+            ->count($con);
+    }
+
+    /**
+     * Returns the not cached count of Team objects. This will hit always the databases.
+     * If you have attached new Team object to this object you need to call `save` first to get
+     * the correct return value. Use getLeTeamLeEventDates() to get the current internal state.
+     *
+     * @param \Event $leEvent
+     * @param string|null $date
+     * @param \Propel\Runtime\ActiveQuery\Criteria|null $criteria
+     * @param \Propel\Runtime\Connection\ConnectionInterface|null $con
+     *
+     * @return int
+     */
+    public function countLeTeams(ChildEvent $leEvent, ?string $date = null, ?Criteria $criteria = null, ?ConnectionInterface $con = null): int
+    {
+        return $this->createLeTeamsQuery($leEvent, $date, $criteria)->count($con);
+    }
+
+    /**
+     * Returns the not cached count of Event objects. This will hit always the databases.
+     * If you have attached new Event object to this object you need to call `save` first to get
+     * the correct return value. Use getLeTeamLeEventDates() to get the current internal state.
+     *
+     * @param \Team $leTeam
+     * @param string|null $date
+     * @param \Propel\Runtime\ActiveQuery\Criteria|null $criteria
+     * @param \Propel\Runtime\Connection\ConnectionInterface|null $con
+     *
+     * @return int
+     */
+    public function countLeEvents(ChildTeam $leTeam, ?string $date = null, ?Criteria $criteria = null, ?ConnectionInterface $con = null): int
+    {
+        return $this->createLeEventsQuery($leTeam, $date, $criteria)->count($con);
+    }
+
+    /**
+     * Associate a LeTeam with this object through the team_user cross reference table.
+     *
+     * @param \Team $leTeam
+     * @param \Event $leEvent
+     * @param string $date
+     *
+     * @return static
+     */
+    public function addLeTeam(ChildTeam $leTeam, ChildEvent $leEvent, string $date): static
+    {
+        if ($this->combinationLeTeamLeEventDates === null) {
+            $this->initLeTeamLeEventDates();
+        }
+
+        if (!$this->getLeTeamLeEventDates()->contains([$leTeam, $leEvent, $date])) {
+            // only add it if the **same** object is not already associated
+            $this->combinationLeTeamLeEventDates->push([$leTeam, $leEvent, $date]);
+            $this->doAddLeTeamLeEventDate($leTeam, $leEvent, $date);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Associate a LeEvent with this object through the team_user cross reference table.
+     *
+     * @param \Event $leEvent
+     * @param \Team $leTeam
+     * @param string $date
+     *
+     * @return static
+     */
+    public function addLeEvent(ChildEvent $leEvent, ChildTeam $leTeam, string $date): static
+    {
+        if ($this->combinationLeTeamLeEventDates === null) {
+            $this->initLeTeamLeEventDates();
+        }
+
+        if (!$this->getLeTeamLeEventDates()->contains([$leTeam, $leEvent, $date])) {
+            // only add it if the **same** object is not already associated
+            $this->combinationLeTeamLeEventDates->push([$leTeam, $leEvent, $date]);
+            $this->doAddLeTeamLeEventDate($leTeam, $leEvent, $date);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param \Team $leTeam
+     * @param \Event $leEvent
+     * @param string $date
+     *
+     * return void
+     */
+    protected function doAddLeTeamLeEventDate(ChildTeam $leTeam, ChildEvent $leEvent, string $date): void
+    {
+        $teamUser = new ChildTeamUser();
+        $teamUser->setLeTeam($leTeam);
+        $teamUser->setLeEvent($leEvent);
+        $teamUser->setDate($date);
+        assert($this instanceof ChildUser);
+        $teamUser->setLeUser($this);
+
+        $this->addTeamUser($teamUser);
+
+        // set the back reference to this object directly as using provided method either results
+        // in endless loop or in multiple relations
+        $leUserLeEventDatesEntry = [$this, $leEvent, $date];
+        if ($leTeam->isLeUserLeEventDatesLoaded()) {
+            $leTeam->getLeUserLeEventDates()->push($leUserLeEventDatesEntry);
+        } elseif (!$leTeam->getLeUserLeEventDates()->contains($leUserLeEventDatesEntry)) {
+            $leTeam->initLeUserLeEventDates();
+            $leTeam->getLeUserLeEventDates()->push($leUserLeEventDatesEntry);
+        }
+        // set the back reference to this object directly as using provided method either results
+        // in endless loop or in multiple relations
+        $leUserLeTeamDatesEntry = [$this, $leTeam, $date];
+        if ($leEvent->isLeUserLeTeamDatesLoaded()) {
+            $leEvent->getLeUserLeTeamDates()->push($leUserLeTeamDatesEntry);
+        } elseif (!$leEvent->getLeUserLeTeamDates()->contains($leUserLeTeamDatesEntry)) {
+            $leEvent->initLeUserLeTeamDates();
+            $leEvent->getLeUserLeTeamDates()->push($leUserLeTeamDatesEntry);
+        }
+    }
+
+    /**
+     * Remove leTeam, leEvent, date of this object through the team_user cross reference table.
+     *
+     * @param \Team $leTeam
+     * @param \Event $leEvent
+     * @param string $date
+     *
+     * @return static
+     */
+    public function removeLeTeamLeEventDate(ChildTeam $leTeam, ChildEvent $leEvent, string $date): static
+    {
+        if (!$this->getLeTeamLeEventDates()->contains([$leTeam, $leEvent, $date])) {
+            return $this;
+        }
+
+        assert($this instanceof ChildUser);
+
+        $teamUser = new ChildTeamUser();
+        $teamUser->setLeTeam($leTeam);
+        if ($leTeam->isLeUserLeEventDatesLoaded()) {
+            //remove the back reference if available
+            $leTeam->getLeUserLeEventDates()->removeObject([$this, $leEvent, $date]);
+        }
+
+        $teamUser->setLeEvent($leEvent);
+        if ($leEvent->isLeUserLeTeamDatesLoaded()) {
+            //remove the back reference if available
+            $leEvent->getLeUserLeTeamDates()->removeObject([$this, $leTeam, $date]);
+        }
+
+        $teamUser->setDate($date);
+        $teamUser->setLeUser($this);
+        $this->removeTeamUser(clone $teamUser);
+        $teamUser->clear();
+
+        $this->combinationLeTeamLeEventDates->remove($this->combinationLeTeamLeEventDates->search([$leTeam, $leEvent, $date]));
+
+        if ($this->leTeamLeEventDatesScheduledForDeletion === null) {
+            $this->leTeamLeEventDatesScheduledForDeletion = clone $this->combinationLeTeamLeEventDates;
+            $this->leTeamLeEventDatesScheduledForDeletion->clear();
+        }
+
+        $this->leTeamLeEventDatesScheduledForDeletion->push([$leTeam, $leEvent, $date]);
+
+        return $this;
+    }
+
+
+addOnReloadCode():
+
+            $this->combinationLeTeamLeEventDates = null;
+
+addDeleteScheduledItemsCode():
+
+        if ($this->leTeamLeEventDatesScheduledForDeletion !== null && !$this->leTeamLeEventDatesScheduledForDeletion->isEmpty()) {
+            $pks = [];
+            foreach ($this->leTeamLeEventDatesScheduledForDeletion as $combination) {
+                $entryPk = [];
+
+                $entryPk[0] = $this->getId();
+                $entryPk[1] = $combination[0]->getId();
+                $entryPk[2] = $combination[1]->getId();
+                $entryPk[3] = $combination[2];
+
+                $pks[] = $entryPk;
+            }
+
+            ChildTeamUserQuery::create()
+                ->filterByPrimaryKeys($pks)
+                ->delete($con);
+
+            $this->leTeamLeEventDatesScheduledForDeletion = null;
+        }
+
+        if ($this->combinationLeTeamLeEventDates !== null) {
+            foreach ($this->combinationLeTeamLeEventDates as $combination) {
+                $model = $combination[0];
+                if (!$model->isDeleted() && ($model->isNew() || $model->isModified())) {
+                    $model->save($con);
+                }
+
+                $model = $combination[1];
+                if (!$model->isDeleted() && ($model->isNew() || $model->isModified())) {
+                    $model->save($con);
+                }
+
+            }
+        }
+
+
+addClearReferencesCode():
+
+            if ($this->combinationLeTeamLeEventDates) {
+                foreach ($this->combinationLeTeamLeEventDates as $o) {
+                    $o[0]->clearAllReferences($deep);
+                }
+            }

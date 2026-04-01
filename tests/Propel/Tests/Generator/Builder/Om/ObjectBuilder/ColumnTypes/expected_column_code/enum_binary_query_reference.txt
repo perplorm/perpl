@@ -1,0 +1,35 @@
+
+    /**
+     * Filter the query on the bin_enum_column column
+     *
+     * @param mixed $binEnumColumn The value to use as filter
+     * @param string|null $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @throws \Propel\Runtime\Exception\PropelException
+     *
+     * @return $this
+     */
+    public function filterByBinEnumColumn($binEnumColumn = null, ?string $comparison = null)
+    {
+        $resolvedColumn = $this->resolveLocalColumnByName('bin_enum_column');
+        $valueSet = TableTableMap::getValueSet(TableTableMap::COL_BIN_ENUM_COLUMN);
+        if (is_scalar($binEnumColumn)) {
+            if (!in_array($binEnumColumn, $valueSet)) {
+                throw new PropelException("Value '$binEnumColumn' is not accepted in this enumerated column");
+            }
+            $binEnumColumn = array_search($binEnumColumn, $valueSet);
+        } elseif (is_array($binEnumColumn)) {
+            $convertedValues = [];
+            foreach ($binEnumColumn as $value) {
+                if (!in_array($value, $valueSet)) {
+                    throw new PropelException("Value '$value' is not accepted in this enumerated column");
+                }
+                $convertedValues[] = array_search($value, $valueSet);
+            }
+            $binEnumColumn = $convertedValues;
+            $comparison ??= Criteria::IN;
+        }
+        $this->addUsingOperator($resolvedColumn, $binEnumColumn, $comparison);
+
+        return $this;
+    }

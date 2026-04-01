@@ -676,9 +676,7 @@ class StandardServiceContainerTest extends BaseTestCase
     }
     
     
-    /**
-     * @dataProvider debugModeDataProvider
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('debugModeDataProvider')]
     public function testUseDebugMode(bool $useDebug, ?bool $useProfiler, bool $expectedConnectionMode, bool $expectedProfilerMode)
     {
         $this->sc->useDebugMode($useDebug, $useProfiler);
@@ -686,7 +684,7 @@ class StandardServiceContainerTest extends BaseTestCase
         $this->assertSame($expectedProfilerMode, ConnectionFactory::$useProfilerConnection);
     }
         
-    public function debugModeDataProvider(): array
+    public static function debugModeDataProvider(): array
     {
         // use debug , use profile, connection debug, connection profile
         return [

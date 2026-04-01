@@ -17,7 +17,7 @@ use Propel\Generator\Util\QuickBuilder;
  */
 class VersionableBehaviorTest extends TestCase
 {
-    public function basicSchemaDataProvider()
+    public static function basicSchemaDataProvider()
     {
         $schema = <<<EOF
 <database name="versionable_behavior_test_0">
@@ -33,10 +33,9 @@ EOF;
     }
 
     /**
-     * @dataProvider basicSchemaDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('basicSchemaDataProvider')]
     public function testModifyTableAddsVersionColumn($schema)
     {
         $builder = new QuickBuilder();
@@ -130,7 +129,7 @@ EOF;
         $this->assertStringContainsString($expected, $builder->getSQL());
     }
 
-    public function foreignTableSchemaDataProvider()
+    public static function foreignTableSchemaDataProvider()
     {
         $schema = <<<EOF
 <database name="versionable_behavior_test_0">
@@ -155,10 +154,9 @@ EOF;
     }
 
     /**
-     * @dataProvider foreignTableSchemaDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('foreignTableSchemaDataProvider')]
     public function testModifyTableAddsVersionColumnForForeignKeysIfForeignTableIsVersioned($schema)
     {
         $builder = new QuickBuilder();
@@ -206,10 +204,9 @@ EOF;
     }
 
     /**
-     * @dataProvider foreignTableSchemaDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('foreignTableSchemaDataProvider')]
     public function testModifyTableAddsVersionColumnForReferrersIfForeignTableIsVersioned($schema)
     {
         $builder = new QuickBuilder();
@@ -255,10 +252,9 @@ EOF;
     }
 
     /**
-     * @dataProvider basicSchemaDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('basicSchemaDataProvider')]
     public function testModifyTableAddsVersionTable($schema)
     {
         $builder = new QuickBuilder();
@@ -376,7 +372,7 @@ EOF;
         $this->assertEquals($expected, $builder->getSQL());
     }
 
-    public function logSchemaDataProvider()
+    public static function logSchemaDataProvider()
     {
         $schema = <<<EOF
 <database name="versionable_behavior_test_0">
@@ -396,10 +392,9 @@ EOF;
     }
 
     /**
-     * @dataProvider logSchemaDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('logSchemaDataProvider')]
     public function testModifyTableAddsLogColumns($schema)
     {
         $builder = new QuickBuilder();
@@ -426,10 +421,9 @@ EOF;
     }
 
     /**
-     * @dataProvider logSchemaDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('logSchemaDataProvider')]
     public function testModifyTableAddsVersionTableLogColumns($schema)
     {
         $builder = new QuickBuilder();
@@ -554,7 +548,7 @@ EOF;
         $this->assertEmpty($builder->getSQL());
     }
 
-    public function tablePrefixSchemaDataProvider()
+    public static function tablePrefixSchemaDataProvider()
     {
         $schema = <<<XML
 <database name="versionable_behavior_test_0" tablePrefix="prefix_">
@@ -570,10 +564,9 @@ XML;
     }
 
     /**
-     * @dataProvider tablePrefixSchemaDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('tablePrefixSchemaDataProvider')]
     public function testModifyTableAddsVersionColumnWithPrefix($schema)
     {
         $builder = new QuickBuilder();
@@ -597,10 +590,9 @@ SQL;
     }
 
     /**
-     * @dataProvider tablePrefixSchemaDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('tablePrefixSchemaDataProvider')]
     public function testModifyTableAddsVersionTableWithPrefix($schema)
     {
         $builder = new QuickBuilder();

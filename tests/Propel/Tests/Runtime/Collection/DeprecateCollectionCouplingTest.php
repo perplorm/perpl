@@ -6,7 +6,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Propel\Tests\Generator\Builder\Om;
+namespace Propel\Tests\Runtime\Collection;
 
 use Propel\Generator\Builder\Om\TableMapBuilder;
 use Propel\Generator\Config\GeneratorConfig;
@@ -65,7 +65,7 @@ $schema = <<< EOF
 <database namespace="$ns">
     <table
         name="extending_test"
-        collection-class="\Propel\Tests\Generator\Builder\Om\ExtendingTestCollection"
+        collection-class="\Propel\Tests\Runtime\Collection\ExtendingTestCollection"
     ></table>
 </database>
 EOF;

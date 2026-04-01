@@ -67,7 +67,7 @@ class EnumBinaryColumnCodeProducer extends ColumnCodeProducer
         if (\$this->$clo === null) {
             return null;
         }
-        \$valueSet = " . $this->getTableMapClassName() . '::getValueSet(' . $this->objectBuilder->getColumnConstant($this->column) . ");
+        \$valueSet = " . $this->getTableMapClassName() . '::getValueSet(' . $this->builder->getColumnConstant($this->column) . ");
         if (!isset(\$valueSet[\$this->$clo])) {
             throw new PropelException('Unknown stored enum key: ' . \$this->$clo);
         }
@@ -111,7 +111,7 @@ class EnumBinaryColumnCodeProducer extends ColumnCodeProducer
         $this->declareGlobalFunction('array_search', 'is_int');
         $col = $this->column;
         $clo = $col->getLowercasedName();
-        $columnConstant = $this->objectBuilder->getColumnConstant($col);
+        $columnConstant = $this->builder->getColumnConstant($col);
 
         $script .= "
         if (\$v !== null) {
@@ -140,7 +140,7 @@ class EnumBinaryColumnCodeProducer extends ColumnCodeProducer
     public function buildCreateFromFilterValueExpression(string $valueExpression): string
     {
         $tableMapClassName = $this->getTableMapClassName();
-        $columnConstant = $this->objectBuilder->getColumnConstant($this->column);
+        $columnConstant = $this->builder->getColumnConstant($this->column);
 
         return "$tableMapClassName::getValueSet($columnConstant)[$valueExpression] ?? $valueExpression";
     }

@@ -53,6 +53,7 @@ propel:
       - bookstore-behavior
     targetPackage: bookstore
     packageObjectModel: false
+    declareStrictTypesInBuilders: true
 
   runtime:
     defaultConnection: bookstore

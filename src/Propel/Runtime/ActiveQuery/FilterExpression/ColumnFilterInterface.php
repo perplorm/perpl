@@ -86,21 +86,21 @@ interface ColumnFilterInterface
      * @param \Propel\Runtime\ActiveQuery\FilterExpression\ColumnFilterInterface $filter
      * @param string $conjunction
      *
-     * @return static
+     * @return $this
      */
     public function addFilter(ColumnFilterInterface $filter, string $conjunction = ClauseList::AND_OPERATOR_LITERAL);
 
     /**
      * @param \Propel\Runtime\ActiveQuery\FilterExpression\ColumnFilterInterface $filter
      *
-     * @return static
+     * @return $this
      */
     public function addAnd(ColumnFilterInterface $filter);
 
     /**
      * @param \Propel\Runtime\ActiveQuery\FilterExpression\ColumnFilterInterface $filter
      *
-     * @return static
+     * @return $this
      */
     public function addOr(ColumnFilterInterface $filter);
 

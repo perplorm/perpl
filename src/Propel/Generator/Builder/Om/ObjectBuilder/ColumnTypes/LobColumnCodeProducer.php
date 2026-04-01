@@ -20,7 +20,7 @@ class LobColumnCodeProducer extends ColumnCodeProducer
     {
         $col = $this->column;
         $clo = $col->getLowercasedName();
-        $columnConstant = $this->objectBuilder->getColumnConstant($col);
+        $columnConstant = $this->builder->getColumnConstant($col);
 
         $script .= "
         // Because BLOB columns are streams in PDO we have to assume that they are

@@ -32,10 +32,9 @@ class CsvParserTest extends TestCase
     }
 
     /**
-     * @dataProvider arrayCsvConversionDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('arrayCsvConversionDataProvider')]
     public function testFromArray($arrayData, $csvData, $type)
     {
         $parser = new CsvParser();
@@ -43,10 +42,9 @@ class CsvParserTest extends TestCase
     }
 
     /**
-     * @dataProvider arrayCsvConversionDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('arrayCsvConversionDataProvider')]
     public function testToCSV($arrayData, $csvData, $type)
     {
         $parser = new CsvParser();
@@ -54,10 +52,9 @@ class CsvParserTest extends TestCase
     }
 
     /**
-     * @dataProvider arrayCsvConversionDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('arrayCsvConversionDataProvider')]
     public function testToArray($arrayData, $csvData, $type)
     {
         $parser = new CsvParser();
@@ -65,10 +62,9 @@ class CsvParserTest extends TestCase
     }
 
     /**
-     * @dataProvider arrayCsvConversionDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('arrayCsvConversionDataProvider')]
     public function testFromCSV($arrayData, $csvData, $type)
     {
         $parser = new CsvParser();
@@ -97,10 +93,9 @@ EOF;
     }
 
     /**
-     * @dataProvider listToCSVDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('listToCSVDataProvider')]
     public function testListToCSV($list, $heading, $csv)
     {
         $parser = new CsvParser();
@@ -111,10 +106,9 @@ EOF;
     }
 
     /**
-     * @dataProvider listToCSVDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('listToCSVDataProvider')]
     public function testCSVToList($list, $heading, $csv)
     {
         $parser = new CsvParser();

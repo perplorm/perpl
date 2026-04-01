@@ -7,30 +7,19 @@ namespace Propel\Generator\Config;
 use Propel\Common\Config\ConfigurationManager;
 use Propel\Common\Pluralizer\PluralizerInterface;
 use Propel\Common\Pluralizer\StandardEnglishPluralizer;
-use Propel\Generator\Builder\Om\AbstractOMBuilder;
-use Propel\Generator\Exception\InvalidArgumentException;
-use Propel\Generator\Model\Table;
 use Propel\Generator\Platform\PlatformInterface;
 use Propel\Generator\Reverse\SchemaParserInterface;
-use Propel\Generator\Util\BehaviorLocator;
 use Propel\Runtime\Connection\ConnectionInterface;
 use function array_replace_recursive;
 
-class QuickGeneratorConfig extends ConfigurationManager implements GeneratorConfigInterface
+class QuickGeneratorConfig extends AbstractGeneratorConfig
 {
-    /**
-     * @var \Propel\Generator\Util\BehaviorLocator|null
-     */
-    protected $behaviorLocator;
-
     /**
      * @param array|null $extraConf
      */
     public function __construct(?array $extraConf = [])
     {
-        if ($extraConf === null) {
-            $extraConf = [];
-        }
+        $extraConf = $extraConf === null ? [] : ConfigurationManager::deflateConfigurationArray($extraConf);
 
         //Creates a GeneratorConfig based on Propel default values plus the following
         $configs = [
@@ -62,33 +51,6 @@ class QuickGeneratorConfig extends ConfigurationManager implements GeneratorConf
     }
 
     /**
-     * Gets a configured data model builder class for specified table and based
-     * on type ('ddl', 'sql', etc.).
-     *
-     * @param \Propel\Generator\Model\Table $table
-     * @param string $type
-     *
-     * @throws \Propel\Generator\Exception\InvalidArgumentException
-     *
-     * @return \Propel\Generator\Builder\Om\AbstractOMBuilder
-     */
-    #[\Override]
-    public function getConfiguredBuilder(Table $table, string $type): AbstractOMBuilder
-    {
-        $class = $this->getConfigPropertyString('generator.objectModel.builders.' . $type);
-
-        if ($class === null) {
-            throw new InvalidArgumentException("Invalid data model builder type `$type`");
-        }
-
-        /** @var \Propel\Generator\Builder\Om\AbstractOMBuilder $builder */
-        $builder = new $class($table);
-        $builder->setGeneratorConfig($this);
-
-        return $builder;
-    }
-
-    /**
      * Returns a configured Pluralizer class.
      *
      * @return \Propel\Common\Pluralizer\PluralizerInterface
@@ -103,7 +65,7 @@ class QuickGeneratorConfig extends ConfigurationManager implements GeneratorConf
      * @inheritDoc
      */
     #[\Override]
-    public function getConfiguredPlatform(?ConnectionInterface $con = null, ?string $database = null): ?PlatformInterface
+    public function getConfiguredPlatform(?ConnectionInterface $con = null, ?string $databaseName = null): ?PlatformInterface
     {
         return null;
     }
@@ -112,21 +74,8 @@ class QuickGeneratorConfig extends ConfigurationManager implements GeneratorConf
      * @inheritDoc
      */
     #[\Override]
-    public function getConfiguredSchemaParser(?ConnectionInterface $con = null, ?string $database = null): ?SchemaParserInterface
+    public function getConfiguredSchemaParser(?ConnectionInterface $con = null, ?string $databaseName = null): ?SchemaParserInterface
     {
         return null;
-    }
-
-    /**
-     * @return \Propel\Generator\Util\BehaviorLocator
-     */
-    #[\Override]
-    public function getBehaviorLocator(): BehaviorLocator
-    {
-        if (!$this->behaviorLocator) {
-            $this->behaviorLocator = new BehaviorLocator($this);
-        }
-
-        return $this->behaviorLocator;
     }
 }

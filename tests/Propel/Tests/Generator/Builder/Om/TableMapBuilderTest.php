@@ -58,28 +58,28 @@ class TableMapBuilderTest extends BookstoreTestBase
      */
     public function testColumnDefaultValue()
     {
-        $table = $this->databaseMap->getTableByPhpName('\Propel\Tests\Bookstore\BookstoreEmployeeAccount');
-        $this->assertNull($table->getColumn('login')->getDefaultValue(), 'null default values are correctly mapped');
+        $tableMap = $this->databaseMap->getTableByPhpName('\Propel\Tests\Bookstore\BookstoreEmployeeAccount');
+        $this->assertNull($tableMap->getColumn('login')->getDefaultValue(), 'null default values are correctly mapped');
         $this->assertEquals(
             '\'@\'\'34"',
-            $table->getColumn('password')->getDefaultValue(),
+            $tableMap->getColumn('password')->getDefaultValue(),
             'string default values are correctly escaped and mapped'
         );
         $this->assertTrue(
-            $table->getColumn('enabled')->getDefaultValue(),
+            $tableMap->getColumn('enabled')->getDefaultValue(),
             'boolean default values are correctly mapped'
         );
         $this->assertFalse(
-            $table->getColumn('not_enabled')->getDefaultValue(),
+            $tableMap->getColumn('not_enabled')->getDefaultValue(),
             'boolean default values are correctly mapped'
         );
         $this->assertEquals(
             'CURRENT_TIMESTAMP',
-            $table->getColumn('created')->getDefaultValue(),
+            $tableMap->getColumn('created')->getDefaultValue(),
             'expression default values are correctly mapped'
         );
         $this->assertNull(
-            $table->getColumn('role_id')->getDefaultValue(),
+            $tableMap->getColumn('role_id')->getDefaultValue(),
             'explicit null default values are correctly mapped'
         );
     }
@@ -409,7 +409,7 @@ class TableMapBuilderTest extends BookstoreTestBase
     /**
      * @return array
      */
-    public function stringifyDataProvider(): array
+    public static function stringifyDataProvider(): array
     {
         return [
             [1, 'int should stay int'],
@@ -429,23 +429,22 @@ class TableMapBuilderTest extends BookstoreTestBase
     }
 
     /**
-     * @dataProvider stringifyDataProvider
      *
      * @param bool|int|float|string|array|null $scalarData
      * @param string $message
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('stringifyDataProvider')]
     public function testStringify($scalarData, string $message): void
     {
-        $builder = new class (new Table('any')) extends TableMapBuilder{
+        $builder = new class (new Table('any')) extends TableMapBuilder {
             public function doStringify($value): string
             {
                 return $this->stringify($value);
             }
         };
         $stringifiedData = $builder->doStringify($scalarData);
-        eval("\$restoredData = $stringifiedData;");
+        eval ("\$restoredData = $stringifiedData;");
 
         $this->assertSame($scalarData, $restoredData, $message);
     }

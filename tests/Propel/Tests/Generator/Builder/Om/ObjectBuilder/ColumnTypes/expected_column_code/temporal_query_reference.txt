@@ -1,0 +1,45 @@
+
+    /**
+     * Filter the query on the temporal_column column
+     *
+     * Example usage:
+     * <code>
+     * $query->filterByTemporalColumn('2011-03-14'); // WHERE temporal_column = '2011-03-14'
+     * $query->filterByTemporalColumn('now'); // WHERE temporal_column = '2011-03-14'
+     * $query->filterByTemporalColumn(array('max' => 'yesterday')); // WHERE temporal_column > '2011-03-13'
+     * </code>
+     *
+     * @param mixed $temporalColumn The value to use as filter.
+     *              Values can be integers (unix timestamps), DateTime objects, or strings.
+     *              Empty strings are treated as NULL.
+     *              Use scalar values for equality.
+     *              Use array values for in_array() equivalent.
+     *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
+     * @param string|null $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return $this
+     */
+    public function filterByTemporalColumn($temporalColumn = null, ?string $comparison = null)
+    {
+        $resolvedColumn = $this->resolveLocalColumnByName('temporal_column');
+        if (is_array($temporalColumn)) {
+            $useMinMax = false;
+            if (isset($temporalColumn['min'])) {
+                $this->addUsingOperator($resolvedColumn, $temporalColumn['min'], Criteria::GREATER_EQUAL);
+                $useMinMax = true;
+            }
+            if (isset($temporalColumn['max'])) {
+                $this->addUsingOperator($resolvedColumn, $temporalColumn['max'], Criteria::LESS_EQUAL);
+                $useMinMax = true;
+            }
+            if ($useMinMax) {
+                return $this;
+            }
+            if ($comparison === null) {
+                $comparison = Criteria::IN;
+            }
+        }
+        $this->addUsingOperator($resolvedColumn, $temporalColumn, $comparison);
+
+        return $this;
+    }

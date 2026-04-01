@@ -1,0 +1,72 @@
+Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes\ObjectColumnCodeProducer
+
+
+addColumnAttributes():
+
+    /**
+     * The value for the object_column field.
+     *
+     * @var resource|null
+     */
+    protected $object_column;
+
+    /**
+     * The unserialized $object_column value.
+     *
+     * @var mixed|null
+     */
+    protected $object_column_unserialized;
+
+
+addAccessor():
+
+    /**
+     * Get the [object_column] column value.
+     *
+     * @return mixed|null
+     */
+    public function getObjectColumn()
+    {
+        if (!$this->object_column_unserialized && is_resource($this->object_column)) {
+            $serialisedString = stream_get_contents($this->object_column);
+            if ($serialisedString) {
+                $unserializedString = unserialize($serialisedString);
+                $this->object_column_unserialized = $unserializedString;
+            }
+        }
+
+        return $this->object_column_unserialized;
+    }
+
+
+addMutator():
+
+    /**
+     * Set the value of [object_column] column.
+     *
+     * @param mixed|null $v New value
+     *
+     * @return $this
+     */
+    public function setObjectColumn($v)
+    {
+        $serializedValue = serialize($v);
+        if ($this->object_column === null || stream_get_contents($this->object_column) !== $serializedValue) {
+            $this->object_column_unserialized = $v;
+            $this->object_column = $this->writeResource($serializedValue);
+            $this->modifiedColumns[TableTableMap::COL_OBJECT_COLUMN] = true;
+        }
+
+        return $this;
+    }
+
+
+getDefaultValueString:
+null
+
+getApplyDefaultValueStatement:
+
+        $this->object_column = new Child(null);
+
+buildCreateFromFilterValueExpression:
+$value

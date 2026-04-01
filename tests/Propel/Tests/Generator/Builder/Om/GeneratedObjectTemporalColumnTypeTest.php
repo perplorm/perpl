@@ -119,7 +119,7 @@ EOF;
         $this->assertEquals(date('Y-m-d H:i'), $r->getDatetimecolumn('Y-m-d H:i'));
     }
     
-    public function persistenceDataProvider()
+    public static function persistenceDataProvider()
     {
         return [
             // type description, column name , input date value, formatted input date, format
@@ -130,9 +130,7 @@ EOF;
         ];
     }
     
-    /**
-     * @dataProvider persistenceDataProvider
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('persistenceDataProvider')]
     public function testPersistence($typeDescription, $columnName, $inputDateValue, $formattedDate, $format)
     {
         $r = new ComplexColumnTypeEntity5();

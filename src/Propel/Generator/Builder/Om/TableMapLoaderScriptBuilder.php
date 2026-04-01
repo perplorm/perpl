@@ -6,7 +6,7 @@ namespace Propel\Generator\Builder\Om;
 
 use Propel\Common\Util\PathTrait;
 use Propel\Generator\Builder\Util\PropelTemplate;
-use Propel\Generator\Config\GeneratorConfigInterface;
+use Propel\Generator\Config\AbstractGeneratorConfig;
 use Propel\Generator\Exception\BuildException;
 use Propel\Generator\Model\Database;
 use Propel\Generator\Model\Table;
@@ -32,14 +32,14 @@ class TableMapLoaderScriptBuilder
     public const FILENAME = 'loadDatabase.php';
 
     /**
-     * @var \Propel\Generator\Config\GeneratorConfigInterface
+     * @var \Propel\Generator\Config\AbstractGeneratorConfig
      */
     protected $generatorConfig;
 
     /**
-     * @param \Propel\Generator\Config\GeneratorConfigInterface $generatorConfig
+     * @param \Propel\Generator\Config\AbstractGeneratorConfig $generatorConfig
      */
-    public function __construct(GeneratorConfigInterface $generatorConfig)
+    public function __construct(AbstractGeneratorConfig $generatorConfig)
     {
         $this->generatorConfig = $generatorConfig;
     }

@@ -56,7 +56,7 @@ class PgsqlSchemaParserTest extends TestCaseFixturesDatabase
         Propel::init(__DIR__ . '/../../../../Fixtures/bookstore/build/conf/bookstore-conf.php');
     }
 
-    public function parseDataProvider()
+    public static function parseDataProvider()
     {
         return [
             // columnDDL, expectedColumnPhpName, type, expectedColumnDefaultType, expectedColumnDefaultValue, expectedSize, expectedScale
@@ -69,10 +69,9 @@ class PgsqlSchemaParserTest extends TestCaseFixturesDatabase
     }
 
     /**
-     * @dataProvider parseDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('parseDataProvider')]
     public function testParse($columnDDL, $expectedPhpName, $expectedType, $expectedDefaultType, $expectedDefaultValue, $expectedSize, $expectedScale)
     {
         $this->con->query("create table foo ( {$columnDDL} );");

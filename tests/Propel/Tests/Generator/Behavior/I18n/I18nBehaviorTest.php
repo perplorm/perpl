@@ -119,7 +119,7 @@ EOF;
         $this->assertEmpty($builder->getSQL());
     }
 
-    public function schemaDataProvider()
+    public static function schemaDataProvider()
     {
         $schema1 = <<<EOF
 <database name="i18n_behavior_test_0">
@@ -155,10 +155,9 @@ EOF;
     }
 
     /**
-     * @dataProvider schemaDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('schemaDataProvider')]
     public function testModifyTableAddsI18nTable($schema)
     {
         $builder = new QuickBuilder();
@@ -176,10 +175,9 @@ EOF;
     }
 
     /**
-     * @dataProvider schemaDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('schemaDataProvider')]
     public function testModifyTableRelatesI18nTableToMainTable($schema)
     {
         $builder = new QuickBuilder();
@@ -191,10 +189,9 @@ EOF;
     }
 
     /**
-     * @dataProvider schemaDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('schemaDataProvider')]
     public function testModifyTableAddsLocaleColumnToI18n($schema)
     {
         $builder = new QuickBuilder();
@@ -209,10 +206,9 @@ EOF;
     }
 
     /**
-     * @dataProvider schemaDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('schemaDataProvider')]
     public function testModifyTableMovesI18nColumns($schema)
     {
         $builder = new QuickBuilder();
@@ -231,10 +227,9 @@ EOF;
     }
 
     /**
-     * @dataProvider schemaDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('schemaDataProvider')]
     public function testModifyTableDoesNotMoveNonI18nColumns($schema)
     {
         $builder = new QuickBuilder();
@@ -398,7 +393,7 @@ EOF;
         $this->assertStringContainsString($expected, $builder->getSQL());
     }
 
-    public function customPkSchemaDataProvider()
+    public static function customPkSchemaDataProvider()
     {
         $schema1 = <<<EOF
 <database name="i18n_behavior_test_custom_pk_0">
@@ -435,10 +430,9 @@ EOF;
     }
 
     /**
-     * @dataProvider customPkSchemaDataProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('customPkSchemaDataProvider')]
     public function testModifyTableRelatesI18nTableToMainTableWithCustomPk($schema)
     {
         $builder = new QuickBuilder();

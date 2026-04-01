@@ -25,7 +25,7 @@ class AbstractQueryExecutorTest extends BookstoreTestBase
     /**
      * @return array
      */
-    public function queryExceptionOutputFormatDataProvider()
+    public static function queryExceptionOutputFormatDataProvider()
     {
         // [$useDebug, $sqlStatement, $internalErrorMessage, $expectedPublicMessage]
         return [
@@ -35,15 +35,14 @@ class AbstractQueryExecutorTest extends BookstoreTestBase
     }
 
     /**
-     * @dataProvider queryExceptionOutputFormatDataProvider
      *
      * @param bool $useDebug
      * @param string $sqlStatement
      * @param string $internalErrorMessage
      * @param string $expectedPublicMessage
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('queryExceptionOutputFormatDataProvider')]
     public function testQueryExceptionOutputFormat($useDebug, $sqlStatement, $internalErrorMessage, $expectedPublicMessage)
     {
         $query = BookQuery::create();

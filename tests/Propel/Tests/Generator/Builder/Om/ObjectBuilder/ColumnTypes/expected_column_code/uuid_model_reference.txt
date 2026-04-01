@@ -1,0 +1,57 @@
+Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes\ColumnCodeProducer
+
+
+addColumnAttributes():
+
+    /**
+     * The value for the uuid_column field.
+     */
+    protected string|null $uuid_column = null;
+
+
+addAccessor():
+
+    /**
+     * Get the [uuid_column] column value.
+     *
+     * @return string|null
+     */
+    public function getUuidColumn()
+    {
+        return $this->uuid_column;
+    }
+
+
+addMutator():
+
+    /**
+     * Set the value of [uuid_column] column.
+     *
+     * @param string|null $v New value
+     *
+     * @return $this
+     */
+    public function setUuidColumn($v)
+    {
+        if ($v !== null) {
+            $v = (string)$v;
+        }
+
+        if ($this->uuid_column !== $v) {
+            $this->uuid_column = $v;
+            $this->modifiedColumns[TableTableMap::COL_UUID_COLUMN] = true;
+        }
+
+        return $this;
+    }
+
+
+getDefaultValueString:
+null
+
+getApplyDefaultValueStatement:
+
+        $this->uuid_column = null;
+
+buildCreateFromFilterValueExpression:
+$value

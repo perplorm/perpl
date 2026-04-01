@@ -37,7 +37,7 @@ EOF;
         }
     }
 
-    public function valueSetConstantProvider()
+    public static function valueSetConstantProvider()
     {
         return [
             ['\Map\ComplexColumnTypeEntity103TableMap::COL_BAR_FOO', 'foo'],
@@ -51,10 +51,9 @@ EOF;
     }
 
     /**
-     * @dataProvider valueSetConstantProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('valueSetConstantProvider')]
     public function testValueSetConstants($constantName, $value)
     {
         $this->assertTrue(defined($constantName));

@@ -101,7 +101,7 @@ abstract class AbstractCommand extends Command
 
         $configDir = $input->getOption('config-dir');
         try {
-            return new GeneratorConfig($configDir, extraConf: $properties);
+            return new GeneratorConfig($configDir, $properties);
         } catch (InvalidConfigurationException $e) {
             $userMessage = $this->getInvalidConfigurationExceptionUserMessage($e->getMessage(), $configDir);
 

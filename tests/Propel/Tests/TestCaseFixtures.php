@@ -242,7 +242,7 @@ class TestCaseFixtures extends TestCase
      *
      * @return string
      */
-    protected function getConnectionDsn($database = 'bookstore', $withCredentials = false)
+    protected static function getConnectionDsn($database = 'bookstore', $withCredentials = false)
     {
         $serviceContainer = Propel::getServiceContainer();
         /** @var \Propel\Runtime\Connection\ConnectionManagerSingle $manager */
@@ -311,7 +311,7 @@ class TestCaseFixtures extends TestCase
      *
      * @return string
      */
-    protected function getDriver()
+    protected static function getDriver(): string
     {
         return static::loadDatabaseDriverName();
     }

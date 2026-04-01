@@ -16,6 +16,11 @@ use Propel\Generator\Model\Inheritance;
 class ExtensionQueryInheritanceBuilder extends AbstractOMBuilder implements ExtensionBuilderInterface
 {
     /**
+     * @var \Propel\Generator\Builder\Om\BuilderType|null
+     */
+    public const BUILDER_TYPE = BuilderType::QueryInheritanceStub;
+
+    /**
      * The current child "object" we are operating on.
      *
      * @var \Propel\Generator\Model\Inheritance|null
@@ -88,7 +93,7 @@ class ExtensionQueryInheritanceBuilder extends AbstractOMBuilder implements Exte
         $tableName = $table->getName();
         $tableDesc = $table->getDescription();
 
-        $baseBuilder = $this->getNewQueryInheritanceBuilder($this->getChild());
+        $baseBuilder = $this->getQueryInheritanceBuilder($this->getChild());
         $baseClassName = $this->getClassNameFromBuilder($baseBuilder);
         $timeStampBlock = $this->generateTimestampBlock();
 

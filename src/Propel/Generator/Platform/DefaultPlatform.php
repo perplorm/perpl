@@ -5,7 +5,7 @@ declare(strict_types = 1);
 namespace Propel\Generator\Platform;
 
 use Propel\Common\Util\SetColumnConverter;
-use Propel\Generator\Config\GeneratorConfigInterface;
+use Propel\Generator\Config\AbstractGeneratorConfig;
 use Propel\Generator\Exception\EngineException;
 use Propel\Generator\Model\Column;
 use Propel\Generator\Model\Database;
@@ -140,12 +140,12 @@ class DefaultPlatform implements PlatformInterface
     /**
      * Sets the GeneratorConfigInterface to use in the parsing.
      *
-     * @param \Propel\Generator\Config\GeneratorConfigInterface $generatorConfig
+     * @param \Propel\Generator\Config\AbstractGeneratorConfig $generatorConfig
      *
      * @return void
      */
     #[\Override]
-    public function setGeneratorConfig(GeneratorConfigInterface $generatorConfig): void
+    public function setGeneratorConfig(AbstractGeneratorConfig $generatorConfig): void
     {
         $this->defaultToNativeEnumeratedColumnTypes = (bool)($generatorConfig->getConfigProperty('generator.defaultToNativeEnumeratedColumnTypes') ?? false);
         if ($this->defaultToNativeEnumeratedColumnTypes) {
@@ -1491,23 +1491,27 @@ ALTER TABLE %s ADD
     /**
      * Gets the preferred timestamp formatter for setting date/time values.
      *
+     * @param bool $withMilliseconds
+     *
      * @return string
      */
     #[\Override]
-    public function getTimestampFormatter(): string
+    public function getTimestampFormatter(bool $withMilliseconds = true): string
     {
-        return 'Y-m-d H:i:s.u';
+        return $this->getDateFormatter() . ' ' . $this->getTimeFormatter($withMilliseconds);
     }
 
     /**
      * Gets the preferred time formatter for setting date/time values.
      *
+     * @param bool $withMilliseconds
+     *
      * @return string
      */
     #[\Override]
-    public function getTimeFormatter(): string
+    public function getTimeFormatter(bool $withMilliseconds = true): string
     {
-        return 'H:i:s.u';
+        return 'H:i:s' . ($withMilliseconds ? '.u' : '');
     }
 
     /**
@@ -1519,6 +1523,27 @@ ALTER TABLE %s ADD
     public function getDateFormatter(): string
     {
         return 'Y-m-d';
+    }
+
+    /**
+     * Returns the appropriate formatter for a date/time column.
+     *
+     * @param \Propel\Generator\Model\Column $column
+     *
+     * @return string|null
+     */
+    #[\Override]
+    public function getTemporalFormatter(Column $column): string|null
+    {
+        $withMilliseconds = (bool)$column->getDomain()->getSize();
+
+        return match ($column->getType()) {
+            PropelTypes::DATE => $this->getDateFormatter(),
+            PropelTypes::TIME => $this->getTimeFormatter($withMilliseconds),
+            PropelTypes::TIMESTAMP,
+            PropelTypes::DATETIME => $this->getTimestampFormatter($withMilliseconds),
+            default => null,
+        };
     }
 
     /**
@@ -1559,12 +1584,9 @@ ALTER TABLE %s ADD
     public function getColumnBindingPHP(Column $column, string $identifier, string $columnValueAccessor, string $tab = '            '): string
     {
         $script = '';
-        if ($column->getType() === PropelTypes::DATE) {
-            $columnValueAccessor = $columnValueAccessor . ' ? ' . $columnValueAccessor . "->format('{$this->getDateFormatter()}') : null";
-        } elseif ($column->getType() === PropelTypes::TIME) {
-            $columnValueAccessor = $columnValueAccessor . ' ? ' . $columnValueAccessor . "->format('{$this->getTimeFormatter()}') : null";
-        } elseif ($column->isTemporalType()) {
-            $columnValueAccessor = $columnValueAccessor . ' ? ' . $columnValueAccessor . "->format('{$this->getTimestampFormatter()}') : null";
+        if ($column->isTemporalType()) {
+            $formatter = $this->getTemporalFormatter($column);
+            $columnValueAccessor .= "?->format('$formatter')";
         } elseif ($column->isLobType()) {
             // we always need to make sure that the stream is rewound, otherwise nothing will
             // get written to database.

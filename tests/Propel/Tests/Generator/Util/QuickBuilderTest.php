@@ -14,6 +14,7 @@ use MyNameSpace2\QuickBuildFoo2;
 use MyNameSpace2\QuickBuildFoo2Query;
 use MyNameSpace3\QuickBuildFoo3;
 use MyNameSpace3\QuickBuildFoo3Query;
+use Propel\Generator\Builder\Om\BuilderType;
 use Propel\Generator\Platform\MysqlPlatform;
 use Propel\Generator\Platform\SqlitePlatform;
 use Propel\Generator\Util\QuickBuilder;
@@ -35,7 +36,7 @@ class QuickBuilderTest extends TestCase
         $this->assertTrue($builder->getPlatform() instanceof SqlitePlatform);
     }
 
-    public function simpleSchemaProvider(): array
+    public static function simpleSchemaProvider(): array
     {
         $xmlSchema = <<<EOF
 <database name="test_quick_build_2" namespace="MyNameSpace">
@@ -52,10 +53,9 @@ EOF;
     }
 
     /**
-     * @dataProvider simpleSchemaProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('simpleSchemaProvider')]
     public function testGetDatabase($builder): void
     {
         $database = $builder->getDatabase();
@@ -65,10 +65,9 @@ EOF;
     }
 
     /**
-     * @dataProvider simpleSchemaProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('simpleSchemaProvider')]
     public function testGetSQL($builder): void
     {
         $expected = <<<EOF
@@ -91,10 +90,9 @@ EOF;
     }
 
     /**
-     * @dataProvider simpleSchemaProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('simpleSchemaProvider')]
     public function testGetClasses($builder): void
     {
         $script = $builder->getClasses();
@@ -105,13 +103,12 @@ EOF;
     }
 
     /**
-     * @dataProvider simpleSchemaProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('simpleSchemaProvider')]
     public function testGetClassesLimitedClassTargets($builder): void
     {
-        $script = $builder->getClasses(['tablemap', 'object', 'query']);
+        $script = $builder->getClasses([BuilderType::TableMap, BuilderType::ObjectBase, BuilderType::QueryBase]);
         $this->assertStringNotContainsString('class QuickBuildFoo1 extends BaseQuickBuildFoo1', $script);
         $this->assertStringNotContainsString('class QuickBuildFoo1Query extends BaseQuickBuildFoo1Query', $script);
         $this->assertStringContainsString('class QuickBuildFoo1 implements ActiveRecordInterface', $script);
@@ -119,10 +116,9 @@ EOF;
     }
 
     /**
-     * @dataProvider simpleSchemaProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('simpleSchemaProvider')]
     public function testBuildClasses($builder): void
     {
         $builder->buildClasses();

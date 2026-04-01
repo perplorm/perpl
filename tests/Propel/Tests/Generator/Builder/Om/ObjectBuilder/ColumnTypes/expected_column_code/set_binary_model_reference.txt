@@ -1,0 +1,83 @@
+Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes\SetBinaryColumnCodeProducer
+
+
+addColumnAttributes():
+
+    /**
+     * The value for the bin_set_column field.
+     */
+    protected int|null $bin_set_column = null;
+
+    /**
+     * @var array<string>|null
+     */
+    protected array|null $bin_set_column_converted = null;
+
+
+addAccessor():
+
+    /**
+     * Get the [bin_set_column] column value.
+     *
+     * @throws \Propel\Runtime\Exception\PropelException
+     *
+     * @return array|null
+     */
+    public function getBinSetColumn()
+    {
+        if ($this->bin_set_column_converted === null) {
+            $this->bin_set_column_converted = [];
+        }
+        if (!$this->bin_set_column_converted && $this->bin_set_column !== null) {
+            $valueSet = TableTableMap::getValueSet(TableTableMap::COL_BIN_SET_COLUMN);
+            try {
+                $this->bin_set_column_converted = SetColumnConverter::convertBitmaskToArray($this->bin_set_column, $valueSet);
+            } catch (SetColumnConverterException $e) {
+                throw new PropelException('Unknown stored set key: ' . $e->getValue(), $e->getCode(), $e);
+            }
+        }
+
+        return $this->bin_set_column_converted;
+    }
+
+
+addMutator():
+
+    /**
+     * Set the value of [bin_set_column] column.
+     *
+     * @param array|null $v new value
+     *
+     * @throws \Propel\Runtime\Exception\PropelException
+     *
+     * @return $this
+     */
+    public function setBinSetColumn($v)
+    {
+        if ($this->bin_set_column_converted === null || count(array_diff($this->bin_set_column_converted, $v)) > 0 || count(array_diff($v, $this->bin_set_column_converted)) > 0) {
+            $valueSet = TableTableMap::getValueSet(TableTableMap::COL_BIN_SET_COLUMN);
+            try {
+                $v = SetColumnConverter::convertToBitmask($v, $valueSet);
+            } catch (SetColumnConverterException $e) {
+                throw new PropelException(sprintf('Value "%s" is not accepted in this set column', $e->getValue()), $e->getCode(), $e);
+            }
+            if ($this->bin_set_column !== $v) {
+                $this->bin_set_column_converted = null;
+                $this->bin_set_column = $v;
+                $this->modifiedColumns[TableTableMap::COL_BIN_SET_COLUMN] = true;
+            }
+        }
+
+        return $this;
+    }
+
+
+getDefaultValueString:
+null
+
+getApplyDefaultValueStatement:
+
+        $this->bin_set_column = null;
+
+buildCreateFromFilterValueExpression:
+SetColumnConverter::convertBitmaskToArray($value, TableTableMap::getValueSet(TableTableMap::COL_BIN_SET_COLUMN))

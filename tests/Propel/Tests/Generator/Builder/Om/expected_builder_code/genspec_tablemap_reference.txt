@@ -1,0 +1,587 @@
+<?php
+
+namespace Map;
+
+use Base\Collection\GenspecTableCollection;
+use Gen;
+use GenspecTable;
+use GenspecTableQuery;
+use Propel\Runtime\ActiveQuery\ColumnResolver\ColumnExpression\LocalColumnExpression;
+use Propel\Runtime\ActiveQuery\Criteria;
+use Propel\Runtime\ActiveQuery\InstancePoolTrait;
+use Propel\Runtime\Connection\ConnectionInterface;
+use Propel\Runtime\DataFetcher\DataFetcherInterface;
+use Propel\Runtime\Exception\PropelException;
+use Propel\Runtime\Map\TableMap;
+use Propel\Runtime\Map\TableMapTrait;
+use Propel\Runtime\Propel;
+use Spec;
+use function assert;
+use function is_array;
+use function is_object;
+use function preg_replace;
+use function trigger_deprecation;
+
+/**
+ * This class defines the structure of the 'genspec_table' table.
+ *
+ *
+ * This map class is used by Propel to do runtime db structure discovery.
+ * For example, the createSelectSql() method checks the type of a given column used in an
+ * ORDER BY clause to know whether it needs to apply SQL to make the ORDER BY case-insensitive
+ * (i.e. if it's a text column type).
+ */
+class GenspecTableTableMap extends TableMap
+{
+    use InstancePoolTrait;
+    use TableMapTrait;
+
+    /**
+     * @deprecated Not used. If you know the class, generate dot-path yourself.
+     *
+     * @var string
+     */
+    public const CLASS_NAME = '.Map.GenspecTableTableMap';
+
+    /**
+     * Default database name.
+     *
+     * @var string
+     */
+    public const DATABASE_NAME = '';
+
+    /**
+     * @var string
+     */
+    public const TABLE_NAME = 'genspec_table';
+
+    /**
+     * @var string
+     */
+    public const TABLE_PHP_NAME = 'GenspecTable';
+
+    /**
+     * Model class
+     *
+     * @var class-string<\GenspecTable>
+     */
+    public const OM_CLASS = GenspecTable::class;
+
+    /**
+     * @deprecated Not needed (generate from {@see self::OM_CLASS}.
+     *
+     * @var string
+     */
+    public const CLASS_DEFAULT = 'GenspecTable';
+
+    /**
+     * @var int
+     */
+    public const NUM_COLUMNS = 2;
+
+    /**
+     * @var int
+     */
+    public const NUM_LAZY_LOAD_COLUMNS = 0;
+
+    /**
+     * The number of columns to hydrate (NUM_COLUMNS - NUM_LAZY_LOAD_COLUMNS)
+     *
+     * @var int
+     */
+    public const NUM_HYDRATE_COLUMNS = 2;
+
+    /**
+     * Identifies the [id] column
+     *
+     * @var string
+     */
+    public const COL_ID = 'genspec_table.id';
+
+    /**
+     * Identifies the [type] column
+     *
+     * @var string
+     */
+    public const COL_TYPE = 'genspec_table.type';
+
+    /**
+     * The default string format for model objects of the related table
+     *
+     * @var string
+     */
+    public const DEFAULT_STRING_FORMAT = 'YAML';
+
+    /**
+     * @var class-string<\Base\Collection\GenspecTableCollection>
+     */
+    public const DEFAULT_OBJECT_COLLECTION = GenspecTableCollection::class;
+
+    /**
+     * Values used in [type] column to identify object class.
+     *
+     * @var int
+     */
+    public const CLASSKEY_11 = 11;
+
+    /**
+     * @deprecated Get class from {@see static::$objectClassLookup}.
+     *
+     * @var class-string<\Gen>
+     */
+    public const CLASSNAME_11 = Gen::class;
+
+    /**
+     * Child model class for model objects with value `11` in [type] column.
+     *
+     * @var class-string<\Gen>
+     */
+    public const CLASSKEY_GEN = Gen::class;
+
+    /**
+     * Values used in [type] column to identify object class.
+     *
+     * @var int
+     */
+    public const CLASSKEY_22 = 22;
+
+    /**
+     * @deprecated Get class from {@see static::$objectClassLookup}.
+     *
+     * @var class-string<\Spec>
+     */
+    public const CLASSNAME_22 = Spec::class;
+
+    /**
+     * Child model class for model objects with value `22` in [type] column.
+     *
+     * @var class-string<\Spec>
+     */
+    public const CLASSKEY_SPEC = Spec::class;
+
+    /**
+     * Maps values of [type] column to the corresponding entity class.
+     *
+     * @var array<int, class-string>
+     */
+    protected static $objectClassLookup = [
+        11 => Gen::class,
+        22 => Spec::class,
+    ];
+
+    /**
+     * Field name lookup.
+     *
+     * first dimension keys are the type constants
+     * e.g. self::$fieldNames[self::TYPE_PHPNAME][0] = 'Id'
+     *
+     * @var array<string, list<string>|list<int>>
+     */
+    protected static $fieldNames = [
+        // phpcs:disable SlevomatCodingStandard.Whitespaces.DuplicateSpaces.DuplicateSpaces
+        self::TYPE_PHPNAME =>   ['Id', 'Type'],
+        self::TYPE_CAMELNAME => ['id', 'type'],
+        self::TYPE_COLNAME =>   [self::COL_ID, self::COL_TYPE],
+        self::TYPE_FIELDNAME => ['id', 'type'],
+        self::TYPE_NUM =>       [0, 1],
+        // phpcs:enable
+    ];
+
+    /**
+     * Maps field names in different cases to field index.
+     *
+     * first dimension keys are the type constants
+     * e.g. self::$fieldKeys[self::TYPE_PHPNAME]['Id'] = 0
+     *
+     * @var array<string, array<string, int>|list<int>>
+     */
+    protected static $fieldKeys = [
+        // phpcs:disable SlevomatCodingStandard.Whitespaces.DuplicateSpaces.DuplicateSpaces
+        self::TYPE_PHPNAME =>   ['Id' => 0, 'Type' => 1],
+        self::TYPE_CAMELNAME => ['id' => 0, 'type' => 1],
+        self::TYPE_COLNAME =>   [self::COL_ID => 0, self::COL_TYPE => 1],
+        self::TYPE_FIELDNAME => ['id' => 0, 'type' => 1],
+        self::TYPE_NUM =>       [0, 1],
+        // phpcs:enable
+    ];
+
+    /**
+     * Holds a list of column names and their normalized version.
+     *
+     * @var array<string, string>
+     */
+    protected $normalizedColumnNameMap = [
+        'Id' => 'ID',
+        'GenspecTable.Id' => 'ID',
+        'id' => 'ID',
+        'genspecTable.id' => 'ID',
+        'GenspecTableTableMap::COL_ID' => 'ID',
+        'COL_ID' => 'ID',
+        'genspec_table.id' => 'ID',
+        'Type' => 'TYPE',
+        'GenspecTable.Type' => 'TYPE',
+        'type' => 'TYPE',
+        'genspecTable.type' => 'TYPE',
+        'GenspecTableTableMap::COL_TYPE' => 'TYPE',
+        'COL_TYPE' => 'TYPE',
+        'genspec_table.type' => 'TYPE',
+    ];
+
+    /**
+     * Initialize the table attributes and columns
+     * Relations are not initialized by this method since they are lazy loaded
+     *
+     * @return void
+     */
+    public function initialize(): void
+    {
+        // attributes
+        $this->setName('genspec_table');
+        $this->setPhpName('GenspecTable');
+        $this->setIdentifierQuoting(false);
+        $this->setClassName('\\GenspecTable');
+        $this->setPackage('');
+        $this->setUseIdGenerator(true);
+        $this->setSingleTableInheritance(true);
+        // columns
+        $this->addPrimaryKey('id', 'Id', 'INTEGER', true, null, null);
+        $this->addColumn('type', 'Type', 'INTEGER', true, null, 0);
+    }
+
+    /**
+     * Build the RelationMap objects for this table relationships
+     *
+     * @return void
+     */
+    public function buildRelations(): void
+    {
+    }
+
+    /**
+     * Adds an object to the instance pool.
+     *
+     * Propel keeps cached copies of objects in an instance pool when they are retrieved
+     * from the database. In some cases you may need to explicitly add objects
+     * to the cache in order to ensure that the same objects are always returned by find*()
+     * and findPk*() calls.
+     *
+     * @param \GenspecTable $obj
+     * @param string|null $key Optional internal key if it was already generated
+     *
+     * @return void
+     */
+    public static function addInstanceToPool($obj, string|null $key = null): void
+    {
+        if (!Propel::isInstancePoolingEnabled()) {
+            return;
+        }
+
+        $key ??= (string)$obj->getId();
+
+        self::$instances[$key] = $obj;
+    }
+
+    /**
+     * Removes an object from the instance pool.
+     *
+     * Propel keeps cached copies of objects in an instance pool when they are retrieved
+     * from the database. In some cases -- especially when you override doDelete
+     * methods in your stub classes -- you may need to explicitly remove objects
+     * from the cache in order to prevent returning objects that no longer exist.
+     *
+     * Passing in a Criteria clears the whole cache and is deprecated.
+     *
+     * @param \GenspecTable|\Propel\Runtime\ActiveQuery\Criteria|int|null $value A GenspecTable object or a primary key value.
+     *
+     * @return void
+     */
+    public static function removeInstanceFromPool($value): void
+    {
+        if (!Propel::isInstancePoolingEnabled() || $value === null) {
+            return;
+        }
+
+        if ($value instanceof Criteria) {
+            self::$instances = [];
+
+            return;
+        }
+
+        $key = $value instanceof GenspecTable
+            ? (string)$value->getId()
+            : (string)$value;
+
+        unset(self::$instances[$key]);
+    }
+
+    /**
+     * Method to invalidate the instance pool of all tables related to GenspecTable
+     * by a foreign key with ON DELETE CASCADE
+     *
+     * @return void
+     */
+    public static function clearRelatedInstancePool(): void
+    {
+    }
+
+    /**
+     * Returns a serialized version of the primary key as unique identifier of the row.
+     *
+     * @param array<mixed> $row Resultset row.
+     * @param int $offset The 0-based offset for reading from the resultset row.
+     * @param string $indexType One of the class type constants TableMap::TYPE_PHPNAME, TableMap::TYPE_CAMELNAME
+     *                           TableMap::TYPE_COLNAME, TableMap::TYPE_FIELDNAME, TableMap::TYPE_NUM
+     *
+     * @return string|null The primary key hash of the row or null if value cannot be resolved
+     */
+    public static function getPrimaryKeyHashFromRow(array $row, int $offset = 0, string $indexType = TableMap::TYPE_NUM): ?string
+    {
+        $id = $row[$indexType === TableMap::TYPE_NUM ? 0 + $offset : static::translateFieldName('Id', TableMap::TYPE_PHPNAME, $indexType)];
+        $id = $id === null ? null : (string)$id;
+
+        return $id;
+    }
+
+    /**
+     * Returns a serialized version of the primary key as unique identifier of the model instance.
+     *
+     * @param \GenspecTable $genspecTable
+     *
+     * @return string|null
+     */
+    public static function getPrimaryKeyHashFromObject(GenspecTable $genspecTable): string|null
+    {
+        return (string)$genspecTable->getId();
+    }
+
+    /**
+     * Retrieves the primary key from the DB resultset row
+     * For tables with a single-column primary key, that simple pkey value will be returned.
+     * For tables with a multi-column primary key, an array of the primary key columns will be returned.
+     *
+     * @param array<mixed> $row Resultset row.
+     * @param int $offset The 0-based offset for reading from the resultset row.
+     * @param string $indexType One of the class type constants TableMap::TYPE_PHPNAME, TableMap::TYPE_CAMELNAME
+     *                           TableMap::TYPE_COLNAME, TableMap::TYPE_FIELDNAME, TableMap::TYPE_NUM
+     *
+     * @return int
+     */
+    public static function getPrimaryKeyFromRow(array $row, int $offset = 0, string $indexType = TableMap::TYPE_NUM)
+    {
+        return (int)$row[$indexType === TableMap::TYPE_NUM ? 0 + $offset : self::translateFieldName('Id', TableMap::TYPE_PHPNAME, $indexType)];
+    }
+
+    /**
+     * The returned Class will contain objects of the default type or
+     * objects that inherit from the default.
+     *
+     * @psalm-return ($withPrefix is true ? string : class-string<\GenspecTable>)
+     *
+     * @param array $row Fetched row.
+     * @param int $offset Start of tuple data in row.
+     * @param bool $withPrefix If true, namespace will be separated by dots, regular backslashes otherwise.
+     *
+     * @return class-string<\GenspecTable>|string
+     */
+    public static function getOMClass(array $row, int $offset, bool $withPrefix = true): string
+    {
+        $classKey = $row[$offset + 1];
+        $omClass = static::$objectClassLookup[$classKey] ?? static::OM_CLASS;
+
+        return $withPrefix ? $omClass : preg_replace('/\./', '\\', $omClass); // replace dots with backslash
+    }
+
+    /**
+     * Populates an object of the default type or an object that inherit from the default.
+     *
+     * @param array $row Row returned by DataFetcher->fetch().
+     * @param int $offset The 0-based offset for reading from the resultset row.
+     * @param string $indexType The index type of $row. Mostly DataFetcher->getIndexType().
+     *                           One of the class type constants TableMap::TYPE_PHPNAME, TableMap::TYPE_CAMELNAME
+     *                           TableMap::TYPE_COLNAME, TableMap::TYPE_FIELDNAME, TableMap::TYPE_NUM.
+     *
+     * @return array{\GenspecTable|null, int} Hydrated object and number of hydrated columns
+     */
+    public static function populateObject(array $row, int $offset = 0, string $indexType = TableMap::TYPE_NUM): array
+    {
+        $key = static::getPrimaryKeyHashFromRow($row, $offset, $indexType);
+        /** @var \GenspecTable|null $obj */
+        $obj = static::getInstanceFromPool($key);
+        if ($obj) {
+            $nextColumnIndex = $offset + static::NUM_HYDRATE_COLUMNS;
+        } else {
+            $cls = static::getOMClass($row, $offset, false);
+            $obj = new $cls();
+            $nextColumnIndex = $obj->hydrate($row, $offset, false, $indexType);
+            static::addInstanceToPool($obj, $key);
+        }
+
+        return [$obj, $nextColumnIndex];
+    }
+
+    /**
+     * The returned array will contain objects of the default type or
+     * objects that inherit from the default.
+     *
+     * @param \Propel\Runtime\DataFetcher\DataFetcherInterface $dataFetcher
+     *
+     * @return array<object>
+     */
+    public static function populateObjects(DataFetcherInterface $dataFetcher): array
+    {
+        $results = [];
+
+        while ($row = $dataFetcher->fetch()) {
+            assert(is_array($row));
+            $key = static::getPrimaryKeyHashFromRow($row, 0, $dataFetcher->getIndexType());
+            /** @var \GenspecTable|null $obj */
+            $obj = static::getInstanceFromPool($key);
+            if (!$obj) {
+                // class must be set each time from the record row
+                $cls = static::getOMClass($row, 0);
+                $cls = preg_replace('#\.#', '\\', $cls);
+                /** @var \GenspecTable $obj */
+                $obj = new $cls();
+                $obj->hydrate($row);
+                static::addInstanceToPool($obj, $key);
+            }
+            $results[] = $obj;
+        }
+
+        return $results;
+    }
+
+    /**
+     * Add all the columns needed to create a new object.
+     *
+     * Note: any columns that were marked with lazyLoad="true" in the
+     * XML schema will not be added to the select list and only loaded
+     * on demand.
+     *
+     * @param \Propel\Runtime\ActiveQuery\Criteria $criteria Object containing the columns to add.
+     * @param string|null $alias Optional table alias
+     *
+     * @return void
+     */
+    public static function addSelectColumns(Criteria $criteria, ?string $alias = null): void
+    {
+        $tableMap = static::getTableMap();
+        $tableAlias = $alias ?: 'genspec_table';
+        $criteria->addSelectColumn(new LocalColumnExpression($criteria, $tableAlias, $tableMap->columns['ID']));
+        $criteria->addSelectColumn(new LocalColumnExpression($criteria, $tableAlias, $tableMap->columns['TYPE']));
+    }
+
+    /**
+     * Remove all the columns needed to create a new object.
+     *
+     * Note: any columns that were marked with lazyLoad="true" in the
+     * XML schema will not be removed as they are only loaded on demand.
+     *
+     * @param \Propel\Runtime\ActiveQuery\Criteria $criteria Object containing the columns to remove.
+     * @param string|null $alias Optional table alias
+     *
+     * @return void
+     */
+    public static function removeSelectColumns(Criteria $criteria, ?string $alias = null): void
+    {
+        if ($alias === null) {
+            $criteria->removeSelectColumn(static::COL_ID);
+            $criteria->removeSelectColumn(static::COL_TYPE);
+        } else {
+            $criteria->removeSelectColumn("$alias.id");
+            $criteria->removeSelectColumn("$alias.type");
+        }
+    }
+
+    /**
+     * Returns the TableMap related to this object.
+     * This method is not needed for general use but a specific application could have a need.
+     *
+     * @return static
+     */
+    public static function getTableMap(): TableMap
+    {
+        /** @var static $tableMap */
+        $tableMap = Propel::getServiceContainer()->getDatabaseMap(static::DATABASE_NAME)->getTable(static::TABLE_NAME);
+
+        return $tableMap;
+    }
+
+    /**
+     * @deprecated Delete via model or GenspecTableQuery.
+     *
+     * Performs a DELETE on the database, given a GenspecTable or Criteria object OR a primary key value.
+     *
+     * @param mixed $values Criteria or GenspecTable object or primary key or array of primary keys
+     *              which is used to create the DELETE statement
+     * @param \Propel\Runtime\Connection\ConnectionInterface|null $con the connection to use
+     *
+     * @return int The number of affected rows (if supported by underlying database driver). This includes CASCADE-related rows
+     *                         if supported by native driver or if emulated using Propel.
+     */
+    public static function doDelete($values, ?ConnectionInterface $con = null): int
+    {
+        trigger_deprecation('Propel', '2.0', 'TableMap::doDelete() should not be used anymore, delete via model or GenspecTableQuery');
+
+        $con ??= Propel::getServiceContainer()->getWriteConnection(static::DATABASE_NAME);
+
+        if ($values instanceof Criteria) {
+            $criteria = $values;
+        } elseif ($values instanceof GenspecTable) {
+            $criteria = $values->buildPkeyCriteria();
+        } else { // it's a primary key, or an array of pks
+            $criteria = new Criteria(static::DATABASE_NAME);
+            $criteria->addAnd(static::COL_ID, (array)$values, Criteria::IN);
+        }
+
+        if ($values instanceof Criteria) {
+            static::clearInstancePool();
+        } elseif (!is_object($values)) { // it's a primary key, or an array of pks
+            foreach ((array)$values as $singleval) {
+                static::removeInstanceFromPool($singleval);
+            }
+        }
+
+        return GenspecTableQuery::create(null, $criteria)->delete($con);
+    }
+
+    /**
+     * Deletes all rows from the genspec_table table.
+     *
+     * @param \Propel\Runtime\Connection\ConnectionInterface|null $con the connection to use
+     *
+     * @return int The number of affected rows (if supported by underlying database driver).
+     */
+    public static function doDeleteAll(?ConnectionInterface $con = null): int
+    {
+        return GenspecTableQuery::create()->doDeleteAll($con);
+    }
+
+    /**
+     * Performs an INSERT on the database, given a GenspecTable or Criteria object.
+     *
+     * @param \Propel\Runtime\ActiveQuery\Criteria|\GenspecTable $criteria
+     * @param \Propel\Runtime\Connection\ConnectionInterface|null $con
+     *
+     * @throws \Propel\Runtime\Exception\PropelException
+     *
+     * @return mixed The new primary key.
+     */
+    public static function doInsert($criteria, ?ConnectionInterface $con = null)
+    {
+        $con ??= Propel::getServiceContainer()->getWriteConnection(static::DATABASE_NAME);
+
+        if ($criteria instanceof Criteria) {
+            $criteria = clone $criteria;
+            $criteria->turnFiltersToUpdateValues();
+        } else {
+            $criteria = $criteria->buildCriteria(); // build Criteria from GenspecTable object
+        }
+
+        if ($criteria->hasUpdateValue(static::COL_ID)) {
+            throw new PropelException('Cannot insert a value for auto-increment primary key (static::COL_ID)');
+        }
+
+        return GenspecTableQuery::create(null, $criteria)->doInsert($con);
+    }
+}

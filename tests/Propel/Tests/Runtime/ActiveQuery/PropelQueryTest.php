@@ -193,9 +193,7 @@ class PropelQueryTest extends BookstoreTestBase
         $this->assertNotNull($result);
     }
 
-    /**
-     * @dataProvider findMethodsProvider
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('findMethodsProvider')]
     public function testReturnTypeOfFind(string $findMethodName, $findMethodArg)
     {
         $queryTypes = [
@@ -208,7 +206,7 @@ class PropelQueryTest extends BookstoreTestBase
         }
     }
 
-    public function findMethodsProvider()
+    public static function findMethodsProvider()
     {
         return [
             ['find', null],

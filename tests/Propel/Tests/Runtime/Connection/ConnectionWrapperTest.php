@@ -115,10 +115,9 @@ class ConnectionWrapperTest extends BookstoreTestBase
     }
 
     /**
-     * @dataProvider debugModeProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('debugModeProvider')]
     public function testInstanceAndClassDebugMode(?bool $classState, ?bool $instanceState, bool $expected, string $message): void
     {
         ConnectionWrapper::$useDebugMode = $classState;
@@ -127,7 +126,7 @@ class ConnectionWrapperTest extends BookstoreTestBase
         $this->assertSame($expected, $this->con->isInDebugMode(), $message);
     }
     
-    public function debugModeProvider()
+    public static function debugModeProvider()
     {
         // [class state, instance state, expected state, message]
         return [

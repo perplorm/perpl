@@ -6,7 +6,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Propel\Tests\Generator\Behavior;
+namespace Propel\Tests\Generator\Behavior\ConcreteInheritance;
 
 use Propel\Tests\BookstoreSchemas\Book;
 use Propel\Tests\BookstoreSchemas\Map\BookTableMap;

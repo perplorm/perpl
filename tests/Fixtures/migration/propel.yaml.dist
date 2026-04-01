@@ -24,6 +24,7 @@ propel:
     connections:
       - migration
     targetPackage: migration
+    declareStrictTypesInBuilders: true
 
   runtime:
     defaultConnection: migration

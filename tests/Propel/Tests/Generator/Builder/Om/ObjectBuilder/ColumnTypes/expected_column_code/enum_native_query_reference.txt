@@ -1,0 +1,26 @@
+
+    /**
+     * Filter the query on the native_enum_column column
+     *
+     * Example usage:
+     * <code>
+     * $query->filterByNativeEnumColumn('fooValue'); // WHERE native_enum_column = 'fooValue'
+     * $query->filterByNativeEnumColumn('%fooValue%', Criteria::LIKE); // WHERE native_enum_column LIKE '%fooValue%'
+     * $query->filterByNativeEnumColumn(['foo', 'bar']); // WHERE native_enum_column IN ('foo', 'bar')
+     * </code>
+     *
+     * @param array<string>|string|null $nativeEnumColumn The value to use as filter.
+     * @param string|null $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return $this
+     */
+    public function filterByNativeEnumColumn($nativeEnumColumn = null, ?string $comparison = null)
+    {
+        $resolvedColumn = $this->resolveLocalColumnByName('native_enum_column');
+        if ($comparison === null && is_array($nativeEnumColumn)) {
+            $comparison = Criteria::IN;
+        }
+        $this->addUsingOperator($resolvedColumn, $nativeEnumColumn, $comparison);
+
+        return $this;
+    }

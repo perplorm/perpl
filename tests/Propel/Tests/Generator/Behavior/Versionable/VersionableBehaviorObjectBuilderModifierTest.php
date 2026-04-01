@@ -272,7 +272,7 @@ EOF;
         $this->assertTrue(method_exists('VersionableBehaviorTest7', 'setMyComment'));
     }
 
-    public function providerForNewActiveRecordTests()
+    public static function providerForNewActiveRecordTests()
     {
         return [
             ['\VersionableBehaviorTest1'],
@@ -283,10 +283,9 @@ EOF;
     }
 
     /**
-     * @dataProvider providerForNewActiveRecordTests
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('providerForNewActiveRecordTests')]
     public function testVersionGetterAndSetter($class)
     {
         $o = new $class();
@@ -295,10 +294,9 @@ EOF;
     }
 
     /**
-     * @dataProvider providerForNewActiveRecordTests
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('providerForNewActiveRecordTests')]
     public function testVersionDefaultValue($class)
     {
         $o = new $class();
@@ -306,10 +304,9 @@ EOF;
     }
 
     /**
-     * @dataProvider providerForNewActiveRecordTests
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('providerForNewActiveRecordTests')]
     public function testVersionValueInitializesOnInsert($class)
     {
         $o = new $class();
@@ -318,10 +315,9 @@ EOF;
     }
 
     /**
-     * @dataProvider providerForNewActiveRecordTests
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('providerForNewActiveRecordTests')]
     public function testVersionValueIncrementsOnUpdate($class)
     {
         $o = new $class();
@@ -368,10 +364,9 @@ EOF;
     }
 
     /**
-     * @dataProvider providerForNewActiveRecordTests
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('providerForNewActiveRecordTests')]
     public function testVersionDoesNotIncrementOnUpdateWithNoChange($class)
     {
         $o = new $class();
@@ -384,10 +379,9 @@ EOF;
     }
 
     /**
-     * @dataProvider providerForNewActiveRecordTests
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('providerForNewActiveRecordTests')]
     public function testVersionDoesNotIncrementWhenVersioningIsDisabled($class)
     {
         $o = new $class();

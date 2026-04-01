@@ -4,7 +4,7 @@ declare(strict_types = 1);
 
 namespace Propel\Generator\Model;
 
-use Propel\Generator\Config\GeneratorConfigInterface;
+use Propel\Generator\Config\AbstractGeneratorConfig;
 use Propel\Generator\Exception\EngineException;
 use Propel\Generator\Platform\PlatformInterface;
 use Propel\Generator\Schema\Dumper\XmlDumper;
@@ -38,7 +38,7 @@ class Schema
     private $isInitialized;
 
     /**
-     * @var \Propel\Generator\Config\GeneratorConfigInterface
+     * @var \Propel\Generator\Config\AbstractGeneratorConfig
      */
     protected $generatorConfig;
 
@@ -84,11 +84,11 @@ class Schema
     /**
      * Sets the generator configuration
      *
-     * @param \Propel\Generator\Config\GeneratorConfigInterface $generatorConfig
+     * @param \Propel\Generator\Config\AbstractGeneratorConfig $generatorConfig
      *
      * @return void
      */
-    public function setGeneratorConfig(GeneratorConfigInterface $generatorConfig): void
+    public function setGeneratorConfig(AbstractGeneratorConfig $generatorConfig): void
     {
         $this->generatorConfig = $generatorConfig;
     }
@@ -96,9 +96,9 @@ class Schema
     /**
      * Returns the generator configuration
      *
-     * @return \Propel\Generator\Config\GeneratorConfigInterface|null
+     * @return \Propel\Generator\Config\AbstractGeneratorConfig|null
      */
-    public function getGeneratorConfig(): ?GeneratorConfigInterface
+    public function getGeneratorConfig(): ?AbstractGeneratorConfig
     {
         return $this->generatorConfig;
     }

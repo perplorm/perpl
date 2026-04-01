@@ -6,7 +6,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Propel\Tests\Runtime\ActiveRecord;
+namespace Propel\Tests\Runtime;
 
 use Propel\Tests\Bookstore\Book;
 

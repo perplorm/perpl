@@ -53,7 +53,7 @@ class MigrationManagerTest extends TestCase
         $connections = $generatorConfig->getBuildConnections();
 
         $migrationManager = $this->getMockBuilder(MigrationManager::class)
-            ->setMethods(['getMigrationTimestamps'])
+            ->onlyMethods(['getMigrationTimestamps'])
             ->getMock();
         $migrationManager->setGeneratorConfig($generatorConfig);
         $migrationManager->setConnections($connections);
@@ -82,13 +82,12 @@ class MigrationManagerTest extends TestCase
     }
 
     /**
-     * @dataProvider getAllDatabaseVersionsDataProvider
      *
      * @param array<int, string|null> $migrationData
      * @param list<int> $expectedDatabaseVersions
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('getAllDatabaseVersionsDataProvider')]
     public function testGetAllDatabaseVersions(array $migrationData, array $expectedDatabaseVersions): void
     {
         $migrationManager = $this->createMigrationManager([]);
@@ -119,15 +118,14 @@ class MigrationManagerTest extends TestCase
     }
 
     /**
-     * @dataProvider getGetNonExecutedMigrationTimestampsByVersionDataProvider
      *
      * @param list<int> $localTimestamps
      * @param list<int> $databaseTimestamps
      * @param list<int> $expectedTimestamps
      * @param int|null $expectedVersion
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('getGetNonExecutedMigrationTimestampsByVersionDataProvider')]
     public function testGetNonExecutedMigrationTimestampsByVersion(
         array $localTimestamps,
         array $databaseTimestamps,
@@ -165,14 +163,13 @@ class MigrationManagerTest extends TestCase
     }
 
     /**
-     * @dataProvider getAlreadyExecutedTimestampsDataProvider
      *
      * @param list<int> $localTimestamps
      * @param array<int, string|null> $databaseMigrationData
      * @param list<int> $expectedTimestamps
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('getAlreadyExecutedTimestampsDataProvider')]
     public function testGetAlreadyExecutedTimestamps(
         array $localTimestamps,
         array $databaseMigrationData,
@@ -187,15 +184,14 @@ class MigrationManagerTest extends TestCase
     }
 
     /**
-     * @dataProvider getAlreadyExecutedMigrationTimestampsByVersionDataProvider
      *
      * @param list<int> $localTimestamps
      * @param array<int, string|null> $databaseMigrationData
      * @param list<int> $expectedTimestamps
      * @param int|null $expectedVersion
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('getAlreadyExecutedMigrationTimestampsByVersionDataProvider')]
     public function testGetAlreadyExecutedMigrationTimestampsByVersion(
         array $localTimestamps,
         array $databaseMigrationData,
@@ -353,11 +349,11 @@ class MigrationManagerTest extends TestCase
     public function testModifyMigrationTableIfOutdatedShouldNotUpdateTableIfExecutionDatetimeColumnExists(): void
     {
         $platformMock = $this->getMockBuilder(DefaultPlatform::class)
-            ->setMethods(['getAddColumnDDL'])
+            ->onlyMethods(['getAddColumnDDL'])
             ->getMock();
 
         $migrationManager = $this->getMockBuilder(MigrationManager::class)
-            ->setMethods(['getPlatform'])
+            ->onlyMethods(['getPlatform'])
             ->getMock();
 
         $migrationManager->expects($this->any())
@@ -386,15 +382,14 @@ class MigrationManagerTest extends TestCase
     }
 
     /**
-     * @dataProvider isDatabaseVersionsAppliedDataProvider
      *
      * @param list<int> $localTimestamps
      * @param list<int> $databaseTimestamps
      * @param int $version
      * @param bool $expectedIsDatabaseVersionApplied
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('isDatabaseVersionsAppliedDataProvider')]
     public function testIsDatabaseVersionsApplied(
         array $localTimestamps,
         array $databaseTimestamps,
@@ -414,7 +409,7 @@ class MigrationManagerTest extends TestCase
     /**
      * @return array<int, array<int, array<int, mixed>>>
      */
-    public function getAllDatabaseVersionsDataProvider(): array
+    public static function getAllDatabaseVersionsDataProvider(): array
     {
         return [
             [
@@ -455,7 +450,7 @@ class MigrationManagerTest extends TestCase
     /**
      * @return array<string, array<int, array<int>|int>>
      */
-    public function getGetNonExecutedMigrationTimestampsByVersionDataProvider(): array
+    public static function getGetNonExecutedMigrationTimestampsByVersionDataProvider(): array
     {
         return [
             'The method should return full diff if a specific version is not provided.' => [
@@ -481,7 +476,7 @@ class MigrationManagerTest extends TestCase
     /**
      * @return array<string, array<int, array|int>>
      */
-    public function getAlreadyExecutedTimestampsDataProvider(): array
+    public static function getAlreadyExecutedTimestampsDataProvider(): array
     {
         return [
             'The method should return an empty array if no intersection is found.' => [
@@ -500,7 +495,7 @@ class MigrationManagerTest extends TestCase
     /**
      * @return array<string, array<int, array|int>>
      */
-    public function getAlreadyExecutedMigrationTimestampsByVersionDataProvider(): array
+    public static function getAlreadyExecutedMigrationTimestampsByVersionDataProvider(): array
     {
         return [
             'The method should return full intersection if a specific version is not provided.' => [
@@ -531,7 +526,7 @@ class MigrationManagerTest extends TestCase
     /**
      * @return array<int, array<int, mixed>>
      */
-    public function isDatabaseVersionsAppliedDataProvider(): array
+    public static function isDatabaseVersionsAppliedDataProvider(): array
     {
         return [
             [

@@ -5,6 +5,7 @@ declare(strict_types = 1);
 namespace Propel\Generator\Reverse;
 
 use PDO;
+use Propel\Generator\Exception\EngineException;
 use Propel\Generator\Model\Column;
 use Propel\Generator\Model\ColumnDefaultValue;
 use Propel\Generator\Model\Database;
@@ -18,15 +19,18 @@ use Propel\Generator\Platform\MysqlPlatform;
 use Propel\Runtime\Connection\ConnectionInterface;
 use RuntimeException;
 use function array_keys;
+use function assert;
 use function count;
 use function explode;
 use function implode;
 use function in_array;
-use function is_array;
 use function preg_match;
 use function preg_match_all;
 use function sprintf;
+use function str_ends_with;
 use function str_replace;
+use function str_starts_with;
+use function stripslashes;
 use function strpos;
 use function strtolower;
 use function strtoupper;
@@ -362,12 +366,16 @@ class MysqlSchemaParser extends AbstractSchemaParser
     protected function extractDefaultValue(?string $parsedValue, string $propelType, string $nativeType, string $extra): ?ColumnDefaultValue
     {
         // BLOBs can't have any default values in MySQL
-        $isBlob = preg_match('~blob|text~', $nativeType);
+        $isBlob = preg_match('/blob/', $nativeType);
 
         if ($parsedValue === null || $isBlob) {
             return null;
         }
         $default = $parsedValue;
+
+        if ($parsedValue !== '' && preg_match('/text/', $nativeType)) {
+            $default = $this->unwrapDefaultValueString($parsedValue);
+        }
 
         if ($propelType == PropelTypes::BOOLEAN) {
             if ($parsedValue == '1') {
@@ -389,6 +397,33 @@ class MysqlSchemaParser extends AbstractSchemaParser
         }
 
         return new ColumnDefaultValue($default, $type);
+    }
+
+    /**
+     * Cleanup of default value string expressions as returned from DBMS.
+     *
+     * MariaDB returns a quoted string: "'Saying \'Foo\' means nothing'"
+     * MySQL 8.0+ escapes again and adds a charset prefix: "_utf8mb3\'Saying \\\'Foo\\\' means nothing\'"
+     *
+     * @param string $value
+     *
+     * @throws \Propel\Generator\Exception\EngineException
+     *
+     * @return string
+     */
+    protected function unwrapDefaultValueString(string $value): string
+    {
+        if (str_starts_with($value, '_')) {
+            $value = stripslashes($value); // unescape outer quotes
+            $firstQuotePos = strpos($value, "'");
+            assert($firstQuotePos !== false);
+            $value = substr($value, $firstQuotePos); // remove charset prefix
+        }
+        if ($value !== '' && !(str_starts_with($value, "'") && str_ends_with($value, "'"))) {
+            throw new EngineException("Expected default value to be quoted, but got: `$value`");
+        }
+
+        return stripslashes(substr($value, 1, -1)); // unquote string
     }
 
     /**
@@ -540,7 +575,7 @@ EOT;
                         $result = null;
                         $regex = sprintf('/ %s (%s)/', $fkaction, $pipedActionsString);
                         preg_match($regex, $fkey, $result);
-                        if ($result && is_array($result) && isset($result[1])) {
+                        if ($result) {
                             $fkactions[$fkaction] = $result[1];
                         }
                     }

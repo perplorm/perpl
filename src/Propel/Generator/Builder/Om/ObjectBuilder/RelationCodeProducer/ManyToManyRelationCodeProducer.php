@@ -18,9 +18,6 @@ use function array_search;
  */
 class ManyToManyRelationCodeProducer extends AbstractManyToManyCodeProducer
 {
-    /**
-     * @var \Propel\Generator\Builder\Util\EntityObjectClassNames
-     */
     protected EntityObjectClassNames $targetTableNames;
 
     /**
@@ -182,8 +179,7 @@ class ManyToManyRelationCodeProducer extends AbstractManyToManyCodeProducer
         }
 
         return \$this->$attributeName;
-    }
-";
+    }\n";
     }
 
     /**
@@ -287,7 +283,7 @@ class ManyToManyRelationCodeProducer extends AbstractManyToManyCodeProducer
 
         $ownIdentifierSingular = $this->names->getSourceIdentifier(false);
         $ownIdentifierPlural = $this->names->getSourceIdentifier(true);
-        $ownStubClassName = $this->objectBuilder->getObjectClassName();
+        $ownStubClassName = $this->builder->getObjectClassName();
 
         $script .= "
     /**{$phpDoc}
@@ -311,7 +307,6 @@ class ManyToManyRelationCodeProducer extends AbstractManyToManyCodeProducer
         } elseif (!{$targetObject}->get{$ownIdentifierPlural}($targetGetterParameters)->contains(\$this)) {
             {$targetObject}->get{$ownIdentifierPlural}($targetGetterParameters)->push(\$this);
         }
-    }
-";
+    }\n";
     }
 }

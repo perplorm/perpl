@@ -16,7 +16,7 @@ use Propel\Tests\TestCase;
  */
 class ReferencedClassesTest extends TestCase
 {
-    public function typeHintDataProvider(): array
+    public static function typeHintDataProvider(): array
     {
         return [
             ['string', 'string', []],
@@ -29,14 +29,13 @@ class ReferencedClassesTest extends TestCase
     }
 
     /**
-     * @dataProvider typeHintDataProvider
-     * 
+     *
      * @param string $docType
      * @param string $expectedTypeHint
      * @param array<string, string> $expectedDeclarations
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('typeHintDataProvider')]
     public function testResolveTypeHintFromDocType(string $docType, string $expectedTypeHint, array $expectedDeclarations): void
     {
         $referencedClasses = new ReferencedClasses($this->createMock(ObjectBuilder::class));

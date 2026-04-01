@@ -20,7 +20,7 @@ class OgObjectModifierTest extends TestCase
 {
 
 
-    public function classDeclarationDataProvider()
+    public static function classDeclarationDataProvider()
     {
         return [
             ['abstract class FooQuery implements BarInterface'],
@@ -30,9 +30,9 @@ class OgObjectModifierTest extends TestCase
     }
 
     /**
-     * @dataProvider classDeclarationDataProvider
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('classDeclarationDataProvider')]
     public function testAddInterfaceDeclaration(string $classDeclaration)
     {
         $interface = ObjectWithOutputGroupInterface::class;

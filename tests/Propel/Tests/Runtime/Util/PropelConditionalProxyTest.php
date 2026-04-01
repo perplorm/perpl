@@ -84,10 +84,9 @@ class PropelConditionalProxyTest extends BaseTestCase
     }
 
     /**
-     * @dataProvider conditionalFlowMethodsWithoutUnderscoreProvider
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('conditionalFlowMethodsWithoutUnderscoreProvider')]
     public function testConditionalFlowMethodsWithoutUnderscoreThrowException(string $method)
     {
         $criteria = new ProxyTestCriteria();

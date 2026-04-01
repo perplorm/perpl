@@ -4,8 +4,6 @@ declare(strict_types = 1);
 
 namespace Propel\Generator\Builder\Om;
 
-use Propel\Generator\Config\GeneratorConfig;
-use Propel\Generator\Config\GeneratorConfigInterface;
 use Propel\Generator\Model\Table;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\Collection\ObjectCollection;
@@ -18,6 +16,11 @@ use function substr;
 class ObjectCollectionBuilder extends AbstractOMBuilder
 {
     /**
+     * @var \Propel\Generator\Builder\Om\BuilderType|null
+     */
+    public const BUILDER_TYPE = BuilderType::Collection;
+
+    /**
      * Used in {@see AbstractOMBuilder::applyBehaviorModifierBase()} to call {@see \Propel\Generator\Model\Behavior::getObjectCollectionBuilderModifier()}.
      *
      * @var string
@@ -28,18 +31,6 @@ class ObjectCollectionBuilder extends AbstractOMBuilder
      * @var array<array{relationIdentifier: string, relationIdentifierInMethod: string, collectionClassType: string, collectionClassNameFq: class-string, collectionClassName: string}>|null
      */
     protected $relationCollectionMapping;
-
-    /**
-     * @param \Propel\Generator\Model\Table $table
-     * @param \Propel\Generator\Config\GeneratorConfigInterface|null $generatorConfig
-     *
-     * @return void
-     */
-    #[\Override]
-    protected function init(Table $table, ?GeneratorConfigInterface $generatorConfig): void
-    {
-        parent::init($table, $generatorConfig);
-    }
 
     /**
      * @return array<array{relationIdentifier: string, relationIdentifierInMethod: string, collectionClassName: string, collectionClassNameFq: class-string, collectionClassType: string}>
@@ -134,7 +125,7 @@ class ObjectCollectionBuilder extends AbstractOMBuilder
             'unqualifiedClassName' => $this->getUnprefixedClassName(),
             'parentClass' => substr($parentClassFq, 1 + strrpos($parentClassFq, '\\')),
             'parentType' => $this->resolveParentCollectionType(),
-            'modelClassNameFq' => $this->codeBuilderStore->getStubObjectBuilder()->getFullyQualifiedClassName(),
+            'modelClassNameFq' => $this->getStubObjectBuilder()->getFullyQualifiedClassName(),
         ]);
 
         $this->applyBehaviorModifier('addObjectCollectionMethods', $script);
@@ -235,7 +226,7 @@ class ObjectCollectionBuilder extends AbstractOMBuilder
             return $collectionClassNameFq;
         }
 
-        $modelClassName = $this->codeBuilderStore->getStubObjectBuilder()->getFullyQualifiedClassName();
+        $modelClassName = $this->getStubObjectBuilder()->getFullyQualifiedClassName();
 
         return '\\' . ObjectCollection::class . "<$modelClassName>";
     }
@@ -248,7 +239,7 @@ class ObjectCollectionBuilder extends AbstractOMBuilder
     public function resolveTableCollectionClassNameFq(?Table $table = null): string
     {
         $table ??= $this->getTable();
-        $collectionBuilder = $table === $this->getTable() ? $this : $this->builderFactory->createObjectCollectionBuilder($table);
+        $collectionBuilder = $table === $this->getTable() ? $this : $this->getObjectCollectionBuilder($table);
 
         /** @var class-string $fqcn */
         $fqcn = $collectionBuilder->skip()
@@ -270,7 +261,8 @@ class ObjectCollectionBuilder extends AbstractOMBuilder
             return $className;
         }
 
-        $modelClassName = $this->referencedClasses->resolveClassNameForTable(GeneratorConfig::KEY_OBJECT_STUB, $table ?? $this->getTable());
+        $builder = $this->generatorConfig->loadConfiguredBuilder($table ?? $this->getTable(), BuilderType::ObjectStub);
+        $modelClassName = $this->referencedClasses->getInternalNameOfBuilderResultClass($builder);
 
         return '\\' . ObjectCollection::class . "<$modelClassName>";
     }
