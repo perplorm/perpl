@@ -151,8 +151,6 @@ class ColumnCodeProducer extends AbstractSubsectionCodeProducer
     }
 
     /**
-     * Build statement used in Model::hydrate()
-     *
      * @see ObjectBuilder::addBuildCriteriaBody()}
      * @see ObjectBuilder::addDoInsertBodyRaw()}
      *

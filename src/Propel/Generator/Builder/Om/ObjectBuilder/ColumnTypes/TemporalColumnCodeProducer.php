@@ -131,6 +131,22 @@ class TemporalColumnCodeProducer extends AbstractDeserializableColumnCodeProduce
     }
 
     /**
+     * @see ObjectBuilder::addBuildCriteriaBody()}
+     * @see ObjectBuilder::addDoInsertBodyRaw()}
+     *
+     * @return string
+     */
+    #[\Override()]
+    public function getAccessValueStatement(): string
+    {
+        $stringAttribute = $this->getAttributeName();
+        $objectAttribute = $this->getDeserializedAttributeName();
+        $format = $this->getPlatform()->getTemporalFormatter($this->column);
+
+        return "{$objectAttribute}?->format('$format') ?? $stringAttribute"; // repeats old Propel behavior, changes to DateTime object propagate
+    }
+
+    /**
      * Build statement to check if current value is the default value.
      *
      * @see ObjectBuilder::addHasOnlyDefaultValuesBody()
