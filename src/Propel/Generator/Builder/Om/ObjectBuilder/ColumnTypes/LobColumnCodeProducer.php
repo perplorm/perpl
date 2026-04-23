@@ -42,11 +42,7 @@ class LobColumnCodeProducer extends ColumnCodeProducer
         $columnConstant = $this->builder->getColumnConstant($this->column);
 
         $script .= "
-        // Because BLOB columns are streams in PDO we have to assume that they are
-        // always modified when a new value is passed in.  For example, the contents
-        // of the stream itself may have changed externally.
         $serializedAttribute = \$this->writeResource(\$v);
-
         \$this->modifiedColumns[$columnConstant] = true;\n";
     }
 }

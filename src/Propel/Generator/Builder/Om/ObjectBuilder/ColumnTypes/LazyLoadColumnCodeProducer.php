@@ -365,13 +365,8 @@ class LazyLoadColumnCodeProducer extends ColumnCodeProducer
     #[\Override]
     protected function addMutatorBody(string &$script): void
     {
-        $cfc = $this->column->getPhpName();
         $isLoadedAttribute = $this->getIsLoadedAttributeName();
         $script .= "
-        // explicitly set the is-loaded flag to true for this lazy load col;
-        // it doesn't matter if the value is actually set or not (logic below) as
-        // any attempt to set the value means that no db lookup should be performed
-        // when the get$cfc() method is called.
         $isLoadedAttribute = true;\n";
 
         $this->columnCodeProducer->addMutatorBody($script);

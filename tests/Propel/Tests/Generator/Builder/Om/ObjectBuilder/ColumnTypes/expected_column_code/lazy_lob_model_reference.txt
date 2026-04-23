@@ -78,17 +78,9 @@ addMutator():
      */
     public function setLazyLoadedBlobColumn($v)
     {
-        // explicitly set the is-loaded flag to true for this lazy load col;
-        // it doesn't matter if the value is actually set or not (logic below) as
-        // any attempt to set the value means that no db lookup should be performed
-        // when the getLazyLoadedBlobColumn() method is called.
         $this->lazy_loaded_blob_column_is_loaded = true;
 
-        // Because BLOB columns are streams in PDO we have to assume that they are
-        // always modified when a new value is passed in.  For example, the contents
-        // of the stream itself may have changed externally.
         $this->lazy_loaded_blob_column = $this->writeResource($v);
-
         $this->modifiedColumns[TableTableMap::COL_LAZY_LOADED_BLOB_COLUMN] = true;
 
         return $this;
