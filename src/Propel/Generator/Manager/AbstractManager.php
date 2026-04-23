@@ -12,6 +12,7 @@ use Propel\Generator\Builder\Util\SchemaReader;
 use Propel\Generator\Config\AbstractGeneratorConfig;
 use Propel\Generator\Exception\BuildException;
 use Propel\Generator\Exception\EngineException;
+use Propel\Generator\Exception\SchemaException;
 use Propel\Generator\Model\Database;
 use Propel\Generator\Model\Schema;
 use Propel\Generator\Platform\PlatformInterface;
@@ -26,11 +27,15 @@ use function file;
 use function in_array;
 use function is_readable;
 use function realpath;
+use function restore_error_handler;
+use function set_error_handler;
 use function sprintf;
+use function str_starts_with;
 use function strpos;
 use function substr;
 use function trim;
 use const DIRECTORY_SEPARATOR;
+use const E_WARNING;
 
 /**
  * An abstract base Propel manager to perform work related to the XML schema
@@ -309,6 +314,7 @@ abstract class AbstractManager
      */
     protected function loadDataModels(): void
     {
+        /** @var list<\Propel\Generator\Model\Schema> $schemas */
         $schemas = [];
         $totalNbTables = 0;
         $dataModelFiles = $this->getSchemas();
@@ -316,12 +322,12 @@ abstract class AbstractManager
 
         foreach ($dataModelFiles as $schemaFile) {
             $schema = $this->processSchemaFile($schemaFile, $defaultPlatform);
-            if (!$schema) {
+            if (!$schema || !$schema->getDatabases(false)) {
                 continue;
             }
             $schemas[] = $schema;
 
-            $nbTables = $schema->getDatabase(null, false)->countTables();
+            $nbTables = $schema->getDatabase(null, false)?->countTables() ?? 0;
             $totalNbTables += $nbTables;
             $this->log("  $nbTables tables processed successfully in {$schemaFile->getPathname()}");
         }
@@ -338,16 +344,14 @@ abstract class AbstractManager
         }
 
         if (count($schemas) > 1 && $this->getGeneratorConfig()->getConfigProperty('generator.packageObjectModel')) {
-            $schema = $this->joinDataModels($schemas);
-            $this->dataModels = [$schema];
-        } else {
-            $this->dataModels = $schemas;
+            $schemas = [$this->joinDataModels($schemas)];
         }
 
-        foreach ($this->dataModels as &$schema) {
+        foreach ($schemas as &$schema) {
             $schema->doFinalInitialization();
         }
 
+        $this->dataModels = $schemas;
         $this->dataModelsLoaded = true;
     }
 
@@ -364,20 +368,19 @@ abstract class AbstractManager
         $dmFilename = $schemaFile->getPathname();
         $this->log('Processing: ' . $schemaFile->getFilename());
 
-        $dom = new DOMDocument('1.0', 'UTF-8');
-        $dom->load($dmFilename);
+        $dom = $this->loadSchemaDomDocument($dmFilename);
 
         $this->includeExternalSchemas($dom, $schemaFile->getPath());
 
         // normalize/transform XML document using XSLT
         if ($this->getGeneratorConfig()->getConfigProperty('generator.schema.transform') && $this->xsl) {
-            $this->log('Transforming ' . $dmFilename . ' using stylesheet ' . $this->xsl->getPath());
+            $this->log("Transforming  $dmFilename  using stylesheet " . $this->xsl->getPath());
             $this->applyXlsTransformation($dom);
         }
 
         // validate the XML document using XSD schema
         if ($this->validate && $this->xsd) {
-            $this->log('  Validating XML using schema ' . $this->xsd);
+            $this->log("  Validating XML using schema $this->xsd");
 
             if (!$dom->schemaValidate($this->xsd)) {
                 throw new EngineException("XML schema file ($dmFilename) does not validate. See warnings above for reasons validation failed (make sure error_reporting is set to show E_WARNING if you don't see any).");
@@ -390,6 +393,32 @@ abstract class AbstractManager
         $schema?->setName($dmFilename);
 
         return $schema;
+    }
+
+    /**
+     * @param string $schemaFileName
+     *
+     * @return \DOMDocument
+     */
+    protected function loadSchemaDomDocument(string $schemaFileName): DOMDocument
+    {
+        $errorHandler = function ($errno, $errstr, $errfile, $errline): bool {
+            if ($errno === E_WARNING && str_starts_with($errstr, 'DOMDocument::load()')) {
+                throw new SchemaException("Error parsing schema file: $errstr");
+            }
+
+            return false; // fallback to default error handler
+        };
+        set_error_handler($errorHandler);
+
+        $dom = new DOMDocument('1.0', 'UTF-8');
+        try {
+            $dom->load($schemaFileName);
+        } finally {
+            restore_error_handler();
+        }
+
+        return $dom;
     }
 
     /**
@@ -444,7 +473,7 @@ abstract class AbstractManager
         while ($externalSchema = $externalSchemaNodes->item(0)) {
             $filePath = $externalSchema->getAttribute('filename');
             $referenceOnly = $externalSchema->getAttribute('referenceOnly');
-            $this->log('Processing external schema: ' . $filePath);
+            $this->log("Processing external schema: $filePath");
 
             $externalSchema->parentNode->removeChild($externalSchema);
 
@@ -486,10 +515,10 @@ abstract class AbstractManager
      */
     protected function joinDataModels(array $schemas): Schema
     {
-        $mainSchema = array_shift($schemas);
-        if (!$mainSchema) {
+        if (!$schemas) {
             throw new LogicException('Cannot join data models of empty schemas');
         }
+        $mainSchema = array_shift($schemas);
         $mainSchema->joinSchemas($schemas);
 
         return $mainSchema;

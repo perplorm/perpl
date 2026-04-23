@@ -8,6 +8,8 @@ use Propel\Generator\Config\AbstractGeneratorConfig;
 use Propel\Generator\Exception\EngineException;
 use Propel\Generator\Platform\PlatformInterface;
 use Propel\Generator\Schema\Dumper\XmlDumper;
+use function array_any;
+use function array_find;
 use function count;
 use function sprintf;
 use function str_replace;
@@ -20,41 +22,24 @@ class Schema
     /**
      * @var array<\Propel\Generator\Model\Database>
      */
-    private $databases;
+    private array $databases = [];
+
+    private PlatformInterface|null $platform = null;
+
+    private string $name;
+
+    private bool $isInitialized = false;
+
+    protected AbstractGeneratorConfig|null $generatorConfig = null;
 
     /**
-     * @var \Propel\Generator\Platform\PlatformInterface
-     */
-    private $platform;
-
-    /**
-     * @var string
-     */
-    private $name;
-
-    /**
-     * @var bool
-     */
-    private $isInitialized;
-
-    /**
-     * @var \Propel\Generator\Config\AbstractGeneratorConfig
-     */
-    protected $generatorConfig;
-
-    /**
-     * Creates a new instance for the specified database type.
-     *
      * @param \Propel\Generator\Platform\PlatformInterface|null $platform
      */
     public function __construct(?PlatformInterface $platform = null)
     {
-        if ($platform !== null) {
+        if ($platform) {
             $this->setPlatform($platform);
         }
-
-        $this->isInitialized = false;
-        $this->databases = [];
     }
 
     /**
@@ -74,9 +59,9 @@ class Schema
      * Returns the platform object to use for any databases added to this
      * application schema.
      *
-     * @return \Propel\Generator\Platform\PlatformInterface
+     * @return \Propel\Generator\Platform\PlatformInterface|null
      */
-    public function getPlatform(): PlatformInterface
+    public function getPlatform(): PlatformInterface|null
     {
         return $this->platform;
     }
@@ -183,18 +168,10 @@ class Schema
         }
 
         if ($name === null) {
-            return $this->databases[0];
+            return $this->databases[0] ?? null;
         }
 
-        foreach ($this->databases as $database) {
-            if ($database->getName() !== $name) {
-                continue;
-            }
-
-            return $database;
-        }
-
-        return null;
+        return array_find($this->databases, fn (Database $db) => $db->getName() === $name);
     }
 
     /**
@@ -207,13 +184,7 @@ class Schema
      */
     public function hasDatabase(string $name): bool
     {
-        foreach ($this->databases as $database) {
-            if ($database->getName() === $name) {
-                return true;
-            }
-        }
-
-        return false;
+        return array_any($this->databases, fn (Database $db) => $db->getName() === $name);
     }
 
     /**
@@ -280,29 +251,31 @@ class Schema
         foreach ($schemas as $schema) {
             foreach ($schema->getDatabases(false) as $addDb) {
                 $addDbName = $addDb->getName();
-                if ($this->hasDatabase($addDbName)) {
-                    $db = $this->getDatabase($addDbName, false);
-                    // temporarily reset database namespace to avoid double namespace decoration (see ticket #1355)
-                    $namespace = $db->getNamespace();
-                    $db->setNamespace('');
-                    // join tables
-                    foreach ($addDb->getTables() as $addTable) {
-                        if ($db->getTable($addTable->getName())) {
-                            throw new EngineException(sprintf('Duplicate table found: %s.', $addTable->getName()));
-                        }
-                        $db->addTable($addTable);
-                    }
-                    // join database behaviors
-                    foreach ($addDb->getBehaviors() as $addBehavior) {
-                        if (!$db->hasBehavior($addBehavior->getId())) {
-                            $db->addBehavior($addBehavior);
-                        }
-                    }
-                    // restore the database namespace
-                    $db->setNamespace($namespace);
-                } else {
+                if (!$this->hasDatabase($addDbName)) {
                     $this->addDatabase($addDb);
+
+                    continue;
                 }
+
+                $db = $this->getDatabase($addDbName, false);
+                // temporarily reset database namespace to avoid double namespace decoration (see ticket #1355)
+                $namespace = $db->getNamespace();
+                $db->setNamespace('');
+                // join tables
+                foreach ($addDb->getTables() as $addTable) {
+                    if ($db->getTable($addTable->getName())) {
+                        throw new EngineException(sprintf('Duplicate table found: %s.', $addTable->getName()));
+                    }
+                    $db->addTable($addTable);
+                }
+                // join database behaviors
+                foreach ($addDb->getBehaviors() as $addBehavior) {
+                    if (!$db->hasBehavior($addBehavior->getId())) {
+                        $db->addBehavior($addBehavior);
+                    }
+                }
+                // restore the database namespace
+                $db->setNamespace($namespace);
             }
         }
     }

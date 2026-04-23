@@ -10,26 +10,12 @@ namespace Propel\Tests\Generator\Command;
 
 use Propel\Generator\Command\AbstractCommand;
 use Propel\Tests\TestCase;
-use Symfony\Component\Console\Application;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Tester\CommandTester;
 
 /**
  * @author William Durand <william.durand1@gmail.com>
  */
 class AbstractCommandTest extends TestCase
 {
-    protected TestableAbstractCommand $command;
-
-    /**
-     * @return void
-     */
-    public function setUp(): void
-    {
-        $this->command = new TestableAbstractCommand();
-    }
-
     /**
      * @return void
      */
@@ -39,14 +25,10 @@ class AbstractCommandTest extends TestCase
         $password = 'H7{“Qj1n>\%28=;P';
         $connectionName = 'bookstore';
         $dsn = 'mysql:host=127.0.0.1;dbname=test';
-        $connection = sprintf(
-            '%s=%s;user=%s;password=%s',
-            $connectionName,
-            $dsn,
-            $user,
-            urlencode($password)
-        );
-        $result = $this->command->parseConnection($connection);
+        $connection = "$connectionName=$dsn;user=$user;password=" . urlencode($password);
+
+        $command = new class extends AbstractCommand{};
+        $result = $this->callMethod($command, 'parseConnection', [$connection]);
 
         $this->assertCount(3, $result);
         $this->assertEquals($connectionName, $result[0]);
@@ -66,12 +48,10 @@ class AbstractCommandTest extends TestCase
     {
         $connectionName = 'bookstore';
         $dsn = 'sqlite:/tmp/test.sq3';
-        $connection = sprintf(
-            '%s=%s',
-            $connectionName,
-            $dsn
-        );
-        $result = $this->command->parseConnection($connection);
+        $connection = "$connectionName=$dsn";
+
+        $command = new class extends AbstractCommand{};
+        $result = $this->callMethod($command, 'parseConnection', [$connection]);
 
         $this->assertCount(3, $result);
         $this->assertEquals($connectionName, $result[0]);
@@ -87,55 +67,13 @@ class AbstractCommandTest extends TestCase
      */
     public function testRecursiveSearch(): void
     {
-        $app = new Application();
-        $app->addCommands([$this->command]);
+        $command = new class extends AbstractCommand{};
+        $schemaDir = realpath(__DIR__ . '/util/recursive-schema');
 
-        $tester = new CommandTester($app->find('testable-command'));
+        $filesInRecursiveSearch = $this->callMethod($command, 'findSchemasInDirectory', [$schemaDir, true]);
+        $this->assertCount(3, $filesInRecursiveSearch);
 
-        $tester->execute(
-            [
-                'command' => 'testable-command',
-                '--config-dir' => realpath(__DIR__ . '/../../../../Fixtures/recursive'),
-                '--recursive' => true,
-            ]
-        );
-
-        $this->assertEquals('3', $tester->getDisplay());
-
-        $tester->execute(
-            [
-                'command' => 'testable-command',
-                '--config-dir' => realpath(__DIR__ . '/../../../../Fixtures/recursive'),
-                '--recursive' => false,
-            ]
-        );
-
-        $this->assertEquals('1', $tester->getDisplay());
-    }
-}
-
-class TestableAbstractCommand extends AbstractCommand
-{
-    /**
-     * @return void
-     */
-    protected function configure(): void
-    {
-        parent::configure();
-        $this->setName('testable-command');
-    }
-
-    public function parseConnection($connection): array
-    {
-        return parent::parseConnection($connection);
-    }
-
-    protected function execute(InputInterface $input, OutputInterface $output): int
-    {
-        $result = $this->findSchemasInDirectory($input->getOption('config-dir'), $input->getOption('recursive'));
-
-        $output->write(count($result));
-
-        return 0;
+        $filesInFlatSearch = $this->callMethod($command, 'findSchemasInDirectory', [$schemaDir, false]);
+        $this->assertCount(1, $filesInFlatSearch);
     }
 }

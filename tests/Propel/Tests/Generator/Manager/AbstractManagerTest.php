@@ -10,6 +10,7 @@ namespace Propel\Tests\Generator\Manager;
 
 use DOMDocument;
 use Propel\Generator\Exception\BuildException;
+use Propel\Generator\Exception\SchemaException;
 use Propel\Generator\Manager\AbstractManager;
 use Propel\Tests\TestCase;
 
@@ -33,7 +34,7 @@ class AbstractManagerTest extends TestCase
     public function testIncludeExternalSchemaWithRelativePathTo()
     {
         // include book.schema.xml, which includes external author schema
-        $schemaXml = <<< EOT
+        $schemaXml = <<<EOT
 <?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
 <database package="core.book" name="bookstore" defaultIdMethod="native" namespace="Propel\Tests\Bookstore">
   <external-schema filename="../../Resources/external-schemas/book.schema.xml" referenceOnly="true"/>
@@ -64,7 +65,7 @@ EOT;
     public function testIncludeExternalSchemaThrowsExceptionForMissingFiles()
     {
         // include book.schema.xml, which includes external author schema
-        $schemaXml = <<< EOT
+        $schemaXml = <<<EOT
 <?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
 <database package="core.book" name="bookstore" defaultIdMethod="native" namespace="Propel\Tests\Bookstore">
   <external-schema filename="../ThisFileNameDoesNotExistBababuiBababui/book.schema.xml" referenceOnly="true"/>
@@ -76,6 +77,26 @@ EOT;
         $dom->loadXML($schemaXml);
         $this->expectException(BuildException::class);
         $this->manager->callIncludeExternalSchemas($dom, __DIR__);
+    }
+
+    public function testSchemaFileParseException(): void
+    {
+        // newlines before xml declaration is prohibited
+        $invalidSchemaXml = <<<EOT
+
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+EOT;
+        $schemaFile = tmpfile();
+        try {
+            fwrite($schemaFile, $invalidSchemaXml);
+            $schemaFilePathName = stream_get_meta_data($schemaFile)['uri'];
+
+            $this->expectException(SchemaException::class);
+            $this->expectExceptionMessage('Error parsing schema file: DOMDocument::load(): XML declaration allowed only at the start of the document in ');
+            $this->callMethod($this->manager, 'loadSchemaDomDocument', [$schemaFilePathName]);
+        } finally {
+            fclose($schemaFile); // this removes the file
+        }
     }
 }
 
