@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - 'main'
-      - 'develop'
   pull_request:
     paths-ignore:
       - '**.md'
@@ -97,7 +96,7 @@ jobs:
               if: success() && matrix.php-version == '8.1' && matrix.symfony-version == '6-max'
               uses: codecov/codecov-action@v6
               with:
-                  flags: ${{ matrix.php-version }}, ${{ matrix.db-type }}, ${{ matrix.symfony-version }}
+                  flags: ${{ matrix.db-type }}-php${{ matrix.php-version }}-symfony${{ matrix.symfony-version }}
                   files: tests/coverage.xml
 
     static-analysis:
