@@ -40,20 +40,16 @@ jobs:
                     php-version: '8.1'
         services:
             postgres:
-                image: ${{ matrix.db-type != 'pgsql' && '' || (matrix.php-version == '8.1' && 'postgres:9' || 'postgres:latest') }}
+                image: ${{ matrix.db-type == 'pgsql' && (matrix.php-version == '8.1' && 'postgres:9' || 'postgres:latest') || '' }}
                 env:
                     POSTGRES_DB: ${{ env.DB_NAME }}
                     POSTGRES_USER: ${{ env.DB_USER }}
                     POSTGRES_PASSWORD: ${{ env.DB_PW }}
                 ports:
                     - 5432:5432
-                options: >-
-                    --health-cmd pg_isready
-                    --health-interval 10s
-                    --health-timeout 5s
-                    --health-retries 5
+
             mysql:
-                image: ${{ matrix.db-type != 'mysql' && '' || (matrix.php-version == '8.1' && 'mariadb:10.2' || 'mysql:latest') }}
+                image: ${{ matrix.db-type == 'mysql' && (matrix.php-version == '8.1' && 'mariadb:10.2' || 'mysql:latest') || '' }}
                 env:
                     MYSQL_ROOT_PASSWORD: ${{ env.DB_PW }}
                     MYSQL_DATABASE: ${{ env.DB_NAME }}
@@ -61,11 +57,6 @@ jobs:
                     MYSQL_PASSWORD: ${{ env.DB_PW }}
                 ports:
                     - 3306:3306
-                options: >-
-                    --health-cmd="mysqladmin ping"
-                    --health-interval=10s
-                    --health-timeout=5s
-                    --health-retries=3
 
         steps:
             - uses: actions/checkout@v5
