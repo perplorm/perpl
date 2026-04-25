@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace Propel\Runtime\Adapter;
 
+use DateTimeInterface;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Map\ColumnMap;
@@ -171,12 +172,12 @@ interface AdapterInterface
     /**
      * Formats a temporal value before binding, given a ColumnMap object
      *
-     * @param mixed $value The temporal value
+     * @param \DateTimeInterface|string|int|null $value The temporal value
      * @param \Propel\Runtime\Map\ColumnMap $cMap
      *
-     * @return string The formatted temporal value
+     * @return string|null The formatted temporal value
      */
-    public function formatTemporalValue($value, ColumnMap $cMap): string;
+    public function formatTemporalValue(DateTimeInterface|string|int|null $value, ColumnMap $cMap): string|null;
 
     /**
      * Returns timestamp formatter string for use in date() function.

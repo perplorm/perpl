@@ -4,7 +4,7 @@ Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes\BoolColumnCodeProducer
 addColumnAttributes():
 
     /**
-     * The value for the bool_column field.
+     * Value of [bool_column] field.
      *
      * Note: this column has a database default value of: true
      */
@@ -74,3 +74,10 @@ getApplyDefaultValueStatement:
 
 buildCreateFromFilterValueExpression:
 $value
+
+getHydrateStatement:
+
+            $this->bool_column = $value !== null ? (bool)$value : null;
+
+getAccessValueStatement:
+$this->bool_column

@@ -4,7 +4,7 @@ Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes\ColumnCodeProducer
 addColumnAttributes():
 
     /**
-     * The value for the uuid_column field.
+     * Value of [uuid_column] field.
      */
     protected string|null $uuid_column = null;
 
@@ -55,3 +55,13 @@ getApplyDefaultValueStatement:
 
 buildCreateFromFilterValueExpression:
 $value
+
+getHydrateStatement:
+
+            if (is_resource($value)) {
+                $value = stream_get_contents($value);
+            }
+            $this->uuid_column = UuidConverter::binToUuid($value, true);
+
+getAccessValueStatement:
+UuidConverter::uuidToBin($this->uuid_column, true)

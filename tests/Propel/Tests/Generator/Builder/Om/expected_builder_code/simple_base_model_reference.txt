@@ -75,7 +75,7 @@ abstract class IdTable implements ActiveRecordInterface
     protected array $virtualColumns = [];
 
     /**
-     * The value for the id field.
+     * Value of [id] field.
      */
     protected int|null $id = null;
 
@@ -396,8 +396,8 @@ abstract class IdTable implements ActiveRecordInterface
             $useNumericIndex = $indexType === TableMap::TYPE_NUM;
 
             $rowIndex = $useNumericIndex ? $startcol + 0 : IdTableTableMap::translateFieldName('Id', TableMap::TYPE_PHPNAME, $indexType);
-            $columnValue = $row[$rowIndex];
-            $this->id = $columnValue !== null ? (int)$columnValue : null;
+            $idValue = $row[$rowIndex];
+            $this->id = $idValue !== null ? (int)$idValue : null;
 
             $this->resetModified();
             $this->setNew(false);
@@ -459,9 +459,9 @@ abstract class IdTable implements ActiveRecordInterface
         if (!$row || $row === true) {
             throw new PropelException('Cannot find matching row in the database to reload object values.');
         }
-        $this->hydrate($row, 0, true, $dataFetcher->getIndexType()); // rehydrate
+        $this->hydrate($row, 0, true, $dataFetcher->getIndexType());
 
-        if ($deep) { // also de-associate any related objects?
+        if ($deep) {
         }
     }
 
@@ -733,8 +733,8 @@ abstract class IdTable implements ActiveRecordInterface
         $result = [
             $keys[0] => $this->getId(),
         ];
-        $virtualColumns = $this->virtualColumns;
-        foreach ($virtualColumns as $key => $virtualColumn) {
+
+        foreach ($this->virtualColumns as $key => $virtualColumn) {
             $result[$key] = $virtualColumn;
         }
 

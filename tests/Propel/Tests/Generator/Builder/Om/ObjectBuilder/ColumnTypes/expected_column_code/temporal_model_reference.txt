@@ -4,32 +4,42 @@ Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes\TemporalColumnCodeProducer
 addColumnAttributes():
 
     /**
-     * The value for the temporal_column field.
+     * Value of [temporal_column] field.
      *
      * Note: this column has a database default value of: '2026-03-19 01:09:00'
      */
-    protected DateTimeInterface|null $temporal_column = null;
+    protected string|null $temporal_column = null;
+
+    /**
+     * Deserialized value of [temporal_column] field.
+     */
+    protected DateTimeInterface|null $temporal_column_date_object = null;
 
 
 addAccessor():
 
     /**
-     * Get the [optionally formatted] temporal [temporal_column] column value.
+     * Get the temporal [temporal_column] column value.
      *
      * @psalm-return ($format is null ? \DateTime|\DateTimeInterface|null : string|null)
      *
-     * @param string|null $format The date/time format string (either date()-style or strftime()-style).
-     *   If format is NULL, then the raw \DateTime object will be returned.
+     * @param string|null $format Datetime format string. If null, the method returns a \DateTime object.
+     *                      For efficiency, storage format 'Y-m-d H:i:s' is returned without internal transformation.
      *
-     * @return \DateTime|\DateTimeInterface|string|null Formatted date/time value as string or \DateTime object (if format is NULL), NULL if column is NULL, and 0 if column value is 0000-00-00 00:00:00.
+     * @return \DateTime|\DateTimeInterface|string|null Formatted date/time value as string or \DateTime
+     *                  object (if format is null), null if column is null, and 0 if column value is 0000-00-00 00:00:00.
      */
     public function getTemporalColumn($format = null)
     {
-        if ($format === null) {
+        if ($format === 'Y-m-d H:i:s') {
             return $this->temporal_column;
-        } else {
-            return $this->temporal_column instanceof DateTimeInterface ? $this->temporal_column->format($format) : null;
         }
+
+        if (!$this->temporal_column_date_object && $this->temporal_column) {
+            $this->temporal_column_date_object = PropelDateTime::newInstance($this->temporal_column, null, '\DateTime');
+        }
+
+        return $format !== null ? $this->temporal_column_date_object?->format($format) : $this->temporal_column_date_object;
     }
 
 
@@ -38,23 +48,19 @@ addMutator():
     /**
      * Sets the value of [temporal_column] column to a normalized version of the date/time value specified.
      *
-     * @param \DateTimeInterface|string|int|null $v string, integer (timestamp), or \DateTimeInterface value.
-     *               Empty strings are treated as NULL.
+     * @param \DateTimeInterface|string|int|null $v Empty strings are treated as null.
      *
      * @return $this
      */
     public function setTemporalColumn($v)
     {
-        $dt = PropelDateTime::newInstance($v, null, '\DateTime');
-        if ($this->temporal_column !== null || $dt !== null) {
-            if (
-                $dt !== $this->temporal_column // normalized values don't match
-                || $dt->format('Y-m-d H:i:s') === '2026-03-19 01:09:00' // or the entered value matches the default
-            ) {
-                $this->temporal_column = $dt === null ? null : clone $dt;
-                $this->modifiedColumns[TableTableMap::COL_TEMPORAL_COLUMN] = true;
-            }
-        } // if either are not null
+        $newDateObject = $v instanceof DateTimeInterface ? $v : PropelDateTime::newInstance($v, null, '\DateTime');
+        $newDateString = $newDateObject?->format('Y-m-d H:i:s');
+        if ($this->temporal_column !== $newDateString || $newDateString === '2026-03-19 01:09:00') {
+            $this->temporal_column_date_object = $newDateObject;
+            $this->temporal_column = $newDateString;
+            $this->modifiedColumns[TableTableMap::COL_TEMPORAL_COLUMN] = true;
+        }
 
         return $this;
     }
@@ -65,7 +71,16 @@ getDefaultValueString:
 
 getApplyDefaultValueStatement:
 
-        $this->temporal_column = PropelDateTime::newInstance('2026-03-19 01:09:00', null, '\DateTime');
+        $this->temporal_column_date_object = $this->temporal_column === '2026-03-19 01:09:00' ? $this->temporal_column_date_object : null;
+        $this->temporal_column = '2026-03-19 01:09:00';
 
 buildCreateFromFilterValueExpression:
 $value
+
+getHydrateStatement:
+
+            $this->temporal_column_date_object = null;
+            $this->temporal_column = $value === '0000-00-00 00:00:00' ? null : $value;
+
+getAccessValueStatement:
+$this->temporal_column_date_object?->format('Y-m-d H:i:s') ?? $this->temporal_column

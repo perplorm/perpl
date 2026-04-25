@@ -4,11 +4,13 @@ Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes\SetBinaryColumnCodeProduce
 addColumnAttributes():
 
     /**
-     * The value for the bin_set_column field.
+     * Value of [bin_set_column] field.
      */
     protected int|null $bin_set_column = null;
 
     /**
+     * Deserialized value of [bin_set_column] field.
+     *
      * @var array<string>|null
      */
     protected array|null $bin_set_column_converted = null;
@@ -81,3 +83,11 @@ getApplyDefaultValueStatement:
 
 buildCreateFromFilterValueExpression:
 SetColumnConverter::convertBitmaskToArray($value, TableTableMap::getValueSet(TableTableMap::COL_BIN_SET_COLUMN))
+
+getHydrateStatement:
+
+            $this->bin_set_column = $value;
+            $this->bin_set_column_converted = null;
+
+getAccessValueStatement:
+$this->bin_set_column

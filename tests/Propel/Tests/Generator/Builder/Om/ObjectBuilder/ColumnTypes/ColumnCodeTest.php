@@ -6,6 +6,7 @@ namespace Propel\Tests\Generator\Builder\Om\ObjectBuilder\ColumnTypes;
 
 use Propel\Generator\Builder\Om\AbstractOMBuilder;
 use Propel\Generator\Builder\Om\BuilderType;
+use Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes\ColumnCodeProducer;
 use Propel\Generator\Config\QuickGeneratorConfig;
 use Propel\Generator\Model\Column;
 use Propel\Generator\Platform\MysqlPlatform;
@@ -15,7 +16,7 @@ use Propel\Tests\CompareGeneratedCodeTestCase;
 
 class ColumnCodeTest extends CompareGeneratedCodeTestCase
 {
- /**
+    /**
      * @return array<array>
      */
     #[ComparesGeneratedFile(textBuilder: 'buildObjectClassCode')]
@@ -33,11 +34,13 @@ class ColumnCodeTest extends CompareGeneratedCodeTestCase
             [['<column name="object_column" type="OBJECT"/>', null, null], __DIR__ . '/expected_column_code/object_model_reference.txt'],
             [['<column name="json_column" type="JSON"/>', null, null], __DIR__ . '/expected_column_code/json_model_reference.txt'],
             [['<column name="blob_column" type="BLOB"/>', null, null], __DIR__ . '/expected_column_code/lob_model_reference.txt'],
-            [['<column name="uuid_column" type="uuid"/>', null, null], __DIR__ . '/expected_column_code/uuid_model_reference.txt'],
+            [['<column name="uuid_column" type="UUID"/>', null, null], __DIR__ . '/expected_column_code/uuid_model_reference.txt'],
+            [['<column name="uuid_binary_column" type="UUID_BINARY"/>', null, null], __DIR__ . '/expected_column_code/uuid_binary_model_reference.txt'],
             [['<column name="bin_enum_column" type="ENUM_BINARY" valueSet="foo,bar"/>', null, null], __DIR__ . '/expected_column_code/enum_binary_model_reference.txt'],
             [['<column name="bin_set_column" type="SET_BINARY" valueSet="foo,bar"/>', null, null], __DIR__ . '/expected_column_code/set_binary_model_reference.txt'],
             [['<column name="native_enum_column" type="ENUM_NATIVE" valueSet="foo,bar"/>', null, $mysqlPlatform], __DIR__ . '/expected_column_code/enum_native_model_reference.txt'],
             [['<column name="native_set_column" type="SET_NATIVE" valueSet="foo,bar"/>', null, $mysqlPlatform], __DIR__ . '/expected_column_code/set_native_model_reference.txt'],
+            [['<column name="lazy_loaded_blob_column" type="BLOB" lazyLoad="true"/>', null, null], __DIR__ . '/expected_column_code/lazy_lob_model_reference.txt'],
         ];
     }
 
@@ -50,10 +53,7 @@ class ColumnCodeTest extends CompareGeneratedCodeTestCase
      */
     public function buildObjectClassCode(string $columnXml, array|null $config, PlatformInterface|null $platform): string
     {
-        /** @var \Propel\Generator\Builder\Om\ObjectBuilder $builder */
-        $builder = $this->buildCodeBuilder($columnXml, BuilderType::ObjectBase, $config, $platform);
-        /** @var \Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes\ColumnCodeProducer $builder */
-        $codeProducer = $this->getObjectPropertyValue($builder, 'columnCodeProducers')[0];
+        $codeProducer = $this->buildCodeProducer($columnXml, $config, $platform);
 
         $script = $this->generateCodeFileContentScript($codeProducer, [
             'addColumnAttributes',
@@ -62,7 +62,10 @@ class ColumnCodeTest extends CompareGeneratedCodeTestCase
         ])
         . $this->buildCodeFileContent('getDefaultValueString', $codeProducer->getDefaultValueString())
         . $this->buildCodeFileContent('getApplyDefaultValueStatement', $codeProducer->getApplyDefaultValueStatement())
-        . $this->buildCodeFileContent('buildCreateFromFilterValueExpression', $codeProducer->buildCreateFromFilterValueExpression('$value'));
+        . $this->buildCodeFileContent('buildCreateFromFilterValueExpression', $codeProducer->buildCreateFromFilterValueExpression('$value'))
+        . $this->buildCodeFileContent('getHydrateStatement', $this->buildWithPossibleExceptionMessage(fn () => $codeProducer->getHydrateStatement('$value'))) // throws an exception on lazy-loaded columns
+        . $this->buildCodeFileContent('getAccessValueStatement', $codeProducer->getAccessValueStatement())
+        ;
 
         return $script;
     }
@@ -151,10 +154,18 @@ class ColumnCodeTest extends CompareGeneratedCodeTestCase
         array|null $extraConfig = null,
         PlatformInterface|null $platform = null
     ): AbstractOMBuilder {
-        $column = static::buildColumnFromSchema($columnXml);
+        $column = static::buildColumnFromSchema($columnXml, $extraConfig, $platform);
         $config = new QuickGeneratorConfig($extraConfig);
 
         return $config->loadConfiguredBuilder($column->getTable(), $builderType);
+    }
+
+    public function buildCodeProducer(string $columnXml, array|null $extraConfig = null, PlatformInterface|null $platform = null): ColumnCodeProducer
+    {
+        /** @var \Propel\Generator\Builder\Om\ObjectBuilder $builder */
+        $builder = $this->buildCodeBuilder($columnXml, BuilderType::ObjectBase, $extraConfig, $platform);
+
+        return $this->getObjectPropertyValue($builder, 'columnCodeProducers')[0];
     }
 
     /**

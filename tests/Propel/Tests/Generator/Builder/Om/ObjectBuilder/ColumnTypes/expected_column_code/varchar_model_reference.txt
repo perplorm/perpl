@@ -4,7 +4,7 @@ Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes\ColumnCodeProducer
 addColumnAttributes():
 
     /**
-     * The value for the var_char_column field.
+     * Value of [var_char_column] field.
      *
      * Note: this column has a database default value of: 'Bar'
      */
@@ -57,3 +57,10 @@ getApplyDefaultValueStatement:
 
 buildCreateFromFilterValueExpression:
 $value
+
+getHydrateStatement:
+
+            $this->var_char_column = $value !== null ? (string)$value : null;
+
+getAccessValueStatement:
+$this->var_char_column

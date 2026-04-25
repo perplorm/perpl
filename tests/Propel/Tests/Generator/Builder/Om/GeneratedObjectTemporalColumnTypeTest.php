@@ -119,31 +119,47 @@ EOF;
         $this->assertEquals(date('Y-m-d H:i'), $r->getDatetimecolumn('Y-m-d H:i'));
     }
     
-    public static function persistenceDataProvider()
+    public static function AccessStorageFormatDataProvider()
     {
+        $date = '2026-03-31';
+        $time = '11:04:32.123456';
+
         return [
-            // type description, column name , input date value, formatted input date, format
-            ['Date', 'Bar1', new DateTime('1999-12-20'), '1999-12-20', 'Y-m-d'],
-            ['Time', 'Bar2', strtotime('12:55'), '12:55', 'H:i'],
-            ['Timestamp', 'Bar3', new DateTime('1999-12-20 12:55'), '1999-12-20 12:55', 'Y-m-d H:i'],
-            ['Datetime', 'Datetimecolumn', new DateTime('2022-06-28 11:55'), '2022-06-28 11:55', 'Y-m-d H:i'],
+            // type description, column name, format, date/time string, optional input value 
+            ['Date', 'Bar1','Y-m-d', $date,  null],
+            ['Time', 'Bar2', 'H:i:s.u', $time, strtotime($time)],
+            ['Timestamp', 'Bar3', 'Y-m-d H:i:s.u', "$date $time", null],
+            ['Datetime', 'Datetimecolumn', 'Y-m-d H:i:s.u', "$date $time", null],
         ];
     }
     
-    #[\PHPUnit\Framework\Attributes\DataProvider('persistenceDataProvider')]
-    public function testPersistence($typeDescription, $columnName, $inputDateValue, $formattedDate, $format)
+    #[\PHPUnit\Framework\Attributes\DataProvider('AccessStorageFormatDataProvider')]
+    public function testAccessStorageFormatWithoutObjectInstantiation(string $typeDescription, string $columnName, string $format, string $formattedDate, int|null $inputValue)
     {
         $r = new ComplexColumnTypeEntity5();
-        $r->setByName($columnName, $inputDateValue);
-        $r->save();
-        ComplexColumnTypeEntity5TableMap::clearInstancePool();
-        $r1 = ComplexColumnTypeEntity5Query::create()->findPk($r->getId());
-        
-        $storedValue = $r1->getByName($columnName);
-        $this->assertInstanceOf(DateTime::class, $storedValue, "$typeDescription column should return DateTime objects");
-        
-        $formattedReturnValue = $storedValue->format($format);
-        $this->assertEquals($formattedDate, $formattedReturnValue, "$typeDescription column: persisted value should match");
+        $r->setByName($columnName, $inputDateValue ?? new DateTime($formattedDate))->save();
+        $r->reload();
+
+        $dateObjectPropertyName = strtolower($columnName) . '_date_object';
+        $dateObjectAfterClear = $this->getObjectPropertyValue($r, $dateObjectPropertyName);
+        $this->assertNull($dateObjectAfterClear, "internal object should be null after reload()");
+
+        $getter = "get$columnName";
+        $storedValue = $r->$getter($format);
+        $this->assertSame($formattedDate, $storedValue, "should return storage date");
+
+        $dateObjectAfterGetStorageFormat = $this->getObjectPropertyValue($r, $dateObjectPropertyName);
+        $this->assertNull($dateObjectAfterGetStorageFormat, "getting storage format should not instantiate DateTime object");
+
+        $dateTimeObject = $r->$getter();
+        $this->assertInstanceOf(DateTime::class, $dateTimeObject, "should return DateTime object");
+
+        $dateObjectAfterGetObject = $this->getObjectPropertyValue($r, $dateObjectPropertyName);
+        $this->assertInstanceOf(DateTime::class, $dateObjectAfterGetObject, "should have set internal DateTime field");
+
+        $rfcDate = $r->$getter('r');
+        $expectedDate = $dateObjectAfterGetObject->format('r');
+        $this->assertSame($expectedDate, $rfcDate, "should produce DateTime format output");
     }
 
     /**

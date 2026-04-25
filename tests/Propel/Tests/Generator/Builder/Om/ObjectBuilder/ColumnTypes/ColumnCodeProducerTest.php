@@ -68,21 +68,15 @@ EOT;
     }
 
     protected const generatorConfig = [
-        'propel' => [
-            'database' => [
-                'connections' => [
-                    'foo' => [
-                        'adapter' => 'mysql',
-                        'dsn' => 'mysql:foo',
-                        'user' => 'foo',
-                        'password' => 'foo'
-                    ],
-                ],
-            ],
-            'generator' => [
-                'defaultConnection' => 'foo',
-                'connections' => ['foo'],
-            ],
-        ]
+        'propel.database.connections.foo' => [
+            'adapter' => 'mysql',
+            'dsn' => 'mysql:foo',
+            'user' => 'foo',
+            'password' => 'foo'
+        ],
+        'propel.generator' => [
+            'defaultConnection' => 'foo',
+            'connections' => ['foo'],
+        ],
     ];
 }

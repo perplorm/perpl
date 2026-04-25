@@ -11,19 +11,18 @@ namespace Propel\Tests\Generator\Platform;
 use Propel\Generator\Model\Column;
 use Propel\Generator\Model\PropelTypes;
 use Propel\Generator\Platform\DefaultPlatform;
-use Propel\Generator\Platform\PlatformInterface;
 use Propel\Tests\TestCase;
 
 class DefaultPlatformTest extends TestCase
 {
-    protected static PlatformInterface|null $platform = null;
+    protected static DefaultPlatform|null $platform = null;
 
     /**
      * Get the Platform object for this class
      *
-     * @return \Propel\Generator\Platform\PlatformInterface
+     * @return \Propel\Generator\Platform\DefaultPlatform
      */
-    protected static function getPlatform(): PlatformInterface
+    protected static function getPlatform(): DefaultPlatform
     {
         static::$platform ??= new DefaultPlatform();
         
@@ -164,11 +163,7 @@ class DefaultPlatformTest extends TestCase
     public static function getColumnBindingDataProvider(): array
     {
         return [
-            [static::createColumn(PropelTypes::DATE, '2020-02-03'), '$stmt->bindValue(ID, ACCESSOR?->format(\'Y-m-d\'), PDO::PARAM_STR);'],
-            [static::createColumn(PropelTypes::TIME, '11:01:03'), '$stmt->bindValue(ID, ACCESSOR?->format(\'H:i:s\'), PDO::PARAM_STR);'],
-            [static::createColumn(PropelTypes::TIMESTAMP, '2020-02-03 11:01:03'), '$stmt->bindValue(ID, ACCESSOR?->format(\'Y-m-d H:i:s\'), PDO::PARAM_STR);'],
-            [static::createColumn(PropelTypes::DATETIME, '2022-06-28 11:01:03'), '$stmt->bindValue(ID, ACCESSOR?->format(\'Y-m-d H:i:s\'), PDO::PARAM_STR);'],
-            [static::createColumn(PropelTypes::DATETIME, '2022-06-28 11:01:03', 6), '$stmt->bindValue(ID, ACCESSOR?->format(\'Y-m-d H:i:s.u\'), PDO::PARAM_STR);'],
+            [static::createColumn(PropelTypes::DATE, '2020-02-03'), '$stmt->bindValue(ID, ACCESSOR, PDO::PARAM_STR);'],
             [static::createColumn(PropelTypes::BLOB, 'BLOB'), '$stmt->bindValue(ID, ACCESSOR, PDO::PARAM_LOB);'],
         ];
     }

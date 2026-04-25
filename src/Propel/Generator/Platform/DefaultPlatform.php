@@ -1584,10 +1584,7 @@ ALTER TABLE %s ADD
     public function getColumnBindingPHP(Column $column, string $identifier, string $columnValueAccessor, string $tab = '            '): string
     {
         $script = '';
-        if ($column->isTemporalType()) {
-            $formatter = $this->getTemporalFormatter($column);
-            $columnValueAccessor .= "?->format('$formatter')";
-        } elseif ($column->isLobType()) {
+        if ($column->isLobType()) {
             // we always need to make sure that the stream is rewound, otherwise nothing will
             // get written to database.
             $script .= "

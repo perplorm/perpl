@@ -10,30 +10,21 @@ use Propel\Common\Util\SetColumnConverter;
 class SetBinaryColumnCodeProducer extends AbstractArrayColumnCodeProducer
 {
     /**
-     * @param string $script
+     * @see AbstractDeserializableColumnCodeProducer::DESERIALIZED_ATTRIBUTE_AFFIX
      *
-     * @return void
+     * @var string
      */
-    #[\Override]
-    public function addColumnAttributes(string &$script): void
-    {
-        $this->addDefaultColumnAttribute($script, 'int');
-        $this->addColumnAttributeConvertedDeclaration($script);
-    }
+    protected const DESERIALIZED_ATTRIBUTE_AFFIX = '_converted';
 
     /**
-     * @param string $script
+     * Get attribute types in order [database field type, deserialized type]
      *
-     * @return void
+     * @return array{string, string}
      */
-    protected function addColumnAttributeConvertedDeclaration(string &$script): void
+    #[\Override]
+    protected function getQualifiedAttributeTypes(): array
     {
-        $attributeName = '$' . $this->column->getLowercasedName() . '_converted';
-        $script .= "
-    /**
-     * @var array<string>|null
-     */
-    protected array|null $attributeName = null;\n";
+        return ['int', 'array<string>'];
     }
 
     /**
@@ -92,30 +83,29 @@ class SetBinaryColumnCodeProducer extends AbstractArrayColumnCodeProducer
     protected function addAccessorBody(string &$script): void
     {
         $this->declareClasses(
-            'Propel\Common\Util\SetColumnConverter',
-            'Propel\Common\Exception\SetColumnConverterException',
+            SetColumnConverter::class,
+            SetColumnConverterException::class,
         );
 
-        $clo = $this->column->getLowercasedName();
-        $cloConverted = $clo . '_converted';
-
+        $intAttribute = $this->getAttributeName();
+        $arrayAttribute = $this->getDeserializedAttributeName();
         $tableMapClassName = $this->getTableMapClassName();
         $columnConstantExpression = $this->builder->getColumnConstant($this->column);
 
         $script .= "
-        if (\$this->$cloConverted === null) {
-            \$this->$cloConverted = [];
+        if ($arrayAttribute === null) {
+            $arrayAttribute = [];
         }
-        if (!\$this->$cloConverted && \$this->$clo !== null) {
+        if (!$arrayAttribute && $intAttribute !== null) {
             \$valueSet = {$tableMapClassName}::getValueSet($columnConstantExpression);
             try {
-                \$this->$cloConverted = SetColumnConverter::convertBitmaskToArray(\$this->$clo, \$valueSet);
+                $arrayAttribute = SetColumnConverter::convertBitmaskToArray($intAttribute, \$valueSet);
             } catch (SetColumnConverterException \$e) {
                 throw new PropelException('Unknown stored set key: ' . \$e->getValue(), \$e->getCode(), \$e);
             }
         }
 
-        return \$this->$cloConverted;";
+        return $arrayAttribute;";
     }
 
     /**
@@ -142,13 +132,11 @@ class SetBinaryColumnCodeProducer extends AbstractArrayColumnCodeProducer
     {
         $clo = $this->column->getLowercasedName();
 
-        $orNull = $this->column->isNotNull() ? '' : '|null';
-
         $script .= "
     /**
      * Set the value of [$clo] column.{$this->getColumnDescriptionDoc()}
      *
-     * @param array{$orNull} \$v new value
+     * @param array|null \$v new value
      *
      * @throws \\Propel\\Runtime\\Exception\\PropelException
      *
@@ -172,21 +160,23 @@ class SetBinaryColumnCodeProducer extends AbstractArrayColumnCodeProducer
         );
         $this->declareGlobalFunction('array_diff', 'count', 'sprintf');
 
-        $col = $this->column;
-        $clo = $col->getLowercasedName();
-        $cloConverted = $clo . '_converted';
+        $intAttribute = $this->getAttributeName();
+        $arrayAttribute = $this->getDeserializedAttributeName();
+        $tableMapClassName = $this->getTableMapClassName();
+        $columnConstant = $this->builder->getColumnConstant($this->getColumn());
+
         $script .= "
-        if (\$this->$cloConverted === null || count(array_diff(\$this->$cloConverted, \$v)) > 0 || count(array_diff(\$v, \$this->$cloConverted)) > 0) {
-            \$valueSet = " . $this->getTableMapClassName() . '::getValueSet(' . $this->builder->getColumnConstant($col) . ");
+        if ($arrayAttribute === null || count(array_diff($arrayAttribute, \$v)) > 0 || count(array_diff(\$v, $arrayAttribute)) > 0) {
+            \$valueSet = {$tableMapClassName}::getValueSet($columnConstant);
             try {
                 \$v = SetColumnConverter::convertToBitmask(\$v, \$valueSet);
             } catch (SetColumnConverterException \$e) {
                 throw new PropelException(sprintf('Value \"%s\" is not accepted in this set column', \$e->getValue()), \$e->getCode(), \$e);
             }
-            if (\$this->$clo !== \$v) {
-                \$this->$cloConverted = null;
-                \$this->$clo = \$v;
-                \$this->modifiedColumns[" . $this->builder->getColumnConstant($col) . "] = true;
+            if ($intAttribute !== \$v) {
+                $arrayAttribute = null;
+                $intAttribute = \$v;
+                \$this->modifiedColumns[$columnConstant] = true;
             }
         }\n";
     }
@@ -201,7 +191,7 @@ class SetBinaryColumnCodeProducer extends AbstractArrayColumnCodeProducer
     #[\Override]
     public function buildCreateFromFilterValueExpression(string $valueExpression): string
     {
-        $this->declareClasses('Propel\Common\Util\SetColumnConverter');
+        $this->declareClasses(SetColumnConverter::class);
         $tableMapClassName = $this->getTableMapClassName();
         $columnConstant = $this->builder->getColumnConstant($this->column);
 

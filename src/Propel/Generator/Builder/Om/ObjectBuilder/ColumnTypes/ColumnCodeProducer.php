@@ -7,9 +7,13 @@ namespace Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes;
 use Propel\Generator\Builder\Om\AbstractSubsectionCodeProducer;
 use Propel\Generator\Builder\Om\ObjectBuilder;
 use Propel\Generator\Model\Column;
+use Propel\Generator\Model\PropelTypes;
+use Propel\Generator\Platform\OraclePlatform;
+use Propel\Runtime\Util\UuidConverter;
 use function array_intersect;
 use function explode;
 use function settype;
+use function str_starts_with;
 use function var_export;
 
 /**
@@ -41,6 +45,17 @@ class ColumnCodeProducer extends AbstractSubsectionCodeProducer
     }
 
     /**
+     * @param string $prefix
+     * @param string|null $suffix
+     *
+     * @return string
+     */
+    protected function getAttributeName(string $prefix = '$this->', string|null $suffix = null): string
+    {
+        return $prefix . $this->column->getLowercasedName() . ($suffix ?? '');
+    }
+
+    /**
      * @return string
      */
     protected function getQualifiedTypeString(): string
@@ -69,26 +84,9 @@ class ColumnCodeProducer extends AbstractSubsectionCodeProducer
     public function addDefaultColumnAttribute(string &$script, ?string $columnDocType = null): void
     {
         $columnName = $this->column->getLowercasedName();
-        $description = "The value for the $columnName field.{$this->getColumnDescriptionDoc()}{$this->getDefaultValueDescription()}";
+        $description = "Value of [$columnName] field.{$this->getColumnDescriptionDoc()}{$this->getDefaultValueDescription()}";
         $docType = $columnDocType ?? $this->getQualifiedTypeString();
         $script .= $this->buildDeclareColumnCode($columnName, $description, $docType);
-    }
-
-    /**
-     * Adds attribute for unserialized value of array and object columns.
-     *
-     * @param string $script
-     * @param string $typeHint
-     *
-     * @return void
-     */
-    protected function addColumnAttributeUnserialized(string &$script, string $typeHint): void
-    {
-        $valueColumnName = $this->column->getLowercasedName();
-        $description = "The unserialized \$$valueColumnName value.";
-        $columnName = "{$valueColumnName}_unserialized";
-
-        $script .= $this->buildDeclareColumnCode($columnName, $description, $typeHint);
     }
 
     /**
@@ -111,8 +109,8 @@ class ColumnCodeProducer extends AbstractSubsectionCodeProducer
         if (!$declareType) {
             $columnDeclaration = "\${$columnName}";
         } else {
-            $typeDeclaration = $this->referencedClasses->resolveTypeDeclarationFromDocType($docType) . '|null';
-            $columnDeclaration = "$typeDeclaration \${$columnName} = null";
+            $typeDeclaration = $this->referencedClasses->resolveTypeDeclarationFromDocType($docType);
+            $columnDeclaration = "$typeDeclaration|null \${$columnName} = null";
         }
 
         return "
@@ -153,21 +151,103 @@ class ColumnCodeProducer extends AbstractSubsectionCodeProducer
     }
 
     /**
+     * @see ObjectBuilder::addBuildCriteriaBody()}
+     * @see ObjectBuilder::addDoInsertBodyRaw()}
+     *
+     * @return string
+     */
+    public function getAccessValueStatement(): string
+    {
+        $attribute = $this->getAttributeName();
+
+        if ($this->column->isUuidBinaryType()) {
+            $uuidSwapFlag = $this->builder->getUuidSwapFlagLiteral();
+
+            return "UuidConverter::uuidToBin($attribute, $uuidSwapFlag)";
+        }
+
+        return $attribute;
+    }
+
+    /**
+     * Build statement used in Model::hydrate()
+     *
+     * @see ObjectBuilder::addHydrateBody()}
+     *
+     * @param string $valueVariable
+     *
+     * @return string
+     */
+    public function getHydrateStatement(string $valueVariable): string
+    {
+        $col = $this->column;
+        $attribute = $this->getAttributeName();
+
+        if ($col->getType() === PropelTypes::CLOB_EMU && $this->getPlatform() instanceof OraclePlatform) {
+            // PDO_OCI returns a stream for CLOB objects, while other PDO adapters return a string...
+            $this->declareGlobalFunction('stream_get_contents');
+
+            return "
+            $attribute = stream_get_contents($valueVariable);";
+        } elseif ($col->isUuidBinaryType()) {
+            $this->declareClasses(UuidConverter::class);
+            $this->declareGlobalFunction('is_resource', 'stream_get_contents');
+            $uuidSwapFlag = $this->builder->getUuidSwapFlagLiteral();
+
+            return "
+            if (is_resource($valueVariable)) {
+                $valueVariable = stream_get_contents($valueVariable);
+            }
+            $attribute = UuidConverter::binToUuid($valueVariable, $uuidSwapFlag);";
+        } elseif ($col->isPhpPrimitiveType()) {
+            $className = $col->getPhpType();
+
+            return "
+            $attribute = $valueVariable !== null ? ($className)$valueVariable : null;";
+        } elseif ($col->isPhpObjectType()) {
+            $constructor = $this->declareClass($col->getPhpType());
+
+            return "
+            $attribute = ($valueVariable === null) ? null : new $constructor($valueVariable);";
+        } else {
+            return "
+            $attribute = $valueVariable;";
+        }
+    }
+
+    /**
+     * Build statement used in Model::clear()
+     *
+     * @see ObjectBuilder::addClear()}
+     *
+     * @return string
+     */
+    public function getClearValueStatement(): string
+    {
+        $attribute = $this->getAttributeName();
+
+        return "
+        $attribute = null;";
+    }
+
+    /**
      * Build statement used in Model::applyDefaultValues()
+     *
+     * @see ObjectBuilder::addApplyDefaultValuesBody()}
      *
      * @return string
      */
     public function getApplyDefaultValueStatement(): string
     {
-        $clo = $this->column->getLowercasedName();
+        $attribute = $this->getAttributeName();
         $defaultValue = $this->getDefaultValueString();
         if ($this->column->isPhpObjectType()) {
-            $assumedClassName = $this->declareClass($this->column->getPhpType());
-            $defaultValue = "new $assumedClassName($defaultValue)";
+            $constructor = $this->declareClass($this->column->getPhpType());
+            $defaultValue = "new $constructor($defaultValue)";
         }
 
         return "
-        \$this->{$clo} = $defaultValue;";
+        $attribute = $defaultValue;";
     }
 
     /**
@@ -187,6 +267,30 @@ class ColumnCodeProducer extends AbstractSubsectionCodeProducer
         }
 
         return var_export($defaultValue, true);
+    }
+
+    /**
+     * Build statement to check if current value is the default value.
+     *
+     * @see ObjectBuilder::addHasOnlyDefaultValuesBody()
+     *
+     * @return string
+     */
+    public function getIsDefaultValueStatement(): string
+    {
+            $attribute = $this->getAttributeName();
+
+            $defaultValueString = $this->getDefaultValueString();
+        if ($this->column->isPhpObjectType()) {
+            $assumedClassName = $this->declareClass($this->column->getPhpType());
+            $defaultValueString = "new $assumedClassName($defaultValueString)";
+        }
+
+            $equals = str_starts_with($defaultValueString, 'new ')
+                ? '==' // allow object-comparison for custom PHP types
+                : '===';
+
+            return "$attribute $equals $defaultValueString";
     }
 
     /**

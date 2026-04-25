@@ -6,19 +6,17 @@ namespace Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes;
 
 use function var_export;
 
-class ObjectColumnCodeProducer extends ColumnCodeProducer
+class ObjectColumnCodeProducer extends AbstractDeserializableColumnCodeProducer
 {
     /**
-     * @param string $script The script will be modified in this method.
+     * Get attribute types in order [database field type, deserialized type]
      *
-     * @return void
+     * @return array{string, string}
      */
     #[\Override]
-    public function addColumnAttributes(string &$script): void
+    protected function getQualifiedAttributeTypes(): array
     {
-        $this->addDefaultColumnAttribute($script, 'resource');
-        $objectType = $this->getQualifiedTypeString() ?: 'object';
-        $this->addColumnAttributeUnserialized($script, $objectType);
+        return ['resource', $this->getQualifiedTypeString() ?: 'object'];
     }
 
     /**
@@ -28,10 +26,34 @@ class ObjectColumnCodeProducer extends ColumnCodeProducer
     public function getDefaultValueString(): string
     {
         $defaultValue = $this->column->getPhpDefaultValue();
+        if ($defaultValue === null) {
+            return 'null';
+        }
+        $constructor = $this->declareClass($this->column->getPhpType());
+        $defaultValueString = var_export($this->column->getPhpDefaultValue(), true);
 
-        return $defaultValue !== null
-            ? 'new ' . $this->column->getPhpType() . '(' . var_export($defaultValue, true) . ')'
-            : 'null';
+        return "new $constructor($defaultValueString)";
+    }
+
+    /**
+     * Build statement used in Model::hydrate()
+     *
+     * @see ObjectBuilder::addHydrateBody()}
+     *
+     * @param string $valueVariable
+     *
+     * @return string
+     */
+    #[\Override]
+    public function getHydrateStatement(string $valueVariable): string
+    {
+        $resourceAttribute = $this->getAttributeName();
+        $processValueStatement = $this->getPlatform()->hasStreamBlobImpl()
+            ? $valueVariable
+            : "\$this->writeResource($valueVariable)";
+
+        return "
+            $resourceAttribute = $processValueStatement;";
     }
 
     /**
@@ -45,22 +67,23 @@ class ObjectColumnCodeProducer extends ColumnCodeProducer
     protected function addAccessorBody(string &$script): void
     {
         $this->declareGlobalFunction('is_resource', 'stream_get_contents', 'unserialize');
-        $clo = $this->column->getLowercasedName();
-        $cloUnserialized = $clo . '_unserialized';
+        $resourceAttribute = $this->getAttributeName();
+        $objectAttribute = $this->getDeserializedAttributeName();
+
         $typeHint = $this->column->getTypeHint();
         $docHint = !$typeHint ? '' : "
-                /** @var $typeHint \$unserializedString */";
+                /** @var $typeHint \$deserializedString */";
 
         $script .= "
-        if (!\$this->$cloUnserialized && is_resource(\$this->$clo)) {
-            \$serialisedString = stream_get_contents(\$this->$clo);
-            if (\$serialisedString) {{$docHint}
-                \$unserializedString = unserialize(\$serialisedString);
-                \$this->$cloUnserialized = \$unserializedString;
+        if (!$objectAttribute && is_resource($resourceAttribute)) {
+            \$serializedString = stream_get_contents($resourceAttribute);
+            if (\$serializedString) {{$docHint}
+                \$deserializedString = unserialize(\$serializedString);
+                $objectAttribute = \$deserializedString;
             }
         }
 
-        return \$this->$cloUnserialized;";
+        return $objectAttribute;";
     }
 
     /**
@@ -76,16 +99,15 @@ class ObjectColumnCodeProducer extends ColumnCodeProducer
     protected function addMutatorBody(string &$script): void
     {
         $this->declareGlobalFunction('serialize', 'stream_get_contents');
-        $col = $this->column;
-        $clo = $col->getLowercasedName();
-        $cloUnserialized = $clo . '_unserialized';
-        $columnConstant = $this->builder->getColumnConstant($col);
+        $resourceAttribute = $this->getAttributeName();
+        $objectAttribute = $this->getDeserializedAttributeName();
+        $columnConstant = $this->builder->getColumnConstant($this->column);
 
         $script .= "
         \$serializedValue = serialize(\$v);
-        if (\$this->$clo === null || stream_get_contents(\$this->$clo) !== \$serializedValue) {
-            \$this->$cloUnserialized = \$v;
-            \$this->$clo = \$this->writeResource(\$serializedValue);
+        if ($resourceAttribute === null || stream_get_contents($resourceAttribute) !== \$serializedValue) {
+            $objectAttribute = \$v;
+            $resourceAttribute = \$this->writeResource(\$serializedValue);
             \$this->modifiedColumns[$columnConstant] = true;
         }\n";
     }

@@ -4,7 +4,7 @@ Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes\LobColumnCodeProducer
 addColumnAttributes():
 
     /**
-     * The value for the blob_column field.
+     * Value of [blob_column] field.
      *
      * @var resource|string|null
      */
@@ -35,11 +35,7 @@ addMutator():
      */
     public function setBlobColumn($v)
     {
-        // Because BLOB columns are streams in PDO we have to assume that they are
-        // always modified when a new value is passed in.  For example, the contents
-        // of the stream itself may have changed externally.
         $this->blob_column = $this->writeResource($v);
-
         $this->modifiedColumns[TableTableMap::COL_BLOB_COLUMN] = true;
 
         return $this;
@@ -55,3 +51,10 @@ getApplyDefaultValueStatement:
 
 buildCreateFromFilterValueExpression:
 $value
+
+getHydrateStatement:
+
+            $this->blob_column = $this->writeResource($value);
+
+getAccessValueStatement:
+$this->blob_column
