@@ -14,4 +14,10 @@
         </foreign-key>
     </table>
 
+    <table name="type_numeric" identifierQuoting="true">
+        <column name="id" type="INTEGER" primaryKey="true" autoIncrement="true"/>
+        <column name="numeric" type="NUMERIC" size="12" scale="4"/>
+        <column name="decimal" type="DECIMAL" size="12" scale="4"/>
+    </table>
+
 </database>

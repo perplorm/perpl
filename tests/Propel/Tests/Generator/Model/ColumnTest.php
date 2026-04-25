@@ -451,7 +451,7 @@ class ColumnTest extends ModelTestCase
             ['LONGVARCHAR', PDO::PARAM_STR],
             ['CLOB', PDO::PARAM_STR],
             ['CLOB_EMU', PDO::PARAM_STR],
-            ['NUMERIC', PDO::PARAM_INT],
+            ['NUMERIC', PDO::PARAM_STR],
             ['DECIMAL', PDO::PARAM_STR],
             ['TINYINT', PDO::PARAM_INT],
             ['SMALLINT', PDO::PARAM_INT],
