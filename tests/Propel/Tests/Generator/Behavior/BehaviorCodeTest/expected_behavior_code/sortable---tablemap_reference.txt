@@ -1,0 +1,10 @@
+
+
+staticAttributes:
+
+// sortable behavior
+/**
+ * rank column
+ */
+const RANK_COL = "table.sortable_rank";
+

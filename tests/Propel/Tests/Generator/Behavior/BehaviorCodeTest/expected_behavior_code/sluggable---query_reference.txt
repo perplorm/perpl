@@ -1,0 +1,32 @@
+
+
+queryMethods:
+
+// sluggable behavior
+
+/**
+ * Filter the query on the slug column
+ *
+ * @param string $slug The value to use as filter.
+ *
+ * @return $this
+ */
+public function filterBySlug(string $slug)
+{
+    $this->addUsingOperator($this->resolveLocalColumnByName('url'), $slug, Criteria::EQUAL);
+
+    return $this;
+}
+
+/**
+ * Find one object based on its slug
+ *
+ * @param string $slug The value to use as filter.
+ * @param \Propel\Runtime\Connection\ConnectionInterface $con The optional connection object
+ *
+ * @return ChildTable the result, formatted by the current formatter
+ */
+public function findOneBySlug(string $slug, ?ConnectionInterface $con = null)
+{
+    return $this->filterBySlug($slug)->findOne($con);
+}

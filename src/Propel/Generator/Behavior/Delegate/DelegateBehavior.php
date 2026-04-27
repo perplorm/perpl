@@ -246,16 +246,16 @@ if (method_exists({$ARFQCN}::class, \$name)) {
             foreach ($this->delegates + [$table->getName() => 1] as $key => $value) {
                 $delegateTable = $this->getDelegateTable($key);
                 foreach ($delegateTable->getColumns() as $columnDelegated) {
-                    if (isset($this->doubleDefined[$columnDelegated->getName()])) {
-                        $this->doubleDefined[$columnDelegated->getName()]++;
-                    } else {
-                        $this->doubleDefined[$columnDelegated->getName()] = 1;
+                    $columnName = $columnDelegated->getName();
+                    if (!isset($this->doubleDefined[$columnName])) {
+                        $this->doubleDefined[$columnName] = 0;
                     }
+                    $this->doubleDefined[$columnName]++;
                 }
             }
         }
 
-        if (1 < $this->doubleDefined[$column->getName()]) {
+        if ($this->doubleDefined[$column->getName()] > 1) {
             return true;
         }
 

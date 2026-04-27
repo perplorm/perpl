@@ -1,0 +1,160 @@
+
+
+objectMethods:
+
+// archivable behavior
+
+/**
+ * Get an archived version of the current object.
+ *
+ * @param \Propel\Runtime\Connection\ConnectionInterface|null $con Optional connection object
+ *
+ * @return ChildTableArchive An archive object, or null if the current object was never archived
+ */
+public function getArchive(?ConnectionInterface $con = null)
+{
+    if ($this->isNew()) {
+        return null;
+    }
+    $archive = ChildTableArchiveQuery::create()
+        ->filterByPrimaryKey($this->getPrimaryKey())
+        ->findOne($con);
+
+    return $archive;
+}
+/**
+ * Copy the data of the current object into a $archiveTablePhpName archive object.
+ * The archived object is then saved.
+ * If the current object has already been archived, the archived object
+ * is updated and not duplicated.
+ *
+ * @param \Propel\Runtime\Connection\ConnectionInterface|null $con Optional connection object
+ *
+ * @throws \Propel\Runtime\Exception\PropelException If the object is new
+ *
+ * @return ChildTableArchive The archive object based on this object
+ */
+public function archive(?ConnectionInterface $con = null)
+{
+    if ($this->isNew()) {
+        throw new PropelException('New objects cannot be archived. You must save the current object before calling archive().');
+    }
+    $archive = $this->getArchive($con);
+    if (!$archive) {
+        $archive = new ChildTableArchive();
+        $archive->setPrimaryKey($this->getPrimaryKey());
+    }
+    $this->copyInto($archive, $deepCopy = false, $makeNew = false);
+    $archive->setArchivedAt(time());
+    $archive->save($con);
+
+    return $archive;
+}
+
+/**
+ * Revert the the current object to the state it had when it was last archived.
+ * The object must be saved afterwards if the changes must persist.
+ *
+ * @param \Propel\Runtime\Connection\ConnectionInterface|null $con Optional connection object
+ *
+ * @throws \Propel\Runtime\Exception\PropelException If the object has no corresponding archive.
+ *
+ * @return $this The current object (for fluent API support)
+ */
+public function restoreFromArchive(?ConnectionInterface $con = null)
+{
+    $archive = $this->getArchive($con);
+    if (!$archive) {
+        throw new PropelException('The current object has never been archived and cannot be restored');
+    }
+    $this->populateFromArchive($archive);
+
+    return $this;
+}
+
+/**
+ * Populates the the current object based on a $archiveTablePhpName archive object.
+ *
+ * @param ChildTableArchive $archive An archived object based on the same class
+  *
+ * @return ChildTable The current object (for fluent API support)
+ */
+public function populateFromArchive($archive)
+{
+    $this->setId($archive->getId());
+    $this->setTitle($archive->getTitle());
+
+    return $this;
+}
+
+/**
+ * Persists the object to the database without archiving it.
+ *
+ * @param \Propel\Runtime\Connection\ConnectionInterface|null $con Optional connection object
+ *
+ * @return $this|ChildTable The current object (for fluent API support)
+ */
+public function saveWithoutArchive(?ConnectionInterface $con = null)
+{
+    if ($this->isNew()) {
+        $this->archiveOnInsert = false;
+    } else {
+        $this->archiveOnUpdate = false;
+    }
+
+    return $this->save($con);
+}
+
+/**
+ * Removes the object from the database without archiving it.
+ *
+ * @param \Propel\Runtime\Connection\ConnectionInterface|null $con Optional connection object
+ *
+ * @return $this|ChildTable The current object (for fluent API support)
+ */
+public function deleteWithoutArchive(?ConnectionInterface $con = null)
+{
+    $this->archiveOnDelete = false;
+
+    return $this->delete($con);
+}
+
+
+objectAttributes:
+
+// archivable behavior
+protected $archiveOnInsert = true;
+protected $archiveOnUpdate = true;
+protected $archiveOnDelete = true;
+
+
+preDelete:
+
+// archivable behavior
+if ($ret) {
+    if ($this->archiveOnDelete) {
+        // do nothing yet. The object will be archived later when calling ChildTableQuery::delete().
+    } else {
+        $deleteQuery->setArchiveOnDelete(false);
+        $this->archiveOnDelete = true;
+    }
+}
+
+
+postUpdate:
+
+// archivable behavior
+if ($this->archiveOnUpdate) {
+    $this->archive($con);
+} else {
+    $this->archiveOnUpdate = true;
+}
+
+postInsert:
+
+// archivable behavior
+if ($this->archiveOnInsert) {
+    $this->archive($con);
+} else {
+    $this->archiveOnInsert = true;
+}

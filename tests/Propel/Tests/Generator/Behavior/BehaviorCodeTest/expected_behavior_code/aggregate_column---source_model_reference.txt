@@ -1,0 +1,85 @@
+
+
+objectMethods:
+
+// aggregate_column_relation_aggregate_column behavior
+
+/**
+ * Update the aggregate column in the related AggregatedTable object
+ *
+ * @param \Propel\Runtime\Connection\ConnectionInterface $con A connection object
+ */
+protected function updateRelatedAggregatedTableRelatedEntries(ConnectionInterface $con)
+{
+    if ($aggregatedTable = $this->getAggregatedTable()) {
+        $aggregatedTable->updateRelatedEntries($con);
+    }
+    if ($this->oldAggregatedTableRelatedEntries) {
+        $this->oldAggregatedTableRelatedEntries->updateRelatedEntries($con);
+        $this->oldAggregatedTableRelatedEntries = null;
+    }
+}
+
+
+objectFilter:
+
+    /**
+     * Declares an association between this object and a ChildAggregatedTable object.
+     *
+     * @param \AggregatedTable|null $aggregatedTable
+     *
+     * @return $this
+     */
+    public function setAggregatedTable(?ChildAggregatedTable $aggregatedTable = null)
+    {
+        // aggregate_column_relation behavior
+        if ($this->aAggregatedTable !== null && $aggregatedTable !== $this->aAggregatedTable) {
+            $this->oldAggregatedTableRelatedEntries = $this->aAggregatedTable;
+        }
+        $fk = $aggregatedTable ? $aggregatedTable->getId() : null;
+        $this->setFk($fk);
+
+        $this->aAggregatedTable = $aggregatedTable;
+        assert($this instanceof ChildSourceTable);
+        $aggregatedTable?->addSourceTable($this);
+
+        return $this;
+    }
+
+    /**
+     * Get the associated AggregatedTable object
+     *
+     * @param \Propel\Runtime\Connection\ConnectionInterface|null $con Optional Connection object.
+     *
+     * @return \AggregatedTable|null
+     */
+    public function getAggregatedTable(?ConnectionInterface $con = null)
+    {
+        if ($this->aAggregatedTable === null && ($this->fk !== null && $this->fk !== 0)) {
+            $this->aAggregatedTable = ChildAggregatedTableQuery::create()->findPk($this->fk, $con);
+            /* The following can be used additionally to
+                guarantee the related object contains a reference
+                to this object.  This level of coupling may, however, be
+                undesirable since it could result in an only partially populated collection
+                in the referenced object.
+                $this->aAggregatedTable->addSourceTables($this);
+             */
+        }
+
+        return $this->aAggregatedTable;
+    }
+
+
+objectAttributes:
+
+// aggregate_column_relation_aggregate_column behavior
+/**
+ * @var ChildAggregatedTable
+ */
+protected $oldAggregatedTableRelatedEntries;
+
+
+postSave:
+
+// aggregate_column_relation_aggregate_column behavior
+$this->updateRelatedAggregatedTableRelatedEntries($con);

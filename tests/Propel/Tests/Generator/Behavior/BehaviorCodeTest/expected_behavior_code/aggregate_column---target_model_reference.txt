@@ -1,0 +1,30 @@
+
+
+objectMethods:
+
+// aggregate_column behavior
+
+/**
+ * Computes the value of the aggregate column related_entries *
+ * @param \Propel\Runtime\Connection\ConnectionInterface $con A connection object
+ *
+ * @return mixed The scalar result from the aggregate query
+ */
+public function computeRelatedEntries(ConnectionInterface $con)
+{
+    $stmt = $con->prepare('SELECT COUNT(id) FROM source_table WHERE source_table.FK = :p1');
+    $stmt->bindValue(':p1', $this->getId());
+    $stmt->execute();
+
+    return $stmt->fetchColumn();
+}
+
+/**
+ * Updates the aggregate column related_entries *
+ * @param \Propel\Runtime\Connection\ConnectionInterface $con A connection object
+ */
+public function updateRelatedEntries(ConnectionInterface $con)
+{
+    $this->setRelatedEntries($this->computeRelatedEntries($con));
+    $this->save($con);
+}

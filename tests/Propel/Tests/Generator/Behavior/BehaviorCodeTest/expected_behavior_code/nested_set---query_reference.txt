@@ -1,0 +1,423 @@
+
+
+queryMethods:
+
+// nested_set behavior
+
+/**
+ * Filter the query to restrict the result to descendants of an object
+ *
+ * @param ChildTable $table The object to use for descendant search
+ *
+ * @return $this
+ */
+public function descendantsOf(ChildTable $table)
+{
+    $leftColumn = $this->resolveLocalColumnByName('tree_left');
+    $this
+        ->addUsingOperator($leftColumn, $table->getLeftValue(), Criteria::GREATER_THAN)
+        ->addUsingOperator($leftColumn, $table->getRightValue(), Criteria::LESS_THAN);
+
+    return $this;
+}
+
+/**
+ * Filter the query to restrict the result to the branch of an object.
+ * Same as descendantsOf(), except that it includes the object passed as parameter in the result
+ *
+ * @param ChildTable $table The object to use for branch search
+ *
+ * @return $this
+ */
+public function branchOf(ChildTable $table)
+{
+    $leftColumn = $this->resolveLocalColumnByName('tree_left');
+    $this
+        ->addUsingOperator($leftColumn, $table->getLeftValue(), Criteria::GREATER_EQUAL)
+        ->addUsingOperator($leftColumn, $table->getRightValue(), Criteria::LESS_EQUAL);
+
+    return $this;
+}
+
+/**
+ * Filter the query to restrict the result to children of an object
+ *
+ * @param ChildTable $table The object to use for child search
+ *
+ * @return $this
+ */
+public function childrenOf(ChildTable $table)
+{
+    $this
+        ->descendantsOf($table)
+        ->addUsingOperator($this->resolveLocalColumnByName('tree_level'), $table->getLevel() + 1, Criteria::EQUAL);
+
+    return $this;
+}
+
+/**
+ * Filter the query to restrict the result to siblings of an object.
+ * The result does not include the object passed as parameter.
+ *
+ * @param ChildTable $table The object to use for sibling search
+ * @param \Propel\Runtime\Connection\ConnectionInterface $con Connection to use.
+ *
+ * @return $this
+ */
+public function siblingsOf(ChildTable $table, ?ConnectionInterface $con = null)
+{
+    if ($table->isRoot()) {
+        $this->
+            add(ChildTable::LEVEL_COL, '1<>1', Criteria::CUSTOM);
+    } else {
+        $this
+            ->childrenOf($table->getParent($con))
+            ->prune($table);
+    }
+
+    return $this;
+}
+
+/**
+ * Filter the query to restrict the result to ancestors of an object
+ *
+ * @param ChildTable $table The object to use for ancestors search
+ *
+ * @return $this
+ */
+public function ancestorsOf(ChildTable $table)
+{
+    $this
+        ->addUsingOperator($this->resolveLocalColumnByName('tree_left'), $table->getLeftValue(), Criteria::LESS_THAN)
+        ->addUsingOperator($this->resolveLocalColumnByName('tree_right'), $table->getRightValue(), Criteria::GREATER_THAN);
+
+    return $this;
+}
+
+/**
+ * Filter the query to restrict the result to roots of an object.
+ * Same as ancestorsOf(), except that it includes the object passed as parameter in the result
+ *
+ * @param ChildTable $table The object to use for roots search
+ *
+ * @return $this
+ */
+public function rootsOf(ChildTable $table)
+{
+    $this
+        ->addUsingOperator($this->resolveLocalColumnByName('tree_left'), $table->getLeftValue(), Criteria::LESS_EQUAL)
+        ->addUsingOperator($this->resolveLocalColumnByName('tree_right'), $table->getRightValue(), Criteria::GREATER_EQUAL);
+
+    return $this;
+}
+
+/**
+ * Order the result by branch, i.e. natural tree order
+ *
+ * @param bool $reverse if true, reverses the order
+ *
+ * @return $this
+ */
+public function orderByBranch($reverse = false)
+{
+    if ($reverse) {
+        $this
+            ->addDescendingOrderByColumn(ChildTable::LEFT_COL);
+    } else {
+        $this
+            ->addAscendingOrderByColumn(ChildTable::LEFT_COL);
+    }
+
+    return $this;
+}
+
+/**
+ * Order the result by level, the closer to the root first
+ *
+ * @param bool $reverse if true, reverses the order
+ *
+ * @return $this
+ */
+public function orderByLevel($reverse = false)
+{
+    if ($reverse) {
+        $this
+            ->addDescendingOrderByColumn(ChildTable::LEVEL_COL)
+            ->addDescendingOrderByColumn(ChildTable::LEFT_COL);
+    } else {
+        $this
+            ->addAscendingOrderByColumn(ChildTable::LEVEL_COL)
+            ->addAscendingOrderByColumn(ChildTable::LEFT_COL);
+    }
+
+    return $this;
+}
+
+/**
+ * Returns the root node for the tree
+ *
+ * @param \Propel\Runtime\Connection\ConnectionInterface $con Connection to use.
+ *
+ * @return ChildTable The tree root object
+ */
+public function findRoot(?ConnectionInterface $con = null)
+{
+    return $this
+        ->addUsingOperator($this->resolveLocalColumnByName('tree_left'), 1, Criteria::EQUAL)
+        ->findOne($con);
+}
+
+/**
+ * Returns the tree of objects
+ *
+ * @param \Propel\Runtime\Connection\ConnectionInterface $con Connection to use.
+ *
+ * @return ChildTable[]|ObjectCollection|mixed the list of results, formatted by the current formatter
+ */
+public function findTree(?ConnectionInterface $con = null)
+{
+    return $this
+        ->orderByBranch()
+        ->find($con);
+}
+
+/**
+ * Returns the root node for a given scope
+ *
+ * @param \Propel\Runtime\Connection\ConnectionInterface $con Connection to use.
+ *
+ * @return ChildTable            Propel object for root node
+ */
+static public function retrieveRoot(?ConnectionInterface $con = null)
+{
+    $query = new Criteria(TableTableMap::DATABASE_NAME);
+    $query->addAnd(ChildTable::LEFT_COL, 1, Criteria::EQUAL);
+
+    return ChildTableQuery::create(null, $query)->findOne($con);
+}
+
+/**
+ * Returns the whole tree node for a given scope
+ *
+ * @param \Propel\Runtime\ActiveQuery\Criteria $query    Optional Criteria to filter the query
+ * @param \Propel\Runtime\Connection\ConnectionInterface $con Connection to use.
+ *
+ * @return ChildTable[]|ObjectCollection|mixed the list of results, formatted by the current formatter
+ */
+static public function retrieveTree(?Criteria $query = null, ?ConnectionInterface $con = null)
+{
+    if (null === $query) {
+        $query = new Criteria(TableTableMap::DATABASE_NAME);
+    }
+    $query->addAscendingOrderByColumn(ChildTable::LEFT_COL);
+
+    return ChildTableQuery::create(null, $query)->find($con);
+}
+
+/**
+ * Tests if node is valid
+ *
+ * @param ChildTable $node    Propel object for src node
+ *
+ * @return bool
+ */
+static public function isValid(?ChildTable $node = null)
+{
+    if (is_object($node) && $node->getRightValue() > $node->getLeftValue()) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+/**
+ * Delete an entire tree
+ * 
+ * @param \Propel\Runtime\Connection\ConnectionInterface $con Connection to use.
+ *
+ * @return int The number of deleted nodes
+ */
+static public function deleteTree(?ConnectionInterface $con = null)
+{
+
+    return TableTableMap::doDeleteAll($con);
+}
+
+/**
+ * Adds $delta to all L and R values that are >= $first and <= $last.
+ * '$delta' can also be negative.
+ *
+ * @param int $delta               Value to be shifted by, can be negative
+ * @param int $first               First node to be shifted
+ * @param int $last                Last node to be shifted (optional)
+ * @param \Propel\Runtime\Connection\ConnectionInterface $con Connection to use.
+ *
+ * @return void
+ */
+static public function shiftRLValues($delta, $first, $last = null, ?ConnectionInterface $con = null)
+{
+    if ($con === null) {
+        $con = Propel::getServiceContainer()->getWriteConnection(TableTableMap::DATABASE_NAME);
+    }
+
+    // Shift left column values
+    $updateQuery = new Criteria(TableTableMap::DATABASE_NAME);
+    $criterion = $updateQuery->getNewCriterion(ChildTable::LEFT_COL, $first, Criteria::GREATER_EQUAL);
+    if (null !== $last) {
+        $criterion->addAnd($updateQuery->getNewCriterion(ChildTable::LEFT_COL, $last, Criteria::LESS_EQUAL));
+    }
+    $updateQuery->addAnd($criterion);
+
+    $updateQuery->setUpdateExpression(ChildTable::LEFT_COL, ChildTable::LEFT_COL . ' + ?', $delta, \PDO::PARAM_INT);
+
+    $updateQuery->doUpdate(null, $con);
+
+    // Shift right column values
+    $updateQuery = new Criteria(TableTableMap::DATABASE_NAME);
+    $criterion = $updateQuery->getNewCriterion(ChildTable::RIGHT_COL, $first, Criteria::GREATER_EQUAL);
+    if (null !== $last) {
+        $criterion->addAnd($updateQuery->getNewCriterion(ChildTable::RIGHT_COL, $last, Criteria::LESS_EQUAL));
+    }
+    $updateQuery->addAnd($criterion);
+
+    $updateQuery->setUpdateExpression(ChildTable::RIGHT_COL, ChildTable::RIGHT_COL . ' + ?', $delta, \PDO::PARAM_STR);
+
+    $updateQuery->doUpdate(null, $con);
+}
+
+/**
+ * Adds $delta to level for nodes having left value >= $first and right value <= $last.
+ * '$delta' can also be negative.
+ *
+ * @param int $delta        Value to be shifted by, can be negative
+ * @param int $first        First node to be shifted
+ * @param int $last            Last node to be shifted
+ * @param \Propel\Runtime\Connection\ConnectionInterface $con Connection to use.
+ *
+ * @return void
+ */
+static public function shiftLevel($delta, $first, $last, ?ConnectionInterface $con = null)
+{
+    if ($con === null) {
+        $con = Propel::getServiceContainer()->getWriteConnection(TableTableMap::DATABASE_NAME);
+    }
+
+    $updateQuery = new Criteria(TableTableMap::DATABASE_NAME);
+    $updateQuery->addAnd(ChildTable::LEFT_COL, $first, Criteria::GREATER_EQUAL);
+    $updateQuery->addAnd(ChildTable::RIGHT_COL, $last, Criteria::LESS_EQUAL);
+
+    $updateQuery->setUpdateExpression(ChildTable::LEVEL_COL, ChildTable::LEVEL_COL . ' + ?', $delta, \PDO::PARAM_INT);
+
+    $updateQuery->doUpdate(null, $con);
+}
+
+/**
+ * Reload all already loaded nodes to sync them with updated db
+ *
+ * @param ChildTable $prune Object to prune from the update
+ * @param \Propel\Runtime\Connection\ConnectionInterface $con Connection to use.
+ *
+ * @return void
+ */
+static public function updateLoadedNodes($prune = null, ?ConnectionInterface $con = null)
+{
+    if (Propel::isInstancePoolingEnabled()) {
+        $keys = [];
+        /** @var $obj ChildTable */
+        foreach (TableTableMap::$instances as $obj) {
+            if (!$prune || !$prune->equals($obj)) {
+                $keys[] = $obj->getPrimaryKey();
+            }
+        }
+
+        if (!empty($keys)) {
+            // We don't need to alter the object instance pool; we're just modifying these ones
+            // already in the pool.
+            $query = new Criteria(TableTableMap::DATABASE_NAME);
+            $query->addAnd(TableTableMap::COL_ID, $keys, Criteria::IN);
+            $dataFetcher = ChildTableQuery::create(null, $query)->fetch($con);
+            while ($row = $dataFetcher->fetch()) {
+                $key = TableTableMap::getPrimaryKeyHashFromRow($row, 0);
+                /** @var $object ChildTable */
+                if (null !== ($object = TableTableMap::getInstanceFromPool($key))) {
+                    $object->setLeftValue($row[2]);
+                    $object->setRightValue($row[3]);
+                    $object->setLevel($row[4]);
+                    $object->clearNestedSetChildren();
+                }
+            }
+            $dataFetcher->close();
+        }
+    }
+}
+
+/**
+ * Update the tree to allow insertion of a leaf at the specified position
+ *
+ * @param int $left    left column value
+ * @param mixed $prune    Object to prune from the shift
+ * @param \Propel\Runtime\Connection\ConnectionInterface|null $con Connection to use.
+ *
+ * @return void
+ */
+static public function makeRoomForLeaf($left, $prune = null, ?ConnectionInterface $con = null)
+{
+    // Update database nodes
+    ChildTableQuery::shiftRLValues(2, $left, null, $con);
+
+    // Update all loaded nodes
+    ChildTableQuery::updateLoadedNodes($prune, $con);
+}
+
+/**
+ * Update the tree to allow insertion of a leaf at the specified position
+ *
+ * @param \Propel\Runtime\Connection\ConnectionInterface|null $con Connection to use.
+ *
+ * @return void
+ */
+static public function fixLevels(?ConnectionInterface $con = null): void
+{
+    $query = new Criteria();
+    $query->addAscendingOrderByColumn(ChildTable::LEFT_COL);
+    $dataFetcher = ChildTableQuery::create(null, $query)->fetch($con);
+    
+    // set the class once to avoid overhead in the loop
+    $cls = TableTableMap::getOMClass(false);
+    $level = null;
+    // iterate over the statement
+    while ($row = $dataFetcher->fetch()) {
+
+        // hydrate object
+        $key = TableTableMap::getPrimaryKeyHashFromRow($row, 0);
+        /** @var $obj ChildTable */
+        if (null === ($obj = TableTableMap::getInstanceFromPool($key))) {
+            $obj = new $cls();
+            $obj->hydrate($row);
+            TableTableMap::addInstanceToPool($obj, $key);
+            
+        }
+
+        // compute level
+        // Algorithm shamelessly stolen from sfPropelActAsNestedSetBehaviorPlugin
+        // Probably authored by Tristan Rivoallan
+        if ($level === null) {
+            $level = 0;
+            $i = 0;
+            $prev = [$obj->getRightValue()];
+        } else {
+            while ($obj->getRightValue() > $prev[$i]) {
+                $i--;
+            }
+            $level = ++$i;
+            $prev[$i] = $obj->getRightValue();
+        }
+
+        // update level in node if necessary
+        if ($obj->getLevel() !== $level) {
+            $obj->setLevel($level);
+            $obj->save($con);
+        }
+    }
+    $dataFetcher->close();
+}

@@ -1,0 +1,327 @@
+
+
+objectMethods:
+
+// versionable behavior
+
+/**
+ * Wrap the setter for version value
+ *
+ * @param string
+ * @return $this
+ */
+public function setVersion($v)
+{
+    $this->setCustomversion($v);
+
+    return $this;
+}
+
+/**
+ * Wrap the getter for version value
+ *
+ * @return string
+ */
+public function getVersion()
+{
+    return $this->getCustomversion();
+}
+
+/**
+ * Enforce a new Version of this object upon next save.
+ *
+ * @return $this
+ */
+public function enforceVersioning()
+{
+    $this->enforceVersion = true;
+
+    return $this;
+}
+        
+/**
+ * Checks whether the current state must be recorded as a version
+ *
+ * @param \Propel\Runtime\Connection\ConnectionInterface $con The ConnectionInterface connection to use.
+ * @return bool
+ */
+public function isVersioningNecessary(?ConnectionInterface $con = null): bool
+{
+    if ($this->alreadyInSave) {
+        return false;
+    }
+
+    if ($this->enforceVersion) {
+        return true;
+    }
+
+    if (ChildTableQuery::isVersioningEnabled() && ($this->isNew() || $this->isModified()) || $this->isDeleted()) {
+        return true;
+    }
+
+    return false;
+}
+
+/**
+ * Creates a version of the current object and saves it.
+ *
+ * @param \Propel\Runtime\Connection\ConnectionInterface $con The ConnectionInterface connection to use.
+ *
+ * @return ChildTableVersion A version object
+ */
+public function addVersion(?ConnectionInterface $con = null)
+{
+    $this->enforceVersion = false;
+
+    $version = new ChildTableVersion();
+    $version->setId($this->getId());
+    $version->setBar($this->getBar());
+    $version->setCustomversion($this->getCustomversion());
+    $version->setTable($this);
+    $version->save($con);
+
+    return $version;
+}
+
+/**
+ * Sets the properties of the current object to the value they had at a specific version
+ *
+ * @param int $versionNumber The version number to read
+ * @param \Propel\Runtime\Connection\ConnectionInterface|null $con The ConnectionInterface connection to use.
+ *
+ * @return $this
+ */
+public function toVersion($versionNumber, ?ConnectionInterface $con = null)
+{
+    $version = $this->getOneVersion($versionNumber, $con);
+    if (!$version) {
+        throw new PropelException(sprintf('No ChildTable object found with version %d', $version));
+    }
+    $this->populateFromVersion($version, $con);
+
+    return $this;
+}
+
+/**
+ * Sets the properties of the current object to the value they had at a specific version
+ *
+ * @param ChildTableVersion $version The version object to use
+ * @param \Propel\Runtime\Connection\ConnectionInterface $con the connection to use
+ * @param array $loadedObjects objects that been loaded in a chain of populateFromVersion calls on referrer or fk objects.
+ *
+ * @return $this
+ */
+public function populateFromVersion($version, $con = null, &$loadedObjects = [])
+{
+    $loadedObjects['ChildTable'][$version->getId()][$version->getCustomversion()] = $this;
+    $this->setId($version->getId());
+    $this->setBar($version->getBar());
+    $this->setCustomversion($version->getCustomversion());
+
+    return $this;
+}
+
+/**
+ * Gets the latest persisted version number for the current object
+ *
+ * @param \Propel\Runtime\Connection\ConnectionInterface $con The ConnectionInterface connection to use.
+ *
+ * @return int
+ */
+public function getLastVersionNumber(?ConnectionInterface $con = null): int
+{
+    $v = ChildTableVersionQuery::create()
+        ->filterByTable($this)
+        ->orderByCustomversion('desc')
+        ->findOne($con);
+    if (!$v) {
+        return 0;
+    }
+
+    return $v->getCustomversion();
+}
+
+/**
+ * Checks whether the current object is the latest one
+ *
+ * @param \Propel\Runtime\Connection\ConnectionInterface $con The ConnectionInterface connection to use.
+ *
+ * @return bool
+ */
+public function isLastVersion(?ConnectionInterface $con = null)
+{
+    return $this->getLastVersionNumber($con) == $this->getVersion();
+}
+
+/**
+ * Retrieves a version object for this entity and a version number
+ *
+ * @param int $versionNumber The version number to read
+ * @param \Propel\Runtime\Connection\ConnectionInterface|null $con The ConnectionInterface connection to use.
+ *
+ * @return ChildTableVersion A version object
+ */
+public function getOneVersion(int $versionNumber, ?ConnectionInterface $con = null)
+{
+    return ChildTableVersionQuery::create()
+        ->filterByTable($this)
+        ->filterByCustomversion($versionNumber)
+        ->findOne($con);
+}
+
+/**
+ * Gets all the versions of this object, in incremental order
+ *
+ * @param \Propel\Runtime\Connection\ConnectionInterface $con The ConnectionInterface connection to use.
+ *
+ * @return ObjectCollection|ChildTableVersion[] A list of ChildTableVersion objects
+ */
+public function getAllVersions(?ConnectionInterface $con = null)
+{
+    $criteria = new Criteria();
+    $criteria->addAscendingOrderByColumn(TableVersionTableMap::COL_CUSTOMVERSION);
+
+    return $this->getTableVersions($criteria, $con);
+}
+
+/**
+ * Compares the current object with another of its version.
+ * <code>
+ * print_r($book->compareVersion(1));
+ * => array(
+ *   '1' => array('Title' => 'Book title at version 1'),
+ *   '2' => array('Title' => 'Book title at version 2')
+ * );
+ * </code>
+ *
+ * @param int $versionNumber
+ * @param string $keys Main key used for the result diff (versions|columns)
+ * @param \Propel\Runtime\Connection\ConnectionInterface $con The ConnectionInterface connection to use.
+ * @param array $ignoredColumns  The columns to exclude from the diff.
+ *
+ * @return array A list of differences
+ */
+public function compareVersion(int $versionNumber, string $keys = 'columns', ?ConnectionInterface $con = null, array $ignoredColumns = []): array
+{
+    $fromVersion = $this->toArray();
+    $toVersion = $this->getOneVersion($versionNumber, $con)->toArray();
+
+    return $this->computeDiff($fromVersion, $toVersion, $keys, $ignoredColumns);
+}
+
+/**
+ * Compares two versions of the current object.
+ * <code>
+ * print_r($book->compareVersions(1, 2));
+ * => array(
+ *   '1' => array('Title' => 'Book title at version 1'),
+ *   '2' => array('Title' => 'Book title at version 2')
+ * );
+ * </code>
+ *
+ * @param int $fromVersionNumber
+ * @param int $toVersionNumber
+ * @param string $keys Main key used for the result diff (versions|columns)
+ * @param \Propel\Runtime\Connection\ConnectionInterface|null $con The ConnectionInterface connection to use.
+ * @param array $ignoredColumns  The columns to exclude from the diff.
+ *
+ * @return array A list of differences
+ */
+public function compareVersions(int $fromVersionNumber, int $toVersionNumber, string $keys = 'columns', ?ConnectionInterface $con = null, array $ignoredColumns = []): array
+{
+    $fromVersion = $this->getOneVersion($fromVersionNumber, $con)->toArray();
+    $toVersion = $this->getOneVersion($toVersionNumber, $con)->toArray();
+
+    return $this->computeDiff($fromVersion, $toVersion, $keys, $ignoredColumns);
+}
+
+/**
+ * Computes the diff between two versions.
+ * <code>
+ * print_r($book->computeDiff(1, 2));
+ * => array(
+ *   '1' => array('Title' => 'Book title at version 1'),
+ *   '2' => array('Title' => 'Book title at version 2')
+ * );
+ * </code>
+ *
+ * @param array $fromVersion     An array representing the original version.
+ * @param array $toVersion       An array representing the destination version.
+ * @param string $keys            Main key used for the result diff (versions|columns).
+ * @param array $ignoredColumns  The columns to exclude from the diff.
+ *
+ * @return array A list of differences
+ */
+protected function computeDiff($fromVersion, $toVersion, $keys = 'columns', $ignoredColumns = [])
+{
+    $fromVersionNumber = $fromVersion['Customversion'];
+    $toVersionNumber = $toVersion['Customversion'];
+    $ignoredColumns = array_merge(array(
+        'Customversion',
+    ), $ignoredColumns);
+    $diff = [];
+    foreach ($fromVersion as $key => $value) {
+        if (in_array($key, $ignoredColumns)) {
+            continue;
+        }
+        if ($toVersion[$key] != $value) {
+            switch ($keys) {
+                case 'versions':
+                    $diff[$fromVersionNumber][$key] = $value;
+                    $diff[$toVersionNumber][$key] = $toVersion[$key];
+                    break;
+                default:
+                    $diff[$key] = [
+                        $fromVersionNumber => $value,
+                        $toVersionNumber => $toVersion[$key],
+                    ];
+                    break;
+            }
+        }
+    }
+
+    return $diff;
+}
+/**
+ * Retrieve the last $number versions.
+ *
+ * @param int $number The number of record to return.
+ * @param \Propel\Runtime\ActiveQuery\Criteria $criteria The Criteria object containing modified values.
+ * @param \Propel\Runtime\Connection\ConnectionInterface $con The ConnectionInterface connection to use.
+ *
+ * @return PropelCollection|\TableVersion[] List of \TableVersion objects
+ */
+public function getLastVersions($number = 10, $criteria = null, ?ConnectionInterface $con = null)
+{
+    $criteria = ChildTableVersionQuery::create(null, $criteria);
+    $criteria->addDescendingOrderByColumn(TableVersionTableMap::COL_VERSION);
+    $criteria->limit($number);
+
+    return $this->getTableVersions($criteria, $con);
+}
+
+objectAttributes:
+
+// versionable behavior
+
+
+/**
+ * @var bool
+ */
+protected $enforceVersion = false;
+        
+
+preSave:
+
+// versionable behavior
+if ($this->isVersioningNecessary()) {
+    $this->setCustomversion($this->isNew() ? 1 : $this->getLastVersionNumber($con) + 1);
+    $createVersion = true; // for postSave hook
+}
+
+postSave:
+
+// versionable behavior
+if (isset($createVersion)) {
+    $this->addVersion($con);
+}
