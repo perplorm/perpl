@@ -33,31 +33,31 @@
  *
 <?php endif; ?>
 <?php foreach($columns as $column):?>
- * @method static orderBy<?= $column->getPhpName() ?>($order = \Propel\Runtime\ActiveQuery\Criteria::ASC) Order by the <?= $column->getName() ?> column
+ * @method $this orderBy<?= $column->getPhpName() ?>($order = \Propel\Runtime\ActiveQuery\Criteria::ASC) Order by the <?= $column->getName() ?> column
 <?php endforeach;?>
  *
 <?php foreach($columns as $column):?>
- * @method static groupBy<?= $column->getPhpName() ?>() Group by the <?= $column->getName() ?> column
+ * @method $this groupBy<?= $column->getPhpName() ?>() Group by the <?= $column->getName() ?> column
 <?php endforeach;?>
  *
- * @method static leftJoin($relation) Adds a LEFT JOIN clause to the query
- * @method static rightJoin($relation) Adds a RIGHT JOIN clause to the query
- * @method static innerJoin($relation) Adds a INNER JOIN clause to the query
+ * @method $this leftJoin($relation) Adds a LEFT JOIN clause to the query
+ * @method $this rightJoin($relation) Adds a RIGHT JOIN clause to the query
+ * @method $this innerJoin($relation) Adds a INNER JOIN clause to the query
  *
- * @method static leftJoinWith($relation) Adds a LEFT JOIN clause and with to the query
- * @method static rightJoinWith($relation) Adds a RIGHT JOIN clause and with to the query
- * @method static innerJoinWith($relation) Adds a INNER JOIN clause and with to the query
+ * @method $this leftJoinWith($relation) Adds a LEFT JOIN clause and with to the query
+ * @method $this rightJoinWith($relation) Adds a RIGHT JOIN clause and with to the query
+ * @method $this innerJoinWith($relation) Adds a INNER JOIN clause and with to the query
  *
 <?php foreach($relationNames as $relationName):?>
- * @method static leftJoin<?= $relationName ?>($relationAlias = null) Adds a LEFT JOIN clause to the query using the <?= $relationName ?> relation
- * @method static rightJoin<?= $relationName ?>($relationAlias = null) Adds a RIGHT JOIN clause to the query using the <?= $relationName ?> relation
- * @method static innerJoin<?= $relationName ?>($relationAlias = null) Adds a INNER JOIN clause to the query using the <?= $relationName ?> relation
+ * @method $this leftJoin<?= $relationName ?>($relationAlias = null) Adds a LEFT JOIN clause to the query using the <?= $relationName ?> relation
+ * @method $this rightJoin<?= $relationName ?>($relationAlias = null) Adds a RIGHT JOIN clause to the query using the <?= $relationName ?> relation
+ * @method $this innerJoin<?= $relationName ?>($relationAlias = null) Adds a INNER JOIN clause to the query using the <?= $relationName ?> relation
  *
- * @method static joinWith<?= $relationName ?>($joinType = \Propel\Runtime\ActiveQuery\Criteria::INNER_JOIN) Adds a join clause and with to the query using the <?= $relationName ?> relation
+ * @method $this joinWith<?= $relationName ?>($joinType = \Propel\Runtime\ActiveQuery\Criteria::INNER_JOIN) Adds a join clause and with to the query using the <?= $relationName ?> relation
  *
- * @method static leftJoinWith<?= $relationName ?>() Adds a LEFT JOIN clause and with to the query using the <?= $relationName ?> relation
- * @method static rightJoinWith<?= $relationName ?>() Adds a RIGHT JOIN clause and with to the query using the <?= $relationName ?> relation
- * @method static innerJoinWith<?= $relationName ?>() Adds a INNER JOIN clause and with to the query using the <?= $relationName ?> relation
+ * @method $this leftJoinWith<?= $relationName ?>() Adds a LEFT JOIN clause and with to the query using the <?= $relationName ?> relation
+ * @method $this rightJoinWith<?= $relationName ?>() Adds a RIGHT JOIN clause and with to the query using the <?= $relationName ?> relation
+ * @method $this innerJoinWith<?= $relationName ?>() Adds a INNER JOIN clause and with to the query using the <?= $relationName ?> relation
  *
 <?php endforeach; ?>
  * @method <?= $modelClass ?>|null findOne(\Propel\Runtime\Connection\ConnectionInterface|null $con = null) Return the first <?= $modelClass ?> matching the query
