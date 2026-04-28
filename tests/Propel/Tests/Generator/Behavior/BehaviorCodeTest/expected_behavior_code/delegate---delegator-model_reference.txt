@@ -1,0 +1,69 @@
+
+
+objectFilter:
+
+    /**
+     * Exports the object as an array.
+     *
+     * You can specify the key type of the array by passing one of the class
+     * type constants.
+     *
+     * @param string $keyType (optional) One of the class type constants TableMap::TYPE_PHPNAME, TableMap::TYPE_CAMELNAME,
+     *                    TableMap::TYPE_COLNAME, TableMap::TYPE_FIELDNAME, TableMap::TYPE_NUM.
+     *                    Defaults to TableMap::TYPE_PHPNAME.
+     * @param bool $includeLazyLoadColumns (optional) Whether to include lazy loaded columns. Defaults to TRUE.
+     * @param array<string, array<string|bool>> $alreadyDumpedObjects List of objects to skip to avoid recursion
+     * @param bool $includeForeignObjects (optional) Whether to include hydrated related objects. Default to FALSE.
+     *
+     * @return array<mixed> An associative array containing the field names (as keys) and field values
+     */
+    public function toArray(
+        string $keyType = TableMap::TYPE_PHPNAME,
+        bool $includeLazyLoadColumns = true,
+        array $alreadyDumpedObjects = [],
+        bool $includeForeignObjects = false
+    ): array {
+        if (isset($alreadyDumpedObjects['Delegator'][$this->hashCode()])) {
+            return ['*RECURSION*'];
+        }
+        $alreadyDumpedObjects['Delegator'][$this->hashCode()] = true;
+        $keys = DelegatorTableMap::getFieldNames($keyType);
+        $keys_resolver = \Map\ResolverTableMap::getFieldNames($keyType);
+        $result = [
+            $keys[0] => $this->getId(),
+            $keys_resolver[1] => $this->getDelegatedColumn(),
+
+        ];
+
+        foreach ($this->virtualColumns as $key => $virtualColumn) {
+            $result[$key] = $virtualColumn;
+        }
+
+        if ($includeForeignObjects) {
+            if ($this->singleResolver !== null) {
+                $key = match ($keyType) {
+                     TableMap::TYPE_CAMELNAME => 'resolver',
+                     TableMap::TYPE_FIELDNAME => 'resolver',
+                     default => 'Resolver',
+                };
+                $result[$key] = $this->singleResolver->toArray($keyType, $includeLazyLoadColumns, $alreadyDumpedObjects, true);
+            }
+        }
+
+        return $result;
+    }
+
+
+objectCall:
+
+// delegate behavior
+
+if (method_exists(\Resolver::class, $name)) {
+    $delegate = $this->getResolver();
+    if (!$delegate) {
+        $delegate = new ChildResolver();
+        $this->setResolver($delegate);
+    }
+
+    return $delegate->$name(...$params);
+}

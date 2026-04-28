@@ -1,0 +1,172 @@
+
+
+objectMethods:
+
+// sluggable behavior
+
+/**
+ * Wrap the setter for slug value
+ *
+ * @param string
+ * @return $this
+ */
+public function setSlug($v)
+{
+    $this->setUrl($v);
+
+    return $this;
+}
+
+/**
+ * Wrap the getter for slug value
+ *
+ * @return string
+ */
+public function getSlug()
+{
+    return $this->getUrl();
+}
+
+/**
+ * Create a unique slug based on the object
+ *
+ * @return string The object slug
+ */
+protected function createSlug(): string
+{
+    $slug = $this->createRawSlug();
+    $slug = $this->limitSlugSize($slug);
+    $slug = $this->makeSlugUnique($slug);
+
+    return $slug;
+}
+
+/**
+ * Create the slug from the appropriate columns
+ *
+ * @return string
+ */
+protected function createRawSlug(): string
+{
+    return '/foo/' . $this->cleanupSlugPart((string)$this->getTitle()) . '/bar';
+}
+
+/**
+ * Cleanup a string to make a slug of it
+ * Removes special characters, replaces blanks with a separator, and trim it
+ *
+ * @param string $slug        the text to slugify
+ * @param string $replacement the separator used by slug
+ * @return string the slugified text
+ */
+protected static function cleanupSlugPart(string $slug, string $replacement = '-'): string
+{
+    // set locale explicitly
+    $localeOrigin = setlocale(LC_CTYPE, '0');
+    setlocale(LC_CTYPE, 'C.UTF-8');
+
+    // transliterate
+    if (function_exists('iconv')) {
+        $slug = iconv('utf-8', 'us-ascii//TRANSLIT', $slug);
+    }
+
+    // lowercase
+    $slug = function_exists('mb_strtolower') ? mb_strtolower($slug) : strtolower($slug);
+
+    // remove accents resulting from OSX's iconv
+    $slug = str_replace(array('\'', '`', '^'), '', $slug);
+
+    // replace non letter or digits with separator
+    $slug = preg_replace('/[^\w\/]+/', $replacement, $slug);
+
+    $slug = trim($slug, $replacement);
+
+    setlocale(LC_CTYPE, $localeOrigin);
+
+    return empty($slug) ? 'n-a' : $slug;
+}
+
+
+/**
+ * Make sure the slug is short enough to accommodate the column size
+ *
+ * @param string $slug The slug to check
+ * @param int $incrementReservedSpace Space to reserve
+ *
+ * @return string The truncated slug
+ */
+protected static function limitSlugSize(string $slug, int $incrementReservedSpace = 3): string
+{
+    // check length, as suffix could put it over maximum
+    if (strlen($slug) > (100 - $incrementReservedSpace)) {
+        $slug = substr($slug, 0, 100 - $incrementReservedSpace);
+    }
+
+    return $slug;
+}
+
+
+/**
+ * Get the slug, ensuring its uniqueness
+ *
+ * @param string $slug            the slug to check
+ * @param string $separator       the separator used by slug
+ * @param bool $alreadyExists   false for the first try, true for the second, and take the high count + 1
+ * @return string the unique slug
+ */
+protected function makeSlugUnique(string $slug, string $separator = '/', bool $alreadyExists = false)
+{
+    if (!$alreadyExists) {
+        $slug2 = $slug;
+    } else {
+        $slug2 = $slug . $separator;
+    }
+
+    $adapter = \Propel\Runtime\Propel::getServiceContainer()->getAdapter('');
+    $col = 'q.Url';
+    $compare = $alreadyExists ? $adapter->compareRegex($col, '?') : sprintf('%s = ?', $col);
+
+    $query = \TableQuery::create('q')
+        ->where($compare, $alreadyExists ? '^' . $slug2 . '[0-9]+$' : $slug2)
+        ->prune($this)
+    ;
+
+    if (!$alreadyExists) {
+        $count = $query->count();
+        if ($count > 0) {
+            return $this->makeSlugUnique($slug, $separator, true);
+        }
+
+        return $slug2;
+    }
+
+    $adapter = \Propel\Runtime\Propel::getServiceContainer()->getAdapter('');
+    // Already exists
+    $object = $query
+        ->addDescendingOrderByColumn($adapter->strLength('url'))
+        ->addDescendingOrderByColumn('url')
+    ->findOne();
+
+    // First duplicate slug
+    if ($object === null) {
+        return $slug2 . '1';
+    }
+
+    $slugNum = substr($object->getUrl(), strlen($slug) + 1);
+    if ($slugNum[0] == 0) {
+        $slugNum[0] = 1;
+    }
+
+    return $slug2 . ($slugNum + 1);
+}
+
+
+preSave:
+
+// sluggable behavior
+
+if ($this->isColumnModified(TableTableMap::COL_URL) && $this->getUrl()) {
+    $this->setUrl($this->makeSlugUnique($this->getUrl()));
+} elseif (!$this->getUrl()) {
+    $this->setUrl($this->createSlug());
+}

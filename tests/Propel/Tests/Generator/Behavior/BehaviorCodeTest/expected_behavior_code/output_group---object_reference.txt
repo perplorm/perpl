@@ -1,0 +1,51 @@
+
+
+objectMethods:
+
+// output_group behavior
+
+/**
+ * Export subset of object fields as specified by output group.
+ *
+ * @param string|array<string,string> $outputGroup  Name of the output group used for all tables or 
+ *                                                  an array mapping model classes to output group name.
+ *                                                  If a model class does not have a definition for the
+ *                                                  given output group, the whole data is returned.
+ * @param string $keyType (optional) One of the class type constants TableMap::TYPE_PHPNAME,
+ *                                        TableMap::TYPE_CAMELNAME, TableMap::TYPE_COLNAME, TableMap::TYPE_FIELDNAME,
+ *                                        TableMap::TYPE_NUM. Defaults to TableMap::TYPE_PHPNAME.
+ * @param array $alreadyDumpedObjects   Internally used on recursion, typically not set by user (List of 
+ *                                      objects to skip to avoid recursion).
+ * @return array
+ */
+public function toOutputGroup(
+    $outputGroup,
+    string $keyType = TableMap::TYPE_PHPNAME,
+    array $alreadyDumpedObjects = []
+): array
+{
+    if (isset($alreadyDumpedObjects['Table'][$this->hashCode()])) {
+        return ['*RECURSION*'];
+    }
+    $alreadyDumpedObjects['Table'][$this->hashCode()] = true;
+    $keys = TableTableMap::getFieldNames($keyType);
+    $outputGroupName = is_string($outputGroup) ? $outputGroup : $outputGroup[get_class($this)] ?? $outputGroup['default'] ?? '';
+    [
+        'column_index' => $columnIndexes, 
+        'relation' => $relationsLookup
+    ] = TableTableMap::getOutputGroupData($outputGroupName);
+    $result = [];
+
+    foreach($columnIndexes as $columnIndex){
+        $columnName = $keys[$columnIndex];
+        $columnValue = $this->getByPosition($columnIndex);
+        $result[$columnName] = $columnValue;
+    }
+
+    $virtualColumns = $this->virtualColumns;
+    foreach ($virtualColumns as $key => $virtualColumn) {
+        $result[$key] = $virtualColumn;
+    }
+
+    return $result;
+}

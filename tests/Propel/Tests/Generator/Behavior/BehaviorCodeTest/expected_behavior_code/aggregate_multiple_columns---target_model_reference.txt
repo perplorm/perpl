@@ -1,0 +1,33 @@
+
+
+objectMethods:
+
+// aggregate_multiple_columns behavior
+
+/**
+ * Computes the value of the aggregate columns defined as AggregatedColumnsFromSourceTable ?>
+ *
+ * @param \Propel\Runtime\Connection\ConnectionInterface $con A connection object
+ *
+ * @return array The result row from the aggregate query
+ */
+public function computeAggregatedColumnsFromSourceTable(ConnectionInterface $con)
+{
+    $stmt = $con->prepare('SELECT SUM(score) AS TotalScore, COUNT(score) AS NumberOfScores FROM source_table WHERE source_table.FK = :p1');
+    $stmt->bindValue(':p1', $this->getId());
+    $stmt->execute();
+
+    return $stmt->fetch(\PDO::FETCH_NUM);
+}
+
+/**
+ * Updates the aggregate columns defined as AggregatedColumnsFromSourceTable *
+ * @param \Propel\Runtime\Connection\ConnectionInterface $con A connection object
+ */
+public function updateAggregatedColumnsFromSourceTable(ConnectionInterface $con)
+{
+    $aggregatedValues = $this->computeAggregatedColumnsFromSourceTable($con);
+    $this->setTotalScore($aggregatedValues[0]);
+    $this->setNumberOfScores($aggregatedValues[1]);
+    $this->save($con);
+}

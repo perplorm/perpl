@@ -1,0 +1,224 @@
+
+
+queryMethods:
+
+// sortable behavior
+
+/**
+ * Filter the query based on a rank in the list
+ *
+ * @param int $rank rank
+ *
+ * @return static
+ */
+public function filterByRank($rank)
+{
+    return $this
+        ->addUsingOperator(TableTableMap::RANK_COL, $rank, Criteria::EQUAL);
+}
+
+/**
+ * Order the query based on the rank in the list.
+ * Using the default $order, returns the item with the lowest rank first
+ *
+ * @param string $order either Criteria::ASC (default) or Criteria::DESC
+ *
+ * @return $this
+ */
+public function orderByRank(string $order = Criteria::ASC)
+{
+    $order = strtoupper($order);
+    switch ($order) {
+        case Criteria::ASC:
+            $this->addAscendingOrderByColumn($this->getAliasedColName(TableTableMap::RANK_COL));
+
+            return $this;
+        case Criteria::DESC:
+            $this->addDescendingOrderByColumn($this->getAliasedColName(TableTableMap::RANK_COL));
+
+            return $this;
+        default:
+            throw new PropelException('ChildTableQuery::orderBy() only accepts "asc" or "desc" as argument');
+    }
+}
+
+/**
+ * Get an item from the list based on its rank
+ *
+ * @param int $rank rank
+ * @param \Propel\Runtime\Connection\ConnectionInterface $con optional connection
+ *
+ * @return ChildTable
+ */
+public function findOneByRank($rank, ?ConnectionInterface $con = null)
+{
+
+    return $this
+        ->filterByRank($rank)
+        ->findOne($con);
+}
+
+/**
+ * Returns the list of objects
+ *
+ * @param \Propel\Runtime\Connection\ConnectionInterface $con Connection to use.
+ *
+ * @return mixed the list of results, formatted by the current formatter
+ */
+public function findList($con = null)
+{
+
+    return $this
+        ->orderByRank()
+        ->find($con);
+}
+
+/**
+ * Get the highest rank
+ * 
+ * @param \Propel\Runtime\Connection\ConnectionInterface $con Optional connection
+ *
+ * @return int|null Highest position
+ */
+public function getMaxRank(?ConnectionInterface $con = null): ?int
+{
+    if (null === $con) {
+        $con = Propel::getServiceContainer()->getReadConnection(TableTableMap::DATABASE_NAME);
+    }
+    // shift the objects with a position lower than the one of object
+    $this->addSelectColumn('MAX(' . TableTableMap::RANK_COL . ')');
+    $stmt = $this->doSelect($con);
+
+    return $stmt->fetchColumn();
+}
+
+/**
+ * Get the highest rank by a scope with a array format.
+ * 
+ * @param \Propel\Runtime\Connection\ConnectionInterface $con Optional connection
+ *
+ * @return int|null Highest position
+ */
+public function getMaxRankArray(?ConnectionInterface $con = null): ?int
+{
+    if ($con === null) {
+        $con = Propel::getConnection(TableTableMap::DATABASE_NAME);
+    }
+    // shift the objects with a position lower than the one of object
+    $this->addSelectColumn('MAX(' . TableTableMap::RANK_COL . ')');
+    $stmt = $this->doSelect($con);
+
+    return $stmt->fetchColumn();
+}
+
+/**
+ * Get an item from the list based on its rank
+ *
+ * @param int $rank rank
+ * @param \Propel\Runtime\Connection\ConnectionInterface $con optional connection
+ *
+ * @return ChildTable
+ */
+static public function retrieveByRank($rank, ?ConnectionInterface $con = null)
+{
+    if (null === $con) {
+        $con = Propel::getServiceContainer()->getReadConnection(TableTableMap::DATABASE_NAME);
+    }
+
+    $c = new Criteria;
+    $c->addAnd(TableTableMap::RANK_COL, $rank);
+
+    return static::create(null, $c)->findOne($con);
+}
+
+/**
+ * Reorder a set of sortable objects based on a list of id/position
+ * Beware that there is no check made on the positions passed
+ * So incoherent positions will result in an incoherent list
+ *
+ * @param mixed $order id => rank pairs
+ * @param \Propel\Runtime\Connection\ConnectionInterface $con   optional connection
+ *
+ * @return bool true if the reordering took place, false if a database problem prevented it
+ */
+public function reorder($order, ?ConnectionInterface $con = null)
+{
+    if (null === $con) {
+        $con = Propel::getServiceContainer()->getReadConnection(TableTableMap::DATABASE_NAME);
+    }
+
+    $con->transaction(function () use ($con, $order) {
+        $ids = array_keys($order);
+        $objects = $this->findPks($ids, $con);
+        /** @var Table $object */
+        foreach ($objects as $object) {
+            $pk = $object->getPrimaryKey();
+            if ($object->getSortableRank() != $order[$pk]) {
+                $object->setSortableRank($order[$pk]);
+                $object->save($con);
+            }
+        }
+    });
+
+    return true;
+}
+
+/**
+ * Return an array of sortable objects ordered by position
+ *
+ * @param \Propel\Runtime\ActiveQuery\Criteria $criteria  optional criteria object
+ * @param string $order     sorting order, to be chosen between Criteria::ASC (default) and Criteria::DESC
+ * @param \Propel\Runtime\Connection\ConnectionInterface $con       optional connection
+ *
+ * @return array|\Propel\Runtime\Collection\Collection list of sortable objects
+ */
+static public function doSelectOrderByRank(?Criteria $criteria = null, $order = Criteria::ASC, ?ConnectionInterface $con = null)
+{
+    if (null === $con) {
+        $con = Propel::getServiceContainer()->getReadConnection(TableTableMap::DATABASE_NAME);
+    }
+
+    if (null === $criteria) {
+        $criteria = new Criteria();
+    } elseif ($criteria instanceof Criteria) {
+        $criteria = clone $criteria;
+    }
+
+    $criteria->clearOrderByColumns();
+
+    if (Criteria::ASC == $order) {
+        $criteria->addAscendingOrderByColumn(TableTableMap::RANK_COL);
+    } else {
+        $criteria->addDescendingOrderByColumn(TableTableMap::RANK_COL);
+    }
+
+    return ChildTableQuery::create(null, $criteria)->find($con);
+}
+
+/**
+ * Adds $delta to all Rank values that are >= $first and <= $last.
+ * '$delta' can also be negative.
+ *
+ * @param int $delta Value to be shifted by, can be negative
+ * @param int $first First node to be shifted
+ * @param int $last  Last node to be shifted
+ * @param \Propel\Runtime\Connection\ConnectionInterface $con Connection to use.
+ */
+static public function sortableShiftRank($delta, $first, $last = null, ?ConnectionInterface $con = null)
+{
+    if (null === $con) {
+        $con = Propel::getServiceContainer()->getWriteConnection(TableTableMap::DATABASE_NAME);
+    }
+
+    $whereCriteria = new Criteria(TableTableMap::DATABASE_NAME);
+    $criterion = $whereCriteria->getNewCriterion(TableTableMap::RANK_COL, $first, Criteria::GREATER_EQUAL);
+    if (null !== $last) {
+        $criterion->addAnd($whereCriteria->getNewCriterion(TableTableMap::RANK_COL, $last, Criteria::LESS_EQUAL));
+    }
+    $whereCriteria->addFilter($criterion);
+
+    $whereCriteria->setUpdateExpression(TableTableMap::RANK_COL, TableTableMap::RANK_COL . ' + ?', $delta, \PDO::PARAM_INT);
+
+    $whereCriteria->doUpdate(null, $con);
+    TableTableMap::clearInstancePool();
+}

@@ -1,0 +1,79 @@
+
+
+queryMethods:
+
+// timestampable behavior
+
+/**
+ * Filter by the latest updated
+ *
+ * @param int $nbDays Maximum age of the latest update in days
+ *
+ * @return $this
+ */
+public function recentlyUpdated($nbDays = 7)
+{
+    $this->addUsingOperator($this->resolveLocalColumnByName('updated_at'), time() - $nbDays * 24 * 60 * 60, Criteria::GREATER_EQUAL);
+
+    return $this;
+}
+
+/**
+ * Order by update date desc
+ *
+ * @return $this
+ */
+public function lastUpdatedFirst()
+{
+    $this->addDescendingOrderByColumn(TableTableMap::COL_UPDATED_AT);
+
+    return $this;
+}
+
+/**
+ * Order by update date asc
+ *
+ * @return $this
+ */
+public function firstUpdatedFirst()
+{
+    $this->addAscendingOrderByColumn(TableTableMap::COL_UPDATED_AT);
+
+    return $this;
+}
+
+/**
+ * Order by create date desc
+ *
+ * @return $this
+ */
+public function lastCreatedFirst()
+{
+    $this->addDescendingOrderByColumn(TableTableMap::COL_CREATED_AT);
+
+    return $this;
+}
+
+/**
+ * Filter by the latest created
+ *
+ * @param int $nbDays Maximum age of in days
+ *
+ * @return static
+ */
+public function recentlyCreated($nbDays = 7)
+{
+    return $this->addUsingOperator($this->resolveLocalColumnByName('created_at'), time() - $nbDays * 24 * 60 * 60, Criteria::GREATER_EQUAL);
+}
+
+/**
+ * Order by create date asc
+ *
+ * @return $this
+ */
+public function firstCreatedFirst()
+{
+    $this->addAscendingOrderByColumn(TableTableMap::COL_CREATED_AT);
+
+    return $this;
+}

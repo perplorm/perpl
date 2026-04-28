@@ -1650,13 +1650,7 @@ class Table extends ScopedMappingModel implements IdMethod
      */
     public function hasValueSetColumns(): bool
     {
-        foreach ($this->columns as $col) {
-            if ($col->isValueSetType()) {
-                return true;
-            }
-        }
-
-        return false;
+        return array_any($this->columns, fn (Column $col) => $col->isValueSetType());
     }
 
     /**

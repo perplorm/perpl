@@ -1,0 +1,427 @@
+
+
+objectMethods:
+
+// i18n behavior
+
+/**
+ * Sets the locale for translations
+ *
+ * @param string $locale Locale to use for the translation, e.g. 'fr_FR'
+ *
+ * @return $this The current object (for fluent API support)
+ */
+public function setLanguage($locale = 'en_US')
+{
+    $this->currentLocale = $locale;
+
+    return $this;
+}
+
+/**
+ * Gets the locale for translations
+ *
+ * @return string $locale Locale to use for the translation, e.g. 'fr_FR'
+ */
+public function getLanguage()
+{
+    return $this->currentLocale;
+}
+
+/**
+ * Gets the locale for translations.
+ * Alias for getLocale(), for BC purpose.
+ *
+ * @return string $locale Locale to use for the translation, e.g. 'fr_FR'
+ */
+public function getCulture()
+{
+    return $this->getLanguage();
+}
+
+/**
+ * Sets the locale for translations.
+ * Alias for setLocale(), for BC purpose.
+ *
+ * @param string $locale Locale to use for the translation, e.g. 'fr_FR'
+ *
+ * @return $this|ChildTable The current object (for fluent API support)
+ */
+public function setCulture($locale = 'en_US')
+{
+    return $this->setLanguage($locale);
+}
+
+/**
+ * Returns the current translation for a given locale
+ *
+ * @param string $locale Locale to use for the translation, e.g. 'fr_FR'
+ * @param \Propel\Runtime\Connection\ConnectionInterface|null $con an optional connection object
+ *
+ * @return ChildTableI18n */
+public function getTranslation(string $locale = 'en_US', ?ConnectionInterface $con = null)
+{
+    if (!isset($this->currentTranslations[$locale])) {
+        if (null !== $this->collTableI18ns) {
+            foreach ($this->collTableI18ns as $translation) {
+                if ($translation->getLanguage() == $locale) {
+                    $this->currentTranslations[$locale] = $translation;
+
+                    return $translation;
+                }
+            }
+        }
+        if ($this->isNew()) {
+            $translation = new ChildTableI18n();
+            $translation->setLanguage($locale);
+        } else {
+            $translation = ChildTableI18nQuery::create()
+                ->filterByPrimaryKey(array($this->getPrimaryKey(), $locale))
+                ->findOneOrCreate($con);
+            $this->currentTranslations[$locale] = $translation;
+        }
+        $this->addTableI18n($translation);
+    }
+
+    return $this->currentTranslations[$locale];
+}
+
+/**
+ * Remove the translation for a given locale
+ *
+ * @param string $locale Locale to use for the translation, e.g. 'fr_FR'
+ * @param \Propel\Runtime\Connection\ConnectionInterface|null $con an optional connection object
+ *
+ * @return $this The current object (for fluent API support)
+ */
+public function removeTranslation(string $locale = 'en_US', ?ConnectionInterface $con = null)
+{
+    if (!$this->isNew()) {
+        ChildTableI18nQuery::create()
+            ->filterByPrimaryKey(array($this->getPrimaryKey(), $locale))
+            ->delete($con);
+    }
+    unset($this->currentTranslations[$locale]);
+    foreach ($this->collTableI18ns as $key => $translation) {
+        if ($translation->getLanguage() == $locale) {
+            unset($this->collTableI18ns[$key]);
+            break;
+        }
+    }
+
+    return $this;
+}
+
+/**
+ * Returns the current translation
+ *
+ * @param \Propel\Runtime\Connection\ConnectionInterface|null $con an optional connection object
+ *
+ * @return ChildTableI18n 
+ */
+public function getCurrentTranslation(?ConnectionInterface $con = null)
+{
+    return $this->getTranslation($this->getLanguage(), $con);
+}
+
+/**
+* Get the [bar] column value.
+*
+* @return string|null
+*/
+public function getBar()
+{
+    return $this->getCurrentTranslation()->getBar();
+}
+
+/**
+* Set the value of [bar] column.
+*
+* @param string|null $v New value
+*
+* @return $this
+*/
+public function setBar($v)
+{    $this->getCurrentTranslation()->setBar($v);
+
+    return $this;
+}
+
+
+objectFilter:
+
+    /**
+     * Initializes the collTableI18ns collection.
+     *
+     * By default this just sets the collTableI18ns collection to an empty array (like clearcollTableI18ns());
+     * however, you may wish to override this method in your stub class to provide setting appropriate
+     * to your application -- for example, setting the initial array to the values stored in database.
+     *
+     * @param bool $overrideExisting If set to true, the method call initializes
+     *                                        the collection even if it is not empty
+     *
+     * @return void
+     */
+    public function initTableI18ns(bool $overrideExisting = true): void
+    {
+        if ($this->collTableI18ns !== null && !$overrideExisting) {
+            return;
+        }
+
+        $this->collTableI18ns = new TableI18nCollection();
+        $this->collTableI18ns->setModel('\TableI18n');
+    }
+
+    /**
+     * Reset is the collTableI18ns collection loaded partially.
+     *
+     * @param bool $isPartial
+     *
+     * @return void
+     */
+    public function resetPartialTableI18ns(bool $isPartial = true): void
+    {
+        $this->collTableI18nsPartial = $isPartial;
+    }
+
+    /**
+     * Clears out the collTableI18ns collection
+     *
+     * This does not modify the database; however, it will remove any associated objects, causing
+     * them to be refetched by subsequent calls to accessor method.
+     *
+     * @return static
+     */
+    public function clearTableI18ns(): static
+    {
+        $this->collTableI18ns = null;
+
+        return $this;
+    }
+
+    /**
+     * Gets table objects which contain a foreign key that references this object.
+     *
+     * If the $criteria is not null, it is used to always fetch the results from the database.
+     * Otherwise the results are fetched from the database the first time, then cached.
+     * Next time the same method is called without $criteria, the cached collection is returned.
+     * If this Table is new, it will return
+     * an empty collection or the current collection; the criteria is ignored on a new object.
+     *
+     * @param \Propel\Runtime\ActiveQuery\Criteria|null $criteria
+     * @param \Propel\Runtime\Connection\ConnectionInterface|null $con
+     *
+     * @return \Base\Collection\TableI18nCollection
+     */
+    public function getTableI18ns(?Criteria $criteria = null, ?ConnectionInterface $con = null): TableI18nCollection
+    {
+        $partial = $this->collTableI18nsPartial && !$this->isNew();
+        if ($this->collTableI18ns && !$criteria && !$partial) {
+            return $this->collTableI18ns;
+        }
+
+        if ($this->isNew()) {
+            // return empty collection
+            if ($this->collTableI18ns === null) {
+                $this->initTableI18ns();
+
+                return $this->collTableI18ns;
+            }
+
+            $collTableI18ns = new TableI18nCollection();
+            $collTableI18ns->setModel('\TableI18n');
+
+            return $collTableI18ns;
+        }
+
+        $collTableI18ns = ChildTableI18nQuery::create(null, $criteria)
+            ->filterByTable($this)
+            ->findObjects($con);
+
+        if ($criteria) {
+            if ($this->collTableI18nsPartial !== false && count($collTableI18ns)) {
+                $this->initTableI18ns(false);
+
+                foreach ($collTableI18ns as $obj) {
+                    if (!$this->collTableI18ns->contains($obj)) {
+                        $this->collTableI18ns->append($obj);
+                    }
+                }
+
+                $this->collTableI18nsPartial = true;
+            }
+
+            return $collTableI18ns;
+        }
+
+        if ($this->collTableI18nsPartial && $this->collTableI18ns) {
+            foreach ($this->collTableI18ns as $obj) {
+                if ($obj->isNew()) {
+                    $collTableI18ns[] = $obj;
+                }
+            }
+        }
+
+        $this->collTableI18ns = $collTableI18ns;
+        $this->collTableI18nsPartial = false;
+
+        return $this->collTableI18ns;
+    }
+
+    /**
+     * Sets a collection of table objects related by a one-to-many relationship
+     * to the current object.
+     *
+     * It will also schedule objects for deletion based on a diff between old objects (aka persisted)
+     * and new objects from the given Propel collection.
+     *
+     * @param \Propel\Runtime\Collection\Collection<\TableI18n> $tableI18ns
+     * @param \Propel\Runtime\Connection\ConnectionInterface|null $con
+     *
+     * @return static
+     */
+    public function setTableI18ns(Collection $tableI18ns, ?ConnectionInterface $con = null): static
+    {
+        $tableI18nsToDelete = $this->getTableI18ns(null, $con)->diff($tableI18ns);
+
+        //since at least one column in the foreign key is at the same time a PK
+        //we can not just set a PK to NULL in the lines below. We have to store
+        //a backup of all values, so we are able to manipulate these items based on the onDelete value later.
+        $this->tableI18nsScheduledForDeletion = clone $tableI18nsToDelete;
+
+        foreach ($tableI18nsToDelete as $tableI18nRemoved) {
+            $tableI18nRemoved->setTable(null);
+        }
+
+        $this->collTableI18ns = null;
+        foreach ($tableI18ns as $tableI18n) {
+            $this->addTableI18n($tableI18n);
+        }
+
+        $this->collTableI18nsPartial = false;
+        $this->collTableI18ns = $tableI18ns instanceof TableI18nCollection
+            ? $tableI18ns : new TableI18nCollection($tableI18ns->getData());
+
+        return $this;
+    }
+
+    /**
+     * Returns the number of related table objects.
+     *
+     * @param \Propel\Runtime\ActiveQuery\Criteria|null $criteria
+     * @param bool $distinct
+     * @param \Propel\Runtime\Connection\ConnectionInterface|null $con
+     *
+     * @return int Count of related table objects.
+     */
+    public function countTableI18ns(?Criteria $criteria = null, bool $distinct = false, ?ConnectionInterface $con = null): int
+    {
+        $partial = $this->collTableI18nsPartial && !$this->isNew();
+        if ($this->collTableI18ns === null || $criteria !== null || $partial) {
+            if ($this->isNew() && $this->collTableI18ns === null) {
+                return 0;
+            }
+
+            if ($partial && !$criteria) {
+                return count($this->getTableI18ns());
+            }
+
+            $query = ChildTableI18nQuery::create(null, $criteria);
+            if ($distinct) {
+                $query->distinct();
+            }
+
+            return $query
+                ->filterByTable($this)
+                ->count($con);
+        }
+
+        return count($this->collTableI18ns);
+    }
+
+    /**
+     * Method called to associate a ChildTableI18n object to this object
+     * through the ChildTableI18n foreign key attribute.
+     *
+     * @param \TableI18n $childTableI18n
+     *
+     * @return $this
+     */
+    public function addTableI18n(ChildTableI18n $childTableI18n)
+    {
+        if ($childTableI18n && $locale = $childTableI18n->getLanguage()) {
+            $this->setLanguage($locale);
+            $this->currentTranslations[$locale] = $childTableI18n;
+        }
+        if ($this->collTableI18ns === null) {
+            $this->initTableI18ns();
+            $this->collTableI18nsPartial = true;
+        }
+
+        if (!$this->collTableI18ns->contains($childTableI18n)) {
+            $this->doAddTableI18n($childTableI18n);
+
+            if ($this->tableI18nsScheduledForDeletion && $this->tableI18nsScheduledForDeletion->contains($childTableI18n)) {
+                $this->tableI18nsScheduledForDeletion->remove($this->tableI18nsScheduledForDeletion->search($childTableI18n));
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param \TableI18n $tableI18n The ChildTableI18n object to add.
+     *
+     * @return void
+     */
+    protected function doAddTableI18n(ChildTableI18n $tableI18n): void
+    {
+        $this->collTableI18ns->append($tableI18n);
+        assert($this instanceof ChildTable);
+        $tableI18n->setTable($this);
+    }
+
+    /**
+     * @param \TableI18n $tableI18n The ChildTableI18n object to remove.
+     *
+     * @return static
+     */
+    public function removeTableI18n(ChildTableI18n $tableI18n): static
+    {
+        if ($this->getTableI18ns()->contains($tableI18n)) {
+            $pos = $this->collTableI18ns->search($tableI18n);
+            $this->collTableI18ns->remove($pos);
+            if ($this->tableI18nsScheduledForDeletion === null) {
+                $this->tableI18nsScheduledForDeletion = clone $this->collTableI18ns;
+                $this->tableI18nsScheduledForDeletion->clear();
+            }
+            $this->tableI18nsScheduledForDeletion->append(clone $tableI18n);
+            $tableI18n->setTable(null);
+        }
+
+        return $this;
+    }
+
+
+objectAttributes:
+
+// i18n behavior
+
+/**
+ * Current locale
+ * @var string
+ */
+protected $currentLocale = 'en_US';
+
+/**
+ * Current translation objects
+ * @var array[ChildTableI18n]
+ */
+protected $currentTranslations;
+
+
+objectClearReferences:
+
+// i18n behavior
+$this->currentLocale = 'en_US';
+$this->currentTranslations = null;

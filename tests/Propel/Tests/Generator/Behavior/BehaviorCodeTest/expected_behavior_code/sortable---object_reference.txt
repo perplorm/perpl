@@ -1,0 +1,370 @@
+
+
+objectMethods:
+
+// sortable behavior
+
+/**
+ * Wrap the getter for rank value
+ *
+ * @return int
+ */
+public function getRank()
+{
+    return $this->sortable_rank;
+}
+
+/**
+ * Wrap the setter for rank value
+ *
+ * @param int
+ * @return $this
+ */
+public function setRank($v)
+{
+    $this->setSortableRank($v);
+
+    return $this;
+}
+
+/**
+ * Check if the object is first in the list, i.e. if it has 1 for rank
+ *
+ * @return bool
+ */
+public function isFirst()
+{
+    return $this->getSortableRank() == 1;
+}
+
+/**
+ * Check if the object is last in the list, i.e. if its rank is the highest rank
+ *
+ * @param \Propel\Runtime\Connection\ConnectionInterface $con Optional connection
+ *
+ * @return bool
+ */
+public function isLast(?ConnectionInterface $con = null)
+{
+    return $this->getSortableRank() == ChildTableQuery::create()->getMaxRankArray($con);
+}
+
+/**
+ * Get the next item in the list, i.e. the one for which rank is immediately higher
+ *
+ * @param \Propel\Runtime\Connection\ConnectionInterface $con Optional connection
+ *
+ * @return ChildTable
+ */
+public function getNext(?ConnectionInterface $con = null)
+{
+
+    $query = ChildTableQuery::create();
+
+    $query->filterByRank($this->getSortableRank() + 1);
+
+
+    return $query->findOne($con);
+}
+
+/**
+ * Get the previous item in the list, i.e. the one for which rank is immediately lower
+ *
+ * @param \Propel\Runtime\Connection\ConnectionInterface $con      optional connection
+ *
+ * @return ChildTable
+ */
+public function getPrevious(?ConnectionInterface $con = null)
+{
+
+    $query = ChildTableQuery::create();
+
+    $query->filterByRank($this->getSortableRank() - 1);
+
+
+    return $query->findOne($con);
+}
+
+/**
+ * Insert at specified rank
+ * The modifications are not persisted until the object is saved.
+ *
+ * @param int $rank rank value
+ * @param \Propel\Runtime\Connection\ConnectionInterface $con Optional connection
+ *
+ * @return $this The current object
+ *
+ * @throws    PropelException
+ */
+public function insertAtRank($rank, ?ConnectionInterface $con = null)
+{
+    $maxRank = ChildTableQuery::create()->getMaxRankArray($con);
+    if ($rank < 1 || $rank > $maxRank + 1) {
+        throw new PropelException('Invalid rank ' . $rank);
+    }
+    // move the object in the list, at the given rank
+    $this->setSortableRank($rank);
+    if ($rank != $maxRank + 1) {
+        // Keep the list modification query for the save() transaction
+        $this->sortableQueries [] = [
+            'callable'  => array('\TableQuery', 'sortableShiftRank'),
+            'arguments' => array(1, $rank, null, ),
+        ];
+    }
+
+    return $this;
+}
+
+/**
+ * Insert in the last rank
+ * The modifications are not persisted until the object is saved.
+ *
+ * @param \Propel\Runtime\Connection\ConnectionInterface $con optional connection
+ *
+ * @return $this The current object
+ *
+ * @throws    PropelException
+ */
+public function insertAtBottom(?ConnectionInterface $con = null)
+{
+    $this->setSortableRank(ChildTableQuery::create()->getMaxRankArray($con) + 1);
+
+    return $this;
+}
+
+/**
+ * Insert in the first rank
+ * The modifications are not persisted until the object is saved.
+ *
+ * @return $this The current object
+ */
+public function insertAtTop()
+{
+    $this->insertAtRank(1);
+
+    return $this;
+}
+
+/**
+ * Move the object to a new rank, and shifts the rank
+ * Of the objects inbetween the old and new rank accordingly
+ *
+ * @param int $newRank rank value
+ * @param \Propel\Runtime\Connection\ConnectionInterface $con optional connection
+ *
+ * @return $this The current object
+ *
+ * @throws    PropelException
+ */
+public function moveToRank($newRank, ?ConnectionInterface $con = null)
+{
+    if ($this->isNew()) {
+        throw new PropelException('New objects cannot be moved. Please use insertAtRank() instead');
+    }
+    if (null === $con) {
+        $con = Propel::getServiceContainer()->getWriteConnection(TableTableMap::DATABASE_NAME);
+    }
+    if ($newRank < 1 || $newRank > ChildTableQuery::create()->getMaxRankArray($con)) {
+        throw new PropelException('Invalid rank ' . $newRank);
+    }
+
+    $oldRank = $this->getSortableRank();
+    if ($oldRank == $newRank) {
+        return $this;
+    }
+
+    $con->transaction(function () use ($con, $oldRank, $newRank) {
+        // shift the objects between the old and the new rank
+        $delta = ($oldRank < $newRank) ? -1 : 1;
+        ChildTableQuery::sortableShiftRank($delta, min($oldRank, $newRank), max($oldRank, $newRank), $con);
+
+        // move the object to its new rank
+        $this->setSortableRank($newRank);
+        $this->save($con);
+    });
+
+    return $this;
+}
+
+/**
+ * Exchange the rank of the object with the one passed as argument, and saves both objects
+ *
+ * @param ChildTable $object
+ * @param \Propel\Runtime\Connection\ConnectionInterface $con optional connection
+ *
+ * @return $this The current object
+ *
+ * @throws Exception if the database cannot execute the two updates
+ */
+public function swapWith($object, ?ConnectionInterface $con = null)
+{
+    if (null === $con) {
+        $con = Propel::getServiceContainer()->getWriteConnection(TableTableMap::DATABASE_NAME);
+    }
+    $con->transaction(function () use ($con, $object) {
+        $oldRank = $this->getSortableRank();
+        $newRank = $object->getSortableRank();
+
+        $this->setSortableRank($newRank);
+        $object->setSortableRank($oldRank);
+
+        $this->save($con);
+        $object->save($con);
+    });
+
+    return $this;
+}
+
+/**
+ * Move the object higher in the list, i.e. exchanges its rank with the one of the previous object
+ *
+ * @param \Propel\Runtime\Connection\ConnectionInterface $con optional connection
+ *
+ * @return $this The current object
+ */
+public function moveUp(?ConnectionInterface $con = null)
+{
+    if ($this->isFirst()) {
+        return $this;
+    }
+    if (null === $con) {
+        $con = Propel::getServiceContainer()->getWriteConnection(TableTableMap::DATABASE_NAME);
+    }
+    $con->transaction(function () use ($con) {
+        $prev = $this->getPrevious($con);
+        $this->swapWith($prev, $con);
+    });
+
+    return $this;
+}
+
+/**
+ * Move the object higher in the list, i.e. exchanges its rank with the one of the next object
+ *
+ * @param \Propel\Runtime\Connection\ConnectionInterface $con optional connection
+ *
+ * @return $this The current object
+ */
+public function moveDown(?ConnectionInterface $con = null)
+{
+    if ($this->isLast($con)) {
+        return $this;
+    }
+    if (null === $con) {
+        $con = Propel::getServiceContainer()->getWriteConnection(TableTableMap::DATABASE_NAME);
+    }
+    $con->transaction(function () use ($con) {
+        $next = $this->getNext($con);
+        $this->swapWith($next, $con);
+    });
+
+    return $this;
+}
+
+/**
+ * Move the object to the top of the list
+ *
+ * @param \Propel\Runtime\Connection\ConnectionInterface $con optional connection
+ *
+ * @return $this The current object
+ */
+public function moveToTop(?ConnectionInterface $con = null)
+{
+    if ($this->isFirst()) {
+        return $this;
+    }
+
+    $this->moveToRank(1, $con);
+
+    return $this;
+}
+
+/**
+ * Move the object to the bottom of the list
+ *
+ * @param \Propel\Runtime\Connection\ConnectionInterface $con optional connection
+ *
+ * @return $this The current object
+ */
+public function moveToBottom(?ConnectionInterface $con = null)
+{
+    if ($this->isLast($con)) {
+        return $this;
+    }
+
+    if ($con === null) {
+        $con = Propel::getServiceContainer()->getWriteConnection(TableTableMap::DATABASE_NAME);
+    }
+
+    $con->transaction(function () use ($con) {
+        $bottom = ChildTableQuery::create()->getMaxRankArray($con);
+
+        $this->moveToRank($bottom, $con);
+    });
+
+    return $this;
+}
+
+/**
+ * Removes the current object from the list.
+ * The modifications are not persisted until the object is saved.
+ *
+ * @return $this The current object
+ */
+public function removeFromList()
+{
+    // Keep the list modification query for the save() transaction
+    $this->sortableQueries[] = [
+        'callable'  => ['\TableQuery', 'sortableShiftRank'],
+        'arguments' => [-1, $this->getSortableRank() + 1, null]
+    ];
+    // remove the object from the list
+    $this->setSortableRank(null);
+    
+
+    return $this;
+}
+
+/**
+ * Execute queries that were saved to be run inside the save transaction
+ */
+protected function processSortableQueries($con)
+{
+    foreach ($this->sortableQueries as ['callable' => $callable, 'arguments' => $arguments]) {
+        $arguments[] = $con;
+        $callable(...$arguments);
+    }
+    $this->sortableQueries = [];
+}
+
+
+objectAttributes:
+
+// sortable behavior
+
+/**
+ * Queries to be executed in the save transaction
+ * @var array
+ */
+protected $sortableQueries = [];
+
+
+preDelete:
+
+// sortable behavior
+
+ChildTableQuery::sortableShiftRank(-1, $this->getSortableRank() + 1, null, $con);
+TableTableMap::clearInstancePool();
+
+
+preSave:
+
+// sortable behavior
+$this->processSortableQueries($con);
+
+preInsert:
+
+// sortable behavior
+if (!$this->isColumnModified(TableTableMap::RANK_COL)) {
+    $this->setSortableRank(ChildTableQuery::create()->getMaxRankArray($con) + 1);
+}

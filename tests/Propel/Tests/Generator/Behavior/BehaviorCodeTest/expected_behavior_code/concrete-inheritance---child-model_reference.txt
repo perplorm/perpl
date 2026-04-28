@@ -1,0 +1,60 @@
+
+
+objectMethods:
+
+// concrete_inheritance behavior
+
+/**
+ * Get or Create the parent ChildParent object of the current object
+ *
+ * @return ChildParent The parent object
+ */
+public function getParentOrCreate(?ConnectionInterface $con = null)
+{
+    if (!$this->isNew()) {
+        return ChildParentQuery::create()->findPk($this->getPrimaryKey(), $con);
+    }
+
+    if ($this->isPrimaryKeyNull()) {
+        $parent = new ChildParent();
+        $parent->setDescendantClass('Child');
+
+        return $parent;
+    }
+
+    $parent = ChildParentQuery::create()->findPk($this->getPrimaryKey(), $con);
+    if (!$parent || $parent->getDescendantClass() !== null) {
+        $parent = new ChildParent();
+        $parent->setPrimaryKey($this->getPrimaryKey());
+        $parent->setDescendantClass('Child');
+    }
+
+    return $parent;
+}
+
+/**
+ * Create or Update the parent Parent object.
+ *
+ * @return Parent The parent object
+ */
+public function getSyncParent(?ConnectionInterface $con = null)
+{
+    $parent = $this->getParentOrCreate($con);
+    $parent->setTitle($this->getTitle());
+
+    return $parent;
+}
+
+
+postDelete:
+
+// concrete_inheritance behavior
+$this->getParentOrCreate($con)->delete($con);
+
+
+preSave:
+
+// concrete_inheritance behavior
+$parent = $this->getSyncParent($con);
+$parent->save($con);
+$this->setPrimaryKey($parent->getPrimaryKey());

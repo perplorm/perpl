@@ -1,0 +1,78 @@
+
+
+queryAttributes:
+
+// versionable behavior
+
+/**
+ * Whether the versioning is enabled
+ */
+static $isVersioningEnabled = true;
+
+
+queryAttributes:
+
+// versionable behavior
+
+/**
+ * Whether the versioning is enabled
+ */
+static $isVersioningEnabled = true;
+
+
+queryMethods:
+
+// versionable behavior
+
+/**
+ * Wrap the filter on the version column
+ *
+ * @param int|null $version
+ * @param string|null  $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+ * @return $this
+ */
+public function filterByVersion($version = null, ?string $comparison = null)
+{
+    $this->filterByCustomversion($version, $comparison);
+
+    return $this;
+}
+
+/**
+ * Wrap the order on the version column
+ *
+ * @param string $order The sorting order. Criteria::ASC by default, also accepts Criteria::DESC
+ * @return $this
+ */
+public function orderByVersion(string $order = Criteria::ASC)
+{
+    $this->orderBy('Customversion', $order);
+
+    return $this;
+}
+
+/**
+ * Checks whether versioning is enabled
+ *
+ * @return bool
+ */
+static public function isVersioningEnabled(): bool
+{
+    return self::$isVersioningEnabled;
+}
+
+/**
+ * Enables versioning
+ */
+static public function enableVersioning(): void
+{
+    self::$isVersioningEnabled = true;
+}
+
+/**
+ * Disables versioning
+ */
+static public function disableVersioning(): void
+{
+    self::$isVersioningEnabled = false;
+}

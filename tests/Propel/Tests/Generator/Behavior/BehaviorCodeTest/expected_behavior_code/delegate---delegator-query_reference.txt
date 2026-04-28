@@ -1,0 +1,94 @@
+
+
+queryAttributes:
+
+// delegate behavior
+
+protected $delegatedFields = [
+    'DelegatedColumn' => 'Resolver',
+];
+
+
+
+queryAttributes:
+
+// delegate behavior
+
+protected $delegatedFields = [
+    'DelegatedColumn' => 'Resolver',
+];
+
+
+
+queryMethods:
+
+// delegate behavior
+/**
+* Filter the query by delegated_column column
+*
+* Example usage:
+* <code>
+    * $query->filterByDelegatedColumn(1234); // WHERE delegated_column = 1234
+    * $query->filterByDelegatedColumn(array(12, 34)); // WHERE delegated_column IN (12, 34)
+    * $query->filterByDelegatedColumn(array('min' => 12)); // WHERE delegated_column >= 12
+    * </code>
+*
+* @param mixed $value The value to use as filter.
+*              Use scalar values for equality.
+*              Use array values for in_array() equivalent.
+*              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
+* @param string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+*
+* @return $this|ChildDelegatorQuery*/
+public function filterByDelegatedColumn($value = null, $comparison = null)
+{
+    return $this->useResolverQuery()->filterByDelegatedColumn($value, $comparison)->endUse();
+}
+
+/**
+* Adds an ORDER BY clause to the query
+* Usability layer on top of Criteria::addAscendingOrderByColumn() and Criteria::addDescendingOrderByColumn()
+* Infers $column and $order from $columnName and some optional arguments
+* Examples:
+*   $c->orderBy('Book.CreatedAt')
+*    => $c->addAscendingOrderByColumn(BookTableMap::CREATED_AT)
+*   $c->orderBy('Book.CategoryId', 'desc')
+*    => $c->addDescendingOrderByColumn(BookTableMap::CATEGORY_ID)
+*
+* @param string $order The sorting order. Criteria::ASC by default, also accepts Criteria::DESC
+*
+* @return $this|ModelCriteria
+*/
+public function orderByDelegatedColumn(string $order = Criteria::ASC)
+{
+    return $this->useResolverQuery()->orderByDelegatedColumn($order)->endUse();
+}
+
+/**
+ * Adds a condition on a column based on a column phpName and a value
+ * Uses introspection to translate the column phpName into a fully qualified name
+ * Warning: recognizes only the phpNames of the main Model (not joined tables)
+ * <code>
+ * $c->filterBy('Title', 'foo');
+ * </code>
+ *
+ * @see Criteria::add()
+ *
+ * @param string $column A string representing the column phpName, e.g. 'AuthorId'
+ * @param mixed $value A value for the condition
+ * @param string $comparison What to use for the column comparison, defaults to Criteria::EQUAL and Criteria::IN for queries
+ *
+ * @return $this
+ */
+public function filterBy(string $column, $value, ?string $comparison = null)
+{
+    if (isset($this->delegatedFields[$column])) {
+        $methodUse = "use{$this->delegatedFields[$column]}Query";
+
+        $this->{$methodUse}()->filterBy($column, $value, $comparison)->endUse();
+    } else {
+        $this->add($this->getRealColumnName($column), $value, $comparison);
+    }
+
+    return $this;
+}

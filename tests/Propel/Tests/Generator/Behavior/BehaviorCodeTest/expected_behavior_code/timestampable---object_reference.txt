@@ -1,0 +1,36 @@
+
+
+objectMethods:
+
+// timestampable behavior
+
+/**
+ * Mark the current object so that the update date doesn't get updated during next save
+ *
+ * @return $this
+ */
+public function keepUpdateDateUnchanged()
+{
+    $this->modifiedColumns[TableTableMap::COL_UPDATED_AT] = true;
+
+    return $this;
+}
+
+
+preInsert:
+
+// timestampable behavior
+$mtime = microtime(true);
+if (!$this->isColumnModified(TableTableMap::COL_CREATED_AT)) {
+    $this->setCreatedAt(PropelDateTime::createHighPrecision(PropelDateTime::formatMicrotime($mtime), '\DateTime'));
+}
+if (!$this->isColumnModified(TableTableMap::COL_UPDATED_AT)) {
+    $this->setUpdatedAt(PropelDateTime::createHighPrecision(PropelDateTime::formatMicrotime($mtime), '\DateTime'));
+}
+
+preUpdate:
+
+// timestampable behavior
+if ($this->isModified() && !$this->isColumnModified(TableTableMap::COL_UPDATED_AT)) {
+    $this->setUpdatedAt(PropelDateTime::createHighPrecision(null, '\DateTime'));
+}

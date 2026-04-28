@@ -271,7 +271,6 @@ class I18nBehaviorObjectBuilderModifier
         $localeColumnName = $this->behavior->getLocaleColumn()->getPhpName();
         $pattern = '/public function add' . $i18nTablePhpName . '.*[\r\n]\s*\{/';
 
-        $matches = [];
         $argGroupPattern = '/public function add' . $i18nTablePhpName . '\(\w+ (\$\w+)\)/';
         preg_match($argGroupPattern, $script, $matches);
         $inputVar = $matches[1];
