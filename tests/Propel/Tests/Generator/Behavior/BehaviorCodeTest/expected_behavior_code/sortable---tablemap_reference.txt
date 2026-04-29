@@ -8,3 +8,16 @@ staticAttributes:
  */
 const RANK_COL = "table.sortable_rank";
 
+
+    /**
+* If defined, the `SCOPE_COL` contains a json_encoded array with all columns.
+* @var bool
+*/
+const MULTI_SCOPE_COL = true;
+
+    
+/**
+* Scope column for the set
+*/
+const SCOPE_COL = '["table.CATEGORY_ID","table.SUB_CATEGORY_ID"]';
+

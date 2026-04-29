@@ -47,5 +47,29 @@ public function toOutputGroup(
         $result[$key] = $virtualColumn;
     }
 
+    if ($this->aFktable !== null && ($relationsLookup === null || isset($relationsLookup['Fktable']))) {
+        $key = match ($keyType) {
+             TableMap::TYPE_CAMELNAME => 'fktable',
+             TableMap::TYPE_FIELDNAME => 'fkTable',
+             default => 'Fktable',
+        };
+        if (!isset($alreadyDumpedObjects['table_fk_9378ed'][$this->aFktable->hashCode()])){
+            $alreadyDumpedObjects['table_fk_9378ed'][$this->aFktable->hashCode()] = 1;
+            $result[$key] = $this->aFktable->toOutputGroup($outputGroup, $keyType, $alreadyDumpedObjects);
+        }
+    }
+
+    if ($this->collReffktables !== null && ($relationsLookup === null || isset($relationsLookup['Reffktable']))) {
+        $key = match ($keyType) {
+             TableMap::TYPE_CAMELNAME => 'reffktables',
+             TableMap::TYPE_FIELDNAME => 'refFkTables',
+             default => 'Reffktables',
+        };
+        if (!isset($alreadyDumpedObjects['refFkTable_fk_8b1062'][$this->hashCode()])){
+            $alreadyDumpedObjects['refFkTable_fk_8b1062'][$this->hashCode()] = 1;
+            $result[$key] = $this->collReffktables->toOutputGroup($outputGroup, null, $keyType, $alreadyDumpedObjects);
+        }
+    }
+
     return $result;
 }

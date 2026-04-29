@@ -1,0 +1,86 @@
+
+
+queryAttributes:
+
+// aggregate_column_relation_aggregate_column behavior
+
+/**
+ * @var \Base\Collection\AggregatedTableCollection|null
+ */
+protected ?AggregatedTableCollection $aggregatedTableRelatedEntriess = null;
+
+
+queryAttributes:
+
+// aggregate_column_relation_aggregate_column behavior
+
+/**
+ * @var \Base\Collection\AggregatedTableCollection|null
+ */
+protected ?AggregatedTableCollection $aggregatedTableRelatedEntriess = null;
+
+
+queryMethods:
+
+// aggregate_column_relation_aggregate_column behavior
+
+/**
+ * Finds the related AggregatedTable objects and keep them for later
+ *
+ * @param \Propel\Runtime\Connection\ConnectionInterface $con A connection object
+ *
+ * @return void
+ */
+protected function findRelatedAggregatedTableRelatedEntriess($con)
+{
+    $criteria = clone $this;
+    if ($this->useAliasInSQL) {
+        $alias = $this->getModelAlias();
+        $criteria->removeAlias($alias);
+    } else {
+        $alias = '';
+    }
+
+    $this->aggregatedTableRelatedEntriess = ChildAggregatedTableQuery::create()
+        ->joinSourceTable($alias)
+        ->mergeWith($criteria)
+        ->findObjects($con);
+}
+
+/**
+ * @param \Propel\Runtime\Connection\ConnectionInterface $con A connection object
+ *
+ * @return void
+ */
+protected function updateRelatedAggregatedTableRelatedEntriess($con)
+{
+    if ($this->aggregatedTableRelatedEntriess === null) {
+        return;
+    }
+
+    foreach ($this->aggregatedTableRelatedEntriess as $aggregatedTableRelatedEntries) {
+        $aggregatedTableRelatedEntries->updateRelatedEntries($con);
+    }
+    $this->aggregatedTableRelatedEntriess = null;
+}
+
+
+preDeleteQuery:
+
+// aggregate_column_relation_aggregate_column behavior
+$this->findRelatedAggregatedTableRelatedEntriess($con);
+
+postDeleteQuery:
+
+// aggregate_column_relation_aggregate_column behavior
+$this->updateRelatedAggregatedTableRelatedEntriess($con);
+
+preUpdateQuery:
+
+// aggregate_column_relation_aggregate_column behavior
+$this->findRelatedAggregatedTableRelatedEntriess($con);
+
+postUpdateQuery:
+
+// aggregate_column_relation_aggregate_column behavior
+$this->updateRelatedAggregatedTableRelatedEntriess($con);
