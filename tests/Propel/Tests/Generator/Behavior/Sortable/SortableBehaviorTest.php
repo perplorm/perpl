@@ -8,6 +8,7 @@
 
 namespace Propel\Tests\Generator\Behavior\Sortable;
 
+use InvalidArgumentException;
 use Propel\Tests\Bookstore\Behavior\Map\SortableTable11TableMap;
 use Propel\Tests\Bookstore\Behavior\Map\SortableTable12TableMap;
 
@@ -33,5 +34,24 @@ class SortableBehaviorTest extends TestCase
         $table12 = SortableTable12TableMap::getTableMap();
         $this->assertEquals(count($table12->getColumns()), 4, 'Sortable does not add a column when it already exists');
         $this->assertTrue(method_exists('Propel\Tests\Bookstore\Behavior\SortableTable12', 'getPosition'), 'Sortable allows customization of rank_column name');
+    }
+
+    public function testNoScopeColumnError(): void
+    {
+        $schema = <<<XML
+    <database>
+        <table name="table">
+            <column name="id" required="true" primaryKey="true" autoIncrement="true" type="INTEGER"/>
+
+            <behavior name="sortable">
+                <parameter name="use_scope" value="true"/>
+            </behavior>
+        </table>
+    </database>
+XML;
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage("The sortable behavior in `table` needs a `scope_column` parameter.");
+        $this->buildDatabaseFromSchema($schema);
     }
 }

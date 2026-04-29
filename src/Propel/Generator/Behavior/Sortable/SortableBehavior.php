@@ -6,12 +6,13 @@ namespace Propel\Generator\Behavior\Sortable;
 
 use InvalidArgumentException;
 use Propel\Generator\Model\Behavior;
+use function array_filter;
+use function array_map;
 use function count;
 use function explode;
 use function implode;
+use function is_string;
 use function sprintf;
-use function str_replace;
-use function trim;
 
 /**
  * Gives a model class the ability to be ordered
@@ -65,19 +66,19 @@ class SortableBehavior extends Behavior
         }
 
         if ($this->useScope()) {
-            if (!$this->hasMultipleScopes() && !$table->hasColumn($this->getParameter('scope_column'))) {
-                $table->addColumn([
-                    'name' => $this->getParameter('scope_column'),
-                    'type' => 'INTEGER',
-                ]);
-            }
-
             $scopes = $this->getScopes();
-            if (count($scopes) === 0) {
+            if (!$scopes) {
                 throw new InvalidArgumentException(sprintf(
                     'The sortable behavior in `%s` needs a `scope_column` parameter.',
                     $this->getTable()->getName(),
                 ));
+            }
+
+            if (count($scopes) === 1 && !$table->hasColumn($scopes[0])) { // what about others?
+                $table->addColumn([
+                    'name' => $scopes[0],
+                    'type' => 'INTEGER',
+                ]);
             }
         }
     }
@@ -220,13 +221,16 @@ class SortableBehavior extends Behavior
     /**
      * Returns all scope columns as array.
      *
-     * @return list<string>
+     * @return array<string>
      */
     public function getScopes(): array
     {
-        return $this->getParameter('scope_column')
-            ? explode(',', str_replace(' ', '', trim($this->getParameter('scope_column'))))
-            : [];
+        $scopeColumnCsv = $this->getParameter('scope_column');
+        if (!$scopeColumnCsv || !is_string($scopeColumnCsv)) {
+            return [];
+        }
+
+        return array_filter(array_map('trim', explode(',', $scopeColumnCsv)));
     }
 
     /**

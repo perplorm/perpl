@@ -28,6 +28,43 @@ public function setRank($v)
 }
 
 /**
+ * Wrap the getter for scope value
+ *
+ * @param bool $returnNulls If true and all scope values are null, this will return null instead of a array full with nulls
+ *
+ * @return mixed A array or a native type
+ */
+public function getScopeValue($returnNulls = true)
+{
+
+    $result = [];
+    $onlyNulls = true;
+
+    $onlyNulls &= null === ($result[] = $this->getCategoryId());
+
+    $onlyNulls &= null === ($result[] = $this->getSubCategoryId());
+
+
+    return $onlyNulls && $returnNulls ? null : $result;
+
+}
+
+/**
+ * Wrap the setter for scope value
+ *
+ * @param mixed A array or a native type
+ *
+ * @return $this
+ */
+public function setScopeValue($v)
+{
+    $this->setCategoryId($v === null ? null : $v[0]);
+    $this->setSubCategoryId($v === null ? null : $v[1]);
+
+    return $this;
+}
+
+/**
  * Check if the object is first in the list, i.e. if it has 1 for rank
  *
  * @return bool
@@ -46,7 +83,7 @@ public function isFirst()
  */
 public function isLast(?ConnectionInterface $con = null)
 {
-    return $this->getSortableRank() == ChildTableQuery::create()->getMaxRankArray($con);
+    return $this->getSortableRank() == ChildTableQuery::create()->getMaxRankArray($this->getScopeValue(), $con);
 }
 
 /**
@@ -61,7 +98,13 @@ public function getNext(?ConnectionInterface $con = null)
 
     $query = ChildTableQuery::create();
 
-    $query->filterByRank($this->getSortableRank() + 1);
+    $scope = $this->getScopeValue();
+    
+    $scopeCategoryId = $scope[0];
+    $scopeSubCategoryId = $scope[1];
+
+
+    $query->filterByRank($this->getSortableRank() + 1, $scopeCategoryId, $scopeSubCategoryId);
 
 
     return $query->findOne($con);
@@ -79,7 +122,13 @@ public function getPrevious(?ConnectionInterface $con = null)
 
     $query = ChildTableQuery::create();
 
-    $query->filterByRank($this->getSortableRank() - 1);
+    $scope = $this->getScopeValue();
+    
+    $scopeCategoryId = $scope[0];
+    $scopeSubCategoryId = $scope[1];
+
+
+    $query->filterByRank($this->getSortableRank() - 1, $scopeCategoryId, $scopeSubCategoryId);
 
 
     return $query->findOne($con);
@@ -98,7 +147,7 @@ public function getPrevious(?ConnectionInterface $con = null)
  */
 public function insertAtRank($rank, ?ConnectionInterface $con = null)
 {
-    $maxRank = ChildTableQuery::create()->getMaxRankArray($con);
+    $maxRank = ChildTableQuery::create()->getMaxRankArray($this->getScopeValue(), $con);
     if ($rank < 1 || $rank > $maxRank + 1) {
         throw new PropelException('Invalid rank ' . $rank);
     }
@@ -108,7 +157,7 @@ public function insertAtRank($rank, ?ConnectionInterface $con = null)
         // Keep the list modification query for the save() transaction
         $this->sortableQueries [] = [
             'callable'  => array('\TableQuery', 'sortableShiftRank'),
-            'arguments' => array(1, $rank, null, ),
+            'arguments' => array(1, $rank, null, $this->getScopeValue()),
         ];
     }
 
@@ -127,7 +176,7 @@ public function insertAtRank($rank, ?ConnectionInterface $con = null)
  */
 public function insertAtBottom(?ConnectionInterface $con = null)
 {
-    $this->setSortableRank(ChildTableQuery::create()->getMaxRankArray($con) + 1);
+    $this->setSortableRank(ChildTableQuery::create()->getMaxRankArray($this->getScopeValue(), $con) + 1);
 
     return $this;
 }
@@ -164,7 +213,7 @@ public function moveToRank($newRank, ?ConnectionInterface $con = null)
     if (null === $con) {
         $con = Propel::getServiceContainer()->getWriteConnection(TableTableMap::DATABASE_NAME);
     }
-    if ($newRank < 1 || $newRank > ChildTableQuery::create()->getMaxRankArray($con)) {
+    if ($newRank < 1 || $newRank > ChildTableQuery::create()->getMaxRankArray($this->getScopeValue(), $con)) {
         throw new PropelException('Invalid rank ' . $newRank);
     }
 
@@ -176,7 +225,7 @@ public function moveToRank($newRank, ?ConnectionInterface $con = null)
     $con->transaction(function () use ($con, $oldRank, $newRank) {
         // shift the objects between the old and the new rank
         $delta = ($oldRank < $newRank) ? -1 : 1;
-        ChildTableQuery::sortableShiftRank($delta, min($oldRank, $newRank), max($oldRank, $newRank), $con);
+        ChildTableQuery::sortableShiftRank($delta, min($oldRank, $newRank), max($oldRank, $newRank), $this->getScopeValue(), $con);
 
         // move the object to its new rank
         $this->setSortableRank($newRank);
@@ -202,6 +251,12 @@ public function swapWith($object, ?ConnectionInterface $con = null)
         $con = Propel::getServiceContainer()->getWriteConnection(TableTableMap::DATABASE_NAME);
     }
     $con->transaction(function () use ($con, $object) {
+        $oldScope = $this->getScopeValue();
+        $newScope = $object->getScopeValue();
+        if ($oldScope != $newScope) {
+            $this->setScopeValue($newScope);
+            $object->setScopeValue($oldScope);
+        }
         $oldRank = $this->getSortableRank();
         $newRank = $object->getSortableRank();
 
@@ -297,7 +352,7 @@ public function moveToBottom(?ConnectionInterface $con = null)
     }
 
     $con->transaction(function () use ($con) {
-        $bottom = ChildTableQuery::create()->getMaxRankArray($con);
+        $bottom = ChildTableQuery::create()->getMaxRankArray($this->getScopeValue(), $con);
 
         $this->moveToRank($bottom, $con);
     });
@@ -306,21 +361,20 @@ public function moveToBottom(?ConnectionInterface $con = null)
 }
 
 /**
- * Removes the current object from the list.
+ * Removes the current object from the list (moves it to the null scope).
  * The modifications are not persisted until the object is saved.
  *
  * @return $this The current object
  */
 public function removeFromList()
 {
-    // Keep the list modification query for the save() transaction
-    $this->sortableQueries[] = [
-        'callable'  => ['\TableQuery', 'sortableShiftRank'],
-        'arguments' => [-1, $this->getSortableRank() + 1, null]
-    ];
-    // remove the object from the list
-    $this->setSortableRank(null);
-    
+    // check if object is already removed
+    if ($this->getScopeValue() === null) {
+        throw new PropelException('Object is already removed (has null scope)');
+    }
+
+    // move the object to the end of null scope
+    $this->setScopeValue(null);
 
     return $this;
 }
@@ -348,12 +402,18 @@ objectAttributes:
  */
 protected $sortableQueries = [];
 
+/**
+ * The old scope value.
+ * @var int
+ */
+protected $oldScope;
+
 
 preDelete:
 
 // sortable behavior
 
-ChildTableQuery::sortableShiftRank(-1, $this->getSortableRank() + 1, null, $con);
+ChildTableQuery::sortableShiftRank(-1, $this->getSortableRank() + 1, null, $this->getScopeValue(), $con);
 TableTableMap::clearInstancePool();
 
 
@@ -366,5 +426,15 @@ preInsert:
 
 // sortable behavior
 if (!$this->isColumnModified(TableTableMap::RANK_COL)) {
-    $this->setSortableRank(ChildTableQuery::create()->getMaxRankArray($con) + 1);
+    $this->setSortableRank(ChildTableQuery::create()->getMaxRankArray($this->getScopeValue(), $con) + 1);
+}
+
+
+preUpdate:
+
+// sortable behavior
+// if scope has changed and rank was not modified (if yes, assuming superior action)
+// insert object to the end of new scope and cleanup old one
+if (($this->isColumnModified(TableTableMap::COL_CATEGORY_ID) OR $this->isColumnModified(TableTableMap::COL_SUB_CATEGORY_ID)) && !$this->isColumnModified(TableTableMap::RANK_COL)) { ChildTableQuery::sortableShiftRank(-1, $this->getSortableRank() + 1, null, $this->oldScope, $con);
+    $this->insertAtBottom($con);
 }

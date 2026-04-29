@@ -5,15 +5,39 @@ queryMethods:
 // sortable behavior
 
 /**
+ * Returns the objects in a certain list, from the list scope
+ *
+ * @param int $scopeCategoryId Scope value for column `CategoryId`
+ * @param int $scopeSubCategoryId Scope value for column `SubCategoryId`
+ *
+ * @return $this
+ */
+public function inList($scopeCategoryId, $scopeSubCategoryId = null)
+{
+    
+    $scope[] = $scopeCategoryId;
+    $scope[] = $scopeSubCategoryId;
+
+
+    static::sortableApplyScopeCriteria($this, $scope, 'addUsingOperator');
+
+    return $this;
+}
+
+/**
  * Filter the query based on a rank in the list
  *
  * @param int $rank rank
+ * @param int $scopeCategoryId Scope value for column `CategoryId`
+ * @param int $scopeSubCategoryId Scope value for column `SubCategoryId`
+
  *
  * @return static
  */
-public function filterByRank($rank)
+public function filterByRank($rank, $scopeCategoryId, $scopeSubCategoryId = null)
 {
     return $this
+        ->inList($scopeCategoryId, $scopeSubCategoryId)
         ->addUsingOperator(TableTableMap::RANK_COL, $rank, Criteria::EQUAL);
 }
 
@@ -46,29 +70,35 @@ public function orderByRank(string $order = Criteria::ASC)
  * Get an item from the list based on its rank
  *
  * @param int $rank rank
+ * @param int $scopeCategoryId Scope value for column `CategoryId`
+ * @param int $scopeSubCategoryId Scope value for column `SubCategoryId`
  * @param \Propel\Runtime\Connection\ConnectionInterface $con optional connection
  *
  * @return ChildTable
  */
-public function findOneByRank($rank, ?ConnectionInterface $con = null)
+public function findOneByRank($rank, $scopeCategoryId, $scopeSubCategoryId = null, ?ConnectionInterface $con = null)
 {
 
     return $this
-        ->filterByRank($rank)
+        ->filterByRank($rank, $scopeCategoryId, $scopeSubCategoryId)
         ->findOne($con);
 }
 
 /**
- * Returns the list of objects
+ * Returns a list of objects
  *
+ * @param int $scopeCategoryId Scope value for column `CategoryId`
+ * @param int $scopeSubCategoryId Scope value for column `SubCategoryId`
+
  * @param \Propel\Runtime\Connection\ConnectionInterface $con Connection to use.
  *
  * @return mixed the list of results, formatted by the current formatter
  */
-public function findList($con = null)
+public function findList($scopeCategoryId, $scopeSubCategoryId = null, $con = null)
 {
 
     return $this
+        ->inList($scopeCategoryId, $scopeSubCategoryId)
         ->orderByRank()
         ->find($con);
 }
@@ -76,17 +106,25 @@ public function findList($con = null)
 /**
  * Get the highest rank
  * 
+ * @param int $scopeCategoryId Scope value for column `CategoryId`
+ * @param int $scopeSubCategoryId Scope value for column `SubCategoryId`
  * @param \Propel\Runtime\Connection\ConnectionInterface $con Optional connection
  *
  * @return int|null Highest position
  */
-public function getMaxRank(?ConnectionInterface $con = null): ?int
+public function getMaxRank($scopeCategoryId, $scopeSubCategoryId = null, ?ConnectionInterface $con = null): ?int
 {
     if (null === $con) {
         $con = Propel::getServiceContainer()->getReadConnection(TableTableMap::DATABASE_NAME);
     }
     // shift the objects with a position lower than the one of object
     $this->addSelectColumn('MAX(' . TableTableMap::RANK_COL . ')');
+            
+    $scope[] = $scopeCategoryId;
+    $scope[] = $scopeSubCategoryId;
+
+
+            static::sortableApplyScopeCriteria($this, $scope);
     $stmt = $this->doSelect($con);
 
     return $stmt->fetchColumn();
@@ -95,17 +133,20 @@ public function getMaxRank(?ConnectionInterface $con = null): ?int
 /**
  * Get the highest rank by a scope with a array format.
  * 
+ * @param mixed $scope      The scope value as scalar type or array($value1, ...).
+
  * @param \Propel\Runtime\Connection\ConnectionInterface $con Optional connection
  *
  * @return int|null Highest position
  */
-public function getMaxRankArray(?ConnectionInterface $con = null): ?int
+public function getMaxRankArray($scope, ?ConnectionInterface $con = null): ?int
 {
     if ($con === null) {
         $con = Propel::getConnection(TableTableMap::DATABASE_NAME);
     }
     // shift the objects with a position lower than the one of object
     $this->addSelectColumn('MAX(' . TableTableMap::RANK_COL . ')');
+    static::sortableApplyScopeCriteria($this, $scope);
     $stmt = $this->doSelect($con);
 
     return $stmt->fetchColumn();
@@ -115,11 +156,12 @@ public function getMaxRankArray(?ConnectionInterface $con = null): ?int
  * Get an item from the list based on its rank
  *
  * @param int $rank rank
+ * @param int $scope        Scope to determine which suite to consider
  * @param \Propel\Runtime\Connection\ConnectionInterface $con optional connection
  *
  * @return ChildTable
  */
-static public function retrieveByRank($rank, ?ConnectionInterface $con = null)
+static public function retrieveByRank($rank, $scope = null, ?ConnectionInterface $con = null)
 {
     if (null === $con) {
         $con = Propel::getServiceContainer()->getReadConnection(TableTableMap::DATABASE_NAME);
@@ -127,6 +169,7 @@ static public function retrieveByRank($rank, ?ConnectionInterface $con = null)
 
     $c = new Criteria;
     $c->addAnd(TableTableMap::RANK_COL, $rank);
+    static::sortableApplyScopeCriteria($c, $scope);
 
     return static::create(null, $c)->findOne($con);
 }
@@ -196,15 +239,83 @@ static public function doSelectOrderByRank(?Criteria $criteria = null, $order = 
 }
 
 /**
+ * Return an array of sortable objects in the given scope ordered by position
+ *
+ * @param int $scope  the scope of the list
+ * @param string $order  sorting order, to be chosen between Criteria::ASC (default) and Criteria::DESC
+ * @param \Propel\Runtime\Connection\ConnectionInterface $con    optional connection
+ *
+ * @return \Propel\Runtime\Collection\ObjectCollection List of sortable objects
+ */
+static public function retrieveList($scope, $order = Criteria::ASC, ?ConnectionInterface $con = null)
+{
+    $c = new Criteria();
+    static::sortableApplyScopeCriteria($c, $scope);
+
+    return ChildTableQuery::doSelectOrderByRank($c, $order, $con);
+}
+
+/**
+ * Return the number of sortable objects in the given scope
+ *
+ * @param int $scope  the scope of the list
+ * @param \Propel\Runtime\Connection\ConnectionInterface $con    optional connection
+ *
+ * @return int Count.
+ */
+static public function countList($scope, ?ConnectionInterface $con = null): int
+{
+    $c = new Criteria();
+    $c->addFilter(TableTableMap::SCOPE_COL, $scope);
+
+    return ChildTableQuery::create(null, $c)->count($con);
+}
+
+/**
+ * Deletes the sortable objects in the given scope
+ *
+ * @param int $scope  the scope of the list
+ * @param \Propel\Runtime\Connection\ConnectionInterface $con    optional connection
+ *
+ * @return int number of deleted objects
+ */
+static public function deleteList($scope, ?ConnectionInterface $con = null): int
+{
+    $c = new Criteria();
+    static::sortableApplyScopeCriteria($c, $scope);
+
+    return TableTableMap::doDelete($c, $con);
+}
+
+/**
+ * Applies all scope fields to the given criteria.
+ *
+ * @param \Propel\Runtime\ActiveQuery\Criteria $criteria Applies the values directly to this criteria.
+ * @param mixed $scope The scope value as scalar type or array($value1, ...).
+ * @param string $method The method we use to apply the values.
+ *
+ * @return void
+ */
+static public function sortableApplyScopeCriteria(Criteria $criteria, $scope, string $method = 'addFilter'): void
+{
+
+    $criteria->$method(TableTableMap::COL_CATEGORY_ID, $scope[0], Criteria::EQUAL);
+
+    $criteria->$method(TableTableMap::COL_SUB_CATEGORY_ID, $scope[1], Criteria::EQUAL);
+
+}
+
+/**
  * Adds $delta to all Rank values that are >= $first and <= $last.
  * '$delta' can also be negative.
  *
  * @param int $delta Value to be shifted by, can be negative
  * @param int $first First node to be shifted
  * @param int $last  Last node to be shifted
+ * @param int $scope Scope to use for the shift
  * @param \Propel\Runtime\Connection\ConnectionInterface $con Connection to use.
  */
-static public function sortableShiftRank($delta, $first, $last = null, ?ConnectionInterface $con = null)
+static public function sortableShiftRank($delta, $first, $last = null, $scope = null, ?ConnectionInterface $con = null)
 {
     if (null === $con) {
         $con = Propel::getServiceContainer()->getWriteConnection(TableTableMap::DATABASE_NAME);
@@ -216,6 +327,7 @@ static public function sortableShiftRank($delta, $first, $last = null, ?Connecti
         $criterion->addAnd($whereCriteria->getNewCriterion(TableTableMap::RANK_COL, $last, Criteria::LESS_EQUAL));
     }
     $whereCriteria->addFilter($criterion);
+    static::sortableApplyScopeCriteria($whereCriteria, $scope);
 
     $whereCriteria->setUpdateExpression(TableTableMap::RANK_COL, TableTableMap::RANK_COL . ' + ?', $delta, \PDO::PARAM_INT);
 

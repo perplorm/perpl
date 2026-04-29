@@ -40,6 +40,10 @@ class BehaviorCodeTest extends CompareGeneratedCodeTestCase
                 "$refDir/aggregate_column---source_model_reference.txt",
             ],
             [
+                [static::AGGREGATE_COLUMN_SCHEMA, 'source_table', BuilderType::QueryBase,],
+                "$refDir/aggregate_column---source_query_reference.txt",
+            ],
+            [
                 [static::AGGREGATE_MULTIPLE_COLUMNS_SCHEMA, 'aggregated_table', BuilderType::ObjectBase,],
                 "$refDir/aggregate_multiple_columns---target_model_reference.txt",
             ],
@@ -94,6 +98,10 @@ class BehaviorCodeTest extends CompareGeneratedCodeTestCase
             [
                 [static::OUTPUT_GROUP_SCHEMA, 'table', BuilderType::TableMap,],
                 "$refDir/output_group---tablemap_reference.txt",
+            ],
+            [
+                [static::OUTPUT_GROUP_SCHEMA, 'table', BuilderType::Collection,],
+                "$refDir/output_group---collection_reference.txt",
             ],
             [
                 [static::QUERY_CACHE_SCHEMA, 'table', BuilderType::QueryBase,],
@@ -379,7 +387,24 @@ XML;
             <column name="col1" outputGroup="group2"/>
             <column name="col2" outputGroup="group1"/>
             <column name="col3" outputGroup="group1,group2"/>
+            
+            <foreign-key foreignTable="fkTable">
+                <reference local="col2" foreign="id"/>
+            </foreign-key>
         </table>
+
+        <table name="fkTable">
+            <column name="id"/>
+        </table>
+
+        <table name="refFkTable">
+            <column name="id"/>
+            
+            <foreign-key foreignTable="table">
+                <reference local="id" foreign="col1"/>
+            </foreign-key>
+        </table>
+
     </database>
 XML;
 
@@ -417,9 +442,14 @@ XML;
     <database>
         <table name="table">
             <column name="id" required="true" primaryKey="true" autoIncrement="true" type="INTEGER"/>
-            <column name="title" type="VARCHAR" size="100" primaryString="true"/>
+            <column name="category_id" required="true" type="INTEGER"/>
+            <column name="sub_category_id" type="INTEGER"/>
 
-            <behavior name="sortable"/>
+            <behavior name="sortable">
+                <parameter name="use_scope" value="true"/>
+                <parameter name="scope_column" value="category_id"/>
+                <parameter name="scope_column" value="sub_category_id"/>
+            </behavior>
         </table>
     </database>
 XML;
@@ -454,7 +484,11 @@ XML;
             <column name="bar" type="INTEGER"/>
 
             <behavior name="versionable">
+                <parameter name="version_table" value="le_version_table"/>
                 <parameter name="version_column" value="CustomVersion"/>
+                <parameter name="log_created_at" value="true"/>
+                <parameter name="log_created_by" value="true"/>
+                <parameter name="log_comment" value="true"/>
             </behavior>
         </table>
     </database>

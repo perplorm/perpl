@@ -77,6 +77,9 @@ public function addVersion(?ConnectionInterface $con = null)
     $version->setId($this->getId());
     $version->setBar($this->getBar());
     $version->setCustomversion($this->getCustomversion());
+    $version->setVersionCreatedAt($this->getVersionCreatedAt());
+    $version->setVersionCreatedBy($this->getVersionCreatedBy());
+    $version->setVersionComment($this->getVersionComment());
     $version->setTable($this);
     $version->save($con);
 
@@ -117,6 +120,9 @@ public function populateFromVersion($version, $con = null, &$loadedObjects = [])
     $this->setId($version->getId());
     $this->setBar($version->getBar());
     $this->setCustomversion($version->getCustomversion());
+    $this->setVersionCreatedAt($version->getVersionCreatedAt());
+    $this->setVersionCreatedBy($version->getVersionCreatedBy());
+    $this->setVersionComment($version->getVersionComment());
 
     return $this;
 }
@@ -258,6 +264,9 @@ protected function computeDiff($fromVersion, $toVersion, $keys = 'columns', $ign
     $toVersionNumber = $toVersion['Customversion'];
     $ignoredColumns = array_merge(array(
         'Customversion',
+        'VersionCreatedAt',
+        'VersionCreatedBy',
+        'VersionComment',
     ), $ignoredColumns);
     $diff = [];
     foreach ($fromVersion as $key => $value) {
@@ -316,6 +325,9 @@ preSave:
 // versionable behavior
 if ($this->isVersioningNecessary()) {
     $this->setCustomversion($this->isNew() ? 1 : $this->getLastVersionNumber($con) + 1);
+    if (!$this->isColumnModified(TableTableMap::COL_VERSION_CREATED_AT)) {
+        $this->setVersionCreatedAt(time());
+    }
     $createVersion = true; // for postSave hook
 }
 
