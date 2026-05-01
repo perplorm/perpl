@@ -18,16 +18,16 @@ use function str_replace;
  */
 class AggregateColumnRelationBehavior extends Behavior
 {
-    /**
-     * Default parameters value
-     *
-     * @var array<string, mixed>
-     */
-    protected $parameters = [
-        'foreign_table' => '',
-        'update_method' => '',
-        'aggregate_name' => '',
-    ];
+    public function __construct()
+    {
+        parent::__construct();
+
+        $this->parameters = [
+            'foreign_table' => '',
+            'update_method' => '',
+            'aggregate_name' => '',
+        ];
+    }
 
     /**
      * @return bool

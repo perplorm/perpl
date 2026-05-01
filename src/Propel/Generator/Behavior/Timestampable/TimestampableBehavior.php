@@ -16,15 +16,17 @@ use function strtoupper;
  */
 class TimestampableBehavior extends Behavior
 {
-    /**
-     * @var array<string, mixed>
-     */
-    protected $parameters = [
-        'create_column' => 'created_at',
-        'update_column' => 'updated_at',
-        'disable_created_at' => 'false',
-        'disable_updated_at' => 'false',
-    ];
+    public function __construct()
+    {
+        parent::__construct();
+
+        $this->parameters = [
+            'create_column' => 'created_at',
+            'update_column' => 'updated_at',
+            'disable_created_at' => 'false',
+            'disable_updated_at' => 'false',
+        ];
+    }
 
     /**
      * @return bool

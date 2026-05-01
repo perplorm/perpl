@@ -36,15 +36,14 @@ class ArchivableBehavior extends SyncedTableBehavior
      */
     public const PARAMETER_KEY_SYNCED_PHPNAME = 'archive_phpname';
 
-    /**
-     * @var \Propel\Generator\Behavior\Archivable\ArchivableBehaviorObjectBuilderModifier|null
-     */
-    protected $objectBuilderModifier;
+    protected ArchivableBehaviorObjectBuilderModifier|null $objectBuilderModifier = null;
 
-    /**
-     * @var \Propel\Generator\Behavior\Archivable\ArchivableBehaviorQueryBuilderModifier|null
-     */
-    protected $queryBuilderModifier;
+    protected ArchivableBehaviorQueryBuilderModifier|null $queryBuilderModifier = null;
+
+    public function __construct()
+    {
+        $this->tableModificationOrder = 90; // should be higher than behaviors adding columns to table (i.e. Versionable)
+    }
 
     /**
      * @see \Propel\Generator\Behavior\SyncedTable\SyncedTableBehavior::getDefaultParameters()
