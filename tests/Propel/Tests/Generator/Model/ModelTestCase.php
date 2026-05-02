@@ -34,7 +34,7 @@ abstract class ModelTestCase extends TestCase
     {
         $defaults = [
             'additional_builders' => [],
-            'is_table_modified' => false,
+            'has_been_applied' => false,
             'modification_order' => 0,
         ];
 
@@ -71,8 +71,8 @@ abstract class ModelTestCase extends TestCase
 
         $behavior
             ->expects($this->any())
-            ->method('isTableModified')
-            ->will($this->returnValue($options['is_table_modified']));
+            ->method('hasBeenApplied')
+            ->will($this->returnValue($options['has_been_applied']));
 
         $behavior
             ->expects($this->any())

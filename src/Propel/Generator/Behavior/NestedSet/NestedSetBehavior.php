@@ -13,20 +13,6 @@ use Propel\Generator\Model\Column;
 class NestedSetBehavior extends Behavior
 {
     /**
-     * Default parameters value
-     *
-     * @var array<string, mixed>
-     */
-    protected $parameters = [
-        'left_column' => 'tree_left',
-        'right_column' => 'tree_right',
-        'level_column' => 'tree_level',
-        'use_scope' => 'false',
-        'scope_column' => 'tree_scope',
-        'method_proxies' => 'false',
-    ];
-
-    /**
      * @var \Propel\Generator\Behavior\NestedSet\NestedSetBehaviorObjectBuilderModifier|null
      */
     protected $objectBuilderModifier;
@@ -35,6 +21,20 @@ class NestedSetBehavior extends Behavior
      * @var \Propel\Generator\Behavior\NestedSet\NestedSetBehaviorQueryBuilderModifier|null
      */
     protected $queryBuilderModifier;
+
+    public function __construct()
+    {
+        parent::__construct();
+
+        $this->parameters = [
+            'left_column' => 'tree_left',
+            'right_column' => 'tree_right',
+            'level_column' => 'tree_level',
+            'use_scope' => 'false',
+            'scope_column' => 'tree_scope',
+            'method_proxies' => 'false',
+        ];
+    }
 
     /**
      * Add the left, right and scope to the current table

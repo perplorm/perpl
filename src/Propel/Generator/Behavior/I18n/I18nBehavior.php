@@ -7,11 +7,13 @@ namespace Propel\Generator\Behavior\I18n;
 use Propel\Generator\Behavior\Validate\ValidateBehavior;
 use Propel\Generator\Builder\Om\AbstractOMBuilder;
 use Propel\Generator\Exception\EngineException;
+use Propel\Generator\Exception\LogicException;
 use Propel\Generator\Model\Behavior;
 use Propel\Generator\Model\Column;
 use Propel\Generator\Model\ForeignKey;
 use Propel\Generator\Model\PropelTypes;
 use Propel\Generator\Model\Table;
+use function array_find;
 use function array_merge;
 use function count;
 use function explode;
@@ -31,41 +33,28 @@ class I18nBehavior extends Behavior
      */
     public const DEFAULT_LOCALE = 'en_US';
 
-    /**
-     * Default parameters value
-     *
-     * @var array<string, mixed>
-     */
-    protected $parameters = [
-        'i18n_table' => '%TABLE%_i18n',
-        'i18n_phpname' => '%PHPNAME%I18n',
-        'i18n_columns' => '',
-        'i18n_pk_column' => null,
-        'locale_column' => 'locale',
-        'locale_length' => 5,
-        'default_locale' => null,
-        'locale_alias' => '',
-    ];
+    protected I18nBehaviorObjectBuilderModifier|null $objectBuilderModifier = null;
 
-    /**
-     * @var int
-     */
-    protected $tableModificationOrder = 70;
+    protected I18nBehaviorQueryBuilderModifier|null $queryBuilderModifier = null;
 
-    /**
-     * @var \Propel\Generator\Behavior\I18n\I18nBehaviorObjectBuilderModifier|null
-     */
-    protected $objectBuilderModifier;
+    protected Table|null $i18nTable = null;
 
-    /**
-     * @var \Propel\Generator\Behavior\I18n\I18nBehaviorQueryBuilderModifier|null
-     */
-    protected $queryBuilderModifier;
+    public function __construct()
+    {
+        parent::__construct();
 
-    /**
-     * @var \Propel\Generator\Model\Table
-     */
-    protected $i18nTable;
+        $this->tableModificationOrder = 70;
+        $this->parameters = [
+            'i18n_table' => '%TABLE%_i18n',
+            'i18n_phpname' => '%PHPNAME%I18n',
+            'i18n_columns' => '',
+            'i18n_pk_column' => null,
+            'locale_column' => 'locale',
+            'locale_length' => 5,
+            'default_locale' => null,
+            'locale_alias' => '',
+        ];
+    }
 
     /**
      * @return void
@@ -97,10 +86,16 @@ class I18nBehavior extends Behavior
     }
 
     /**
+     * @throws \Propel\Generator\Exception\LogicException
+     *
      * @return \Propel\Generator\Model\Table
      */
     public function getI18nTable(): Table
     {
+        if (!$this->i18nTable) {
+            throw new LogicException('Cannot access i18n table before modifyTable() was called.');
+        }
+
         return $this->i18nTable;
     }
 
@@ -109,13 +104,7 @@ class I18nBehavior extends Behavior
      */
     public function getI18nForeignKey(): ?ForeignKey
     {
-        foreach ($this->i18nTable->getForeignKeys() as $fk) {
-            if ($fk->getForeignTableName() == $this->table->getName()) {
-                return $fk;
-            }
-        }
-
-        return null;
+        return array_find($this->getI18nTable()->getForeignKeys(), fn (ForeignKey $fk) => $fk->getForeignTableName() === $this->table->getName());
     }
 
     /**
@@ -258,7 +247,7 @@ class I18nBehavior extends Behavior
     protected function relateI18nTableToMainTable(): void
     {
         $table = $this->getTable();
-        $i18nTable = $this->i18nTable;
+        $i18nTable = $this->getI18nTable();
         $pks = $this->getTable()->getPrimaryKey();
 
         if (count($pks) > 1) {
@@ -299,8 +288,8 @@ class I18nBehavior extends Behavior
     {
         $localeColumnName = $this->getLocaleColumnName();
 
-        if (!$this->i18nTable->hasColumn($localeColumnName)) {
-            $this->i18nTable->addColumn([
+        if (!$this->getI18nTable()->hasColumn($localeColumnName)) {
+            $this->getI18nTable()->addColumn([
                 'name' => $localeColumnName,
                 'type' => PropelTypes::VARCHAR,
                 'size' => $this->getParameter('locale_length') ? (int)$this->getParameter('locale_length') : 5,
@@ -320,7 +309,7 @@ class I18nBehavior extends Behavior
     protected function moveI18nColumns(): void
     {
         $table = $this->getTable();
-        $i18nTable = $this->i18nTable;
+        $i18nTable = $this->getI18nTable();
 
         $i18nValidateParams = [];
         foreach ($this->getI18nColumnNamesFromConfig() as $columnName) {

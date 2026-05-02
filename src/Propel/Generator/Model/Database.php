@@ -10,12 +10,9 @@ use Propel\Generator\Exception\InvalidArgumentException;
 use Propel\Generator\Exception\SchemaException;
 use Propel\Generator\Platform\PlatformInterface;
 use function array_search;
-use function count;
 use function explode;
 use function implode;
 use function in_array;
-use function key;
-use function ksort;
 use function ltrim;
 use function sprintf;
 use function strpos;
@@ -842,19 +839,15 @@ class Database extends ScopedMappingModel
      */
     public function getNextTableBehavior(): ?Behavior
     {
-        // order the behaviors according to Behavior::$tableModificationOrder
-        $behaviors = [];
+        /** @var \Propel\Generator\Model\Behavior|null $nextBehavior */
         $nextBehavior = null;
         foreach ($this->tables as $table) {
             foreach ($table->getBehaviors() as $behavior) {
-                if (!$behavior->isTableModified()) {
-                    $behaviors[$behavior->getTableModificationOrder()][] = $behavior;
+                if ($behavior->hasBeenApplied() || ($nextBehavior && $nextBehavior->getTableModificationOrder() <= $behavior->getTableModificationOrder())) {
+                    continue;
                 }
+                $nextBehavior = $behavior;
             }
-        }
-        ksort($behaviors);
-        if (count($behaviors)) {
-            $nextBehavior = $behaviors[key($behaviors)][0];
         }
 
         return $nextBehavior;

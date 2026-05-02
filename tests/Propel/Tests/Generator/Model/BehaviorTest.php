@@ -243,4 +243,24 @@ EOF;
         $behavior = $table->getBehavior('timestampable');
         $this->assertEquals($table->getColumn('created_on'), $behavior->getColumnForParameter('create_column'), 'getColumnForParameter() returns the configured column for behavior based on a parameter name');
     }
+
+    /**
+     * @return void
+     */
+    public function testLatenessParameter()
+    {
+        $lateness = 2000;
+        $schema = <<<XML
+<database>
+  <table name="table1">
+    <column name="id" type="INTEGER" primaryKey="true"/>
+    <column name="title" type="VARCHAR" size="100" primaryString="true"/>
+    <behavior name="timestampable" order-lateness="$lateness"/>
+  </table>
+</database>
+XML;
+        $table = $this->buildDatabaseFromSchema($schema)->getTable('table1');
+        $behavior = $table->getBehavior('timestampable');
+        $this->assertEquals($lateness, $behavior->getTableModificationOrder());
+    }
 }

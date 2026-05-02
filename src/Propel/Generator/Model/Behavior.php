@@ -24,86 +24,63 @@ class Behavior extends MappingModel
     use PathTrait;
 
     /**
+     * @var string
+     */
+    final public const PARAM_NAME_TABLE_MODIFICATION_ORDER = 'order-lateness';
+
+    /**
      * The table object on which the behavior is applied.
-     *
-     * @var \Propel\Generator\Model\Table
      */
-    protected $table;
+    protected Table|null $table = null;
+
+    protected Database|null $database = null;
+
+    protected string|null $id = null;
+
+    protected string|null $name = null;
 
     /**
-     * The database object.
-     *
-     * @var \Propel\Generator\Model\Database
-     */
-    protected $database;
-
-    /**
-     * The behavior id.
-     *
-     * @var string
-     */
-    protected $id;
-
-    /**
-     * The behavior name.
-     *
-     * @var string
-     */
-    protected $name;
-
-    /**
-     * A collection of parameters.
-     *
      * @var array<string, mixed>
      */
     protected $parameters = [];
 
     /**
-     * Whether the table has been
-     * modified by the behavior.
-     *
-     * @var bool
+     * Whether the table has been modified by the behavior.
      */
-    protected $isTableModified = false;
+    protected bool $isTableModified = false;
 
     /**
-     * The absolute path to the directory
-     * that contains the behavior's templates
-     * files.
+     * The absolute path to the directory that contains the behavior's files.
      *
-     * @var string
+     * @var string|null
      */
-    protected $dirname;
+    protected string|null $dirname = null;
 
     /**
-     * A collection of additional builders.
+     * Custom builders to create additional table classes in {@see \Propel\Generator\Manager\ModelManager::build()}
      *
-     * @var array
+     * @var array<class-string<\Propel\Generator\Builder\Om\AbstractOMBuilder>>
      */
-    protected $additionalBuilders = [];
+    protected array $additionalBuilders = [];
 
     /**
-     * The order in which the behavior must
-     * be applied.
-     *
-     * @var int
+     * The order in which the behavior must be applied.
      */
-    protected $tableModificationOrder = 50;
+    protected int $tableModificationOrder = 50;
+
+    public function __construct()
+    {
+    }
 
     /**
-     * Sets the name of the Behavior
-     *
-     * @param string $name the name of the behavior
+     * @param string $name
      *
      * @return void
      */
     public function setName(string $name): void
     {
         $this->name = $name;
-
-        if ($this->id === null) {
-            $this->id = $name;
-        }
+        $this->id ??= $name;
     }
 
     /**
@@ -130,18 +107,20 @@ class Behavior extends MappingModel
     }
 
     /**
-     * Returns the id of the Behavior
+     * @throws \Propel\Generator\Exception\LogicException
      *
      * @return string
      */
     public function getId(): string
     {
+        if ($this->id === null) {
+            throw new LogicException('Id not set.');
+        }
+
         return $this->id;
     }
 
     /**
-     * Returns the name of the Behavior
-     *
      * @return string|null
      */
     public function getName(): ?string
@@ -205,10 +184,16 @@ class Behavior extends MappingModel
      * Returns the table this behavior is applied to if behavior is applied to
      * a database element.
      *
+     * @throws \Propel\Generator\Exception\LogicException
+     *
      * @return \Propel\Generator\Model\Database
      */
     public function getDatabase(): Database
     {
+        if ($this->database === null) {
+            throw new LogicException('Database not set.');
+        }
+
         return $this->database;
     }
 
@@ -300,6 +285,8 @@ class Behavior extends MappingModel
      *
      * Default is 50.
      *
+     * @see Database::getNextTableBehavior()
+     *
      * @return int
      */
     public function getTableModificationOrder(): int
@@ -368,9 +355,19 @@ class Behavior extends MappingModel
      *
      * @return bool
      */
-    public function isTableModified(): bool
+    public function hasBeenApplied(): bool
     {
         return $this->isTableModified;
+    }
+
+    /**
+     * @deprecated Use aptly named {@see static::hasBeenApplied()}
+     *
+     * @return bool
+     */
+    public function isTableModified(): bool
+    {
+        return $this->hasBeenApplied();
     }
 
     /**
@@ -482,6 +479,7 @@ class Behavior extends MappingModel
         }
 
         $this->id = $this->getAttribute('id', $this->name);
+        $this->tableModificationOrder = (int)$this->getAttribute(static::PARAM_NAME_TABLE_MODIFICATION_ORDER, $this->tableModificationOrder);
     }
 
     /**
@@ -563,7 +561,7 @@ class Behavior extends MappingModel
     /**
      * Returns the list of additional builder objects.
      *
-     * @return array
+     * @return array<class-string<\Propel\Generator\Builder\Om\AbstractOMBuilder>>
      */
     public function getAdditionalBuilders(): array
     {

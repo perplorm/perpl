@@ -35,24 +35,21 @@ class ConcreteInheritanceBehavior extends Behavior
      */
     protected const ATTRIBUTE_IS_PARENT_CHILD = 'is-parent-child';
 
-    /**
-     * @var \Propel\Generator\Builder\Om\ObjectBuilder
-     */
-    protected $builder;
+    protected ObjectBuilder|null $builder = null;
 
-    /**
-     * Default parameters value
-     *
-     * @var array<string, mixed>
-     */
-    protected $parameters = [
-        'extends' => '',
-        'descendant_column' => 'descendant_class',
-        'copy_data_to_parent' => 'true',
-        'copy_data_to_child' => 'false',
-        'schema' => '',
-        'exclude_behaviors' => '',
-    ];
+    public function __construct()
+    {
+        parent::__construct();
+
+        $this->parameters = [
+            'extends' => '',
+            'descendant_column' => 'descendant_class',
+            'copy_data_to_parent' => 'true',
+            'copy_data_to_child' => 'false',
+            'schema' => '',
+            'exclude_behaviors' => '',
+        ];
+    }
 
     /**
      * @return void

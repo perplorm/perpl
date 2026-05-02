@@ -13,19 +13,19 @@ use Propel\Generator\Model\Behavior;
 class QueryCacheBehavior extends Behavior
 {
     /**
-     * Default parameters value
-     *
-     * @var array<string, mixed>
-     */
-    protected $parameters = [
-        'backend' => 'apc',
-        'lifetime' => '3600',
-    ];
-
-    /**
      * @var string
      */
     private $tableClassName;
+
+    public function __construct()
+    {
+        parent::__construct();
+
+        $this->parameters = [
+            'backend' => 'apc',
+            'lifetime' => '3600',
+        ];
+    }
 
     /**
      * @param \Propel\Generator\Builder\Om\AbstractOMBuilder $builder
