@@ -6,13 +6,21 @@ namespace Propel\Generator\Behavior\QueryCache;
 
 use Propel\Generator\Builder\Om\AbstractOMBuilder;
 use Propel\Generator\Model\Behavior;
+use Symfony\Component\Console\Output\OutputInterface;
 use function trigger_deprecation;
 
 /**
  * Speeds up queries on a model by caching the query
  */
 class QueryCacheBehavior extends Behavior
-{
+{    
+    
+    function __construct(OutputInterface $output) {
+        $message = 'The query_cache behavior is deprecated. Please remove this behavior from your schema definition and its methods from your codebase.';
+        $output->writeln($message);
+        trigger_deprecation('Perpl', '2.8.0', $message);
+    }
+
     /**
      * Default parameters value
      *
