@@ -7,13 +7,6 @@ protected $queryKey = '';
 protected static $cacheBackend;
             
 
-queryAttributes:
-
-// query_cache behavior
-protected $queryKey = '';
-protected static $cacheBackend;
-            
-
 queryMethods:
 
 // query_cache behavior
@@ -21,122 +14,8 @@ queryMethods:
 public function setQueryKey($key)
 {
     $this->queryKey = $key;
-
+    trigger_deprecation('Perpl', '2.8.0', 'setQueryKey() is deprecated. Please remove this function from your queries.');
+    trigger_deprecation('Perpl', '2.8.0', 'The query_cache behavior is deprecated. Please remove this behavior from your schema definition.');
     return $this;
 }
 
-public function getQueryKey()
-{
-    return $this->queryKey;
-}
-
-public function cacheContains($key)
-{
-
-    return isset(self::$cacheBackend[$key]);
-}
-
-public function cacheFetch($key)
-{
-
-    return isset(self::$cacheBackend[$key]) ? self::$cacheBackend[$key] : null;
-}
-
-public function cacheStore($key, $value, $lifetime = 3600)
-{
-    self::$cacheBackend[$key] = $value;
-}
-
-public function doSelect(?ConnectionInterface $con = null): \Propel\Runtime\DataFetcher\DataFetcherInterface
-{
-    // check that the columns of the main class are already added (if this is the primary ModelCriteria)
-    if (!$this->hasSelectClause() && !$this->getPrimaryCriteria()) {
-        $this->addSelfSelectColumns();
-    }
-    $this->configureSelectColumns();
-
-    $dbMap = Propel::getServiceContainer()->getDatabaseMap(TableTableMap::DATABASE_NAME);
-    $db = Propel::getServiceContainer()->getAdapter(TableTableMap::DATABASE_NAME);
-
-    $key = $this->getQueryKey();
-    if ($key && $this->cacheContains($key)) {
-        $params = $this->getParams();
-        $sql = $this->cacheFetch($key);
-    } else {
-        $params = [];
-        $sql = $this->createSelectSql($params);
-    }
-
-    try {
-        $stmt = $con->prepare($sql);
-        $db->bindValues($stmt, $params, $dbMap);
-        $stmt->execute();
-        } catch (Exception $e) {
-            Propel::log($e->getMessage(), Propel::LOG_ERR);
-            throw new PropelException(sprintf('Unable to execute SELECT statement [%s]', $sql), 0, $e);
-        }
-
-    if ($key && !$this->cacheContains($key)) {
-            $this->cacheStore($key, $sql);
-    }
-
-    return $con->getDataFetcher($stmt);
-}
-
-public function doCount(?ConnectionInterface $con = null): \Propel\Runtime\DataFetcher\DataFetcherInterface
-{
-    $dbMap = Propel::getServiceContainer()->getDatabaseMap($this->getDbName());
-    $db = Propel::getServiceContainer()->getAdapter($this->getDbName());
-
-    $key = $this->getQueryKey();
-    if ($key && $this->cacheContains($key)) {
-        $params = $this->getParams();
-        $sql = $this->cacheFetch($key);
-    } else {
-        // check that the columns of the main class are already added (if this is the primary ModelCriteria)
-        if (!$this->hasSelectClause() && !$this->getPrimaryCriteria()) {
-            $this->addSelfSelectColumns();
-        }
-
-        $this->configureSelectColumns();
-
-        $needsComplexCount = $this->getGroupByColumns()
-            || $this->getOffset()
-            || $this->getLimit() >= 0
-            || $this->getHaving()
-            || in_array(Criteria::DISTINCT, $this->getSelectModifiers())
-            || count($this->selectQueries) > 0
-        ;
-
-        $params = [];
-        if ($needsComplexCount) {
-            if ($this->needsSelectAliases()) {
-                if ($this->getHaving()) {
-                    throw new PropelException('Propel cannot create a COUNT query when using HAVING and  duplicate column names in the SELECT part');
-                }
-                $db->turnSelectColumnsToAliases($this);
-            }
-            $selectSql = $this->createSelectSql($params);
-            $sql = 'SELECT COUNT(*) FROM (' . $selectSql . ') propelmatch4cnt';
-        } else {
-            // Replace SELECT columns with COUNT(*)
-            $this->clearSelectColumns()->addSelectColumn('COUNT(*)');
-            $sql = $this->createSelectSql($params);
-        }
-    }
-
-    try {
-        $stmt = $con->prepare($sql);
-        $db->bindValues($stmt, $params, $dbMap);
-        $stmt->execute();
-    } catch (Exception $e) {
-        Propel::log($e->getMessage(), Propel::LOG_ERR);
-        throw new PropelException(sprintf('Unable to execute COUNT statement [%s]', $sql), 0, $e);
-    }
-
-    if ($key && !$this->cacheContains($key)) {
-            $this->cacheStore($key, $sql);
-    }
-
-    return $con->getDataFetcher($stmt);
-}
