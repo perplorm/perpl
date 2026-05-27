@@ -15,24 +15,23 @@ use function str_replace;
  */
 class SluggableBehavior extends Behavior
 {
-    /**
-     * @var \Propel\Generator\Builder\Om\AbstractOMBuilder
-     */
-    private $builder;
+    private AbstractOMBuilder|null $builder = null;
 
-    /**
-     * @var array<string, mixed>
-     */
-    protected $parameters = [
-        'slug_column' => 'slug',
-        'slug_pattern' => '',
-        'replace_pattern' => '/\W+/',
-        'replacement' => '-',
-        'separator' => '-',
-        'permanent' => 'false',
-        'scope_column' => '',
-        'unique_constraint' => 'true',
-    ];
+    public function __construct()
+    {
+        parent::__construct();
+
+        $this->parameters = [
+            'slug_column' => 'slug',
+            'slug_pattern' => '',
+            'replace_pattern' => '/\W+/',
+            'replacement' => '-',
+            'separator' => '-',
+            'permanent' => 'false',
+            'scope_column' => '',
+            'unique_constraint' => 'true',
+        ];
+    }
 
     /**
      * Adds the slug_column to the current table.

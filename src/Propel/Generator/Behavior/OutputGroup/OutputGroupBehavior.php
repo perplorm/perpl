@@ -20,15 +20,6 @@ class OutputGroupBehavior extends Behavior
     public const PARAMETER_OBJECT_COLLECTION_CLASS = 'object_collection_class';
 
     /**
-     * Default parameters value
-     *
-     * @var array<string, mixed>
-     */
-    protected $parameters = [
-        self::PARAMETER_OBJECT_COLLECTION_CLASS => null,
-    ];
-
-    /**
      * @var string
      */
     public const SCHEMA_ATTRIBUTE_OUTPUT_GROUP = 'outputGroup';
@@ -48,20 +39,20 @@ class OutputGroupBehavior extends Behavior
      */
     public const SCHEMA_ATTRIBUTE_REF_IGNORE_GROUP = 'refIgnoreGroup';
 
-    /**
-     * @var \Propel\Generator\Behavior\OutputGroup\OgObjectModifier|null
-     */
-    protected $objectModifier;
+    protected OgObjectModifier|null $objectModifier = null;
 
-    /**
-     * @var \Propel\Generator\Behavior\OutputGroup\OgTableMapModifier|null
-     */
-    protected $tableModifier;
+    protected OgTableMapModifier|null $tableModifier = null;
 
-    /**
-     * @var \Propel\Generator\Behavior\OutputGroup\OgQueryModifier|null
-     */
-    protected $queryModifier;
+    protected OgQueryModifier|null $queryModifier = null;
+
+    public function __construct()
+    {
+        parent::__construct();
+
+        $this->parameters = [
+            self::PARAMETER_OBJECT_COLLECTION_CLASS => null,
+        ];
+    }
 
     /**
      * @see \Propel\Generator\Model\Behavior::getObjectBuilderModifier()

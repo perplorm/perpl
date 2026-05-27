@@ -94,7 +94,7 @@ class TableTest extends ModelTestCase
         $behavior = $this->getBehaviorMock('foo');
         $behavior
             ->expects($this->once())
-            ->method('isTableModified')
+            ->method('hasBeenApplied')
             ->will($this->returnValue(false));
 
         $behavior
@@ -122,9 +122,9 @@ class TableTest extends ModelTestCase
     public function testGetAdditionalBuilders()
     {
         $additionalBehaviors = [
-            $this->getBehaviorMock('foo'),
-            $this->getBehaviorMock('bar'),
-            $this->getBehaviorMock('baz'),
+            'builderClass1',
+            'builderClass2',
+            'builderClass3',
         ];
 
         $behavior = $this->getBehaviorMock('mix', [

@@ -15,7 +15,7 @@ use function sprintf;
 trait BehaviorableTrait
 {
     /**
-     * @var array<\Propel\Generator\Model\Behavior>
+     * @var array<string, \Propel\Generator\Model\Behavior>
      */
     protected $behaviors = [];
 

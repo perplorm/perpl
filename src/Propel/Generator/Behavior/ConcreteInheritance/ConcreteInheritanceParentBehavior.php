@@ -14,19 +14,16 @@ use Propel\Generator\Model\Behavior;
  */
 class ConcreteInheritanceParentBehavior extends Behavior
 {
-    /**
-     * @var \Propel\Generator\Builder\Om\ObjectBuilder
-     */
-    protected $builder;
+    protected ObjectBuilder|null $builder = null;
 
-    /**
-     * Default parameters value
-     *
-     * @var array<string, mixed>
-     */
-    protected $parameters = [
-        'descendant_column' => 'descendant_class',
-    ];
+    public function __construct()
+    {
+        parent::__construct();
+
+        $this->parameters = [
+            'descendant_column' => 'descendant_class',
+        ];
+    }
 
     /**
      * @return void

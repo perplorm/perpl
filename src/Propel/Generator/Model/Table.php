@@ -271,7 +271,7 @@ class Table extends ScopedMappingModel implements IdMethod
     public function applyBehaviors(): void
     {
         foreach ($this->behaviors as $behavior) {
-            if (!$behavior->isTableModified()) {
+            if (!$behavior->hasBeenApplied()) {
                 $behavior->getTableModifier()->modifyTable();
                 $behavior->setTableModified(true);
             }
@@ -1160,28 +1160,19 @@ class Table extends ScopedMappingModel implements IdMethod
      */
     public function hasAdditionalBuilders(): bool
     {
-        foreach ($this->behaviors as $behavior) {
-            if ($behavior->hasAdditionalBuilders()) {
-                return true;
-            }
-        }
-
-        return false;
+        return array_any($this->behaviors, fn (Behavior $behavior) => $behavior->hasAdditionalBuilders());
     }
 
     /**
      * Returns the list of additional builders provided by the table behaviors.
      *
-     * @return array
+     * @return array<class-string<\Propel\Generator\Builder\Om\AbstractOMBuilder>>
      */
     public function getAdditionalBuilders(): array
     {
-        $additionalBuilders = [];
-        foreach ($this->behaviors as $behavior) {
-            $additionalBuilders = array_merge($additionalBuilders, $behavior->getAdditionalBuilders());
-        }
+        $additionalBuilders = array_map(fn (Behavior $behavior) => $behavior->getAdditionalBuilders(), array_values($this->behaviors));
 
-        return $additionalBuilders;
+        return array_merge(...$additionalBuilders);
     }
 
     /**

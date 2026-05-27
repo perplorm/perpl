@@ -21,10 +21,7 @@ use function strtolower;
  */
 class SyncedTableBehavior extends SyncedTableBehaviorDeclaration
 {
-    /**
-     * @var \Propel\Generator\Model\Table|null
-     */
-    protected $syncedTable;
+    protected Table|null $syncedTable = null;
 
     /**
      * @return \Propel\Generator\Model\Table|null

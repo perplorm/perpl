@@ -12,16 +12,16 @@ use function array_merge;
  */
 class AutoAddPkBehavior extends Behavior
 {
-    /**
-     * Default parameters value
-     *
-     * @var array<string, mixed>
-     */
-    protected $parameters = [
-        'name' => 'id',
-        'autoIncrement' => 'true',
-        'type' => 'INTEGER',
-    ];
+    public function __construct()
+    {
+        parent::__construct();
+
+        $this->parameters = [
+            'name' => 'id',
+            'autoIncrement' => 'true',
+            'type' => 'INTEGER',
+        ];
+    }
 
     /**
      * Copy the behavior to the database tables

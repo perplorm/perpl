@@ -41,23 +41,23 @@ class DelegateBehavior extends Behavior
     public const MANY_TO_ONE = 2;
 
     /**
-     * Default parameters value
-     *
-     * @var array<string, mixed>
-     */
-    protected $parameters = [
-        'to' => '',
-    ];
-
-    /**
      * @var array<int>
      */
-    protected $delegates = [];
+    protected array $delegates = [];
 
     /**
-     * @var array|null
+     * @var array<string, int> |null
      */
-    protected $doubleDefined;
+    protected array|null $doubleDefined = null;
+
+    public function __construct()
+    {
+        parent::__construct();
+
+        $this->parameters = [
+            'to' => '',
+        ];
+    }
 
     /**
      * Lists the delegates and checks that the behavior can use them,
@@ -247,10 +247,7 @@ if (method_exists({$ARFQCN}::class, \$name)) {
                 $delegateTable = $this->getDelegateTable($key);
                 foreach ($delegateTable->getColumns() as $columnDelegated) {
                     $columnName = $columnDelegated->getName();
-                    if (!isset($this->doubleDefined[$columnName])) {
-                        $this->doubleDefined[$columnName] = 0;
-                    }
-                    $this->doubleDefined[$columnName]++;
+                    $this->doubleDefined[$columnName] = ($this->doubleDefined[$columnName] ?? 0) + 1;
                 }
             }
         }

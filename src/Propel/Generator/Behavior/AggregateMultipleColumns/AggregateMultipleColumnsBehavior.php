@@ -55,28 +55,25 @@ class AggregateMultipleColumnsBehavior extends Behavior
     public const PARAMETER_KEY_COLUMN_EXPRESSION = 'expression';
 
     /**
-     * Keeps track of inserted aggregation functions to avoid naming collisions.
+     * Maps table name to inserted aggregation function names. Used to detect naming collisions.
      *
-     * @var array
+     * @var array<string, list<string>>
      */
-    private static $insertedAggregationNames = [];
+    private static array $insertedAggregationNames = [];
 
-    /**
-     * Default parameters value.
-     *
-     * @var array<string, mixed>
-     */
-    protected $parameters = [
-        self::PARAMETER_KEY_FOREIGN_TABLE => null,
-        self::PARAMETER_KEY_FOREIGN_SCHEMA => null,
-        self::PARAMETER_KEY_CONDITION => null,
-        self::PARAMETER_KEY_COLUMNS => null,
-    ];
+    private string|null $aggregationName = null;
 
-    /**
-     * @var string|null
-     */
-    private $aggregationName;
+    public function __construct()
+    {
+        parent::__construct();
+
+        $this->parameters = [
+            self::PARAMETER_KEY_FOREIGN_TABLE => null,
+            self::PARAMETER_KEY_FOREIGN_SCHEMA => null,
+            self::PARAMETER_KEY_CONDITION => null,
+            self::PARAMETER_KEY_COLUMNS => null,
+        ];
+    }
 
     /**
      * Reset the function name memorizer. Needed when running tests.
@@ -298,12 +295,14 @@ class AggregateMultipleColumnsBehavior extends Behavior
     protected function addObjectUpdate(): string
     {
         $table = $this->getTable();
-        $columnPhpNames = array_map(function (array $columnParameters) use ($table) {
-            $columName = $columnParameters[self::PARAMETER_KEY_COLUMN_NAME];
+        $columnPhpNames = array_map(
+            function (array $columnParameters) use ($table) {
+                $columnName = $columnParameters[self::PARAMETER_KEY_COLUMN_NAME];
 
-            return $table->getColumn($columName)->getPhpName();
-        },
-        $this->getParameter(static::PARAMETER_KEY_COLUMNS));
+                return $table->getColumn($columnName)->getPhpName();
+            },
+            $this->getParameter(static::PARAMETER_KEY_COLUMNS),
+        );
 
         return $this->renderLocalTemplate('objectUpdate', [
             'aggregationName' => $this->getAggregationName(),

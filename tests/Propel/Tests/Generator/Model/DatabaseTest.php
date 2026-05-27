@@ -177,20 +177,20 @@ class DatabaseTest extends ModelTestCase
         $table1 = $this->getTableMock('books', [
         'behaviors' => [
             $this->getBehaviorMock('foo', [
-                'is_table_modified' => false,
+                'has_been_applied' => false,
                 'modification_order' => 2,
             ]),
             $this->getBehaviorMock('bar', [
-                'is_table_modified' => false,
+                'has_been_applied' => false,
                 'modification_order' => 1,
             ]),
-            $this->getBehaviorMock('baz', ['is_table_modified' => true]),
+            $this->getBehaviorMock('baz', ['has_been_applied' => true]),
         ]]);
 
         $table2 = $this->getTableMock('authors', [
         'behaviors' => [
             $this->getBehaviorMock('mix', [
-                'is_table_modified' => false,
+                'has_been_applied' => false,
                 'modification_order' => 1,
             ]),
         ]]);
@@ -212,7 +212,7 @@ class DatabaseTest extends ModelTestCase
     {
         $table1 = $this->getTableMock('books', [
         'behaviors' => [
-            $this->getBehaviorMock('foo', ['is_table_modified' => true]),
+            $this->getBehaviorMock('foo', ['has_been_applied' => true]),
         ]]);
 
         $database = new Database();

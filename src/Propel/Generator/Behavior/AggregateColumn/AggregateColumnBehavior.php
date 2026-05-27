@@ -20,18 +20,18 @@ use function sprintf;
  */
 class AggregateColumnBehavior extends Behavior
 {
-    /**
-     * Default parameters value
-     *
-     * @var array<string, mixed>
-     */
-    protected $parameters = [
-        'name' => null,
-        'expression' => null,
-        'condition' => null,
-        'foreign_table' => null,
-        'foreign_schema' => null,
-    ];
+    public function __construct()
+    {
+        parent::__construct();
+
+        $this->parameters = [
+            'name' => null,
+            'expression' => null,
+            'condition' => null,
+            'foreign_table' => null,
+            'foreign_schema' => null,
+        ];
+    }
 
     /**
      * Multiple aggregates on the same table is OK.

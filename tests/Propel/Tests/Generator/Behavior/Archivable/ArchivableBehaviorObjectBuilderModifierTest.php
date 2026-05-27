@@ -23,9 +23,11 @@ use ArchivableTest10ArchiveQuery;
 use ArchivableTest10Query;
 use ArchivableTest30;
 use ArchivableTest40;
+use Map\VersionableArchivableArchiveTableMap;
 use MyOldArchivableTest30Query;
 use Propel\Generator\Util\QuickBuilder;
 use Propel\Runtime\Exception\PropelException;
+use Propel\Runtime\Map\TableMap;
 use Propel\Tests\TestCase;
 
 /**
@@ -91,6 +93,15 @@ class ArchivableBehaviorObjectBuilderModifierTest extends TestCase
         <behavior name="archivable">
             <parameter name="archive_class" value="\Propel\Tests\Generator\Behavior\Archivable\FooArchive"/>
         </behavior>
+    </table>
+
+    <table name="versionable_archivable">
+        <column name="id" required="true" primaryKey="true" autoIncrement="true" type="INTEGER"/>
+        <column name="title" type="VARCHAR" size="100" primaryString="true"/>
+        <column name="age" type="INTEGER"/>
+
+        <behavior name="archivable" />
+        <behavior name="versionable" />
     </table>
 
 </database>
@@ -485,5 +496,13 @@ EOF;
         $ret = $a->archive();
         // time without seconds
         $this->assertEquals(date('Y-m-d H:i'), $ret->getArchivedAt('Y-m-d H:i'));
+    }
+
+    public function testArchivableContainsVersionableColumn(): void
+    {
+        /** @var TableMap $tableMap */
+        $tableMap = VersionableArchivableArchiveTableMap::getTableMap();
+
+        $this->assertTrue($tableMap->hasColumn('version'));
     }
 }

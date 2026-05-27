@@ -20,31 +20,22 @@ use function sprintf;
  */
 class SortableBehavior extends Behavior
 {
-    /**
-     * Default parameters value
-     *
-     * @var array<string, mixed>
-     */
-    protected $parameters = [
-        'rank_column' => 'sortable_rank',
-        'use_scope' => 'false',
-        'scope_column' => '',
-    ];
+    protected SortableBehaviorObjectBuilderModifier|null $objectBuilderModifier = null;
 
-    /**
-     * @var \Propel\Generator\Behavior\Sortable\SortableBehaviorObjectBuilderModifier|null
-     */
-    protected $objectBuilderModifier;
+    protected SortableBehaviorQueryBuilderModifier|null $queryBuilderModifier = null;
 
-    /**
-     * @var \Propel\Generator\Behavior\Sortable\SortableBehaviorQueryBuilderModifier|null
-     */
-    protected $queryBuilderModifier;
+    protected SortableBehaviorTableMapBuilderModifier|null $tableMapBuilderModifier = null;
 
-    /**
-     * @var \Propel\Generator\Behavior\Sortable\SortableBehaviorTableMapBuilderModifier|null
-     */
-    protected $tableMapBuilderModifier;
+    public function __construct()
+    {
+        parent::__construct();
+
+        $this->parameters = [
+            'rank_column' => 'sortable_rank',
+            'use_scope' => 'false',
+            'scope_column' => '',
+        ];
+    }
 
     /**
      * Add the rank_column to the current table

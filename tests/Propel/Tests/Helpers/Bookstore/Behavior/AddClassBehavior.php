@@ -12,5 +12,5 @@ use Propel\Generator\Model\Behavior;
 
 class AddClassBehavior extends Behavior
 {
-    protected $additionalBuilders = ['Propel\Tests\Helpers\Bookstore\Behavior\AddClassBehaviorBuilder'];
+    protected array $additionalBuilders = ['Propel\Tests\Helpers\Bookstore\Behavior\AddClassBehaviorBuilder'];
 }

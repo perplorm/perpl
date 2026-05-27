@@ -43,32 +43,22 @@ class VersionableBehavior extends SyncedTableBehavior
      */
     public const PARAMETER_KEY_SYNC_INDEXES = 'indices';
 
-    /**
-     * @var \Propel\Generator\Model\Table
-     */
-    protected $versionTable;
+    protected VersionableBehaviorObjectBuilderModifier|null $objectBuilderModifier = null;
 
-    /**
-     * @var \Propel\Generator\Behavior\Versionable\VersionableBehaviorObjectBuilderModifier|null
-     */
-    protected $objectBuilderModifier;
-
-    /**
-     * @var \Propel\Generator\Behavior\Versionable\VersionableBehaviorQueryBuilderModifier|null
-     */
-    protected $queryBuilderModifier;
-
-    /**
-     * @var int
-     */
-    protected $tableModificationOrder = 80;
+    protected VersionableBehaviorQueryBuilderModifier|null $queryBuilderModifier = null;
 
     /**
      * Track added version tables.
      *
-     * @var array
+     * @var array<\Propel\Generator\Model\Table>
      */
-    protected $versionTables = [];
+    protected array $versionTables = [];
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->tableModificationOrder = 80;
+    }
 
     /**
      * @see \Propel\Generator\Behavior\SyncedTable\SyncedTableBehavior::getDefaultParameters()
