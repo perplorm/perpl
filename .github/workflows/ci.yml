@@ -67,9 +67,17 @@ jobs:
                 symfony-version: ${{ matrix.symfony-version }}
                 cache-key-suffix: ${{ matrix.db-type}}
 
-            - name: Grant MySQL privileges to DB user
+            - name: Finish MySQL init
               if: matrix.db-type == 'mysql'
               run: |
+                bash -c "
+                for i in {1..10}; do
+                  mysqladmin -h 127.0.0.1 -u root status >/dev/null 2>&1 && exit 0 || sleep 6
+                  echo 'MySQL not up yet, waiting...'
+                done;
+                echo 'could not establish connection after 10 tries'
+                exit 1
+                "
                 mysql -h 127.0.0.1 -u root -e "
                   GRANT ALL PRIVILEGES ON *.* TO '${{ env.DB_USER }}'@'%';
                   FLUSH PRIVILEGES;
