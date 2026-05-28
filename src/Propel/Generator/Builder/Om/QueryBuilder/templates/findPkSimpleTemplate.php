@@ -21,7 +21,7 @@
         try {
             $stmt->execute();
         } catch (Exception $e) {
-            Propel::log($e->getMessage(), Propel::LOG_ERR);
+            Perpl::log($e->getMessage(), Perpl::LOG_ERR);
 
             throw new PropelException(sprintf('Unable to execute SELECT statement [%s]', $sql), 0, $e);
         }

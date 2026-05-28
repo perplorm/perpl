@@ -9,7 +9,7 @@ use Propel\Runtime\ActiveQuery\Exception\UnknownColumnException;
 use Propel\Runtime\ActiveQuery\FilterExpression\ColumnFilterInterface;
 use Propel\Runtime\ActiveQuery\FilterExpression\FilterClauseLiteralWithColumns;
 use Propel\Runtime\Map\ColumnMap;
-use Propel\Runtime\Propel;
+use Propel\Runtime\Perpl;
 use function array_key_exists;
 use function array_map;
 use function array_merge;
@@ -543,7 +543,7 @@ class DeprecatedCriteriaMethods extends Criteria
         $pk = null;
 
         if ($table) {
-            $dbMap = Propel::getServiceContainer()->getDatabaseMap($criteria->getDbName());
+            $dbMap = Perpl::getServiceContainer()->getDatabaseMap($criteria->getDbName());
 
             $pks = $dbMap->getTable($table)->getPrimaryKeys();
             if ($pks) {

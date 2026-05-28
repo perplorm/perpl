@@ -1605,9 +1605,7 @@ protected function moveSubtreeTo(\$destLeft, \$levelDelta" . ($this->behavior->u
 
     \$treeSize = \$right - \$left +1;
 
-    if (null === \$con) {
-        \$con = Propel::getServiceContainer()->getWriteConnection($tableMapClass::DATABASE_NAME);
-    }
+    \$con ??= Perpl::getServiceContainer()->getWriteConnection($tableMapClass::DATABASE_NAME);
 
     \$con->transaction(function () use (\$con, \$treeSize, \$destLeft, \$left, \$right, \$levelDelta" . ($useScope ? ', $scope, $targetScope' : '') . ") {
         \$preventDefault = false;
@@ -1694,9 +1692,8 @@ public function deleteDescendants(?ConnectionInterface \$con = null)
         // save one query
         return;
     }
-    if (null === \$con) {
-        \$con = Propel::getServiceContainer()->getReadConnection($tableMapClass::DATABASE_NAME);
-    }
+    \$con ??= Perpl::getServiceContainer()->getReadConnection($tableMapClass::DATABASE_NAME);
+
     \$left = \$this->getLeftValue();
     \$right = \$this->getRightValue();";
         if ($useScope) {

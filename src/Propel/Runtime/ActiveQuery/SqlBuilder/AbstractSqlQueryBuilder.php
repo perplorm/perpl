@@ -6,7 +6,7 @@ namespace Propel\Runtime\ActiveQuery\SqlBuilder;
 
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\FilterExpression\ColumnFilterInterface;
-use Propel\Runtime\Propel;
+use Propel\Runtime\Perpl;
 use function strrpos;
 use function substr;
 
@@ -39,7 +39,7 @@ abstract class AbstractSqlQueryBuilder
         $this->criteria = $criteria;
 
         $dbName = $criteria->getDbName();
-        $serviceContainer = Propel::getServiceContainer();
+        $serviceContainer = Perpl::getServiceContainer();
 
         /** @var \Propel\Runtime\Adapter\SqlAdapterInterface $adapter */
         $adapter = $serviceContainer->getAdapter($dbName);

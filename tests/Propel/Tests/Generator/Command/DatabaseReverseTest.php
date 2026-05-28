@@ -10,7 +10,7 @@ namespace Propel\Tests\Generator\Command;
 
 use Propel\Generator\Command\AbstractCommand;
 use Propel\Generator\Command\DatabaseReverseCommand;
-use Propel\Runtime\Propel;
+use Propel\Runtime\Perpl;
 use Propel\Tests\TestCaseFixturesDatabase;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
@@ -26,7 +26,7 @@ class DatabaseReverseTest extends TestCaseFixturesDatabase
      */
     public function testCommandWithoutNamespace()
     {
-        $app = new Application('Propel', Propel::VERSION);
+        $app = new Application('Perpl', Perpl::VERSION);
         $command = new DatabaseReverseCommand();
         $app->addCommands([$command]);
 
@@ -74,7 +74,7 @@ class DatabaseReverseTest extends TestCaseFixturesDatabase
      */
     public function testCommandWithNamespace()
     {
-        $app = new Application('Propel', Propel::VERSION);
+        $app = new Application('Perpl', Perpl::VERSION);
         $command = new DatabaseReverseCommand();
         $app->addCommands([$command]);
 

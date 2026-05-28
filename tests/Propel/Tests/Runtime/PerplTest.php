@@ -8,25 +8,25 @@
 
 namespace Propel\Tests\Runtime;
 
-use Propel\Runtime\Propel;
+use Propel\Runtime\Perpl;
 use Propel\Runtime\ServiceContainer\ServiceContainerInterface;
 use Propel\Runtime\ServiceContainer\StandardServiceContainer;
 use Propel\Tests\Helpers\BaseTestCase;
 use Propel\Runtime\Exception\PropelException;
 
-class PropelTest extends BaseTestCase
+class PerplTest extends BaseTestCase
 {
     protected static $initialServiceContainer;
     
     public static function setUpBeforeClass(): void
     {
         parent::setUpBeforeClass();
-        static::$initialServiceContainer = Propel::getServiceContainer();
+        static::$initialServiceContainer = Perpl::getServiceContainer();
     }
     
     public function tearDown(): void
     {
-        Propel::setServiceContainer(static::$initialServiceContainer);
+        Perpl::setServiceContainer(static::$initialServiceContainer);
     }
     
     /**
@@ -34,7 +34,7 @@ class PropelTest extends BaseTestCase
      */
     public function testGetServiceContainerReturnsAServiceContainer()
     {
-        $this->assertInstanceOf(ServiceContainerInterface::class, Propel::getServiceContainer());
+        $this->assertInstanceOf(ServiceContainerInterface::class, Perpl::getServiceContainer());
     }
 
     /**
@@ -42,8 +42,8 @@ class PropelTest extends BaseTestCase
      */
     public function testGetServiceContainerAlwaysReturnsTheSameInstance()
     {
-        $sc1 = Propel::getServiceContainer();
-        $sc2 = Propel::getServiceContainer();
+        $sc1 = Perpl::getServiceContainer();
+        $sc2 = Perpl::getServiceContainer();
         $this->assertSame($sc1, $sc2);
     }
 
@@ -53,13 +53,13 @@ class PropelTest extends BaseTestCase
     public function testSetServiceContainerOverridesTheExistingServiceContainer()
     {
         $newSC = new StandardServiceContainer();
-        Propel::setServiceContainer($newSC);
-        $this->assertSame($newSC, Propel::getServiceContainer());
+        Perpl::setServiceContainer($newSC);
+        $this->assertSame($newSC, Perpl::getServiceContainer());
     }
     
     public function testGetStandardServiceContainerWithDefaultContainer()
     {
-        $sc = Propel::getStandardServiceContainer();
+        $sc = Perpl::getStandardServiceContainer();
         $this->assertInstanceOf(StandardServiceContainer::class, $sc);
     }
     
@@ -67,9 +67,9 @@ class PropelTest extends BaseTestCase
     public function testGetStandardServiceContainerThrowsErrorWithNonStandardContainer()
     {
         $sc = $this->createMock(ServiceContainerInterface::class);
-        Propel::setServiceContainer($sc);
+        Perpl::setServiceContainer($sc);
         $this->expectException(PropelException::class);
-        Propel::getStandardServiceContainer();
+        Perpl::getStandardServiceContainer();
     }
     
 }

@@ -10,7 +10,7 @@ namespace Propel\Tests\Generator\Command;
 
 use Propel\Generator\Application;
 use Propel\Generator\Command\PrintPropelDirectoriesCommand;
-use Propel\Runtime\Propel;
+use Propel\Runtime\Perpl;
 use Propel\Tests\TestCaseFixtures;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\StreamOutput;
@@ -161,7 +161,7 @@ Directory structure and files according to current config (directories marked as
      */
     protected function runConfigPreviewCommand(array $input): array
     {
-        $app = new Application('Propel', Propel::VERSION);
+        $app = new Application('Perpl', Perpl::VERSION);
         $command = new PrintPropelDirectoriesCommand();
         $app->addCommands([$command]);
 

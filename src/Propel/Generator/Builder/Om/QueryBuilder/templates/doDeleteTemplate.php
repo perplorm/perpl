@@ -8,9 +8,7 @@
      */
     public function doDeleteAll(?ConnectionInterface $con = null): int
     {
-        if (!$con) {
-            $con = Propel::getServiceContainer()->getWriteConnection(<?= $tableMapClassName ?>::DATABASE_NAME);
-        }
+        $con ??= Perpl::getServiceContainer()->getWriteConnection(<?= $tableMapClassName ?>::DATABASE_NAME);
 
         // use transaction because $criteria could contain info
         // for more than one table or we could emulating ON DELETE CASCADE, etc.
@@ -43,9 +41,7 @@
      */
     public function delete(?ConnectionInterface $con = null): int
     {
-        if (!$con) {
-            $con = Propel::getServiceContainer()->getWriteConnection(<?= $tableMapClassName ?>::DATABASE_NAME);
-        }
+        $con ??= Perpl::getServiceContainer()->getWriteConnection(<?= $tableMapClassName ?>::DATABASE_NAME);
 
         $criteria = $this;
 

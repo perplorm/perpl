@@ -24,7 +24,7 @@ use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Connection\ConnectionWrapper;
 use Propel\Runtime\Connection\PdoConnection;
 use Propel\Runtime\Connection\StatementInterface;
-use Propel\Runtime\Propel;
+use Propel\Runtime\Perpl;
 use RuntimeException;
 use function array_filter;
 use function array_map;
@@ -323,8 +323,8 @@ class QuickBuilder
         $this->buildSQL($con);
         $this->buildClasses($classTargets);
         $name = (string)$this->getDatabase()->getName();
-        Propel::getServiceContainer()->setAdapter($name, $adapter);
-        Propel::getServiceContainer()->setConnection($name, $con);
+        Perpl::getServiceContainer()->setAdapter($name, $adapter);
+        Perpl::getServiceContainer()->setConnection($name, $con);
 
         return $con;
     }
@@ -687,7 +687,7 @@ class QuickBuilder
     {
         $includes = [];
         $hashFromCwd = substr(sha1((string)getcwd()), 0, 10);
-        $version = Propel::VERSION;
+        $version = Perpl::VERSION;
         $dirName = sys_get_temp_dir() . "/perplQuickBuild/v{$version}-$hashFromCwd/";
         if (!is_dir($dirName)) {
             mkdir($dirName, 0777, true);
@@ -739,7 +739,7 @@ class QuickBuilder
      */
     protected function registerTableMaps(): void
     {
-        $serviceContainer = Propel::getServiceContainer();
+        $serviceContainer = Perpl::getServiceContainer();
         $serviceContainer->initDatabaseMaps();
         $db = $this->getDatabase();
         $dbName = $db->getName();

@@ -11,9 +11,7 @@
      */
     public function findPks($keys, ?ConnectionInterface $con = null)
     {
-        if (!$con) {
-            $con = Propel::getServiceContainer()->getReadConnection($this->getDbName());
-        }
+        $con ??= Perpl::getServiceContainer()->getReadConnection($this->getDbName());
         $this->basePreSelect($con);
         $criteria = $this->isKeepQuery() ? clone $this : $this;
         $dataFetcher = $criteria

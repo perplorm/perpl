@@ -15,10 +15,17 @@ use Propel\Generator\Model\PropelTypes;
 use Propel\Generator\Model\Table;
 use Propel\Generator\Platform\PgsqlPlatform;
 use Propel\Generator\Platform\PlatformInterface;
+use Propel\Runtime\ActiveQuery\ColumnResolver\ColumnExpression\LocalColumnExpression;
+use Propel\Runtime\ActiveQuery\Criteria;
+use Propel\Runtime\ActiveQuery\InstancePoolTrait;
+use Propel\Runtime\Connection\ConnectionInterface;
+use Propel\Runtime\DataFetcher\DataFetcherInterface;
 use Propel\Runtime\Exception\LogicException as RuntimeLogicException;
 use Propel\Runtime\Exception\PropelException;
 use Propel\Runtime\Map\RelationMap;
 use Propel\Runtime\Map\TableMap;
+use Propel\Runtime\Map\TableMapTrait;
+use Propel\Runtime\Perpl;
 use function addslashes;
 use function array_filter;
 use function array_keys;
@@ -192,14 +199,14 @@ class $className extends TableMap
         $table = $this->getTable();
 
         $this->declareClasses(
-            '\Propel\Runtime\ActiveQuery\ColumnResolver\ColumnExpression\LocalColumnExpression',
-            '\Propel\Runtime\ActiveQuery\InstancePoolTrait',
-            '\Propel\Runtime\Map\TableMap',
-            '\Propel\Runtime\Map\TableMapTrait',
-            '\Propel\Runtime\ActiveQuery\Criteria',
-            '\Propel\Runtime\Connection\ConnectionInterface',
-            '\Propel\Runtime\DataFetcher\DataFetcherInterface',
-            '\Propel\Runtime\Propel',
+            ConnectionInterface::class,
+            Criteria::class,
+            DataFetcherInterface::class,
+            InstancePoolTrait::class,
+            LocalColumnExpression::class,
+            Perpl::class,
+            TableMap::class,
+            TableMapTrait::class,
         );
 
         $script .= $this->addConstants();
@@ -1446,7 +1453,7 @@ class $className extends TableMap
     public static function getTableMap(): TableMap
     {
         /** @var static \$tableMap */
-        \$tableMap = Propel::getServiceContainer()->getDatabaseMap(static::DATABASE_NAME)->getTable(static::TABLE_NAME);
+        \$tableMap = Perpl::getServiceContainer()->getDatabaseMap(static::DATABASE_NAME)->getTable(static::TABLE_NAME);
 
         return \$tableMap;
     }\n";
@@ -1516,7 +1523,7 @@ class $className extends TableMap
     {
         trigger_deprecation('Propel', '2.0', 'TableMap::doDelete() should not be used anymore, delete via model or $queryClassName');
 
-        \$con ??= Propel::getServiceContainer()->getWriteConnection(static::DATABASE_NAME);
+        \$con ??= Perpl::getServiceContainer()->getWriteConnection(static::DATABASE_NAME);
 
         if (\$values instanceof Criteria) {
             \$criteria = \$values;
@@ -1620,7 +1627,7 @@ class $className extends TableMap
      */
     public static function doInsert(\$criteria, ?ConnectionInterface \$con = null)
     {
-        \$con ??= Propel::getServiceContainer()->getWriteConnection(static::DATABASE_NAME);
+        \$con ??= Perpl::getServiceContainer()->getWriteConnection(static::DATABASE_NAME);
 
         if (\$criteria instanceof Criteria) {
             \$criteria = clone \$criteria;

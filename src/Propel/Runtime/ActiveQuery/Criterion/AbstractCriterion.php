@@ -10,7 +10,7 @@ use Propel\Runtime\ActiveQuery\FilterExpression\ClauseList;
 use Propel\Runtime\ActiveQuery\FilterExpression\ColumnFilterInterface;
 use Propel\Runtime\Adapter\SqlAdapterInterface;
 use Propel\Runtime\Map\ColumnMap;
-use Propel\Runtime\Propel;
+use Propel\Runtime\Perpl;
 use function array_unshift;
 use function count;
 use function str_repeat;
@@ -98,12 +98,12 @@ abstract class AbstractCriterion extends ClauseList implements ColumnFilterInter
     public function init(Criteria $criteria): void
     {
         try {
-            $db = Propel::getServiceContainer()->getAdapter($criteria->getDbName());
+            $db = Perpl::getServiceContainer()->getAdapter($criteria->getDbName());
             $this->setAdapter($db);
         } catch (Exception $e) {
             // we are only doing this to allow easier debugging, so
             // no need to throw up the exception, just make note of it.
-            Propel::log('Could not get a AdapterInterface, sql may be wrong', Propel::LOG_ERR);
+            Perpl::log('Could not get a AdapterInterface, sql may be wrong', Perpl::LOG_ERR);
         }
 
         // init $this->realtable

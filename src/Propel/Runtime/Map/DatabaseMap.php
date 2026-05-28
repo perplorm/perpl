@@ -6,7 +6,7 @@ namespace Propel\Runtime\Map;
 
 use Propel\Runtime\Adapter\AdapterInterface;
 use Propel\Runtime\Map\Exception\TableNotFoundException;
-use Propel\Runtime\Propel;
+use Propel\Runtime\Perpl;
 use function array_map;
 use function class_exists;
 use function explode;
@@ -347,12 +347,12 @@ class DatabaseMap
     /**
      * Convenience method to get the AdapterInterface registered with Propel for this database.
      *
-     * @see Propel::getServiceContainer()->getAdapter(string) .
+     * @see \Propel\Runtime\Perpl::getServiceContainer()->getAdapter(string) .
      *
      * @return \Propel\Runtime\Adapter\AdapterInterface
      */
     public function getAbstractAdapter(): AdapterInterface
     {
-        return Propel::getServiceContainer()->getAdapter($this->name);
+        return Perpl::getServiceContainer()->getAdapter($this->name);
     }
 }

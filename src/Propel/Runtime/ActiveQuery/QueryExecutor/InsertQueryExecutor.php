@@ -9,7 +9,7 @@ use Propel\Runtime\ActiveQuery\SqlBuilder\InsertQuerySqlBuilder;
 use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Exception\PropelException;
 use Propel\Runtime\Map\TableMap;
-use Propel\Runtime\Propel;
+use Propel\Runtime\Perpl;
 use Throwable;
 use function reset;
 
@@ -46,7 +46,7 @@ class InsertQueryExecutor extends AbstractQueryExecutor
             return null;
         }
 
-        $dbMap = Propel::getServiceContainer()->getDatabaseMap($this->criteria->getDbName());
+        $dbMap = Perpl::getServiceContainer()->getDatabaseMap($this->criteria->getDbName());
 
         return $dbMap->getTable($tableAlias);
     }

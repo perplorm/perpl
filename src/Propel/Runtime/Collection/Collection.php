@@ -17,7 +17,7 @@ use Propel\Runtime\Exception\UnexpectedValueException;
 use Propel\Runtime\Formatter\AbstractFormatter;
 use Propel\Runtime\Map\TableMap;
 use Propel\Runtime\Parser\AbstractParser;
-use Propel\Runtime\Propel;
+use Propel\Runtime\Perpl;
 use Serializable;
 use Traversable;
 use function array_map;
@@ -573,7 +573,7 @@ class Collection implements ArrayAccess, IteratorAggregate, Countable, Serializa
     {
         $databaseName = $this->getTableMapClass()::DATABASE_NAME;
 
-        return Propel::getServiceContainer()->getWriteConnection($databaseName);
+        return Perpl::getServiceContainer()->getWriteConnection($databaseName);
     }
 
     /**

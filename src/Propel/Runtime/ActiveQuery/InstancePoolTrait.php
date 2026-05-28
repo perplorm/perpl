@@ -6,7 +6,7 @@ namespace Propel\Runtime\ActiveQuery;
 
 use Countable;
 use Propel\Runtime\Exception\LogicException;
-use Propel\Runtime\Propel;
+use Propel\Runtime\Perpl;
 use function count;
 use function is_array;
 use function is_object;
@@ -81,7 +81,7 @@ trait InstancePoolTrait
      */
     public static function getInstanceFromPool(?string $key): ?object
     {
-        if ($key === null || !Propel::isInstancePoolingEnabled()) {
+        if ($key === null || !Perpl::isInstancePoolingEnabled()) {
             return null;
         }
 

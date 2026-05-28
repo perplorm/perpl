@@ -256,10 +256,7 @@ static public function deleteTree(?ConnectionInterface $con = null)
  */
 static public function shiftRLValues($delta, $first, $last = null, ?ConnectionInterface $con = null)
 {
-    if ($con === null) {
-        $con = Propel::getServiceContainer()->getWriteConnection(TableTableMap::DATABASE_NAME);
-    }
-
+    $con ??= Perpl::getServiceContainer()->getWriteConnection(TableTableMap::DATABASE_NAME);
     // Shift left column values
     $updateQuery = new Criteria(TableTableMap::DATABASE_NAME);
     $criterion = $updateQuery->getNewCriterion(ChildTable::LEFT_COL, $first, Criteria::GREATER_EQUAL);
@@ -298,10 +295,7 @@ static public function shiftRLValues($delta, $first, $last = null, ?ConnectionIn
  */
 static public function shiftLevel($delta, $first, $last, ?ConnectionInterface $con = null)
 {
-    if ($con === null) {
-        $con = Propel::getServiceContainer()->getWriteConnection(TableTableMap::DATABASE_NAME);
-    }
-
+    $con ??= Perpl::getServiceContainer()->getWriteConnection(TableTableMap::DATABASE_NAME);
     $updateQuery = new Criteria(TableTableMap::DATABASE_NAME);
     $updateQuery->addAnd(ChildTable::LEFT_COL, $first, Criteria::GREATER_EQUAL);
     $updateQuery->addAnd(ChildTable::RIGHT_COL, $last, Criteria::LESS_EQUAL);
@@ -321,7 +315,7 @@ static public function shiftLevel($delta, $first, $last, ?ConnectionInterface $c
  */
 static public function updateLoadedNodes($prune = null, ?ConnectionInterface $con = null)
 {
-    if (Propel::isInstancePoolingEnabled()) {
+    if (Perpl::isInstancePoolingEnabled()) {
         $keys = [];
         /** @var $obj ChildTable */
         foreach (TableTableMap::$instances as $obj) {

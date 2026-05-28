@@ -11,7 +11,7 @@ use Propel\Runtime\Adapter\AdapterInterface;
 use Propel\Runtime\Adapter\SqlAdapterInterface;
 use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Exception\InvalidArgumentException;
-use Propel\Runtime\Propel;
+use Propel\Runtime\Perpl;
 use RuntimeException;
 use function array_map;
 use function array_search;
@@ -255,7 +255,7 @@ class PgsqlAdapter extends PdoAdapter implements SqlAdapterInterface
     {
         if ($query instanceof Criteria) {
             $params = [];
-            $dbMap = Propel::getServiceContainer()->getDatabaseMap($query->getDbName());
+            $dbMap = Perpl::getServiceContainer()->getDatabaseMap($query->getDbName());
             $sql = $query->createSelectSql($params);
         } else {
             $sql = $query;

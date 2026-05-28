@@ -182,16 +182,16 @@
     }
 
     /**
-     * Logs a message using Propel::log().
+     * Logs a message using Perpl::log().
      *
      * @param string $msg
-     * @param int $priority One of the Propel::LOG_* logging levels
+     * @param int $priority One of the Perpl::LOG_* logging levels
      *
      * @return void
      */
-    protected function log(string $msg, int $priority = Propel::LOG_INFO): void
+    protected function log(string $msg, int $priority = Perpl::LOG_INFO): void
     {
-        Propel::log(static::class . ': ' . $msg, $priority);
+        Perpl::log(static::class . ': ' . $msg, $priority);
     }
 
     /**

@@ -114,9 +114,8 @@ public function findList($scopeCategoryId, $scopeSubCategoryId = null, $con = nu
  */
 public function getMaxRank($scopeCategoryId, $scopeSubCategoryId = null, ?ConnectionInterface $con = null): ?int
 {
-    if (null === $con) {
-        $con = Propel::getServiceContainer()->getReadConnection(TableTableMap::DATABASE_NAME);
-    }
+    $con ??= Perpl::getServiceContainer()->getWriteConnection(TableTableMap::DATABASE_NAME);
+
     // shift the objects with a position lower than the one of object
     $this->addSelectColumn('MAX(' . TableTableMap::RANK_COL . ')');
             
@@ -141,9 +140,8 @@ public function getMaxRank($scopeCategoryId, $scopeSubCategoryId = null, ?Connec
  */
 public function getMaxRankArray($scope, ?ConnectionInterface $con = null): ?int
 {
-    if ($con === null) {
-        $con = Propel::getConnection(TableTableMap::DATABASE_NAME);
-    }
+    $con ??= Perpl::getServiceContainer()->getWriteConnection(TableTableMap::DATABASE_NAME);
+
     // shift the objects with a position lower than the one of object
     $this->addSelectColumn('MAX(' . TableTableMap::RANK_COL . ')');
     static::sortableApplyScopeCriteria($this, $scope);
@@ -163,9 +161,7 @@ public function getMaxRankArray($scope, ?ConnectionInterface $con = null): ?int
  */
 static public function retrieveByRank($rank, $scope = null, ?ConnectionInterface $con = null)
 {
-    if (null === $con) {
-        $con = Propel::getServiceContainer()->getReadConnection(TableTableMap::DATABASE_NAME);
-    }
+    $con ??= Perpl::getServiceContainer()->getWriteConnection(TableTableMap::DATABASE_NAME);
 
     $c = new Criteria;
     $c->addAnd(TableTableMap::RANK_COL, $rank);
@@ -186,9 +182,7 @@ static public function retrieveByRank($rank, $scope = null, ?ConnectionInterface
  */
 public function reorder($order, ?ConnectionInterface $con = null)
 {
-    if (null === $con) {
-        $con = Propel::getServiceContainer()->getReadConnection(TableTableMap::DATABASE_NAME);
-    }
+    $con ??= Perpl::getServiceContainer()->getReadConnection(TableTableMap::DATABASE_NAME);
 
     $con->transaction(function () use ($con, $order) {
         $ids = array_keys($order);
@@ -217,9 +211,7 @@ public function reorder($order, ?ConnectionInterface $con = null)
  */
 static public function doSelectOrderByRank(?Criteria $criteria = null, $order = Criteria::ASC, ?ConnectionInterface $con = null)
 {
-    if (null === $con) {
-        $con = Propel::getServiceContainer()->getReadConnection(TableTableMap::DATABASE_NAME);
-    }
+    $con ??= Perpl::getServiceContainer()->getWriteConnection(TableTableMap::DATABASE_NAME);
 
     if (null === $criteria) {
         $criteria = new Criteria();
@@ -317,9 +309,7 @@ static public function sortableApplyScopeCriteria(Criteria $criteria, $scope, st
  */
 static public function sortableShiftRank($delta, $first, $last = null, $scope = null, ?ConnectionInterface $con = null)
 {
-    if (null === $con) {
-        $con = Propel::getServiceContainer()->getWriteConnection(TableTableMap::DATABASE_NAME);
-    }
+    $con ??= Perpl::getServiceContainer()->getWriteConnection(TableTableMap::DATABASE_NAME);
 
     $whereCriteria = new Criteria(TableTableMap::DATABASE_NAME);
     $criterion = $whereCriteria->getNewCriterion(TableTableMap::RANK_COL, $first, Criteria::GREATER_EQUAL);

@@ -28,7 +28,7 @@ use Propel\Runtime\Exception\UnexpectedValueException;
 use Propel\Runtime\Formatter\SimpleArrayFormatter;
 use Propel\Runtime\Map\Exception\ColumnNotFoundException;
 use Propel\Runtime\Map\RelationMap;
-use Propel\Runtime\Propel;
+use Propel\Runtime\Perpl;
 use Propel\Runtime\Util\PropelModelPager;
 use function array_key_exists;
 use function array_merge;
@@ -1360,7 +1360,7 @@ class ModelCriteria extends BaseModelCriteria
     public function fetch(?ConnectionInterface $con = null): DataFetcherInterface
     {
         if ($con === null) {
-            $con = Propel::getServiceContainer()->getReadConnection($this->getDbName());
+            $con = Perpl::getServiceContainer()->getReadConnection($this->getDbName());
         }
 
         $this->basePreSelect($con);
@@ -1542,7 +1542,7 @@ class ModelCriteria extends BaseModelCriteria
     public function findPk($key, ?ConnectionInterface $con = null)
     {
         if ($con === null) {
-            $con = Propel::getServiceContainer()->getReadConnection($this->getDbName());
+            $con = Perpl::getServiceContainer()->getReadConnection($this->getDbName());
         }
 
         // As the query uses a PK condition, no limit(1) is necessary.
@@ -1587,7 +1587,7 @@ class ModelCriteria extends BaseModelCriteria
     public function findPks(array $keys, ?ConnectionInterface $con = null)
     {
         if ($con === null) {
-            $con = Propel::getServiceContainer()->getReadConnection($this->getDbName());
+            $con = Perpl::getServiceContainer()->getReadConnection($this->getDbName());
         }
         // As the query uses a PK condition, no limit(1) is necessary.
         $this->basePreSelect($con);
@@ -1705,7 +1705,7 @@ class ModelCriteria extends BaseModelCriteria
     public function count(?ConnectionInterface $con = null): int
     {
         if ($con === null) {
-            $con = Propel::getServiceContainer()->getReadConnection($this->getDbName());
+            $con = Perpl::getServiceContainer()->getReadConnection($this->getDbName());
         }
 
         $this->basePreSelect($con);
@@ -1754,7 +1754,7 @@ class ModelCriteria extends BaseModelCriteria
     public function exists(?ConnectionInterface $con = null): bool
     {
         if ($con === null) {
-            $con = Propel::getServiceContainer()->getReadConnection($this->getDbName());
+            $con = Perpl::getServiceContainer()->getReadConnection($this->getDbName());
         }
 
         $this->basePreSelect($con);
@@ -1856,7 +1856,7 @@ class ModelCriteria extends BaseModelCriteria
         }
 
         if ($con === null) {
-            $con = Propel::getServiceContainer()->getWriteConnection($this->getDbName());
+            $con = Perpl::getServiceContainer()->getWriteConnection($this->getDbName());
         }
 
         $criteria = $this->isKeepQuery() ? clone $this : $this;
@@ -1890,7 +1890,7 @@ class ModelCriteria extends BaseModelCriteria
     public function deleteAll(?ConnectionInterface $con = null): int
     {
         if ($con === null) {
-            $con = Propel::getServiceContainer()->getWriteConnection($this->getDbName());
+            $con = Perpl::getServiceContainer()->getWriteConnection($this->getDbName());
         }
         try {
             return $con->transaction(function () use ($con) {
@@ -1983,7 +1983,7 @@ class ModelCriteria extends BaseModelCriteria
         }
 
         if ($con === null) {
-            $con = Propel::getServiceContainer()->getWriteConnection($this->getDbName());
+            $con = Perpl::getServiceContainer()->getWriteConnection($this->getDbName());
         }
 
         $criteria = $this->isKeepQuery() ? clone $this : $this;

@@ -110,7 +110,7 @@ class ConfigConvertCommand extends AbstractCommand
         $stringifiedOptions = ArrayToPhpConverter::convert($options);
         $runtimeVersion = StandardServiceContainer::CONFIGURATION_VERSION;
         $phpConf = "<?php
-\$serviceContainer = \Propel\Runtime\Propel::getServiceContainer();
+\$serviceContainer = \Propel\Runtime\Perpl::getServiceContainer();
 \$serviceContainer->checkVersion($runtimeVersion);
 $stringifiedOptions
 require_once __DIR__ . '$loaderScriptLocation';

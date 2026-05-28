@@ -12,7 +12,7 @@ use Propel\Runtime\Exception\InvalidArgumentException;
 use Propel\Runtime\Exception\LogicException;
 use Propel\Runtime\Formatter\AbstractFormatter;
 use Propel\Runtime\Map\TableMap;
-use Propel\Runtime\Propel;
+use Propel\Runtime\Perpl;
 use Traversable;
 use function array_pop;
 use function class_exists;
@@ -228,7 +228,7 @@ class BaseModelCriteria extends Criteria implements IteratorAggregate
             $this->modelTableMapName = $modelName::TABLE_MAP;
         }
         $dbName = $this->getDbName();
-        $this->tableMap = Propel::getServiceContainer()->getDatabaseMap($dbName)->getTableByPhpName($modelName);
+        $this->tableMap = Perpl::getServiceContainer()->getDatabaseMap($dbName)->getTableByPhpName($modelName);
         $this->setPrimaryTableName($this->modelTableMapName::TABLE_NAME);
 
         return $this;

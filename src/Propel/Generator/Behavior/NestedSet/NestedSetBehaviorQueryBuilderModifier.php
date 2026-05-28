@@ -762,10 +762,7 @@ static public function deleteTree(" . ($useScope ? '$scope = null, ' : '') . "?C
  */
 static public function shiftRLValues(\$delta, \$first, \$last = null" . ($useScope ? ', $scope = null' : '') . ", ?ConnectionInterface \$con = null)
 {
-    if (\$con === null) {
-        \$con = Propel::getServiceContainer()->getWriteConnection($tableMapClassName::DATABASE_NAME);
-    }
-
+    \$con ??= Perpl::getServiceContainer()->getWriteConnection($tableMapClassName::DATABASE_NAME);
     // Shift left column values
     \$updateQuery = new Criteria($tableMapClassName::DATABASE_NAME);
     \$criterion = \$updateQuery->getNewCriterion($objectClassName::LEFT_COL, \$first, Criteria::GREATER_EQUAL);
@@ -835,10 +832,7 @@ static public function shiftRLValues(\$delta, \$first, \$last = null" . ($useSco
  */
 static public function shiftLevel(\$delta, \$first, \$last" . ($useScope ? ', $scope = null' : '') . ", ?ConnectionInterface \$con = null)
 {
-    if (\$con === null) {
-        \$con = Propel::getServiceContainer()->getWriteConnection($tableMapClassName::DATABASE_NAME);
-    }
-
+    \$con ??= Perpl::getServiceContainer()->getWriteConnection($tableMapClassName::DATABASE_NAME);
     \$updateQuery = new Criteria($tableMapClassName::DATABASE_NAME);
     \$updateQuery->addAnd($objectClassName::LEFT_COL, \$first, Criteria::GREATER_EQUAL);
     \$updateQuery->addAnd($objectClassName::RIGHT_COL, \$last, Criteria::LESS_EQUAL);";
@@ -877,7 +871,7 @@ static public function shiftLevel(\$delta, \$first, \$last" . ($useScope ? ', $s
  */
 static public function updateLoadedNodes(\$prune = null, ?ConnectionInterface \$con = null)
 {
-    if (Propel::isInstancePoolingEnabled()) {
+    if (Perpl::isInstancePoolingEnabled()) {
         \$keys = [];
         /** @var \$obj $objectClassName */
         foreach ($tableMapClassName::\$instances as \$obj) {

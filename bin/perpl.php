@@ -16,14 +16,14 @@ if (!class_exists(\Symfony\Component\Console\Application::class)) {
 }
 
 use Propel\Generator\Application;
-use Propel\Runtime\Propel;
+use Propel\Runtime\Perpl;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Finder\Finder;
 
 $finder = new Finder();
 $finder->files()->name('*.php')->in(__DIR__ . '/../src/Propel/Generator/Command')->depth(0);
 
-$app = new Application('Perpl CLI', Propel::VERSION);
+$app = new Application('Perpl CLI', Perpl::VERSION);
 
 $ns = '\\Propel\\Generator\\Command\\';
 

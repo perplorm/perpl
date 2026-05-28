@@ -9,7 +9,7 @@
 namespace Propel\Tests;
 
 use Propel\Runtime\Connection\ConnectionInterface;
-use Propel\Runtime\Propel;
+use Propel\Runtime\Perpl;
 use ReflectionClass;
 use RuntimeException;
 use Symfony\Component\Console\Application;
@@ -175,7 +175,7 @@ class TestCaseFixtures extends TestCase
             $commands[] = $r->newInstance();
         }
 
-        $app = new Application('Propel', Propel::VERSION);
+        $app = new Application('Perpl', Perpl::VERSION);
         $app->addCommands($commands);
         $app->setAutoExit(false);
 
@@ -244,7 +244,7 @@ class TestCaseFixtures extends TestCase
      */
     protected static function getConnectionDsn($database = 'bookstore', $withCredentials = false)
     {
-        $serviceContainer = Propel::getServiceContainer();
+        $serviceContainer = Perpl::getServiceContainer();
         /** @var \Propel\Runtime\Connection\ConnectionManagerSingle $manager */
         $manager = $serviceContainer->getConnectionManager($database);
         $configuration = $manager->getConfiguration();

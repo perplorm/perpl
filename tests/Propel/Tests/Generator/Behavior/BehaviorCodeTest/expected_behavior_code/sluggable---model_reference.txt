@@ -122,7 +122,7 @@ protected function makeSlugUnique(string $slug, string $separator = '/', bool $a
         $slug2 = $slug . $separator;
     }
 
-    $adapter = \Propel\Runtime\Propel::getServiceContainer()->getAdapter('');
+    $adapter = \Propel\Runtime\Perpl::getServiceContainer()->getAdapter('');
     $col = 'q.Url';
     $compare = $alreadyExists ? $adapter->compareRegex($col, '?') : sprintf('%s = ?', $col);
 
@@ -140,7 +140,7 @@ protected function makeSlugUnique(string $slug, string $separator = '/', bool $a
         return $slug2;
     }
 
-    $adapter = \Propel\Runtime\Propel::getServiceContainer()->getAdapter('');
+    $adapter = \Propel\Runtime\Perpl::getServiceContainer()->getAdapter('');
     // Already exists
     $object = $query
         ->addDescendingOrderByColumn($adapter->strLength('url'))

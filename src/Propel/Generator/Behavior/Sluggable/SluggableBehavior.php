@@ -358,7 +358,7 @@ protected function makeSlugUnique(string \$slug, string \$separator = '" . $this
         $script .= "
     }
 
-    \$adapter = \\Propel\\Runtime\\Propel::getServiceContainer()->getAdapter('" . $this->builder->getDatabase()->getName() . "');
+    \$adapter = \\Propel\\Runtime\\Perpl::getServiceContainer()->getAdapter('" . $this->builder->getDatabase()->getName() . "');
     \$col = 'q." . $this->getColumnForParameter('slug_column')->getPhpName() . "';
     \$compare = \$alreadyExists ? \$adapter->compareRegex(\$col, '?') : sprintf('%s = ?', \$col);
 
@@ -388,7 +388,7 @@ protected function makeSlugUnique(string \$slug, string \$separator = '" . $this
         return \$slug2;
     }
 
-    \$adapter = \\Propel\\Runtime\\Propel::getServiceContainer()->getAdapter('" . $this->builder->getDatabase()->getName() . "');
+    \$adapter = \\Propel\\Runtime\\Perpl::getServiceContainer()->getAdapter('" . $this->builder->getDatabase()->getName() . "');
     // Already exists
     \$object = \$query
         ->addDescendingOrderByColumn(\$adapter->strLength('" . $this->getColumnForParameter('slug_column')->getName() . "'))

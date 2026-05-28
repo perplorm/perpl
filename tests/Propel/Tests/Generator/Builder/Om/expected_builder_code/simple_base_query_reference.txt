@@ -12,7 +12,7 @@ use Propel\Runtime\ActiveQuery\ModelCriteria;
 use Propel\Runtime\ActiveQuery\TypedModelCriteria;
 use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Exception\PropelException;
-use Propel\Runtime\Propel;
+use Propel\Runtime\Perpl;
 use function is_array;
 use function is_bool;
 use function sprintf;
@@ -114,7 +114,7 @@ abstract class IdTableQuery extends TypedModelCriteria
      */
     public function findPk($key, ?ConnectionInterface $con = null)
     {
-        $con ??= Propel::getServiceContainer()->getReadConnection(IdTableTableMap::DATABASE_NAME);
+        $con ??= Perpl::getServiceContainer()->getReadConnection(IdTableTableMap::DATABASE_NAME);
 
         $this->basePreSelect($con);
 
@@ -150,7 +150,7 @@ abstract class IdTableQuery extends TypedModelCriteria
         try {
             $stmt->execute();
         } catch (Exception $e) {
-            Propel::log($e->getMessage(), Propel::LOG_ERR);
+            Perpl::log($e->getMessage(), Perpl::LOG_ERR);
 
             throw new PropelException(sprintf('Unable to execute SELECT statement [%s]', $sql), 0, $e);
         }
@@ -197,9 +197,7 @@ abstract class IdTableQuery extends TypedModelCriteria
      */
     public function findPks($keys, ?ConnectionInterface $con = null)
     {
-        if (!$con) {
-            $con = Propel::getServiceContainer()->getReadConnection($this->getDbName());
-        }
+        $con ??= Perpl::getServiceContainer()->getReadConnection($this->getDbName());
         $this->basePreSelect($con);
         $criteria = $this->isKeepQuery() ? clone $this : $this;
         $dataFetcher = $criteria
@@ -306,9 +304,7 @@ abstract class IdTableQuery extends TypedModelCriteria
      */
     public function doDeleteAll(?ConnectionInterface $con = null): int
     {
-        if (!$con) {
-            $con = Propel::getServiceContainer()->getWriteConnection(IdTableTableMap::DATABASE_NAME);
-        }
+        $con ??= Perpl::getServiceContainer()->getWriteConnection(IdTableTableMap::DATABASE_NAME);
 
         // use transaction because $criteria could contain info
         // for more than one table or we could emulating ON DELETE CASCADE, etc.
@@ -335,9 +331,7 @@ abstract class IdTableQuery extends TypedModelCriteria
      */
     public function delete(?ConnectionInterface $con = null): int
     {
-        if (!$con) {
-            $con = Propel::getServiceContainer()->getWriteConnection(IdTableTableMap::DATABASE_NAME);
-        }
+        $con ??= Perpl::getServiceContainer()->getWriteConnection(IdTableTableMap::DATABASE_NAME);
 
         $criteria = $this;
 

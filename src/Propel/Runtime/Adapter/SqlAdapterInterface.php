@@ -108,11 +108,11 @@ interface SqlAdapterInterface extends AdapterInterface
      * values that should be substituted.
      *
      * <code>
-     * $adapter = Propel::getServiceContainer()->getAdapter($criteria->getDbName());
+     * $adapter = Perpl::getServiceContainer()->getAdapter($criteria->getDbName());
      * $sql = $criteria->createSelectSql($params);
      * $stmt = $con->prepare($sql);
      * $params = [];
-     * $adapter->populateStmtValues($stmt, $params, Propel::getServiceContainer()->getDatabaseMap($criteria->getDbName()));
+     * $adapter->populateStmtValues($stmt, $params, Perpl::getServiceContainer()->getDatabaseMap($criteria->getDbName()));
      * $stmt->execute();
      * </code>
      *

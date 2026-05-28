@@ -34,13 +34,13 @@ jobs:
 
             - name: Update version in \Propel\Runtime\Perpl
               run: |
-                sed -i "s/public const VERSION = '.*';/public const VERSION = '${VERSION_NUMBER}';/" src/Propel/Runtime/Propel.php
+                sed -i "s/public const VERSION = '.*';/public const VERSION = '${VERSION_NUMBER}';/" src/Propel/Runtime/Perpl.php
 
             - name: Commit and push changes
               run: |
                 git config --global user.name "Github Actions"
                 git config --global user.email "actions@github.com"
-                git add src/Propel/Runtime/Propel.php
+                git add src/Propel/Runtime/Perpl.php
                 git commit -m "Update version number to ${VERSION_NUMBER}"
                 git push origin HEAD:main
 

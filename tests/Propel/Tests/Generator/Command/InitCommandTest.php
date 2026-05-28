@@ -12,10 +12,9 @@ use Propel\Generator\Command\ConfigConvertCommand;
 use Propel\Generator\Command\InitCommand;
 use Propel\Generator\Command\ModelBuildCommand;
 use Propel\Generator\Command\SqlBuildCommand;
-use Propel\Runtime\Propel;
+use Propel\Runtime\Perpl;
 use Propel\Tests\TestCaseFixtures;
 use Symfony\Component\Console\Application;
-use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\Filesystem\Filesystem;
 
@@ -55,7 +54,7 @@ class InitCommandTest extends TestCaseFixtures
             $this->markTestSkipped('Interactive console input was not present in some earlier versions of symfony/console');
         }
 
-        $app = new Application('Propel', Propel::VERSION);
+        $app = new Application('Perpl', Perpl::VERSION);
         $app->addCommands([
             new InitCommand(),
             new ModelBuildCommand(),
@@ -91,7 +90,7 @@ class InitCommandTest extends TestCaseFixtures
             $this->markTestSkipped('Interactive console input was not present in some earlier versions of symphony/console');
         }
 
-        $app = new Application('Propel', Propel::VERSION);
+        $app = new Application('Perpl', Perpl::VERSION);
         $app->addCommands([
             new InitCommand(),
             new ModelBuildCommand(),

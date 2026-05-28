@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace Propel\Generator\Builder\Om;
 
+use Exception;
 use Propel\Generator\Builder\Om\InstancePoolCodeProducer\InstancePoolCodeProducer;
 use Propel\Generator\Builder\Util\EntityObjectClassNames;
 use Propel\Generator\Config\AbstractGeneratorConfig;
@@ -12,8 +13,13 @@ use Propel\Generator\Model\CrossRelation;
 use Propel\Generator\Model\ForeignKey;
 use Propel\Generator\Model\PropelTypes;
 use Propel\Generator\Model\Table;
+use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\FilterExpression\ExistsFilter;
+use Propel\Runtime\ActiveQuery\FilterExpression\FilterFactory;
+use Propel\Runtime\ActiveQuery\ModelJoin;
 use Propel\Runtime\ActiveQuery\TypedModelCriteria;
+use Propel\Runtime\Exception\PropelException;
+use Propel\Runtime\Perpl;
 use function addslashes;
 use function array_any;
 use function array_filter;
@@ -226,13 +232,13 @@ class QueryBuilder extends AbstractOMBuilder
 
         // namespaces
         $this->declareClasses(
-            '\Propel\Runtime\Propel',
-            '\Propel\Runtime\ActiveQuery\TypedModelCriteria',
-            '\Propel\Runtime\ActiveQuery\Criteria',
-            '\Propel\Runtime\ActiveQuery\FilerExpression\FilterFactory',
-            '\Propel\Runtime\ActiveQuery\ModelJoin',
-            '\Exception',
-            '\Propel\Runtime\Exception\PropelException',
+            Criteria::class,
+            Exception::class,
+            FilterFactory::class,
+            ModelJoin::class,
+            PropelException::class,
+            Perpl::class,
+            TypedModelCriteria::class,
         );
         $this->declareClassFromBuilder($this->getStubQueryBuilder(), 'Child');
         $this->declareClassFromBuilder($this->getTableMapBuilder());
@@ -631,7 +637,7 @@ class QueryBuilder extends AbstractOMBuilder
             return;
         }
 
-        $this->declareClasses('\Propel\Runtime\Propel');
+        $this->declareClasses(Perpl::class);
 
         $exampleCode = count($table->getPrimaryKey()) === 1
             ? '$c->findPks(array(12, 56, 832), $con);'

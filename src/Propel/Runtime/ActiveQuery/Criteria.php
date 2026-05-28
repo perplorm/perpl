@@ -36,7 +36,7 @@ use Propel\Runtime\Exception\LogicException;
 use Propel\Runtime\Exception\PropelException;
 use Propel\Runtime\Map\DatabaseMap;
 use Propel\Runtime\Map\TableMap;
-use Propel\Runtime\Propel;
+use Propel\Runtime\Perpl;
 use Propel\Runtime\Util\PropelConditionalProxy;
 use function array_diff;
 use function array_intersect_key;
@@ -700,7 +700,7 @@ class Criteria
      */
     protected function getDatabaseMap(): DatabaseMap
     {
-        return Propel::getServiceContainer()->getDatabaseMap($this->dbName);
+        return Perpl::getServiceContainer()->getDatabaseMap($this->dbName);
     }
 
     /**
@@ -708,7 +708,7 @@ class Criteria
      */
     public function getAdapter(): AdapterInterface
     {
-        return Propel::getServiceContainer()->getAdapter($this->getDbName());
+        return Perpl::getServiceContainer()->getAdapter($this->getDbName());
     }
 
     /**
@@ -721,7 +721,7 @@ class Criteria
      */
     public function setDbName(?string $dbName = null)
     {
-        $this->dbName = ($dbName ?? Propel::getServiceContainer()->getDefaultDatasource());
+        $this->dbName = ($dbName ?? Perpl::getServiceContainer()->getDefaultDatasource());
 
         return $this;
     }

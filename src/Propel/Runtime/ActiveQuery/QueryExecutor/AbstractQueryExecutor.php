@@ -9,7 +9,7 @@ use Propel\Runtime\ActiveQuery\SqlBuilder\PreparedStatementDto;
 use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Connection\ConnectionWrapper;
 use Propel\Runtime\Connection\StatementWrapper;
-use Propel\Runtime\Propel;
+use Propel\Runtime\Perpl;
 use Propel\Runtime\ServiceContainer\ServiceContainerInterface;
 use RuntimeException;
 use Throwable;
@@ -56,7 +56,7 @@ abstract class AbstractQueryExecutor
         $this->criteria = $criteria;
 
         $dbName = $criteria->getDbName();
-        $serviceContainer = Propel::getServiceContainer();
+        $serviceContainer = Perpl::getServiceContainer();
 
         $this->con = $con ?: $this->retrieveConnection($serviceContainer, $dbName, static::NEEDS_WRITE_CONNECTION);
 
@@ -136,7 +136,7 @@ abstract class AbstractQueryExecutor
         $publicMessage = "Unable to execute statement [$sql]";
 
         $fullLogMessage = $publicMessage . PHP_EOL . "Reason: [$internalMessage]";
-        Propel::log($fullLogMessage, Propel::LOG_ERR);
+        Perpl::log($fullLogMessage, Perpl::LOG_ERR);
 
         if ($isDebugMode) {
             $publicMessage .= PHP_EOL . "Reason: [$internalMessage]";

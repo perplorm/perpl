@@ -681,9 +681,9 @@ public function moveToRank(\$newRank, ?ConnectionInterface \$con = null)
     if (\$this->isNew()) {
         throw new PropelException('New objects cannot be moved. Please use insertAtRank() instead');
     }
-    if (null === \$con) {
-        \$con = Propel::getServiceContainer()->getWriteConnection({$this->tableMapClassName}::DATABASE_NAME);
-    }
+
+    \$con ??= Perpl::getServiceContainer()->getWriteConnection({$this->tableMapClassName}::DATABASE_NAME);
+
     if (\$newRank < 1 || \$newRank > {$this->queryClassName}::create()->getMaxRankArray(" . ($useScope ? '$this->getScopeValue(), ' : '') . "\$con)) {
         throw new PropelException('Invalid rank ' . \$newRank);
     }
@@ -728,9 +728,8 @@ public function moveToRank(\$newRank, ?ConnectionInterface \$con = null)
  */
 public function swapWith(\$object, ?ConnectionInterface \$con = null)
 {
-    if (null === \$con) {
-        \$con = Propel::getServiceContainer()->getWriteConnection({$this->tableMapClassName}::DATABASE_NAME);
-    }
+    \$con ??= Perpl::getServiceContainer()->getWriteConnection({$this->tableMapClassName}::DATABASE_NAME);
+
     \$con->transaction(function () use (\$con, \$object) {";
         if ($this->behavior->useScope()) {
             $script .= "
@@ -778,9 +777,9 @@ public function moveUp(?ConnectionInterface \$con = null)
     if (\$this->isFirst()) {
         return \$this;
     }
-    if (null === \$con) {
-        \$con = Propel::getServiceContainer()->getWriteConnection({$this->tableMapClassName}::DATABASE_NAME);
-    }
+
+    \$con ??= Perpl::getServiceContainer()->getWriteConnection({$this->tableMapClassName}::DATABASE_NAME);
+
     \$con->transaction(function () use (\$con) {
         \$prev = \$this->getPrevious(\$con);
         \$this->swapWith(\$prev, \$con);
@@ -811,9 +810,9 @@ public function moveDown(?ConnectionInterface \$con = null)
     if (\$this->isLast(\$con)) {
         return \$this;
     }
-    if (null === \$con) {
-        \$con = Propel::getServiceContainer()->getWriteConnection({$this->tableMapClassName}::DATABASE_NAME);
-    }
+
+    \$con ??= Perpl::getServiceContainer()->getWriteConnection({$this->tableMapClassName}::DATABASE_NAME);
+
     \$con->transaction(function () use (\$con) {
         \$next = \$this->getNext(\$con);
         \$this->swapWith(\$next, \$con);
@@ -874,9 +873,7 @@ public function moveToBottom(?ConnectionInterface \$con = null)
         return \$this;
     }
 
-    if (\$con === null) {
-        \$con = Propel::getServiceContainer()->getWriteConnection({$this->tableMapClassName}::DATABASE_NAME);
-    }
+    \$con ??= Perpl::getServiceContainer()->getWriteConnection({$this->tableMapClassName}::DATABASE_NAME);
 
     \$con->transaction(function () use (\$con) {
         \$bottom = {$this->queryClassName}::create()->getMaxRankArray(" . ($useScope ? '$this->getScopeValue(), ' : '') . "\$con);

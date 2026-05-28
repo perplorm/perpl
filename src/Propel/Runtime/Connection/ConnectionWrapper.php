@@ -8,7 +8,7 @@ use PDOException;
 use Propel\Runtime\Connection\Exception\RollbackException;
 use Propel\Runtime\DataFetcher\DataFetcherInterface;
 use Propel\Runtime\Exception\InvalidArgumentException;
-use Propel\Runtime\Propel;
+use Propel\Runtime\Perpl;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
 use function constant;
@@ -708,7 +708,7 @@ class ConnectionWrapper implements ConnectionInterface, LoggerAwareInterface
     public function getLogger(): LoggerInterface
     {
         if ($this->logger === null) {
-            return Propel::getServiceContainer()->getLogger($this->getName());
+            return Perpl::getServiceContainer()->getLogger($this->getName());
         }
 
         return $this->logger;

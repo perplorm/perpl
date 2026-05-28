@@ -19,7 +19,7 @@ use Propel\Generator\Platform\MysqlPlatform;
 use Propel\Generator\Platform\SqlitePlatform;
 use Propel\Generator\Util\QuickBuilder;
 use Propel\Runtime\ActiveRecord\ActiveRecordInterface;
-use Propel\Runtime\Propel;
+use Propel\Runtime\Perpl;
 use Propel\Tests\TestCase;
 
 class QuickBuilderTest extends TestCase
@@ -173,6 +173,6 @@ EOF;
         $this->assertEquals($foo, QuickBuildFoo3Query::create()->findOne());
 
         $this->assertDirectoryExists(
-            sys_get_temp_dir() . '/perplQuickBuild/v' . Propel::VERSION . '-' . substr(sha1(getcwd()), 0, 10));
+            sys_get_temp_dir() . '/perplQuickBuild/v' . Perpl::VERSION . '-' . substr(sha1(getcwd()), 0, 10));
     }
 }

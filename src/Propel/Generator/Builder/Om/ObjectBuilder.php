@@ -4,6 +4,8 @@ declare(strict_types = 1);
 
 namespace Propel\Generator\Builder\Om;
 
+use Exception;
+use PDO;
 use Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes\ColumnCodeProducer;
 use Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes\ColumnCodeProducerFactory;
 use Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes\LazyLoadColumnCodeProducer;
@@ -19,8 +21,18 @@ use Propel\Generator\Model\PropelTypes;
 use Propel\Generator\Model\Table;
 use Propel\Generator\Platform\MssqlPlatform;
 use Propel\Generator\Platform\PlatformInterface;
+use Propel\Runtime\ActiveQuery\ColumnResolver\ColumnExpression\LocalColumnExpression;
+use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\FilterExpression\FilterCollector;
+use Propel\Runtime\ActiveQuery\ModelCriteria;
+use Propel\Runtime\ActiveRecord\ActiveRecordInterface;
+use Propel\Runtime\Collection\ObjectCombinationCollection;
+use Propel\Runtime\Connection\ConnectionInterface;
+use Propel\Runtime\Exception\BadMethodCallException;
 use Propel\Runtime\Exception\PropelException;
+use Propel\Runtime\Map\TableMap;
+use Propel\Runtime\Parser\AbstractParser;
+use Propel\Runtime\Perpl;
 use function addslashes;
 use function array_any;
 use function array_filter;
@@ -338,20 +350,19 @@ abstract class {$this->getUnqualifiedClassName()}$parentClass implements ActiveR
         $this->declareClassFromBuilder($this->getTableMapBuilder());
 
         $this->declareClasses(
-            'Exception',
-            'PDO',
-            '\Propel\Runtime\Exception\PropelException',
-            '\Propel\Runtime\Connection\ConnectionInterface',
-            '\Propel\Runtime\Collection\ObjectCombinationCollection',
-            '\Propel\Runtime\Exception\BadMethodCallException',
-            '\Propel\Runtime\Exception\PropelException',
-            '\Propel\Runtime\ActiveQuery\ColumnResolver\ColumnExpression\LocalColumnExpression',
-            '\Propel\Runtime\ActiveQuery\Criteria',
-            '\Propel\Runtime\ActiveQuery\ModelCriteria',
-            '\Propel\Runtime\ActiveRecord\ActiveRecordInterface',
-            '\Propel\Runtime\Parser\AbstractParser',
-            '\Propel\Runtime\Propel',
-            '\Propel\Runtime\Map\TableMap',
+            AbstractParser::class,
+            ActiveRecordInterface::class,
+            BadMethodCallException::class,
+            ConnectionInterface::class,
+            Criteria::class,
+            Exception::class,
+            LocalColumnExpression::class,
+            ModelCriteria::class,
+            ObjectCombinationCollection::class,
+            PDO::class,
+            Perpl::class,
+            PropelException::class,
+            TableMap::class,
         );
 
         $baseClass = $this->getBaseClass();
@@ -1532,14 +1543,14 @@ $indent};";
      */
     protected function addDeleteBody(string &$script): void
     {
+        $tableMapClassName = $this->getTableMapClassName();
+
         $script .= "
         if (\$this->isDeleted()) {
             throw new PropelException('This object has already been deleted.');
         }
 
-        if (\$con === null) {
-            \$con = Propel::getServiceContainer()->getWriteConnection(" . $this->getTableMapClass() . "::DATABASE_NAME);
-        }
+        \$con ??= Perpl::getServiceContainer()->getWriteConnection({$tableMapClassName}::DATABASE_NAME);
 
         \$con->transaction(function () use (\$con) {
             \$deleteQuery = " . $this->getQueryClassName() . "::create()
@@ -1622,7 +1633,7 @@ $indent};";
             throw new PropelException('Cannot reload an unsaved object.');
         }
 
-        \$con ??= Propel::getServiceContainer()->getReadConnection({$tableMapClass}::DATABASE_NAME);
+        \$con ??= Perpl::getServiceContainer()->getReadConnection({$tableMapClass}::DATABASE_NAME);
 
         \$dataFetcher = {$queryClassName}::create(null, \$this->buildPkeyCriteria())->fetch(\$con);
         \$row = \$dataFetcher->fetch();
@@ -2258,8 +2269,8 @@ $indent};";
     protected function addDoInsertBodyRaw(): string
     {
         $this->declareClasses(
-            '\Propel\Runtime\Propel',
-            'PDO',
+            PDO::class,
+            Perpl::class,
         );
         $this->declareGlobalFunction('implode', 'array_keys', 'sprintf');
 
@@ -2365,7 +2376,7 @@ $indent};";
             }
             \$stmt->execute();
         } catch (Exception \$e) {
-            Propel::log(\$e->getMessage(), Propel::LOG_ERR);
+            Perpl::log(\$e->getMessage(), Perpl::LOG_ERR);
 
             throw new PropelException(\"Unable to execute INSERT statement [\$sql]\", 0, \$e);
         }\n";
@@ -2555,9 +2566,7 @@ $indent};";
             return 0;
         }
 
-        if (\$con === null) {
-            \$con = Propel::getServiceContainer()->getWriteConnection(" . $this->getTableMapClass() . "::DATABASE_NAME);
-        }
+        \$con ??= Perpl::getServiceContainer()->getWriteConnection({$tableMapClassName}::DATABASE_NAME);
 
         return \$con->transaction(function () use (\$con" . ($reloadOnUpdate || $reloadOnInsert ? ', $skipReload' : '') . ') {';
 

@@ -10,7 +10,7 @@ namespace Propel\Tests\Generator\Command;
 
 use Propel\Generator\Command\AbstractCommand;
 use Propel\Generator\Command\DataDictionaryExportCommand;
-use Propel\Runtime\Propel;
+use Propel\Runtime\Perpl;
 use Propel\Tests\TestCaseFixturesDatabase;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
@@ -28,7 +28,7 @@ class DataDictionaryExportCommandTest extends TestCaseFixturesDatabase
      */
     public function testCommandExecutesWithoutError(): void
     {
-        $app = new Application('Propel', Propel::VERSION);
+        $app = new Application('Perpl', Perpl::VERSION);
         $command = new DataDictionaryExportCommand();
         $app->addCommands([$command]);
 

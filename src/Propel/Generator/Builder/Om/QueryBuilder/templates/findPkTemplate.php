@@ -15,7 +15,7 @@
      */
     public function findPk($key, ?ConnectionInterface $con = null)
     {
-        $con ??= Propel::getServiceContainer()->getReadConnection(<?= $tableMapClassName ?>::DATABASE_NAME);
+        $con ??= Perpl::getServiceContainer()->getReadConnection(<?= $tableMapClassName ?>::DATABASE_NAME);
 
         $this->basePreSelect($con);
 

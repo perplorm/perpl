@@ -16,7 +16,7 @@ use Propel\Runtime\Exception\BadMethodCallException;
 use Propel\Runtime\Exception\PropelException;
 use Propel\Runtime\Map\TableMap;
 use Propel\Runtime\Parser\AbstractParser;
-use Propel\Runtime\Propel;
+use Propel\Runtime\Perpl;
 use ReflectionClass;
 use ReflectionProperty;
 use RuntimeException;
@@ -269,16 +269,16 @@ abstract class IdTable implements ActiveRecordInterface
     }
 
     /**
-     * Logs a message using Propel::log().
+     * Logs a message using Perpl::log().
      *
      * @param string $msg
-     * @param int $priority One of the Propel::LOG_* logging levels
+     * @param int $priority One of the Perpl::LOG_* logging levels
      *
      * @return void
      */
-    protected function log(string $msg, int $priority = Propel::LOG_INFO): void
+    protected function log(string $msg, int $priority = Perpl::LOG_INFO): void
     {
-        Propel::log(static::class . ': ' . $msg, $priority);
+        Perpl::log(static::class . ': ' . $msg, $priority);
     }
 
     /**
@@ -451,7 +451,7 @@ abstract class IdTable implements ActiveRecordInterface
             throw new PropelException('Cannot reload an unsaved object.');
         }
 
-        $con ??= Propel::getServiceContainer()->getReadConnection(IdTableTableMap::DATABASE_NAME);
+        $con ??= Perpl::getServiceContainer()->getReadConnection(IdTableTableMap::DATABASE_NAME);
 
         $dataFetcher = ChildIdTableQuery::create(null, $this->buildPkeyCriteria())->fetch($con);
         $row = $dataFetcher->fetch();
@@ -483,9 +483,7 @@ abstract class IdTable implements ActiveRecordInterface
             throw new PropelException('This object has already been deleted.');
         }
 
-        if ($con === null) {
-            $con = Propel::getServiceContainer()->getWriteConnection(IdTableTableMap::DATABASE_NAME);
-        }
+        $con ??= Perpl::getServiceContainer()->getWriteConnection(IdTableTableMap::DATABASE_NAME);
 
         $con->transaction(function () use ($con) {
             $deleteQuery = ChildIdTableQuery::create()
@@ -523,9 +521,7 @@ abstract class IdTable implements ActiveRecordInterface
             return 0;
         }
 
-        if ($con === null) {
-            $con = Propel::getServiceContainer()->getWriteConnection(IdTableTableMap::DATABASE_NAME);
-        }
+        $con ??= Perpl::getServiceContainer()->getWriteConnection(IdTableTableMap::DATABASE_NAME);
 
         return $con->transaction(function () use ($con) {
             $ret = $this->preSave($con);
@@ -639,7 +635,7 @@ abstract class IdTable implements ActiveRecordInterface
             }
             $stmt->execute();
         } catch (Exception $e) {
-            Propel::log($e->getMessage(), Propel::LOG_ERR);
+            Perpl::log($e->getMessage(), Perpl::LOG_ERR);
 
             throw new PropelException("Unable to execute INSERT statement [$sql]", 0, $e);
         }

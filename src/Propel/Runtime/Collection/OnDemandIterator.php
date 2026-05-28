@@ -8,7 +8,7 @@ use Propel\Runtime\ActiveRecord\ActiveRecordInterface;
 use Propel\Runtime\DataFetcher\DataFetcherInterface;
 use Propel\Runtime\Exception\PropelException;
 use Propel\Runtime\Formatter\ObjectFormatter;
-use Propel\Runtime\Propel;
+use Propel\Runtime\Perpl;
 use function is_array;
 
 /**
@@ -60,7 +60,7 @@ class OnDemandIterator implements IteratorInterface
         $this->currentKey = -1;
         $this->formatter = $formatter;
         $this->dataFetcher = $dataFetcher;
-        $this->enableInstancePoolingOnFinish = Propel::disableInstancePooling();
+        $this->enableInstancePoolingOnFinish = Perpl::disableInstancePooling();
     }
 
     /**
@@ -70,7 +70,7 @@ class OnDemandIterator implements IteratorInterface
     {
         $this->dataFetcher->close();
         if ($this->enableInstancePoolingOnFinish) {
-            Propel::enableInstancePooling();
+            Perpl::enableInstancePooling();
         }
     }
 

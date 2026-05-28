@@ -14,7 +14,7 @@ use Propel\Runtime\DataFetcher\DataFetcherInterface;
 use Propel\Runtime\Exception\PropelException;
 use Propel\Runtime\Map\TableMap;
 use Propel\Runtime\Map\TableMapTrait;
-use Propel\Runtime\Propel;
+use Propel\Runtime\Perpl;
 use Spec;
 use function assert;
 use function is_array;
@@ -272,7 +272,7 @@ class GenspecTableTableMap extends TableMap
      */
     public static function addInstanceToPool($obj, string|null $key = null): void
     {
-        if (!Propel::isInstancePoolingEnabled()) {
+        if (!Perpl::isInstancePoolingEnabled()) {
             return;
         }
 
@@ -297,7 +297,7 @@ class GenspecTableTableMap extends TableMap
      */
     public static function removeInstanceFromPool($value): void
     {
-        if (!Propel::isInstancePoolingEnabled() || $value === null) {
+        if (!Perpl::isInstancePoolingEnabled() || $value === null) {
             return;
         }
 
@@ -502,7 +502,7 @@ class GenspecTableTableMap extends TableMap
     public static function getTableMap(): TableMap
     {
         /** @var static $tableMap */
-        $tableMap = Propel::getServiceContainer()->getDatabaseMap(static::DATABASE_NAME)->getTable(static::TABLE_NAME);
+        $tableMap = Perpl::getServiceContainer()->getDatabaseMap(static::DATABASE_NAME)->getTable(static::TABLE_NAME);
 
         return $tableMap;
     }
@@ -523,7 +523,7 @@ class GenspecTableTableMap extends TableMap
     {
         trigger_deprecation('Propel', '2.0', 'TableMap::doDelete() should not be used anymore, delete via model or GenspecTableQuery');
 
-        $con ??= Propel::getServiceContainer()->getWriteConnection(static::DATABASE_NAME);
+        $con ??= Perpl::getServiceContainer()->getWriteConnection(static::DATABASE_NAME);
 
         if ($values instanceof Criteria) {
             $criteria = $values;
@@ -569,7 +569,7 @@ class GenspecTableTableMap extends TableMap
      */
     public static function doInsert($criteria, ?ConnectionInterface $con = null)
     {
-        $con ??= Propel::getServiceContainer()->getWriteConnection(static::DATABASE_NAME);
+        $con ??= Perpl::getServiceContainer()->getWriteConnection(static::DATABASE_NAME);
 
         if ($criteria instanceof Criteria) {
             $criteria = clone $criteria;

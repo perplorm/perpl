@@ -5,7 +5,7 @@ declare(strict_types = 1);
 namespace Propel\Runtime\Connection;
 
 use Propel\Runtime\DataFetcher\DataFetcherInterface;
-use Propel\Runtime\Propel;
+use Propel\Runtime\Perpl;
 use Propel\Runtime\Util\Profiler;
 
 /**
@@ -48,7 +48,7 @@ class ProfilerConnectionWrapper extends ConnectionWrapper
     public function getProfiler(): Profiler
     {
         if ($this->profiler === null) {
-            $this->profiler = Propel::getServiceContainer()->getProfiler();
+            $this->profiler = Perpl::getServiceContainer()->getProfiler();
         }
 
         return $this->profiler;

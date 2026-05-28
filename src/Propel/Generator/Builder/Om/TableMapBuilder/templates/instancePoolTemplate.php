@@ -14,7 +14,7 @@
      */
     public static function addInstanceToPool($obj, string|null $key = null): void
     {
-        if (!Propel::isInstancePoolingEnabled()) {
+        if (!Perpl::isInstancePoolingEnabled()) {
             return;
         }
 
@@ -39,7 +39,7 @@
      */
     public static function removeInstanceFromPool($value): void
     {
-        if (!Propel::isInstancePoolingEnabled() || $value === null) {
+        if (!Perpl::isInstancePoolingEnabled() || $value === null) {
             return;
         }
 

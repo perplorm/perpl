@@ -15,7 +15,7 @@ use Propel\Generator\Command\MigrationDownCommand;
 use Propel\Generator\Command\MigrationMigrateCommand;
 use Propel\Generator\Command\MigrationStatusCommand;
 use Propel\Generator\Command\MigrationUpCommand;
-use Propel\Runtime\Propel;
+use Propel\Runtime\Perpl;
 use Propel\Tests\TestCaseFixturesDatabase;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
@@ -379,7 +379,7 @@ class MigrationTest extends TestCaseFixturesDatabase
             $outputCapturer = new StreamOutput(fopen('php://temp', 'r+'));
         }
 
-        $app = new Application('Propel', Propel::VERSION);
+        $app = new Application('Perpl', Perpl::VERSION);
         $app->addCommands([$commandInstance]); // Using addCommands for BC with Symfony < 8
         $app->setAutoExit(false);
 
@@ -441,7 +441,7 @@ class MigrationTest extends TestCaseFixturesDatabase
     {
         $sql = sprintf('SELECT %s FROM %s', self::COL_VERSION, self::MIGRATION_TABLE);
 
-        $stmt = Propel::getServiceContainer()->getConnection()->prepare($sql);
+        $stmt = Perpl::getServiceContainer()->getConnection()->prepare($sql);
         $stmt->execute();
 
         $versions = $stmt->fetchAll();

@@ -6,6 +6,8 @@ namespace Propel\Generator\Behavior\Sortable;
 
 use Propel\Generator\Builder\Om\AbstractOMBuilder;
 use Propel\Generator\Model\Column;
+use Propel\Runtime\Connection\ConnectionInterface;
+use Propel\Runtime\Perpl;
 use function current;
 use function str_replace;
 use function strtoupper;
@@ -96,8 +98,8 @@ class SortableBehaviorQueryBuilderModifier
     {
         $this->setBuilder($builder);
         $this->builder->declareClasses(
-            '\Propel\Runtime\Propel',
-            '\Propel\Runtime\Connection\ConnectionInterface',
+            Perpl::class,
+            ConnectionInterface::class,
         );
         $script = '';
 
@@ -398,9 +400,8 @@ $paramsDoc";
  */
 public function getMaxRank(" . ($useScope ? "$methodSignature, " : '') . "?ConnectionInterface \$con = null): ?int
 {
-    if (null === \$con) {
-        \$con = Propel::getServiceContainer()->getReadConnection({$this->tableMapClassName}::DATABASE_NAME);
-    }
+    \$con ??= Perpl::getServiceContainer()->getWriteConnection($this->tableMapClassName::DATABASE_NAME);
+
     // shift the objects with a position lower than the one of object
     \$this->addSelectColumn('MAX(' . {$this->tableMapClassName}::RANK_COL . ')');";
         if ($useScope) {
@@ -441,9 +442,8 @@ public function getMaxRank(" . ($useScope ? "$methodSignature, " : '') . "?Conne
  */
 public function getMaxRankArray(" . ($useScope ? '$scope, ' : '') . "?ConnectionInterface \$con = null): ?int
 {
-    if (\$con === null) {
-        \$con = Propel::getConnection({$this->tableMapClassName}::DATABASE_NAME);
-    }
+    \$con ??= Perpl::getServiceContainer()->getWriteConnection($this->tableMapClassName::DATABASE_NAME);
+
     // shift the objects with a position lower than the one of object
     \$this->addSelectColumn('MAX(' . {$this->tableMapClassName}::RANK_COL . ')');";
         if ($useScope) {
@@ -481,9 +481,7 @@ public function getMaxRankArray(" . ($useScope ? '$scope, ' : '') . "?Connection
  */
 public function reorder(\$order, ?ConnectionInterface \$con = null)
 {
-    if (null === \$con) {
-        \$con = Propel::getServiceContainer()->getReadConnection({$this->tableMapClassName}::DATABASE_NAME);
-    }
+    \$con ??= Perpl::getServiceContainer()->getReadConnection({$this->tableMapClassName}::DATABASE_NAME);
 
     \$con->transaction(function () use (\$con, \$order) {
         \$ids = array_keys(\$order);
@@ -527,9 +525,7 @@ public function reorder(\$order, ?ConnectionInterface \$con = null)
  */
 static public function retrieveByRank(\$rank, " . ($useScope ? '$scope = null, ' : '') . "?ConnectionInterface \$con = null)
 {
-    if (null === \$con) {
-        \$con = Propel::getServiceContainer()->getReadConnection({$this->tableMapClassName}::DATABASE_NAME);
-    }
+    \$con ??= Perpl::getServiceContainer()->getWriteConnection($this->tableMapClassName::DATABASE_NAME);
 
     \$c = new Criteria;
     \$c->addAnd({$this->tableMapClassName}::RANK_COL, \$rank);";
@@ -564,9 +560,7 @@ static public function retrieveByRank(\$rank, " . ($useScope ? '$scope = null, '
  */
 static public function doSelectOrderByRank(?Criteria \$criteria = null, \$order = Criteria::ASC, ?ConnectionInterface \$con = null)
 {
-    if (null === \$con) {
-        \$con = Propel::getServiceContainer()->getReadConnection({$this->tableMapClassName}::DATABASE_NAME);
-    }
+    \$con ??= Perpl::getServiceContainer()->getWriteConnection($this->tableMapClassName::DATABASE_NAME);
 
     if (null === \$criteria) {
         \$criteria = new Criteria();
@@ -691,9 +685,7 @@ static public function deleteList(\$scope, ?ConnectionInterface \$con = null): i
  */
 static public function sortableShiftRank(\$delta, \$first, \$last = null, " . ($useScope ? '$scope = null, ' : '') . "?ConnectionInterface \$con = null)
 {
-    if (null === \$con) {
-        \$con = Propel::getServiceContainer()->getWriteConnection({$this->tableMapClassName}::DATABASE_NAME);
-    }
+    \$con ??= Perpl::getServiceContainer()->getWriteConnection($this->tableMapClassName::DATABASE_NAME);
 
     \$whereCriteria = new Criteria({$this->tableMapClassName}::DATABASE_NAME);
     \$criterion = \$whereCriteria->getNewCriterion({$this->tableMapClassName}::RANK_COL, \$first, Criteria::GREATER_EQUAL);

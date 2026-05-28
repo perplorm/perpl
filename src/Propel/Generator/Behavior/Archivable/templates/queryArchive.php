@@ -21,9 +21,8 @@ public function archive($con = null, $useLittleMemory = true)
     if ($useLittleMemory) {
         $criteria->setFormatter(ModelCriteria::FORMAT_ON_DEMAND);
     }
-    if ($con === null) {
-        $con = Propel::getServiceContainer()->getWriteConnection(<?php echo $modelTableMap ?>::DATABASE_NAME);
-    }
+
+    $con ??= Perpl::getServiceContainer()->getWriteConnection(<?php echo $modelTableMap ?>::DATABASE_NAME);
 
     return $con->transaction(function () use ($con, $criteria) {
         $totalArchivedObjects = 0;

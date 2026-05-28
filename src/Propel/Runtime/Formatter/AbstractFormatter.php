@@ -10,7 +10,7 @@ use Propel\Runtime\ActiveRecord\ActiveRecordInterface;
 use Propel\Runtime\DataFetcher\DataFetcherInterface;
 use Propel\Runtime\Exception\PropelException;
 use Propel\Runtime\Map\TableMap;
-use Propel\Runtime\Propel;
+use Propel\Runtime\Perpl;
 
 /**
  * Abstract class for query formatter
@@ -298,7 +298,7 @@ abstract class AbstractFormatter
      */
     public function getTableMap(): TableMap
     {
-        return Propel::getServiceContainer()->getDatabaseMap($this->dbName)->getTableByPhpName((string)$this->class);
+        return Perpl::getServiceContainer()->getDatabaseMap($this->dbName)->getTableByPhpName((string)$this->class);
     }
 
     /**

@@ -12,7 +12,7 @@ use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Exception\RuntimeException;
 use Propel\Runtime\Map\RelationMap;
 use Propel\Runtime\Map\TableMap;
-use Propel\Runtime\Propel;
+use Propel\Runtime\Perpl;
 use function end;
 use function is_callable;
 use function is_object;
@@ -358,7 +358,7 @@ class ObjectCollection extends Collection
         ?Criteria $criteria = null,
         ?ConnectionInterface $con = null
     ) {
-        if (!Propel::isInstancePoolingEnabled()) {
+        if (!Perpl::isInstancePoolingEnabled()) {
             throw new RuntimeException(__METHOD__ . ' needs instance pooling to be enabled prior to populating the collection');
         }
         $relationMap = $this->getFormatter()->getTableMap()->getRelation($relation);
