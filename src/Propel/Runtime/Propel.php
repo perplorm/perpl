@@ -28,7 +28,7 @@ class Propel
      *
      * @var string
      */
-    public const VERSION = '2.8.0';
+    public const VERSION = '2.8.1';
 
     /**
      * A constant for <code>default</code>.
