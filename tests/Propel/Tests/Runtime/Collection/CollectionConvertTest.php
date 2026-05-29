@@ -12,6 +12,7 @@ use Propel\Runtime\Collection\ObjectCollection;
 use Propel\Tests\Bookstore\Book;
 use Propel\Tests\Bookstore\Publisher;
 use Propel\Tests\TestCaseFixtures;
+use Symfony\Component\Yaml\Yaml;
 
 /**
  * Test class for Collection.
@@ -123,6 +124,7 @@ Books:
         AuthorId: null
 
 EOF;
+        $expected = Yaml::dump(Yaml::parse($expected), Yaml::DUMP_OBJECT_AS_MAP); // fix incosistent YAML format across versions
 
         return [[$expected]];
     }
@@ -224,10 +226,9 @@ EOF;
     /**
      * @return void
      */
-    #[\PHPUnit\Framework\Attributes\DataProvider('toYamlDataProvider')]
-    public function testToStringUsesDefaultStringFormat($expected)
+    public function testToStringUsesDefaultStringFormat()
     {
-        $this->assertEquals($expected, (string)$this->coll, 'Collection::__toString() uses the YAML representation by default');
+        $this->assertEquals($this->coll->toYAML(), (string)$this->coll, 'Collection::__toString() uses the YAML representation by default');
     }
 
     /**

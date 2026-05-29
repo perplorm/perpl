@@ -186,7 +186,7 @@ class ConsoleHelper extends QuestionHelper
 
     /**
      * @param iterable|string $messages
-     * @param int $options
+     * @param int<0, 511> $options
      *
      * @return void
      */

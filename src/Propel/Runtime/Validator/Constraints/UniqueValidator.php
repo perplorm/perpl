@@ -14,7 +14,7 @@ class UniqueValidator extends ConstraintValidator
 {
     /**
      * @param mixed $value
-     * @param \Propel\Runtime\Validator\Constraints\Unique $constraint
+     * @param \Symfony\Component\Validator\Constraint $constraint
      *
      * @return void
      */
@@ -34,6 +34,7 @@ class UniqueValidator extends ConstraintValidator
         $columnName = sprintf('%s.%s', $tableMap::TABLE_NAME, $this->context->getPropertyName());
 
         $object = $this->context->getObject();
+
         if ($object->isNew() && $matches->count() > 0) {
             $this->context->addViolation($constraint->message);
         } elseif ($object->isModified() && $matches->count() > (in_array($columnName, $object->getModifiedColumns(), true) ? 0 : 1)) {
