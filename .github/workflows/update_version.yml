@@ -1,0 +1,52 @@
+name: update version
+
+on:
+  release:
+    types: [released]
+  workflow_dispatch:
+    inputs:
+      version_number:
+        description: 'Version number to update to (with leading "v")'
+        required: true
+
+jobs:
+    update-version:
+        name: 'Update Version'
+        runs-on: ubuntu-24.04
+        permissions:
+          contents: write
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v5
+
+            - name: Get version source from release event
+              if: github.event_name == 'release'
+              run: echo "VERSION_NAME=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+
+            - name: Get version source from input
+              if: github.event_name == 'workflow_dispatch'
+              run: echo "VERSION_NAME=${{ github.event.inputs.version_number }}" >> $GITHUB_ENV
+              
+            - name: Resolve version number
+              run: |
+                echo Version name: $VERSION_NAME
+                echo "VERSION_NUMBER=${VERSION_NAME#v}" >> $GITHUB_ENV
+
+            - name: Update version in \Propel\Runtime\Perpl
+              run: |
+                sed -i "s/public const VERSION = '.*';/public const VERSION = '${VERSION_NUMBER}';/" src/Propel/Runtime/Propel.php
+
+            - name: Commit and push changes
+              run: |
+                git config --global user.name "Github Actions"
+                git config --global user.email "actions@github.com"
+                git add src/Propel/Runtime/Propel.php
+                git commit -m "Update version number to ${VERSION_NUMBER}"
+                git push origin HEAD:main
+
+            - name: Move release tag
+              run: |
+                echo "Setting tag ${VERSION_NAME} to point to the latest commit on main branch"
+                git push origin --delete tag ${VERSION_NAME}
+                git tag -fa -m "Release ${VERSION_NAME}" ${VERSION_NAME}
+                git push origin --tags

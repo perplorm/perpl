@@ -23,11 +23,12 @@ use Psr\Log\LoggerInterface;
 class Propel
 {
     /**
-     * The Propel version.
+     * NOTE: Will be automatically updated on release.
+     *       Check .github/workflows/update_version.yml before any manual change.
      *
      * @var string
      */
-    public const VERSION = '2.5.0';
+    public const VERSION = '2.8.0';
 
     /**
      * A constant for <code>default</code>.
