@@ -6,54 +6,16 @@ namespace Propel\Generator\Behavior\QueryCache;
 
 use Propel\Generator\Builder\Om\AbstractOMBuilder;
 use Propel\Generator\Model\Behavior;
-use Propel\Runtime\Perpl;
+use function trigger_deprecation;
 
 /**
- * Speeds up queries on a model by caching the query
+ * @deprecated No performance gain in Perpl.
  */
 class QueryCacheBehavior extends Behavior
 {
-    /**
-     * @var string
-     */
-    private $tableClassName;
-
     public function __construct()
     {
-        parent::__construct();
-
-        $this->parameters = [
-            'backend' => 'apc',
-            'lifetime' => '3600',
-        ];
-    }
-
-    /**
-     * @param \Propel\Generator\Builder\Om\AbstractOMBuilder $builder
-     *
-     * @return string
-     */
-    public function queryAttributes(AbstractOMBuilder $builder): string
-    {
-        $script = "protected \$queryKey = '';
-";
-        switch ($this->getParameter('backend')) {
-            case 'backend':
-                $script .= "protected static \$cacheBackend = [];
-            ";
-
-                break;
-            case 'apc':
-                break;
-            case 'custom':
-            default:
-                $script .= "protected static \$cacheBackend;
-            ";
-
-                break;
-        }
-
-        return $script;
+        trigger_deprecation('perpl', '2.9.0', 'The query_cache behavior is deprecated. Perpl is faster without it. See https://github.com/perplorm/perpl/issues/95#issuecomment-3618764440');
     }
 
     /**
@@ -63,266 +25,32 @@ class QueryCacheBehavior extends Behavior
      */
     public function queryMethods(AbstractOMBuilder $builder): string
     {
-        $builder->declareClasses(Perpl::class);
-        $this->tableClassName = $builder->getTableMapClassName();
-        $script = '';
-        $this->addSetQueryKey($script);
-        $this->addGetQueryKey($script);
-        $this->addCacheContains($script);
-        $this->addCacheFetch($script);
-        $this->addCacheStore($script);
-        $this->addDoSelect($script);
-        $this->addDoCount($script);
+        $builder->declareGlobalFunction('trigger_deprecation');
 
-        return $script;
+        return $this->buildDeprecatedFunction('setQueryKey($key)', '$this')
+            . $this->buildDeprecatedFunction('getQueryKey()', '""')
+            . $this->buildDeprecatedFunction('cacheContains($key)', 'false')
+            . $this->buildDeprecatedFunction('cacheStore($key, $value, $lifetime = -1)', 'null')
+            . $this->buildDeprecatedFunction('cacheFetch($key)', 'null');
     }
 
     /**
-     * @param string $script
+     * @param string $methodHead
+     * @param string $returnValue
      *
-     * @return void
+     * @return string
      */
-    protected function addSetQueryKey(string &$script): void
+    protected function buildDeprecatedFunction(string $methodHead, string $returnValue): string
     {
-        $script .= "
-public function setQueryKey(\$key)
+        return "
+/**
+ * @deprecated Method was added by deprecated query_cache behavior. Perpl is faster without it.
+ */
+public function $methodHead
 {
-    \$this->queryKey = \$key;
+    trigger_deprecation('perpl', '2.9.0', 'The query_cache behavior is deprecated. Perpl is faster without it. See https://github.com/perplorm/perpl/issues/95#issuecomment-3618764440');
 
-    return \$this;
-}
-";
-    }
-
-    /**
-     * @param string $script
-     *
-     * @return void
-     */
-    protected function addGetQueryKey(string &$script): void
-    {
-        $script .= "
-public function getQueryKey()
-{
-    return \$this->queryKey;
-}
-";
-    }
-
-    /**
-     * @param string $script
-     *
-     * @return void
-     */
-    protected function addCacheContains(string &$script): void
-    {
-        $script .= "
-public function cacheContains(\$key)
-{";
-        switch ($this->getParameter('backend')) {
-            case 'apc':
-                $script .= "
-
-    return apc_fetch(\$key);";
-
-                break;
-            case 'array':
-                $script .= "
-
-    return isset(self::\$cacheBackend[\$key]);";
-
-                break;
-            case 'custom':
-            default:
-                $script .= "
-    throw new PropelException('You must override the cacheContains(), cacheStore(), and cacheFetch() methods to enable query cache');";
-
-                break;
-        }
-        $script .= "
-}
-";
-    }
-
-    /**
-     * @param string $script
-     *
-     * @return void
-     */
-    protected function addCacheStore(string &$script): void
-    {
-        $script .= "
-public function cacheStore(\$key, \$value, \$lifetime = " . $this->getParameter('lifetime') . ")
-{";
-        switch ($this->getParameter('backend')) {
-            case 'apc':
-                $script .= "
-    apc_store(\$key, \$value, \$lifetime);";
-
-                break;
-            case 'array':
-                $script .= "
-    self::\$cacheBackend[\$key] = \$value;";
-
-                break;
-            case 'custom':
-            default:
-                $script .= "
-    throw new PropelException('You must override the cacheContains(), cacheStore(), and cacheFetch() methods to enable query cache');";
-
-                break;
-        }
-        $script .= "
-}
-";
-    }
-
-    /**
-     * @param string $script
-     *
-     * @return void
-     */
-    protected function addCacheFetch(string &$script): void
-    {
-        $script .= "
-public function cacheFetch(\$key)
-{";
-        switch ($this->getParameter('backend')) {
-            case 'apc':
-                $script .= "
-
-    return apc_fetch(\$key);";
-
-                break;
-            case 'array':
-                $script .= "
-
-    return isset(self::\$cacheBackend[\$key]) ? self::\$cacheBackend[\$key] : null;";
-
-                break;
-            case 'custom':
-            default:
-                $script .= "
-    throw new PropelException('You must override the cacheContains(), cacheStore(), and cacheFetch() methods to enable query cache');";
-
-                break;
-        }
-        $script .= "
-}
-";
-    }
-
-    /**
-     * @param string $script
-     *
-     * @return void
-     */
-    protected function addDoSelect(string &$script): void
-    {
-        $script .= "
-public function doSelect(?ConnectionInterface \$con = null): \Propel\Runtime\DataFetcher\DataFetcherInterface
-{
-    // check that the columns of the main class are already added (if this is the primary ModelCriteria)
-    if (!\$this->hasSelectClause() && !\$this->getPrimaryCriteria()) {
-        \$this->addSelfSelectColumns();
-    }
-    \$this->configureSelectColumns();
-
-    \$dbMap = Perpl::getServiceContainer()->getDatabaseMap(" . $this->tableClassName . "::DATABASE_NAME);
-    \$db = Perpl::getServiceContainer()->getAdapter(" . $this->tableClassName . "::DATABASE_NAME);
-
-    \$key = \$this->getQueryKey();
-    if (\$key && \$this->cacheContains(\$key)) {
-        \$params = \$this->getParams();
-        \$sql = \$this->cacheFetch(\$key);
-    } else {
-        \$params = [];
-        \$sql = \$this->createSelectSql(\$params);
-    }
-
-    try {
-        \$stmt = \$con->prepare(\$sql);
-        \$db->bindValues(\$stmt, \$params, \$dbMap);
-        \$stmt->execute();
-        } catch (Exception \$e) {
-            Perpl::log(\$e->getMessage(), Perpl::LOG_ERR);
-            throw new PropelException(sprintf('Unable to execute SELECT statement [%s]', \$sql), 0, \$e);
-        }
-
-    if (\$key && !\$this->cacheContains(\$key)) {
-            \$this->cacheStore(\$key, \$sql);
-    }
-
-    return \$con->getDataFetcher(\$stmt);
-}
-";
-    }
-
-    /**
-     * @param string $script
-     *
-     * @return void
-     */
-    protected function addDoCount(string &$script): void
-    {
-        $script .= "
-public function doCount(?ConnectionInterface \$con = null): \Propel\Runtime\DataFetcher\DataFetcherInterface
-{
-    \$dbMap = Perpl::getServiceContainer()->getDatabaseMap(\$this->getDbName());
-    \$db = Perpl::getServiceContainer()->getAdapter(\$this->getDbName());
-
-    \$key = \$this->getQueryKey();
-    if (\$key && \$this->cacheContains(\$key)) {
-        \$params = \$this->getParams();
-        \$sql = \$this->cacheFetch(\$key);
-    } else {
-        // check that the columns of the main class are already added (if this is the primary ModelCriteria)
-        if (!\$this->hasSelectClause() && !\$this->getPrimaryCriteria()) {
-            \$this->addSelfSelectColumns();
-        }
-
-        \$this->configureSelectColumns();
-
-        \$needsComplexCount = \$this->getGroupByColumns()
-            || \$this->getOffset()
-            || \$this->getLimit() >= 0
-            || \$this->getHaving()
-            || in_array(Criteria::DISTINCT, \$this->getSelectModifiers())
-            || count(\$this->selectQueries) > 0
-        ;
-
-        \$params = [];
-        if (\$needsComplexCount) {
-            if (\$this->needsSelectAliases()) {
-                if (\$this->getHaving()) {
-                    throw new PropelException('Propel cannot create a COUNT query when using HAVING and  duplicate column names in the SELECT part');
-                }
-                \$db->turnSelectColumnsToAliases(\$this);
-            }
-            \$selectSql = \$this->createSelectSql(\$params);
-            \$sql = 'SELECT COUNT(*) FROM (' . \$selectSql . ') propelmatch4cnt';
-        } else {
-            // Replace SELECT columns with COUNT(*)
-            \$this->clearSelectColumns()->addSelectColumn('COUNT(*)');
-            \$sql = \$this->createSelectSql(\$params);
-        }
-    }
-
-    try {
-        \$stmt = \$con->prepare(\$sql);
-        \$db->bindValues(\$stmt, \$params, \$dbMap);
-        \$stmt->execute();
-    } catch (Exception \$e) {
-        Perpl::log(\$e->getMessage(), Perpl::LOG_ERR);
-        throw new PropelException(sprintf('Unable to execute COUNT statement [%s]', \$sql), 0, \$e);
-    }
-
-    if (\$key && !\$this->cacheContains(\$key)) {
-            \$this->cacheStore(\$key, \$sql);
-    }
-
-    return \$con->getDataFetcher(\$stmt);
-}
-";
+    return $returnValue;
+}\n";
     }
 }

@@ -1,142 +1,55 @@
 
 
-queryAttributes:
-
-// query_cache behavior
-protected $queryKey = '';
-protected static $cacheBackend;
-            
-
-queryAttributes:
-
-// query_cache behavior
-protected $queryKey = '';
-protected static $cacheBackend;
-            
-
 queryMethods:
 
 // query_cache behavior
 
+/**
+ * @deprecated Method was added by deprecated query_cache behavior. Perpl is faster without it.
+ */
 public function setQueryKey($key)
 {
-    $this->queryKey = $key;
+    trigger_deprecation('perpl', '2.9.0', 'The query_cache behavior is deprecated. Perpl is faster without it. See https://github.com/perplorm/perpl/issues/95#issuecomment-3618764440');
 
     return $this;
 }
 
+/**
+ * @deprecated Method was added by deprecated query_cache behavior. Perpl is faster without it.
+ */
 public function getQueryKey()
 {
-    return $this->queryKey;
+    trigger_deprecation('perpl', '2.9.0', 'The query_cache behavior is deprecated. Perpl is faster without it. See https://github.com/perplorm/perpl/issues/95#issuecomment-3618764440');
+
+    return "";
 }
 
+/**
+ * @deprecated Method was added by deprecated query_cache behavior. Perpl is faster without it.
+ */
 public function cacheContains($key)
 {
+    trigger_deprecation('perpl', '2.9.0', 'The query_cache behavior is deprecated. Perpl is faster without it. See https://github.com/perplorm/perpl/issues/95#issuecomment-3618764440');
 
-    return isset(self::$cacheBackend[$key]);
+    return false;
 }
 
+/**
+ * @deprecated Method was added by deprecated query_cache behavior. Perpl is faster without it.
+ */
+public function cacheStore($key, $value, $lifetime = -1)
+{
+    trigger_deprecation('perpl', '2.9.0', 'The query_cache behavior is deprecated. Perpl is faster without it. See https://github.com/perplorm/perpl/issues/95#issuecomment-3618764440');
+
+    return null;
+}
+
+/**
+ * @deprecated Method was added by deprecated query_cache behavior. Perpl is faster without it.
+ */
 public function cacheFetch($key)
 {
+    trigger_deprecation('perpl', '2.9.0', 'The query_cache behavior is deprecated. Perpl is faster without it. See https://github.com/perplorm/perpl/issues/95#issuecomment-3618764440');
 
-    return isset(self::$cacheBackend[$key]) ? self::$cacheBackend[$key] : null;
-}
-
-public function cacheStore($key, $value, $lifetime = 3600)
-{
-    self::$cacheBackend[$key] = $value;
-}
-
-public function doSelect(?ConnectionInterface $con = null): \Propel\Runtime\DataFetcher\DataFetcherInterface
-{
-    // check that the columns of the main class are already added (if this is the primary ModelCriteria)
-    if (!$this->hasSelectClause() && !$this->getPrimaryCriteria()) {
-        $this->addSelfSelectColumns();
-    }
-    $this->configureSelectColumns();
-
-    $dbMap = Perpl::getServiceContainer()->getDatabaseMap(TableTableMap::DATABASE_NAME);
-    $db = Perpl::getServiceContainer()->getAdapter(TableTableMap::DATABASE_NAME);
-
-    $key = $this->getQueryKey();
-    if ($key && $this->cacheContains($key)) {
-        $params = $this->getParams();
-        $sql = $this->cacheFetch($key);
-    } else {
-        $params = [];
-        $sql = $this->createSelectSql($params);
-    }
-
-    try {
-        $stmt = $con->prepare($sql);
-        $db->bindValues($stmt, $params, $dbMap);
-        $stmt->execute();
-        } catch (Exception $e) {
-            Perpl::log($e->getMessage(), Perpl::LOG_ERR);
-            throw new PropelException(sprintf('Unable to execute SELECT statement [%s]', $sql), 0, $e);
-        }
-
-    if ($key && !$this->cacheContains($key)) {
-            $this->cacheStore($key, $sql);
-    }
-
-    return $con->getDataFetcher($stmt);
-}
-
-public function doCount(?ConnectionInterface $con = null): \Propel\Runtime\DataFetcher\DataFetcherInterface
-{
-    $dbMap = Perpl::getServiceContainer()->getDatabaseMap($this->getDbName());
-    $db = Perpl::getServiceContainer()->getAdapter($this->getDbName());
-
-    $key = $this->getQueryKey();
-    if ($key && $this->cacheContains($key)) {
-        $params = $this->getParams();
-        $sql = $this->cacheFetch($key);
-    } else {
-        // check that the columns of the main class are already added (if this is the primary ModelCriteria)
-        if (!$this->hasSelectClause() && !$this->getPrimaryCriteria()) {
-            $this->addSelfSelectColumns();
-        }
-
-        $this->configureSelectColumns();
-
-        $needsComplexCount = $this->getGroupByColumns()
-            || $this->getOffset()
-            || $this->getLimit() >= 0
-            || $this->getHaving()
-            || in_array(Criteria::DISTINCT, $this->getSelectModifiers())
-            || count($this->selectQueries) > 0
-        ;
-
-        $params = [];
-        if ($needsComplexCount) {
-            if ($this->needsSelectAliases()) {
-                if ($this->getHaving()) {
-                    throw new PropelException('Propel cannot create a COUNT query when using HAVING and  duplicate column names in the SELECT part');
-                }
-                $db->turnSelectColumnsToAliases($this);
-            }
-            $selectSql = $this->createSelectSql($params);
-            $sql = 'SELECT COUNT(*) FROM (' . $selectSql . ') propelmatch4cnt';
-        } else {
-            // Replace SELECT columns with COUNT(*)
-            $this->clearSelectColumns()->addSelectColumn('COUNT(*)');
-            $sql = $this->createSelectSql($params);
-        }
-    }
-
-    try {
-        $stmt = $con->prepare($sql);
-        $db->bindValues($stmt, $params, $dbMap);
-        $stmt->execute();
-    } catch (Exception $e) {
-        Perpl::log($e->getMessage(), Perpl::LOG_ERR);
-        throw new PropelException(sprintf('Unable to execute COUNT statement [%s]', $sql), 0, $e);
-    }
-
-    if ($key && !$this->cacheContains($key)) {
-            $this->cacheStore($key, $sql);
-    }
-
-    return $con->getDataFetcher($stmt);
+    return null;
 }
