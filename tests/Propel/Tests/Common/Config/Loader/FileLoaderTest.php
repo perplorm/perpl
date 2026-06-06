@@ -8,6 +8,7 @@
 
 namespace Propel\Tests\Common\Config\Loader;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use Propel\Common\Config\Loader\FileLoader as BaseFileLoader;
 use Propel\Tests\TestCase;
 
@@ -40,6 +41,25 @@ class FileLoaderTest extends TestCase
     {
         $this->assertFalse(TestableFileLoader::checkSupports('', '/tmp/propel.yaml'));
         $this->assertFalse(TestableFileLoader::checkSupports('12', '/tmp/propel.yaml'));
+    }
+    public static function DistFileNameDataProvider(): array
+    {
+        return [
+            ['perpl.dist.yml', true],
+            ['perpl.yml.dist', true],
+            ['perpl.dist.php', true],
+            ['perpl.php.dist', true],
+            ['perpl.disto.yml', false],
+            ['perpl.php.disto', false],
+        ];
+    }
+
+    #[DataProvider('DistFileNameDataProvider')]
+    public function testIsDistFile(string $fileName, bool $expected): void
+    {
+        $isDist = BaseFileLoader::isDistFile($fileName);
+        $maybeNot = $expected ? '' : 'not ';
+        $this->assertTrue($isDist === $expected, "$fileName is {$maybeNot}dist file");
     }
 }
 

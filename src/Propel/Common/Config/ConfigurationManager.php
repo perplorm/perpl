@@ -6,6 +6,7 @@ namespace Propel\Common\Config;
 
 use Propel\Common\Config\Exception\InvalidArgumentException;
 use Propel\Common\Config\Exception\InvalidConfigurationException;
+use Propel\Common\Config\Loader\FileLoader;
 use Propel\Common\Config\Loader\LoaderResolver;
 use RuntimeException;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException as SymfonyInvalidConfigurationException;
@@ -32,6 +33,7 @@ use function is_dir;
 use function is_int;
 use function is_string;
 use function ksort;
+use function preg_replace;
 use function str_ends_with;
 use function var_export;
 use const PHP_EOL;
@@ -51,7 +53,7 @@ class ConfigurationManager
     /**
      * @var int
      */
-    private const PRECEDENCE_NORMAL = 1;
+    private const PRECEDENCE_NORMAL = 2;
 
     /**
      * Array of configuration values
@@ -248,10 +250,7 @@ class ConfigurationManager
     {
         $filesOrderedByPrecedence = is_dir($path)
             ? $this->getConfigFileNamesFromDirectory($path)
-            : [
-                self::PRECEDENCE_DIST => $path . '.dist',
-                self::PRECEDENCE_NORMAL => $path,
-            ];
+            : $this->buildExpectedConfigFileNamesForMainConfig($path);
 
         ksort($filesOrderedByPrecedence);
 
@@ -262,6 +261,27 @@ class ConfigurationManager
         $configs[] = $extraConf;
 
         return array_replace_recursive(...$configs);
+    }
+
+    /**
+     * @param string $configFilepath
+     *
+     * @return array<array|string|null>
+     */
+    private function buildExpectedConfigFileNamesForMainConfig(string $configFilepath): array
+    {
+        $filesByPrecedence = [
+                self::PRECEDENCE_DIST => $configFilepath . '.dist',
+                self::PRECEDENCE_NORMAL => $configFilepath,
+            ];
+
+        $pattern = '/\.([^.]+)$/'; // dot followed by not-dots until end, grouping not-dots
+        $distBeforeExt = preg_replace($pattern, '.dist.$1', $configFilepath, -1, $replacements);
+        if ($replacements === 1) {
+            $filesByPrecedence[self::PRECEDENCE_DIST + 1] = $distBeforeExt;
+        }
+
+        return $filesByPrecedence;
     }
 
     /**
@@ -316,7 +336,7 @@ class ConfigurationManager
         ];
         $dirs = array_filter($dirs, 'is_dir');
 
-        $fileGlob = 'p{rope,erp}l.{php,inc,ini,properties,yaml,yml,xml,json}{,.dist}';
+        $fileGlob = 'p{rope,erp}l{,.dist}.{php,inc,ini,properties,yaml,yml,xml,json}{,.dist}';
         $finder = new Finder();
         $finder->in($dirs)->depth(0)->files()->name($fileGlob);
         $orderedConfigFileNames = [];
@@ -326,7 +346,10 @@ class ConfigurationManager
             if ($isExecutable) {
                 continue;
             }
-            $precedence = ($file->getExtension() === 'dist') ? self::PRECEDENCE_DIST : self::PRECEDENCE_NORMAL;
+            $precedence = FileLoader::isDistFile($file->getFilename())
+                ? self::PRECEDENCE_DIST
+                : self::PRECEDENCE_NORMAL;
+
             if (isset($orderedConfigFileNames[$precedence])) {
                 $messageSplits = [
                     'Propel expects only one configuration file, but found two:',

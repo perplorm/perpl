@@ -859,31 +859,51 @@ EOF;
         $this->assertEquals(['mysource', 'yoursource'], $manager->getConfigProperty('runtime.connections'));
     }
 
+    /**
+     * @return array<array>
+     */
+    public static function deflateConfigurationDataProvider(): array
+    {
+        return [
+        [['foo' => 42], ['foo' => 42]],
+        [['foo.bar.baz' => 42], ['foo' => ['bar' => ['baz' => 42]]]],
+        [['foo.bar.baz' => 42, 'foo.fizz' => 43], ['foo' => ['bar' => ['baz' => 42], 'fizz' => 43]]]
+        ];
+    }
 
-  /**
-   * @return array<array>
-   */
-  public static function deflateConfigurationDataProvider(): array
-  {
-    return [
-      [['foo' => 42], ['foo' => 42]],
-      [['foo.bar.baz' => 42], ['foo' => ['bar' => ['baz' => 42]]]],
-      [['foo.bar.baz' => 42, 'foo.fizz' => 43], ['foo' => ['bar' => ['baz' => 42], 'fizz' => 43]]]
-    ];
-  }
+    /**
+     * @param array $flattenedConfig
+     * @param array $expectedArray
+     *
+     * @return void
+     */
+    #[DataProvider('deflateConfigurationDataProvider')]
+    public function testDeflateConfiguration(array $flattenedConfig, array $expectedArray)
+    {
+        $actualArray = ConfigurationManager::deflateConfigurationArray($flattenedConfig);
+        $this->assertEquals($expectedArray, $actualArray);
+    }
 
-  /**
-   * @param array $flattenedConfig
-   * @param array $expectedArray
-   *
-   * @return void
-   */
-  #[DataProvider('deflateConfigurationDataProvider')]
-  public function testDeflateConfiguration(array $flattenedConfig, array $expectedArray)
-  {
-    $actualArray = ConfigurationManager::deflateConfigurationArray($flattenedConfig);
-    $this->assertEquals($expectedArray, $actualArray);
-  }
+    /**
+     * @return array<array>
+     */
+    public static function ExpectedFilenamsDataProvider(): array
+    {
+        return [
+            ['foo.ext', [0 => 'foo.ext.dist', 1 => 'foo.dist.ext', 2 => 'foo.ext']],  // Note: keys are precedence values, not indexes
+            ['foo', [0 => 'foo.dist', 2 => 'foo']],
+            ['foo.bar.ext', [0 => 'foo.bar.ext.dist', 1 => 'foo.bar.dist.ext', 2 => 'foo.bar.ext']],
+        ];
+    }
+
+    #[DataProvider('ExpectedFilenamsDataProvider')]
+    public function testFilenameBuilder(string $fileName, array $expectedArray)
+    {
+        $actualArray = $this->callMethod(new ConfigurationManager(), 'buildExpectedConfigFileNamesForMainConfig', [$fileName]);
+        $this->assertEquals($expectedArray, $actualArray);
+    }
+
+
 }
 
 class TestableConfigurationManager extends ConfigurationManager

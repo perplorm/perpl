@@ -14,6 +14,7 @@ use function is_array;
 use function is_readable;
 use function is_string;
 use function pathinfo;
+use function preg_match;
 use const PATHINFO_EXTENSION;
 
 /**
@@ -108,5 +109,15 @@ abstract class FileLoader extends SymfonyFileLoader
         }
 
         return in_array($extension, $ext, true);
+    }
+
+    /**
+     * @param string $fileName
+     *
+     * @return int|bool
+     */
+    public static function isDistFile(string $fileName): bool
+    {
+        return (bool)preg_match('/\.dist(\.\w{3,4})?$/', $fileName); // ends with ".dist.<extension>" or just ".dist"
     }
 }
