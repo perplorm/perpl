@@ -5,7 +5,6 @@ declare(strict_types = 1);
 namespace Propel\Generator\Command;
 
 use Propel\Generator\Behavior\AggregateMultipleColumns\AggregateMultipleColumnsBehavior;
-use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -141,7 +140,7 @@ class TestPrepareCommand extends AbstractCommand
 
         chdir($this->root . '/' . $fixturesDir);
 
-        if (!$this->updatePropelYamlDistFile($vendor, $dsn, $user, $password)) {
+        if (!$this->buildConfigFromTemplate($vendor, $dsn, $user, $password)) {
             $output->writeln('<comment>No "propel.yaml.dist" file found, skipped.</comment>');
         }
 
@@ -187,46 +186,43 @@ class TestPrepareCommand extends AbstractCommand
      *
      * @return bool
      */
-    protected function updatePropelYamlDistFile(string $vendor, string $dsn, string $user, string $password): bool
+    protected function buildConfigFromTemplate(string $vendor, string $dsn, string $user, string $password): bool
     {
-        if (!is_file('propel.yaml.dist')) {
+        if (!is_file('config-template.yaml')) {
             return false;
         }
 
-        $content = (string)file_get_contents('propel.yaml.dist');
+        $content = (string)file_get_contents('config-template.yaml');
 
         $content = str_replace('##DATABASE_VENDOR##', $vendor, $content);
         $content = str_replace('##DATABASE_URL##', $dsn, $content);
         $content = str_replace('##DATABASE_USER##', $user, $content);
         $content = str_replace('##DATABASE_PASSWORD##', $password, $content);
 
-        file_put_contents('propel.yaml', $content);
+        file_put_contents('perpl.yaml', $content);
 
         return true;
     }
 
     /**
-     * Convert local propel.yaml file via config:convert command.
+     * Convert local perpl.yaml file via config:convert command.
      *
      * @param \Symfony\Component\Console\Output\OutputInterface $output
-     * @param string $connection
+     * @param string $connectionName
      *
      * @return void
      */
-    protected function runConfigConvertCommand(OutputInterface $output, string $connection): void
+    protected function runConfigConvertCommand(OutputInterface $output, string $connectionName): void
     {
-        if (!is_file('propel.yaml')) {
+        if (!is_file('perpl.yaml')) {
             return;
         }
-        $in = new ArrayInput([
+        $this->runCommand('config:convert', [
             'command' => 'config:convert',
             '--output-dir' => './build/conf',
-            '--output-file' => sprintf('%s-conf.php', $connection),
+            '--output-file' => "{$connectionName}-conf.php",
             '--loader-script-dir' => './build/conf',
-        ]);
-
-        $command = $this->getApplication()->find('config:convert');
-        $command->run($in, $output);
+        ], $output);
     }
 
     /**
@@ -238,17 +234,14 @@ class TestPrepareCommand extends AbstractCommand
      */
     protected function runModelBuildCommand(OutputInterface $output, string $vendor, string|bool $verbose): void
     {
-        $in = new ArrayInput([
+        $this->runCommand('model:build', [
             'command' => 'model:build',
             '--schema-dir' => '.',
             '--output-dir' => 'build/classes/',
             '--loader-script-dir' => './build/conf',
             '--platform' => ucfirst($vendor) . 'Platform',
             '--verbose' => $verbose,
-        ]);
-
-        $command = $this->getApplication()->find('model:build');
-        $command->run($in, $output);
+        ], $output);
     }
 
     /**
@@ -260,16 +253,13 @@ class TestPrepareCommand extends AbstractCommand
      */
     protected function runSqlBuildCommand(OutputInterface $output, string $vendor, string|bool $verbose): void
     {
-        $in = new ArrayInput([
+        $this->runCommand('sql:build', [
             'command' => 'sql:build',
             '--schema-dir' => '.',
             '--output-dir' => 'build/sql/',
             '--platform' => ucfirst($vendor) . 'Platform',
             '--verbose' => $verbose,
-        ]);
-
-        $command = $this->getApplication()->find('sql:build');
-        $command->run($in, $output);
+        ], $output);
     }
 
     /**
@@ -296,14 +286,11 @@ class TestPrepareCommand extends AbstractCommand
      */
     protected function runSqlInsert(OutputInterface $output, array $connectionStrings, string|bool $verbose): void
     {
-        $in = new ArrayInput([
+        $this->runCommand('sql:insert', [
             'command' => 'sql:insert',
             '--sql-dir' => 'build/sql/',
             '--connection' => $connectionStrings,
             '--verbose' => $verbose,
-        ]);
-
-        $command = $this->getApplication()->find('sql:insert');
-        $command->run($in, $output);
+        ], $output);
     }
 }

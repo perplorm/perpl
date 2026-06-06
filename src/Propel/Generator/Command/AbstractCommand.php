@@ -10,8 +10,10 @@ use Propel\Generator\Config\GeneratorConfig;
 use RuntimeException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Exception\MissingInputException;
+use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
@@ -341,5 +343,20 @@ Hint:
     protected function hasInputArgument(string $argument, InputInterface $input): bool
     {
         return $input->hasArgument($argument) && $input->getArgument($argument) !== null;
+    }
+
+    /**
+     * @param string $command
+     * @param array $args
+     * @param \Symfony\Component\Console\Output\OutputInterface $output
+     *
+     * @return void
+     */
+    protected function runCommand(string $command, array $args, OutputInterface $output)
+    {
+        $in = new ArrayInput($args);
+
+        $command = $this->getApplication()->find($command);
+        $command->run($in, $output);
     }
 }

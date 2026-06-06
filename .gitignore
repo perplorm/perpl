@@ -19,28 +19,28 @@ tests/Fixtures/nestedset/build/
 tests/Fixtures/schemas/build/
 
 tests/Fixtures/bookstore/build/
-tests/Fixtures/bookstore/propel.yaml
+tests/Fixtures/bookstore/perpl.yaml
 
 tests/Fixtures/bookstore-packaged/
 
-tests/Fixtures/namespaced/propel.yaml
+tests/Fixtures/namespaced/perpl.yaml
 
-tests/Fixtures/schemas/propel.yaml
+tests/Fixtures/schemas/perpl.yaml
 
 tests/Fixtures/instance-pool/build/
-tests/Fixtures/instance-pool/propel.yaml
+tests/Fixtures/instance-pool/perpl.yaml
 
 tests/Fixtures/reverse/mysql/build/
-tests/Fixtures/reverse/mysql/propel.yaml
+tests/Fixtures/reverse/mysql/perpl.yaml
 
 tests/Fixtures/reverse/pgsql/build/
-tests/Fixtures/reverse/pgsql/propel.yaml
+tests/Fixtures/reverse/pgsql/perpl.yaml
 
 tests/Fixtures/migration/build/
-tests/Fixtures/migration/propel.yaml
+tests/Fixtures/migration/perpl.yaml
 
 tests/Fixtures/quoting/build/
-tests/Fixtures/quoting/propel.yaml
+tests/Fixtures/quoting/perpl.yaml
 
 
 tests/Fixtures/fixtures_built
