@@ -40,6 +40,7 @@ use Propel\Runtime\Perpl;
 use Propel\Runtime\Util\PropelConditionalProxy;
 use function array_diff;
 use function array_intersect_key;
+use function array_key_exists;
 use function array_map;
 use function array_merge;
 use function array_unique;
@@ -331,7 +332,7 @@ class Criteria
     /**
      * @var array<\Propel\Runtime\ActiveQuery\Criteria>
      */
-    protected $selectQueries = [];
+    protected array $subqueries = [];
 
     /**
      * The name of the database.
@@ -475,7 +476,7 @@ class Criteria
         $this->having = null;
         $this->asColumns = [];
         $this->joins = [];
-        $this->selectQueries = [];
+        $this->subqueries = [];
         $this->dbName = $this->originalDbName;
         $this->offset = 0;
         $this->limit = -1;
@@ -1025,16 +1026,36 @@ class Criteria
      * @param self $subQuery Criteria to build the subquery from
      * @param string|null $alias alias for the subQuery
      *
+     * @throws \Propel\Runtime\Exception\RuntimeException
+     *
      * @return $this this modified Criteria object (Fluid API)
      */
     public function addSubquery(self $subQuery, ?string $alias = null)
     {
-        if ($alias === null) {
-            $alias = 'alias_' . ($subQuery->forgeSelectQueryAlias() + count($this->selectQueries));
+        if ($alias && array_key_exists($alias, $this->subqueries)) {
+            throw new RuntimeException("Subquery alias `$alias` already exists.");
+        } elseif (!$alias) {
+            $alias = 'subquery_' . (1 + $this->countSubqueriesRecursive() + $subQuery->countSubqueriesRecursive());
+            while (array_key_exists($alias, $this->subqueries)) {
+                $alias .= 'i'; // user must have manually set the auto-generated name, add `i`s as last resort
+            }
         }
-        $this->selectQueries[$alias] = $subQuery;
+        $this->subqueries[$alias] = $subQuery;
 
         return $this;
+    }
+
+    /**
+     * @return int
+     */
+    protected function countSubqueriesRecursive(): int
+    {
+        $count = 0;
+        foreach ($this->getSubqueries() as $subquery) {
+            $count += 1 + $subquery->countSubqueriesRecursive();
+        }
+
+        return $count;
     }
 
     /**
@@ -1042,9 +1063,19 @@ class Criteria
      *
      * @return bool
      */
+    public function hasSubqueries(): bool
+    {
+        return (bool)$this->subqueries;
+    }
+
+    /**
+     * @deprecated Use aptly named {@see static::hasSubqueries()}
+     *
+     * @return bool
+     */
     public function hasSelectQueries(): bool
     {
-        return (bool)$this->selectQueries;
+        return $this->hasSubqueries();
     }
 
     /**
@@ -1052,9 +1083,19 @@ class Criteria
      *
      * @return array<\Propel\Runtime\ActiveQuery\Criteria>
      */
+    public function getSubqueries(): array
+    {
+        return $this->subqueries;
+    }
+
+    /**
+     * @deprecated Use aptly named {@see static::getSubqueries()}
+     *
+     * @return array<\Propel\Runtime\ActiveQuery\Criteria>
+     */
     public function getSelectQueries(): array
     {
-        return $this->selectQueries;
+        return $this->getSubqueries();
     }
 
     /**
@@ -1064,9 +1105,21 @@ class Criteria
      *
      * @return self
      */
+    public function getSubquery(string $alias): self
+    {
+        return $this->subqueries[$alias];
+    }
+
+    /**
+     * @deprecated Use aptly named {@see static::getSubquery()}
+     *
+     * @param string $alias alias for the subQuery
+     *
+     * @return self
+     */
     public function getSelectQuery(string $alias): self
     {
-        return $this->selectQueries[$alias];
+        return $this->getSubquery($alias);
     }
 
     /**
@@ -1076,22 +1129,21 @@ class Criteria
      *
      * @return bool
      */
-    public function hasSelectQuery(string $alias): bool
+    public function hasSubquery(string $alias): bool
     {
-        return isset($this->selectQueries[$alias]);
+        return isset($this->subqueries[$alias]);
     }
 
     /**
-     * @return int
+     * @deprecated Use aptly named {@see static::hasSubquery()}
+     *
+     * @param string $alias
+     *
+     * @return bool
      */
-    public function forgeSelectQueryAlias(): int
+    public function hasSelectQuery(string $alias): bool
     {
-        $aliasNumber = 0;
-        foreach ($this->getSelectQueries() as $c1) {
-            $aliasNumber += $c1->forgeSelectQueryAlias();
-        }
-
-        return ++$aliasNumber;
+        return $this->hasSubquery($alias);
     }
 
     /**

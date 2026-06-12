@@ -98,8 +98,8 @@ class ColumnResolver
             return new RemoteColumnExpression($sourceQuery, $tableAlias, $columnIdentifier);
         }
 
-        if (!$isColumnFound && $sourceQuery->hasSelectQuery($prefix)) {
-            return $this->getColumnFromSubQuery($sourceQuery, $sourceQuery->getSelectQuery($prefix), $prefix, $columnIdentifier, $failSilently);
+        if (!$isColumnFound && $sourceQuery->hasSubquery($prefix)) {
+            return $this->getColumnFromSubQuery($sourceQuery, $sourceQuery->getSubquery($prefix), $prefix, $columnIdentifier, $failSilently);
         }
 
         if (!$isColumnFound && $sourceQuery instanceof ModelCriteria && $sourceQuery->getPrimaryCriteria()) {

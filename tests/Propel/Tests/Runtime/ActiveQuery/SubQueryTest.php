@@ -9,6 +9,7 @@
 namespace Propel\Tests\Runtime\ActiveQuery;
 
 use Propel\Runtime\ActiveQuery\Criteria;
+use Propel\Runtime\Exception\RuntimeException;
 use Propel\Runtime\Propel;
 use Propel\Tests\Bookstore\BookQuery;
 use Propel\Tests\Bookstore\Map\BookTableMap;
@@ -60,7 +61,7 @@ class SubQueryTest extends BookstoreTestBase
         $c = new BookQuery();
         $c->setAutoAddTable(false);
         BookTableMap::addSelectColumns($c, 'subCriteriaAlias');
-        $c->addSelectQuery($subCriteria, 'subCriteriaAlias', false);
+        $c->addSubquery($subCriteria, 'subCriteriaAlias', false);
         $c->groupBy('subCriteriaAlias.AuthorId');
 
         if ($this->isDb('pgsql')) {
@@ -82,7 +83,7 @@ class SubQueryTest extends BookstoreTestBase
         // no addSelectColumns()
 
         $c = new BookQuery();
-        $c->addSelectQuery($subCriteria, 'subCriteriaAlias');
+        $c->addSubquery($subCriteria, 'subCriteriaAlias');
         $c->filterByPrice(20, Criteria::LESS_THAN);
 
         $sql = $this->getSql('SELECT subCriteriaAlias.id, subCriteriaAlias.title, subCriteriaAlias.isbn, subCriteriaAlias.price, subCriteriaAlias.publisher_id, subCriteriaAlias.author_id FROM (SELECT book.id, book.title, book.isbn, book.price, book.publisher_id, book.author_id FROM book) AS subCriteriaAlias WHERE subCriteriaAlias.price<:p1');
@@ -90,7 +91,7 @@ class SubQueryTest extends BookstoreTestBase
         $params = [
             ['table' => 'book', 'column' => 'price', 'value' => 20],
         ];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'addSelectQuery() adds select columns if none given');
+        $this->assertCriteriaTranslation($c, $sql, $params, 'addSubquery() adds select columns if none given');
     }
 
     /**
@@ -102,15 +103,15 @@ class SubQueryTest extends BookstoreTestBase
         $subCriteria->addSelfSelectColumns();
 
         $c = new BookQuery();
-        $c->addSelectQuery($subCriteria); // no alias
+        $c->addSubquery($subCriteria); // no alias
         $c->filterByPrice(20, Criteria::LESS_THAN);
 
-        $sql = $this->getSql('SELECT alias_1.id, alias_1.title, alias_1.isbn, alias_1.price, alias_1.publisher_id, alias_1.author_id FROM (SELECT book.id, book.title, book.isbn, book.price, book.publisher_id, book.author_id FROM book) AS alias_1 WHERE alias_1.price<:p1');
+        $sql = $this->getSql('SELECT subquery_1.id, subquery_1.title, subquery_1.isbn, subquery_1.price, subquery_1.publisher_id, subquery_1.author_id FROM (SELECT book.id, book.title, book.isbn, book.price, book.publisher_id, book.author_id FROM book) AS subquery_1 WHERE subquery_1.price<:p1');
 
         $params = [
             ['table' => 'book', 'column' => 'price', 'value' => 20],
         ];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'addSelectQuery() forges a unique alias if none is given');
+        $this->assertCriteriaTranslation($c, $sql, $params, 'addSubquery() forges a unique alias if none is given');
     }
 
     /**
@@ -122,15 +123,15 @@ class SubQueryTest extends BookstoreTestBase
         // no select
 
         $c = new BookQuery();
-        $c->addSelectQuery($subCriteria); // no alias
+        $c->addSubquery($subCriteria); // no alias
         $c->filterByPrice(20, Criteria::LESS_THAN);
 
-        $sql = $this->getSql('SELECT alias_1.id, alias_1.title, alias_1.isbn, alias_1.price, alias_1.publisher_id, alias_1.author_id FROM (SELECT book.id, book.title, book.isbn, book.price, book.publisher_id, book.author_id FROM book) AS alias_1 WHERE alias_1.price<:p1');
+        $sql = $this->getSql('SELECT subquery_1.id, subquery_1.title, subquery_1.isbn, subquery_1.price, subquery_1.publisher_id, subquery_1.author_id FROM (SELECT book.id, book.title, book.isbn, book.price, book.publisher_id, book.author_id FROM book) AS subquery_1 WHERE subquery_1.price<:p1');
 
         $params = [
             ['table' => 'book', 'column' => 'price', 'value' => 20],
         ];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'addSelectQuery() forges a unique alias and adds select columns by default');
+        $this->assertCriteriaTranslation($c, $sql, $params, 'addSubquery() forges a unique alias and adds select columns by default');
     }
 
     /**
@@ -145,11 +146,11 @@ class SubQueryTest extends BookstoreTestBase
         $c2->filterByPrice(20, Criteria::LESS_THAN);
 
         $c3 = new BookQuery();
-        $c3->addSelectQuery($c1); // no alias
-        $c3->addSelectQuery($c2); // no alias
+        $c3->addSubquery($c1); // no alias
+        $c3->addSubquery($c2); // no alias
         $c3->filterByTitle('War%', Criteria::LIKE);
 
-        $sql = $this->getSql('SELECT alias_1.id, alias_1.title, alias_1.isbn, alias_1.price, alias_1.publisher_id, alias_1.author_id, alias_2.id, alias_2.title, alias_2.isbn, alias_2.price, alias_2.publisher_id, alias_2.author_id FROM (SELECT book.id, book.title, book.isbn, book.price, book.publisher_id, book.author_id FROM book WHERE book.price>:p2) AS alias_1, (SELECT book.id, book.title, book.isbn, book.price, book.publisher_id, book.author_id FROM book WHERE book.price<:p3) AS alias_2 WHERE alias_2.title LIKE :p1');
+        $sql = $this->getSql('SELECT subquery_1.id, subquery_1.title, subquery_1.isbn, subquery_1.price, subquery_1.publisher_id, subquery_1.author_id, subquery_2.id, subquery_2.title, subquery_2.isbn, subquery_2.price, subquery_2.publisher_id, subquery_2.author_id FROM (SELECT book.id, book.title, book.isbn, book.price, book.publisher_id, book.author_id FROM book WHERE book.price>:p2) AS subquery_1, (SELECT book.id, book.title, book.isbn, book.price, book.publisher_id, book.author_id FROM book WHERE book.price<:p3) AS subquery_2 WHERE subquery_2.title LIKE :p1');
 
         $params = [
             ['table' => 'book', 'column' => 'title', 'value' => 'War%'],
@@ -168,20 +169,43 @@ class SubQueryTest extends BookstoreTestBase
         $c1 = new BookQuery();
 
         $c2 = new BookQuery();
-        $c2->addSelectQuery($c1); // no alias
+        $c2->addSubquery($c1); // no alias
         $c2->filterByPrice(20, Criteria::LESS_THAN);
 
         $c3 = new BookQuery();
-        $c3->addSelectQuery($c2); // no alias
+        $c3->addSubquery($c2); // no alias
         $c3->filterByTitle('War%', Criteria::LIKE);
 
-        $sql = $this->getSql('SELECT alias_2.id, alias_2.title, alias_2.isbn, alias_2.price, alias_2.publisher_id, alias_2.author_id FROM (SELECT alias_1.id, alias_1.title, alias_1.isbn, alias_1.price, alias_1.publisher_id, alias_1.author_id FROM (SELECT book.id, book.title, book.isbn, book.price, book.publisher_id, book.author_id FROM book) AS alias_1 WHERE alias_1.price<:p2) AS alias_2 WHERE alias_2.title LIKE :p1');
+        $sql = $this->getSql('SELECT subquery_2.id, subquery_2.title, subquery_2.isbn, subquery_2.price, subquery_2.publisher_id, subquery_2.author_id FROM (SELECT subquery_1.id, subquery_1.title, subquery_1.isbn, subquery_1.price, subquery_1.publisher_id, subquery_1.author_id FROM (SELECT book.id, book.title, book.isbn, book.price, book.publisher_id, book.author_id FROM book) AS subquery_1 WHERE subquery_1.price<:p2) AS subquery_2 WHERE subquery_2.title LIKE :p1');
 
         $params = [
             ['table' => 'book', 'column' => 'title', 'value' => 'War%'],
             ['table' => 'book', 'column' => 'price', 'value' => 20],
         ];
-        $this->assertCriteriaTranslation($c3, $sql, $params, 'addSelectQuery() forges a unique alias if none is given');
+        $this->assertCriteriaTranslation($c3, $sql, $params, 'addSubquery() forges a unique alias if none is given');
+    }
+
+    public function testErrorOnDuplicatedAlias(): void
+    {
+        $q = BookQuery::create()->addSubquery(BookQuery::create(), 'foo');
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Subquery alias `foo` already exists.');
+
+        $q->addSubquery(BookQuery::create(), 'foo');
+    }
+
+    public function testGeneratedAliasResolvesDuplication(): void
+    {
+        $q = BookQuery::create()
+            ->addSubquery(BookQuery::create(), 'subquery_2')
+            ->addSubquery(BookQuery::create()) // no alias
+        ;
+
+        $subqueries = $q->getSubqueries();
+        $this->assertCount(2, $subqueries);
+        $this->assertArrayHasKey('subquery_2', $subqueries);
+        $this->assertArrayHasKey('subquery_2i', $subqueries);
     }
 
     /**
@@ -195,7 +219,7 @@ class SubQueryTest extends BookstoreTestBase
             ->endUse();
 
         $c2 = new BookQuery();
-        $c2->addSelectQuery($c1, 'subQuery');
+        $c2->addSubquery($c1, 'subQuery');
         $c2->filterByPrice(20, Criteria::LESS_THAN);
 
         $sql = $this->getSql('SELECT subQuery.id, subQuery.title, subQuery.isbn, subQuery.price, subQuery.publisher_id, subQuery.author_id FROM (SELECT book.id, book.title, book.isbn, book.price, book.publisher_id, book.author_id FROM book LEFT JOIN author ON (book.author_id=author.id) WHERE author.last_name=:p2) AS subQuery WHERE subQuery.price<:p1');
@@ -204,7 +228,7 @@ class SubQueryTest extends BookstoreTestBase
             ['table' => 'book', 'column' => 'price', 'value' => 20],
             ['table' => 'author', 'column' => 'last_name', 'value' => 'Rowling'],
         ];
-        $this->assertCriteriaTranslation($c2, $sql, $params, 'addSelectQuery() can add a select query with a join');
+        $this->assertCriteriaTranslation($c2, $sql, $params, 'addSubquery() can add a select query with a join');
     }
 
     /**
@@ -216,7 +240,7 @@ class SubQueryTest extends BookstoreTestBase
         $subCriteria->filterByAuthorId(123);
 
         $c = new BookQuery();
-        $c->addSelectQuery($subCriteria, 'subCriteriaAlias');
+        $c->addSubquery($subCriteria, 'subCriteriaAlias');
         // and use filterByPrice method!
         $c->filterByPrice(20, Criteria::LESS_THAN);
 
@@ -243,12 +267,12 @@ class SubQueryTest extends BookstoreTestBase
 
         // group by author, after sorting!
         $latestBookQuery = new BookQuery();
-        $latestBookQuery->addSelectQuery($sortedBookQuery, 'sortedBookQuery');
+        $latestBookQuery->addSubquery($sortedBookQuery, 'sortedBookQuery');
         $latestBookQuery->groupBy('sortedBookQuery.AuthorId');
 
         // filter from these latest books, find the ones cheaper than 12 euro
         $c = new BookQuery();
-        $c->addSelectQuery($latestBookQuery, 'latestBookQuery');
+        $c->addSubquery($latestBookQuery, 'latestBookQuery');
         $c->filterByPrice(12, Criteria::LESS_THAN);
 
         if ($this->isDb('pgsql')) {
@@ -282,7 +306,7 @@ class SubQueryTest extends BookstoreTestBase
         $subCriteria = new BookQuery();
 
         $c = new BookQuery();
-        $c->addSelectQuery($subCriteria, 'alias1', false);
+        $c->addSubquery($subCriteria, 'alias1', false);
         $c->select(['alias1.Id']);
         $c->setAutoAddTable(false);
         $c->configureSelectColumns();
@@ -290,7 +314,7 @@ class SubQueryTest extends BookstoreTestBase
         $sql = $this->getSql('SELECT alias1.id AS "alias1.Id" FROM (SELECT book.id, book.title, book.isbn, book.price, book.publisher_id, book.author_id FROM book) AS alias1');
 
         $params = [];
-        $this->assertCriteriaTranslation($c, $sql, $params, 'addSelectQuery() forges a unique alias and adds select columns by default');
+        $this->assertCriteriaTranslation($c, $sql, $params, 'addSubquery() forges a unique alias and adds select columns by default');
     }
 
     /**
@@ -301,7 +325,7 @@ class SubQueryTest extends BookstoreTestBase
         $subCriteria = new BookQuery();
 
         $c = new BookQuery();
-        $c->addSelectQuery($subCriteria, 'subCriteriaAlias');
+        $c->addSubquery($subCriteria, 'subCriteriaAlias');
         $c->filterByPrice(20, Criteria::LESS_THAN);
         $nbBooks = $c->count();
 
@@ -309,7 +333,7 @@ class SubQueryTest extends BookstoreTestBase
 
         $sql = $this->getSql('SELECT COUNT(*) FROM (SELECT subCriteriaAlias.id, subCriteriaAlias.title, subCriteriaAlias.isbn, subCriteriaAlias.price, subCriteriaAlias.publisher_id, subCriteriaAlias.author_id FROM (SELECT book.id, book.title, book.isbn, book.price, book.publisher_id, book.author_id FROM book) AS subCriteriaAlias WHERE subCriteriaAlias.price<20) propelmatch4cnt');
 
-        $this->assertEquals($sql, $query, 'addSelectQuery() doCount is defined as complexQuery');
+        $this->assertEquals($sql, $query, 'addSubquery() doCount is defined as complexQuery');
     }
 
     /**

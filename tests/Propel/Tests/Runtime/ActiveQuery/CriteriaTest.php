@@ -1245,8 +1245,8 @@ class CriteriaTest extends BookstoreTestBase
         $this->assertTrue(is_array($c->getJoins()), 'joins is an array');
         $this->assertEquals(0, count($c->getJoins()), 'joins is empty by default');
 
-        $this->assertTrue(is_array($c->getSelectQueries()), 'selectQueries is an array');
-        $this->assertEquals(0, count($c->getSelectQueries()), 'selectQueries is empty by default');
+        $this->assertTrue(is_array($c->getSubqueries()), 'selectQueries is an array');
+        $this->assertEquals(0, count($c->getSubqueries()), 'selectQueries is empty by default');
 
         $this->assertEquals(0, $c->getOffset(), 'offset is 0 by default');
 

@@ -36,7 +36,7 @@ class CountQuerySqlBuilder extends AbstractSqlQueryBuilder
             || $this->criteria->getLimit() >= 0
             || $this->criteria->getHaving()
             || in_array(Criteria::DISTINCT, $this->criteria->getSelectModifiers(), true)
-            || $this->criteria->hasSelectQueries();
+            || $this->criteria->hasSubqueries();
 
         if (!$needsComplexCount) {
             $this->criteria

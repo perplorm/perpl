@@ -141,7 +141,7 @@ class SelectQuerySqlBuilder extends AbstractSqlQueryBuilder
 
         $sourceTableNames = array_map([$this, 'quoteIdentifierTable'], $sourceTableNames);
 
-        foreach ($this->criteria->getSelectQueries() as $subQueryAlias => $subQueryCriteria) {
+        foreach ($this->criteria->getSubqueries() as $subQueryAlias => $subQueryCriteria) {
             $sourceTableNames[] = '(' . $subQueryCriteria->createSelectSql($params) . ') AS ' . $subQueryAlias;
         }
 
@@ -159,7 +159,7 @@ class SelectQuerySqlBuilder extends AbstractSqlQueryBuilder
      * If a subqueries uses the same table as the outer query, it adds an alias to the parent query (legacy behavior).
      * This method removes those aliases from the list of source table names.
      *
-     * @see \Propel\Runtime\ActiveQuery\ModelCriteria::addSelectQuery()
+     * @see \Propel\Runtime\ActiveQuery\ModelCriteria::addSubquery()
      *
      * @param array<string> $sourceTableNames
      *
@@ -167,7 +167,7 @@ class SelectQuerySqlBuilder extends AbstractSqlQueryBuilder
      */
     protected function removeRecursiveSubqueryTableAliases(array &$sourceTableNames): void
     {
-        if (!$this->criteria->hasSelectQueries()) {
+        if (!$this->criteria->hasSubqueries()) {
             return;
         }
 
@@ -175,7 +175,7 @@ class SelectQuerySqlBuilder extends AbstractSqlQueryBuilder
             $spacePos = strpos($rawTableName, ' ');
             $tableName = ($spacePos !== false) ? substr($rawTableName, $spacePos + 1) : $rawTableName;
 
-            if ($this->criteria->hasSelectQuery($tableName)) {
+            if ($this->criteria->hasSubquery($tableName)) {
                 unset($sourceTableNames[$index]);
             }
         }
@@ -332,7 +332,7 @@ class SelectQuerySqlBuilder extends AbstractSqlQueryBuilder
             }
 
             $columnAlias = $columnName;
-            $asColumnName = $this->criteria->getColumnForAs($columnName);
+            $asColumnName = $this->criteria->getClauseForColumnAlias($columnName);
             if ($asColumnName) {
                 $columnName = $asColumnName;
             }

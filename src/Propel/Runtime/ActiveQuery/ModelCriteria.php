@@ -1060,7 +1060,7 @@ class ModelCriteria extends BaseModelCriteria
     #[\Override]
     public function addSubquery(Criteria $subQuery, ?string $alias = null, bool $addAliasAndSelectColumns = true)
     {
-        if (!$subQuery->hasSelectClause()) {
+        if (!$subQuery->hasSelectClause() && $subQuery instanceof ModelCriteria) {
             $subQuery->addSelfSelectColumns();
         }
 
@@ -1075,30 +1075,30 @@ class ModelCriteria extends BaseModelCriteria
 
         if ($alias === null) {
             // get the default alias set in parent::addSubquery()
-            end($this->selectQueries);
-            $alias = (string)key($this->selectQueries);
+            end($this->subqueries);
+            $alias = (string)key($this->subqueries);
         }
 
         if ($subQuery->modelTableMapName === $this->modelTableMapName) {
             $this->setModelAlias($alias, true);
             $this->addSelfSelectColumns(true);
         } else {
-            $tableMapClassName = (string)$subQuery->modelTableMapName;
+            $tableMapClassName = $subQuery->modelTableMapName;
             $this->addSelfSelectColumnsFromTableMapClass($tableMapClassName, $alias);
         }
 
         return $this;
     }
 
-   /**
-    * @deprecated use aptly named Criteria::addSubquery().
-    *
-    * @param \Propel\Runtime\ActiveQuery\Criteria $subQueryCriteria Criteria to build the subquery from
-    * @param string|null $alias alias for the subQuery
-    * @param bool $addAliasAndSelectColumns Set to false if you want to manually add the aliased select columns
-    *
-    * @return $this
-    */
+    /**
+     * @deprecated use aptly named Criteria::addSubquery().
+     *
+     * @param \Propel\Runtime\ActiveQuery\Criteria $subQueryCriteria Criteria to build the subquery from
+     * @param string|null $alias alias for the subQuery
+     * @param bool $addAliasAndSelectColumns Set to false if you want to manually add the aliased select columns
+     *
+     * @return $this
+     */
     public function addSelectQuery(Criteria $subQueryCriteria, ?string $alias = null, bool $addAliasAndSelectColumns = true)
     {
         return $this->addSubquery($subQueryCriteria, $alias, $addAliasAndSelectColumns);
@@ -1117,8 +1117,9 @@ class ModelCriteria extends BaseModelCriteria
             return $this;
         }
 
-        /** @var string $tableMapClassName */
         $tableMapClassName = $this->modelTableMapName;
+        assert($tableMapClassName !== null);
+
         $alias = ($this->useAliasInSQL) ? $this->modelAlias : null;
 
         $this->addSelfSelectColumnsFromTableMapClass($tableMapClassName, $alias);
