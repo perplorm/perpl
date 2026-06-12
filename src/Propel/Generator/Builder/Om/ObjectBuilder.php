@@ -26,6 +26,7 @@ use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\FilterExpression\FilterCollector;
 use Propel\Runtime\ActiveQuery\ModelCriteria;
 use Propel\Runtime\ActiveRecord\ActiveRecordInterface;
+use Propel\Runtime\ActiveRecord\MutableActiveRecordInterface;
 use Propel\Runtime\Collection\ObjectCombinationCollection;
 use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Exception\BadMethodCallException;
@@ -321,8 +322,14 @@ class ObjectBuilder extends AbstractObjectBuilder
  */";
         }
 
+        $interfaces = $this->declareClasses(...array_filter([
+            ActiveRecordInterface::class,
+            $this->isAddGenericMutators() ? MutableActiveRecordInterface::class : null,
+        ]));
+        $interfacesCsv = implode(', ', $interfaces);
+
         $script .= "
-abstract class {$this->getUnqualifiedClassName()}$parentClass implements ActiveRecordInterface";
+abstract class {$this->getUnqualifiedClassName()}$parentClass implements $interfacesCsv";
 
         if ($interface) {
             $script .= ', Child' . ClassTools::classname($interface);
@@ -351,7 +358,6 @@ abstract class {$this->getUnqualifiedClassName()}$parentClass implements ActiveR
 
         $this->declareClasses(
             AbstractParser::class,
-            ActiveRecordInterface::class,
             BadMethodCallException::class,
             ConnectionInterface::class,
             Criteria::class,

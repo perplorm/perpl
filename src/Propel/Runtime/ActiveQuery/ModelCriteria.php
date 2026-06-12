@@ -16,6 +16,7 @@ use Propel\Runtime\ActiveQuery\FilterExpression\ColumnFilterInterface;
 use Propel\Runtime\ActiveQuery\FilterExpression\ColumnToQueryFilter;
 use Propel\Runtime\ActiveQuery\FilterExpression\ExistsFilter;
 use Propel\Runtime\ActiveQuery\ModelCriteria as ActiveQueryModelCriteria;
+use Propel\Runtime\ActiveRecord\MutableActiveRecordInterface;
 use Propel\Runtime\Collection\ArrayCollection;
 use Propel\Runtime\Collection\ObjectCollection;
 use Propel\Runtime\Connection\ConnectionInterface;
@@ -35,6 +36,7 @@ use function array_key_exists;
 use function array_merge;
 use function array_shift;
 use function array_values;
+use function assert;
 use function count;
 use function current;
 use function end;
@@ -2008,8 +2010,9 @@ class ModelCriteria extends BaseModelCriteria
                 throw new LogicException('Parameter #1 `$updateValues` must be an array while `$forceIndividualSaves = true`.');
             }
             // Update rows one by one
-            $objects = $this->setFormatter(self::FORMAT_OBJECT)->find($con);
+            $objects = $this->findObjects($con);
             foreach ($objects as $object) {
+                assert($object instanceof MutableActiveRecordInterface);
                 foreach ($updateValues as $key => $value) {
                     $object->setByName($key, $value);
                 }

@@ -11,6 +11,7 @@ use Propel\Runtime\ActiveQuery\ColumnResolver\ColumnExpression\LocalColumnExpres
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\FilterExpression\FilterCollector;
 use Propel\Runtime\ActiveRecord\ActiveRecordInterface;
+use Propel\Runtime\ActiveRecord\MutableActiveRecordInterface;
 use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Exception\BadMethodCallException;
 use Propel\Runtime\Exception\PropelException;
@@ -39,7 +40,7 @@ use const JSON_UNESCAPED_UNICODE;
  *
  * @phpstan-consistent-constructor
  */
-abstract class IdTable implements ActiveRecordInterface
+abstract class IdTable implements ActiveRecordInterface, MutableActiveRecordInterface
 {
     /**
      * TableMap class name
