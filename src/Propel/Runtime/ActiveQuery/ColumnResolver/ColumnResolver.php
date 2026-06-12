@@ -79,7 +79,7 @@ class ColumnResolver
     {
         $sourceQuery = $this->query;
 
-        if ($hasAccessToOutputColumns && $sourceQuery->getColumnForAs($columnIdentifier)) {
+        if ($hasAccessToOutputColumns && $sourceQuery->getColumnClauseByAlias($columnIdentifier)) {
             return new RemoteColumnExpression($sourceQuery, null, $columnIdentifier);
         }
 
@@ -123,7 +123,7 @@ class ColumnResolver
             $columnIdentifier = $columnMap->getName();
 
             return new LocalColumnExpression($sourceQuery, $tableAlias, $columnMap);
-        } elseif ($sourceQuery->getColumnForAs($columnIdentifier)) {
+        } elseif ($sourceQuery->getColumnClauseByAlias($columnIdentifier)) {
             // local column
            // throw new LogicException('AS columns should not be resolved like this...');
             echo 'inv';
@@ -218,7 +218,7 @@ class ColumnResolver
         string $columnPhpName,
         bool $failSilently = true
     ): AbstractColumnExpression {
-        if ($subQuery->getColumnForAs($columnPhpName) !== null) {
+        if ($subQuery->getColumnClauseByAlias($columnPhpName) !== null) {
             return new RemoteColumnExpression($sourceQuery, $tableAlias, $columnPhpName);
         }
 

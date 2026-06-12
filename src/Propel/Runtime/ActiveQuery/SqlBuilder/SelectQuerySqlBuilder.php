@@ -332,7 +332,7 @@ class SelectQuerySqlBuilder extends AbstractSqlQueryBuilder
             }
 
             $columnAlias = $columnName;
-            $asColumnName = $this->criteria->getClauseForColumnAlias($columnName);
+            $asColumnName = $this->criteria->getColumnClauseByAlias($columnName);
             if ($asColumnName) {
                 $columnName = $asColumnName;
             }

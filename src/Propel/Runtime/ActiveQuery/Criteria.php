@@ -479,7 +479,7 @@ class Criteria
      *
      * If the name already exists, it is replaced by the new clause.
      *
-     * @param string $name Wanted Name of the column (alias).
+     * @param string $name Column name in output (AS alias).
      * @param string $clause SQL clause to select from the table
      *
      * @return $this A modified Criteria object.
@@ -505,13 +505,25 @@ class Criteria
     /**
      * Returns the column name associated with an alias (AS-column).
      *
+     * @param string $alias Alias
+     *
+     * @return string|null
+     */
+    public function getColumnClauseByAlias(string $alias): ?string
+    {
+        return $this->asColumns[$alias] ?? null;
+    }
+
+    /**
+     * @deprecated Use aptly named {@see static::getColumnClauseByAlias()}
+     *
      * @param string $as Alias
      *
      * @return string|null
      */
     public function getColumnForAs(string $as): ?string
     {
-        return $this->asColumns[$as] ?? null;
+        return $this->getColumnClauseByAlias($as);
     }
 
     /**
