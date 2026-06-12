@@ -93,7 +93,7 @@ class QuotingTest extends TestCaseFixturesDatabase
         ->useAuthorQuery()
         ->filterByName('Author filter')
         ->endUse()
-        ->with('Author')
+        ->populateJoinedRelation('Author')
         ->find();
 
         $expected = $this->getSql("SELECT `group`.`id`, `group`.`title`, `group`.`by`, `group`.`as`, `group`.`author_id`, quoting_author.id, quoting_author.name, quoting_author.type_id FROM `group` LEFT JOIN quoting_author ON (`group`.`author_id`=quoting_author.id) WHERE quoting_author.name='Author filter'");
@@ -112,7 +112,7 @@ class QuotingTest extends TestCaseFixturesDatabase
         ->useAuthorTypeQuery()
         ->filterByTitle('Author type title')
         ->endUse()
-        ->with('AuthorType')
+        ->populateJoinedRelation('AuthorType')
         ->find();
 
         $expected = $this->getSql("SELECT quoting_author.id, quoting_author.name, quoting_author.type_id, `quoting_author_type`.`id`, `quoting_author_type`.`title` FROM quoting_author LEFT JOIN `quoting_author_type` ON (quoting_author.type_id=`quoting_author_type`.`id`) WHERE `quoting_author_type`.`title`='Author type title'");

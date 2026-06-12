@@ -65,9 +65,9 @@ class OnDemandFormatterWithTest extends BookstoreEmptyTestBase
         $c->setFormatter(ModelCriteria::FORMAT_ON_DEMAND);
         $c->orderBy('Propel\Tests\Bookstore\Book.Title');
         $c->join('Propel\Tests\Bookstore\Book.Author');
-        $c->with('Author');
+        $c->populateJoinedRelation('Author');
         $c->join('Propel\Tests\Bookstore\Book.Publisher');
-        $c->with('Publisher');
+        $c->populateJoinedRelation('Publisher');
         $this->assertCorrectHydration1($c, 'without instance pool');
     }
 
@@ -83,9 +83,9 @@ class OnDemandFormatterWithTest extends BookstoreEmptyTestBase
         $c->setFormatter(ModelCriteria::FORMAT_ON_DEMAND);
         $c->orderBy('Propel\Tests\Bookstore\Book.Title');
         $c->join('Propel\Tests\Bookstore\Book.Author a');
-        $c->with('a');
+        $c->populateJoinedRelation('a');
         $c->join('Propel\Tests\Bookstore\Book.Publisher p');
-        $c->with('p');
+        $c->populateJoinedRelation('p');
         $this->assertCorrectHydration1($c, 'with alias');
     }
 
@@ -102,9 +102,9 @@ class OnDemandFormatterWithTest extends BookstoreEmptyTestBase
         $c->setModelAlias('b', true);
         $c->orderBy('b.Title');
         $c->join('b.Author a');
-        $c->with('a');
+        $c->populateJoinedRelation('a');
         $c->join('b.Publisher p');
-        $c->with('p');
+        $c->populateJoinedRelation('p');
         $this->assertCorrectHydration1($c, 'with main alias');
     }
 
@@ -119,9 +119,9 @@ class OnDemandFormatterWithTest extends BookstoreEmptyTestBase
         $c->setFormatter(ModelCriteria::FORMAT_ON_DEMAND);
         $c->orderBy('Propel\Tests\Bookstore\Book.Title');
         $c->join('Propel\Tests\Bookstore\Book.Author');
-        $c->with('Author');
+        $c->populateJoinedRelation('Author');
         $c->join('Propel\Tests\Bookstore\Book.Publisher');
-        $c->with('Publisher');
+        $c->populateJoinedRelation('Publisher');
         $this->assertCorrectHydration1($c, 'with instance pool');
     }
 
@@ -139,7 +139,7 @@ class OnDemandFormatterWithTest extends BookstoreEmptyTestBase
         $c->setFormatter(ModelCriteria::FORMAT_ON_DEMAND);
         $c->where('Propel\Tests\Bookstore\Book.Title = ?', 'Foo');
         $c->leftJoin('Propel\Tests\Bookstore\Book.Author');
-        $c->with('Author');
+        $c->populateJoinedRelation('Author');
         $c->limit(1);
         $con = Propel::getServiceContainer()->getConnection(BookTableMap::DATABASE_NAME);
         $books = $c->find($con);
@@ -160,7 +160,7 @@ class OnDemandFormatterWithTest extends BookstoreEmptyTestBase
         BookstoreEmployeeTableMap::clearInstancePool();
         $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\BookstoreEmployee');
         $c->join('Propel\Tests\Bookstore\BookstoreEmployee.Supervisor s');
-        $c->with('s');
+        $c->populateJoinedRelation('s');
         $c->where('s.Name = ?', 'John');
         $c->limit(1);
         $con = Propel::getServiceContainer()->getConnection(BookTableMap::DATABASE_NAME);
@@ -200,7 +200,7 @@ class OnDemandFormatterWithTest extends BookstoreEmptyTestBase
         $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\Essay');
         $c->setFormatter(ModelCriteria::FORMAT_ON_DEMAND);
         $c->join('Propel\Tests\Bookstore\Essay.FirstAuthor');
-        $c->with('FirstAuthor');
+        $c->populateJoinedRelation('FirstAuthor');
         $c->where('Propel\Tests\Bookstore\Essay.Title = ?', 'Foo');
         $c->limit(1);
         $con = Propel::getServiceContainer()->getConnection(BookTableMap::DATABASE_NAME);
@@ -230,9 +230,9 @@ class OnDemandFormatterWithTest extends BookstoreEmptyTestBase
         $c->setFormatter(ModelCriteria::FORMAT_ON_DEMAND);
         $c->where('Propel\Tests\Bookstore\Review.Recommended = ?', true);
         $c->join('Propel\Tests\Bookstore\Review.Book');
-        $c->with('Book');
+        $c->populateJoinedRelation('Book');
         $c->join('Book.Author');
-        $c->with('Author');
+        $c->populateJoinedRelation('Author');
         $c->limit(1);
         $con = Propel::getServiceContainer()->getConnection(BookTableMap::DATABASE_NAME);
         $reviews = $c->find($con);
@@ -260,8 +260,8 @@ class OnDemandFormatterWithTest extends BookstoreEmptyTestBase
         ReviewTableMap::clearInstancePool();
         Propel::enableInstancePooling();
         $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\BookSummary');
-        $c->joinWith('Propel\Tests\Bookstore\BookSummary.SummarizedBook');
-        $c->joinWith('SummarizedBook.Author');
+        $c->populateRelation('Propel\Tests\Bookstore\BookSummary.SummarizedBook');
+        $c->populateRelation('SummarizedBook.Author');
         $c->setFormatter(ModelCriteria::FORMAT_ON_DEMAND);
         $con = Propel::getServiceContainer()->getConnection(BookTableMap::DATABASE_NAME);
         $summary = $c->findOne($con);
@@ -290,7 +290,7 @@ class OnDemandFormatterWithTest extends BookstoreEmptyTestBase
         $c->setFormatter(ModelCriteria::FORMAT_ON_DEMAND);
         $c->add(BookTableMap::COL_ISBN, '043935806X');
         $c->leftJoin('Propel\Tests\Bookstore\Book.Review');
-        $c->with('Review');
+        $c->populateJoinedRelation('Review');
         $c->find();
     }
 
@@ -362,7 +362,7 @@ class OnDemandFormatterWithTest extends BookstoreEmptyTestBase
         $c->join('Propel\Tests\Bookstore\Book.Author');
         $c->withColumn('Author.FirstName', 'AuthorName');
         $c->withColumn('Author.LastName', 'AuthorName2');
-        $c->with('Author');
+        $c->populateJoinedRelation('Author');
         $c->limit(1);
         $con = Propel::getServiceContainer()->getConnection(BookTableMap::DATABASE_NAME);
         $books = $c->find($con);

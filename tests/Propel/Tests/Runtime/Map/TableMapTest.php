@@ -225,6 +225,7 @@ class TableMapTest extends TestCase
     public function testLoadWrongRelations()
     {
         $this->expectException(RelationNotFoundException::class);
+        $this->expectExceptionMessage('Unknown relation `Bar` on table `foo`. Available relations: [none]');
 
         $this->tmap->getRelation('Bar');
     }

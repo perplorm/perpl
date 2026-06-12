@@ -40,7 +40,7 @@ abstract class AbstractFormatter
     /**
      * @var array<\Propel\Runtime\ActiveQuery\ModelWith>
      */
-    protected $with = [];
+    protected $relatedModelsToPopulate = [];
 
     /**
      * @var array<string, string>
@@ -115,7 +115,7 @@ abstract class AbstractFormatter
             throw new LogicException('Cannot initialize formatter on a criteria without model class name (`modelName`)');
         }
         $this->setClass($modelClassName);
-        $this->setWith($criteria->getWith());
+        $this->setRelatedModelsToPopulate($criteria->getRelatedModelsToPopulate());
         $this->asColumns = $criteria->getAsColumns();
         $this->hasLimit = $criteria->getLimit() != -1;
         if ($dataFetcher) {
@@ -171,17 +171,39 @@ abstract class AbstractFormatter
      *
      * @return void
      */
-    public function setWith(array $withs = []): void
+    public function setRelatedModelsToPopulate(array $withs = []): void
     {
-        $this->with = $withs;
+        $this->relatedModelsToPopulate = $withs;
     }
 
     /**
      * @return array<\Propel\Runtime\ActiveQuery\ModelWith>
      */
+    public function getRelatedModelsToPopulate(): array
+    {
+        return $this->relatedModelsToPopulate;
+    }
+
+    /**
+     * @deprecated Use aptly named {static::setRelatedModelsToPopulate()}
+     *
+     * @param array $withs
+     *
+     * @return void
+     */
+    public function setWith(array $withs = []): void
+    {
+        $this->relatedModelsToPopulate = $withs;
+    }
+
+    /**
+     * @deprecated Use aptly named {static::getRelatedModelsToPopulate()}
+     *
+     * @return array<\Propel\Runtime\ActiveQuery\ModelWith>
+     */
     public function getWith(): array
     {
-        return $this->with;
+        return $this->relatedModelsToPopulate;
     }
 
     /**
@@ -306,7 +328,7 @@ abstract class AbstractFormatter
      */
     protected function isWithOneToMany(): bool
     {
-        foreach ($this->with as $modelWith) {
+        foreach ($this->relatedModelsToPopulate as $modelWith) {
             if ($modelWith->isWithOneToMany()) {
                 return true;
             }

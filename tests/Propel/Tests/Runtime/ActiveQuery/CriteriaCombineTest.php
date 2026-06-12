@@ -159,7 +159,7 @@ class CriteriaCombineTest extends BaseTestCase
     {
         $cn1 = $this->c->getNewCriterion('INVOICE.COST', 1000, Criteria::GREATER_EQUAL);
         $cn2 = $this->c->getNewCriterion('INVOICE.COST', 5000, Criteria::LESS_EQUAL);
-        $this->c->add($cn1->addAnd($cn2));
+        $this->c->addAnd($cn1->addAnd($cn2));
 
         $expect = $this->getSql('SELECT  FROM INVOICE WHERE (INVOICE.COST>=:p1 AND INVOICE.COST<=:p2)');
         $expect_params = [

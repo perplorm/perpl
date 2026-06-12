@@ -10,6 +10,8 @@ use Propel\Runtime\Map\Exception\ColumnNotFoundException;
 use Propel\Runtime\Map\Exception\RelationNotFoundException;
 use function array_find;
 use function array_key_exists;
+use function array_keys;
+use function implode;
 use function sprintf;
 use function substr;
 
@@ -819,7 +821,10 @@ class TableMap
     public function getRelation(string $relationName): RelationMap
     {
         if (!array_key_exists($relationName, $this->getRelations())) {
-            throw new RelationNotFoundException(sprintf('Calling getRelation() on an unknown relation: %s.', $relationName));
+            $availableRelationNames = array_keys($this->getRelations());
+            $relationNamesCsv = implode(', ', $availableRelationNames) ?: '[none]';
+
+            throw new RelationNotFoundException(sprintf("Unknown relation `$relationName` on table `{$this->tableName}`. Available relations: $relationNamesCsv"));
         }
 
         return $this->relations[$relationName];

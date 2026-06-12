@@ -1,7 +1,6 @@
 
 /**
- * Adds a JOIN clause to the query and hydrates the related I18n object.
- * Shortcut for $c->joinI18n($locale)->with()
+ * @deprecated Use {@see static::populateI18n()}
  *
  * @param string $locale Locale to use for the join condition, e.g. 'fr_FR'
  * @param string $joinType Accepted values are null, 'left join', 'right join', 'inner join'. Defaults to left join.
@@ -10,10 +9,23 @@
  */
 public function joinWithI18n($locale = '<?php echo $defaultLocale ?>', $joinType = Criteria::LEFT_JOIN)
 {
+    return $this->populateI18n($locale, $joinType);
+}
+
+/**
+ * Adds a JOIN clause to the query and hydrates the related I18n object.
+ *
+ * @param string $locale Locale to use for the join condition, e.g. 'fr_FR'
+ * @param string $joinType Accepted values are null, 'left join', 'right join', 'inner join'. Defaults to left join.
+ *
+ * @return $this
+ */
+public function populateI18n($locale = '<?php echo $defaultLocale ?>', $joinType = Criteria::LEFT_JOIN)
+{
     $this
         ->joinI18n($locale, null, $joinType)
-        ->with('<?php echo $i18nRelationName ?>');
-    $this->with['<?php echo $i18nRelationName ?>']->setIsWithOneToMany(false);
+        ->populateJoinedRelation('<?php echo $i18nRelationName ?>');
+    $this->relatedModelsToPopulate['<?php echo $i18nRelationName ?>']->setIsWithOneToMany(false);
 
     return $this;
 }

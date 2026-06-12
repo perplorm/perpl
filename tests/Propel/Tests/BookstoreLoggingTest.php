@@ -188,7 +188,7 @@ class BookstoreLoggingTest extends BookstoreEmptyTestBase
 
         $logs = PolymorphicRelationLogQuery::create()
             ->rightJoinAuthor()
-            ->with('Author')
+            ->populateJoinedRelation('Author')
             ->orderById()
             ->find();
 
@@ -201,7 +201,7 @@ class BookstoreLoggingTest extends BookstoreEmptyTestBase
 
         $logs = PolymorphicRelationLogQuery::create()
             ->rightJoinBook()
-            ->with('Book')
+            ->populateJoinedRelation('Book')
             ->find();
 
         $this->assertCount(1, $logs);
@@ -212,7 +212,7 @@ class BookstoreLoggingTest extends BookstoreEmptyTestBase
             ->useAuthorQuery(null, Criteria::RIGHT_JOIN)
                 ->filterByFirstName('Steve')
             ->endUse()
-            ->with('Author')
+            ->populateJoinedRelation('Author')
             ->find();
 
         $this->assertCount(2, $logs);
@@ -221,7 +221,7 @@ class BookstoreLoggingTest extends BookstoreEmptyTestBase
             ->useAuthorQuery(null, Criteria::RIGHT_JOIN)
                 ->filterByFirstName('Blumen')
             ->endUse()
-            ->with('Author')
+            ->populateJoinedRelation('Author')
             ->find();
 
         $this->assertCount(1, $logs);
@@ -237,7 +237,7 @@ class BookstoreLoggingTest extends BookstoreEmptyTestBase
 
         $author3 = AuthorQuery::create()
             ->leftJoinPolymorphicRelationLog()
-            ->with('PolymorphicRelationLog')
+            ->populateJoinedRelation('PolymorphicRelationLog')
             ->filterById($author->getId())
             ->find()
             ->get(0);

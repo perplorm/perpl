@@ -53,7 +53,8 @@
  * @method $this rightJoin<?= $relationName ?>($relationAlias = null) Adds a RIGHT JOIN clause to the query using the <?= $relationName ?> relation
  * @method $this innerJoin<?= $relationName ?>($relationAlias = null) Adds a INNER JOIN clause to the query using the <?= $relationName ?> relation
  *
- * @method $this joinWith<?= $relationName ?>($joinType = \Propel\Runtime\ActiveQuery\Criteria::INNER_JOIN) Adds a join clause and with to the query using the <?= $relationName ?> relation
+ * @method $this populate<?= $relationName ?>($joinType = \Propel\Runtime\ActiveQuery\Criteria::LEFT_JOIN) Populate related <?= $relationName ?> ({@see static::populateRelation()} for details and pitfalls)
+ * @method $this joinWith<?= $relationName ?>($joinType = \Propel\Runtime\ActiveQuery\Criteria::INNER_JOIN) Deprecated - use populate<?= $relationName ?>().
  *
  * @method $this leftJoinWith<?= $relationName ?>() Adds a LEFT JOIN clause and with to the query using the <?= $relationName ?> relation
  * @method $this rightJoinWith<?= $relationName ?>() Adds a RIGHT JOIN clause and with to the query using the <?= $relationName ?> relation

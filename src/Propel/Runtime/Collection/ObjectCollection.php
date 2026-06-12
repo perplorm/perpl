@@ -341,8 +341,11 @@ class ObjectCollection extends Collection
     }
 
     /**
-     * Makes an additional query to populate the objects related to the collection objects
-     * by a certain relation
+     * Makes an additional query to populate the objects related to the
+     * collection objects by a certain relation.
+     *
+     * Populating relations via {@see \Propel\Runtime\ActiveQuery\ModelCriteria::populateRelation()}
+     * is typically 30 to 50% faster.
      *
      * @param string $relation Relation name (e.g. 'Book')
      * @param \Propel\Runtime\ActiveQuery\Criteria|null $criteria Optional Criteria object to filter the related object collection

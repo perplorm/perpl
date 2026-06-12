@@ -642,7 +642,7 @@ class OneToManyRelationCodeProducer extends AbstractIncomingRelationCode
     ): $targetCollectionClassName {";
                 $script .= "
         \$query = $targetQueryClassName::create(null, \$criteria);
-        \$query->joinWith('$currentRelationIdentifier', \$joinBehavior);
+        \$query->populateRelation('$currentRelationIdentifier', \$joinBehavior);
 
         return \$this->get{$relationIdentifierPlural}(\$query, \$con);
     }

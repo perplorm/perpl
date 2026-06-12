@@ -121,7 +121,7 @@ class OnDemandFormatter extends ObjectFormatter
         $hydrationChain = [];
 
         // related objects using 'with'
-        foreach ($this->getWith() as $modelWith) {
+        foreach ($this->getRelatedModelsToPopulate() as $modelWith) {
             if ($modelWith->isSingleTableInheritance()) {
                 /** @var class-string<object>|object $class */
                 $class = $modelWith->getTableMap()::getOMClass($row, $col, false);

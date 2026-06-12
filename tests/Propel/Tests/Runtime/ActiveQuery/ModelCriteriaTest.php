@@ -9,6 +9,7 @@
 namespace Propel\Tests\Runtime\ActiveQuery;
 
 use PDO;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\Exception\UnknownColumnException;
 use Propel\Runtime\ActiveQuery\Exception\UnknownRelationException;
@@ -18,6 +19,7 @@ use Propel\Runtime\Exception\ClassNotFoundException;
 use Propel\Runtime\Exception\EntityNotFoundException;
 use Propel\Runtime\Exception\PropelException;
 use Propel\Runtime\Exception\UnexpectedValueException;
+use Propel\Runtime\Map\Exception\RelationNotFoundException;
 use Propel\Runtime\Propel;
 use Propel\Runtime\Util\PropelModelPager;
 use Propel\Tests\Bookstore\AuthorQuery;
@@ -859,6 +861,19 @@ class ModelCriteriaTest extends BookstoreTestBase
         $this->assertSelectStatement($c, $sql, $params, 'addJoin() works the same as in Criteria');
     }
 
+
+
+    /**
+     * @return void
+     */
+    public function testJoinWithUnknownRelation()
+    {
+        $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\Book');
+        $this->expectException(RelationNotFoundException::class);
+        $this->expectExceptionMessage('Unknown relation `Foo` on table `book`. Available relations: Publisher, Author, BookSummary, Review, Media, ');
+        $c->join('Propel\Tests\Bookstore\Book.Foo');
+    }
+
     /**
      * @return void
      */
@@ -869,14 +884,6 @@ class ModelCriteriaTest extends BookstoreTestBase
         $sql = $this->getSql('SELECT  FROM book INNER JOIN author ON (book.author_id=author.id)');
         $params = [];
         $this->assertSelectStatement($c, $sql, $params, 'join() uses a relation to guess the columns');
-
-        $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\Book');
-        try {
-            $c->join('Propel\Tests\Bookstore\Book.Foo');
-            $this->fail('join() throws an exception when called with a non-existing relation');
-        } catch (UnknownRelationException $e) {
-            $this->assertTrue(true, 'join() throws an exception when called with a non-existing relation');
-        }
 
         $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\Book');
         $c->join('Propel\Tests\Bookstore\Book.Author');
@@ -1265,8 +1272,8 @@ class ModelCriteriaTest extends BookstoreTestBase
     {
         $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\Book');
         $c->join('Propel\Tests\Bookstore\Book.Author');
-        $c->with('Author');
-        $withs = $c->getWith();
+        $c->populateJoinedRelation('Author');
+        $withs = $c->getRelatedModelsToPopulate();
         $this->assertTrue(array_key_exists('Author', $withs), 'with() adds an entry to the internal list of Withs');
         $this->assertInstanceOf('Propel\Runtime\ActiveQuery\ModelWith', $withs['Author'], 'with() references the ModelWith object');
     }
@@ -1279,7 +1286,7 @@ class ModelCriteriaTest extends BookstoreTestBase
         $this->expectException(UnknownRelationException::class);
 
         $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\Book');
-        $c->with('Propel\Tests\Bookstore\Author');
+        $c->populateJoinedRelation('Propel\Tests\Bookstore\Author');
     }
 
     /**
@@ -1289,8 +1296,8 @@ class ModelCriteriaTest extends BookstoreTestBase
     {
         $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\Book');
         $c->join('Propel\Tests\Bookstore\Book.Author a');
-        $c->with('a');
-        $withs = $c->getWith();
+        $c->populateJoinedRelation('a');
+        $withs = $c->getRelatedModelsToPopulate();
         $this->assertTrue(array_key_exists('a', $withs), 'with() uses the alias for the index of the internal list of Withs');
     }
 
@@ -1303,7 +1310,7 @@ class ModelCriteriaTest extends BookstoreTestBase
 
         $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\Book');
         $c->join('Propel\Tests\Bookstore\Book.Author a');
-        $c->with('Propel\Tests\Bookstore\Author');
+        $c->populateJoinedRelation('Propel\Tests\Bookstore\Author');
     }
 
     /**
@@ -1314,7 +1321,7 @@ class ModelCriteriaTest extends BookstoreTestBase
         $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\Book');
         BookTableMap::addSelectColumns($c);
         $c->join('Propel\Tests\Bookstore\Book.Author');
-        $c->with('Author');
+        $c->populateJoinedRelation('Author');
         $expectedColumns = [
             BookTableMap::COL_ID,
             BookTableMap::COL_TITLE,
@@ -1339,7 +1346,7 @@ class ModelCriteriaTest extends BookstoreTestBase
         $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\Book');
         BookTableMap::addSelectColumns($c);
         $c->join('Propel\Tests\Bookstore\Book.Author a');
-        $c->with('a');
+        $c->populateJoinedRelation('a');
         $expectedColumns = [
             BookTableMap::COL_ID,
             BookTableMap::COL_TITLE,
@@ -1363,7 +1370,7 @@ class ModelCriteriaTest extends BookstoreTestBase
     {
         $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\Book');
         $c->join('Propel\Tests\Bookstore\Book.Author');
-        $c->with('Author');
+        $c->populateJoinedRelation('Author');
         $expectedColumns = [
             BookTableMap::COL_ID,
             BookTableMap::COL_TITLE,
@@ -1388,7 +1395,7 @@ class ModelCriteriaTest extends BookstoreTestBase
         $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\Book');
         $c->setModelAlias('b', true);
         $c->join('b.Author a');
-        $c->with('a');
+        $c->populateJoinedRelation('a');
         $expectedColumns = [
             'b.id',
             'b.title',
@@ -1413,7 +1420,7 @@ class ModelCriteriaTest extends BookstoreTestBase
         $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\Author');
         AuthorTableMap::addSelectColumns($c);
         $c->leftJoin('Propel\Tests\Bookstore\Author.Book');
-        $c->with('Book');
+        $c->populateJoinedRelation('Book');
         $expectedColumns = [
             AuthorTableMap::COL_ID,
             AuthorTableMap::COL_FIRST_NAME,
@@ -1430,13 +1437,22 @@ class ModelCriteriaTest extends BookstoreTestBase
         $this->assertEquals($expectedColumns, $c->getSelectColumns(), 'with() adds the columns of the related table even in a one-to-many relationship');
     }
 
+    public static function PopulateDataProvider(): array
+    {
+        return [
+            ['joinWith', Criteria::INNER_JOIN], 
+            ['populateRelation', Criteria::LEFT_JOIN], 
+        ];
+    }
+
     /**
      * @return void
      */
-    public function testJoinWith()
+    #[DataProvider('PopulateDataProvider')]
+    public function testJoinWith(string $populateFunctionName, string $expectedJoinType)
     {
         $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\Book');
-        $c->joinWith('Propel\Tests\Bookstore\Book.Author');
+        $c->$populateFunctionName('Propel\Tests\Bookstore\Book.Author');
         $expectedColumns = [
             BookTableMap::COL_ID,
             BookTableMap::COL_TITLE,
@@ -1450,10 +1466,10 @@ class ModelCriteriaTest extends BookstoreTestBase
             AuthorTableMap::COL_EMAIL,
             AuthorTableMap::COL_AGE,
         ];
-        $this->assertEquals($expectedColumns, $c->getSelectColumns(), 'joinWith() adds the join');
+        $this->assertEquals($expectedColumns, $c->getSelectColumns(), "$populateFunctionName() adds the join");
         $joins = $c->getJoins();
         $join = $joins['Author'];
-        $this->assertEquals(Criteria::INNER_JOIN, $join->getJoinType(), 'joinWith() adds an INNER JOIN by default');
+        $this->assertEquals($expectedJoinType, $join->getJoinType(), "$populateFunctionName() adds an $expectedJoinType by default");
     }
 
     /**
@@ -1462,7 +1478,7 @@ class ModelCriteriaTest extends BookstoreTestBase
     public function testJoinWithType()
     {
         $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\Book');
-        $c->joinWith('Propel\Tests\Bookstore\Book.Author', Criteria::LEFT_JOIN);
+        $c->populateRelation('Propel\Tests\Bookstore\Book.Author', Criteria::LEFT_JOIN);
         $joins = $c->getJoins();
         $join = $joins['Author'];
         $this->assertEquals(Criteria::LEFT_JOIN, $join->getJoinType(), 'joinWith() accepts a join type as second parameter');
@@ -1474,7 +1490,7 @@ class ModelCriteriaTest extends BookstoreTestBase
     public function testJoinWithAlias()
     {
         $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\Book');
-        $c->joinWith('Propel\Tests\Bookstore\Book.Author a');
+        $c->populateRelation('Propel\Tests\Bookstore\Book.Author a');
         $expectedColumns = [
             BookTableMap::COL_ID,
             BookTableMap::COL_TITLE,
@@ -1497,9 +1513,9 @@ class ModelCriteriaTest extends BookstoreTestBase
     public function testJoinWithSeveral()
     {
         $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\Review');
-        $c->joinWith('Review.Book');
-        $c->joinWith('Propel\Tests\Bookstore\Book.Author');
-        $c->joinWith('Book.Publisher');
+        $c->populateRelation('Review.Book');
+        $c->populateRelation('Propel\Tests\Bookstore\Book.Author');
+        $c->populateRelation('Book.Publisher');
         $expectedColumns = [
             ReviewTableMap::COL_ID,
             ReviewTableMap::COL_REVIEWED_BY,
@@ -1534,8 +1550,8 @@ class ModelCriteriaTest extends BookstoreTestBase
     {
         $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\Book');
         $c->join('Propel\Tests\Bookstore\Book.Review');
-        $c->joinWith('Propel\Tests\Bookstore\Book.Author');
-        $c->joinWith('Propel\Tests\Bookstore\Book.Review');
+        $c->populateRelation('Propel\Tests\Bookstore\Book.Author');
+        $c->populateRelation('Propel\Tests\Bookstore\Book.Review');
         $expectedColumns = [
             BookTableMap::COL_ID,
             BookTableMap::COL_TITLE,
@@ -2696,7 +2712,7 @@ class ModelCriteriaTest extends BookstoreTestBase
         $this->assertCount(1, array_filter($c1->getSelectColumns(), function ($v) {
             return BookTableMap::COL_ID == $v;
         }), '$c1 criteria has selected Book columns twice');
-        $with = $c1->getWith();
+        $with = $c1->getRelatedModelsToPopulate();
         $this->assertEquals(1, count($with), 'mergeWith() does not remove an existing join');
         $this->assertEquals('modelName: Propel\Tests\Bookstore\Author, relationName: Author, relationMethod: setAuthor, leftPhpName: , rightPhpName: a', $with['a']->__toString(), 'mergeWith() does not remove an existing join');
 
@@ -2707,7 +2723,7 @@ class ModelCriteriaTest extends BookstoreTestBase
         $this->assertCount(1, array_filter($c1->getSelectColumns(), function ($v) {
             return BookTableMap::COL_ID == $v;
         }), '$c1 criteria has selected Book columns twice');
-        $with = $c1->getWith();
+        $with = $c1->getRelatedModelsToPopulate();
         $this->assertEquals(1, count($with), 'mergeWith() does not remove an existing join');
         $this->assertEquals('modelName: Propel\Tests\Bookstore\Author, relationName: Author, relationMethod: setAuthor, leftPhpName: , rightPhpName: a', $with['a']->__toString(), 'mergeWith() does not remove an existing join');
 
@@ -2718,7 +2734,7 @@ class ModelCriteriaTest extends BookstoreTestBase
         $this->assertCount(1, array_filter($c1->getSelectColumns(), function ($v) {
             return BookTableMap::COL_ID == $v;
         }), '$c1 criteria has selected Book columns twice');
-        $with = $c1->getWith();
+        $with = $c1->getRelatedModelsToPopulate();
         $this->assertEquals(1, count($with), 'mergeWith() merge joins to an empty join');
         $this->assertEquals('modelName: Propel\Tests\Bookstore\Author, relationName: Author, relationMethod: setAuthor, leftPhpName: , rightPhpName: a', $with['a']->__toString(), 'mergeWith() merge joins to an empty join');
 
@@ -2730,7 +2746,7 @@ class ModelCriteriaTest extends BookstoreTestBase
         $this->assertCount(1, array_filter($c1->getSelectColumns(), function ($v) {
             return BookTableMap::COL_ID == $v;
         }), '$c1 criteria has selected Book columns twice');
-        $with = $c1->getWith();
+        $with = $c1->getRelatedModelsToPopulate();
         $this->assertEquals(2, count($with), 'mergeWith() merge joins to an existing join');
         $this->assertEquals('modelName: Propel\Tests\Bookstore\Author, relationName: Author, relationMethod: setAuthor, leftPhpName: , rightPhpName: a', $with['a']->__toString(), 'mergeWith() merge joins to an empty join');
         $this->assertEquals('modelName: Propel\Tests\Bookstore\Publisher, relationName: Publisher, relationMethod: setPublisher, leftPhpName: , rightPhpName: p', $with['p']->__toString(), 'mergeWith() merge joins to an empty join');

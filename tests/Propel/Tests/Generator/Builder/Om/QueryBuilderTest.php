@@ -1274,7 +1274,7 @@ class QueryBuilderTest extends BookstoreTestBase
             ->useAuthorQuery()
                 ->filterByFirstName('Leo')
             ->endUse()
-            ->with('Author')
+            ->populateJoinedRelation('Author')
             ->find($con);
         $q1 = $con->getLastExecutedQuery();
         $books = BookQuery::create()

@@ -295,7 +295,7 @@ class Criteria
     protected FilterCollectorCombiner $filterCollector;
 
     /**
-     * Storage of conditions data. Collection of Criterion objects.
+     * Used in UPDATE queries.
      *
      * @var \Propel\Runtime\ActiveQuery\ColumnResolver\ColumnExpression\UpdateColumn\UpdateColumnCollector
      */
@@ -2459,7 +2459,7 @@ class Criteria
      * Allows to use a model query as a proxy for a subquery:
      * <code>
      * $subquery = BookQuery::create()->select('author_id')->addAsColumn('nrBooks', 'COUNT(*)')->groupBy('author_id');
-     * BookQuery::create()->setAutoAddTable(false)->addSubquery($subquery)->joinWithAuthor();
+     * BookQuery::create()->setAutoAddTable(false)->addSubquery($subquery)->populateAuthor();
      * // SELECT ... FROM (SELECT author_id, COUNT(*) AS nrBooks FROM book GROUP BY author_id) JOIN author ON (...)
      * </code>
      *

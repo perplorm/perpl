@@ -187,10 +187,10 @@ EOF;
     /**
      * @return void
      */
-    public function testJoinWithI18nAddsTheI18nColumns()
+    public function testPopulateI18nAddsTheI18nColumns()
     {
         $q = I18nBehaviorTest11Query::create()
-            ->joinWithI18n();
+            ->populateI18n();
         $params = [];
         $sql = $q->createSelectSQL($params);
         $expectedSQL = $this->getSql('SELECT `i18n_behavior_test_11`.`id`, `i18n_behavior_test_11`.`foo`, `i18n_behavior_test_11_i18n`.`id`, `i18n_behavior_test_11_i18n`.`locale`, `i18n_behavior_test_11_i18n`.`bar` FROM `i18n_behavior_test_11` LEFT JOIN `i18n_behavior_test_11_i18n` ON (`i18n_behavior_test_11`.`id`=`i18n_behavior_test_11_i18n`.`id` AND `i18n_behavior_test_11_i18n`.`locale` = :p1)');
@@ -201,7 +201,7 @@ EOF;
     /**
      * @return void
      */
-    public function testJoinWithI18nDoesNotPruneResultsWithoutTranslation()
+    public function testPopulateI18nDoesNotPruneResultsWithoutTranslation()
     {
         I18nBehaviorTest11Query::create()->deleteAll();
         I18nBehaviorTest11I18nQuery::create()->deleteAll();
@@ -209,7 +209,7 @@ EOF;
         $o->setFoo(123);
         $o->save();
         $res = I18nBehaviorTest11Query::create()
-            ->joinWithI18n('en_US')
+            ->populateI18n('en_US')
             ->findOne();
         $this->assertEquals($o, $res);
     }
@@ -217,7 +217,7 @@ EOF;
     /**
      * @return void
      */
-    public function testJoinWithI18nPrunesResultsWithoutTranslationWhenUsingInnerJoin()
+    public function testPopulateI18nPrunesResultsWithoutTranslationWhenUsingInnerJoin()
     {
         I18nBehaviorTest11Query::create()->deleteAll();
         I18nBehaviorTest11I18nQuery::create()->deleteAll();
@@ -225,7 +225,7 @@ EOF;
         $o->setFoo(123);
         $o->save();
         $res = I18nBehaviorTest11Query::create()
-            ->joinWithI18n('en_US', Criteria::INNER_JOIN)
+            ->populateI18n('en_US', Criteria::INNER_JOIN)
             ->findOne();
         $this->assertNull($res);
     }
@@ -233,7 +233,7 @@ EOF;
     /**
      * @return void
      */
-    public function testJoinWithI18nHydratesRelatedObject()
+    public function testPopulateI18nHydratesRelatedObject()
     {
         $con = Propel::getServiceContainer()->getConnection(I18nBehaviorTest11TableMap::DATABASE_NAME);
         $con->useDebug(true);
@@ -249,7 +249,7 @@ EOF;
         I18nBehaviorTest11TableMap::clearInstancePool();
         I18nBehaviorTest11I18nTableMap::clearInstancePool();
         $o = I18nBehaviorTest11Query::create()
-            ->joinWithI18n('en_US')
+            ->populateI18n('en_US')
             ->findOne($con);
         $count = $con->getQueryCount();
         $translation = $o->getTranslation('en_US', $con);
@@ -260,7 +260,7 @@ EOF;
     /**
      * @return void
      */
-    public function testJoinWithI18nSetsTheLocaleOnResults()
+    public function testPopulateI18nSetsTheLocaleOnResults()
     {
         I18nBehaviorTest11Query::create()->deleteAll();
         I18nBehaviorTest11I18nQuery::create()->deleteAll();
@@ -272,11 +272,11 @@ EOF;
         $o->setBar('bonjour');
         $o->save();
         $o1 = I18nBehaviorTest11Query::create()
-            ->joinWithI18n('en_US')
+            ->populateI18n('en_US')
             ->findOne();
         $this->assertEquals('en_US', $o1->getLocale());
         $o2 = I18nBehaviorTest11Query::create()
-            ->joinWithI18n('fr_FR')
+            ->populateI18n('fr_FR')
             ->findOne();
         $this->assertEquals('fr_FR', $o2->getLocale());
     }
@@ -284,10 +284,10 @@ EOF;
     /**
      * @return void
      */
-    public function testJoinWithI18nAndLimitDoesNotThrowException()
+    public function testPopulateI18nAndLimitDoesNotThrowException()
     {
         $res = I18nBehaviorTest11Query::create()
-            ->joinWithI18n('en_US')
+            ->populateI18n('en_US')
             ->limit(2)
             ->find();
         $this->assertInstanceOf('\Propel\Runtime\Collection\ObjectCollection', $res);
@@ -305,7 +305,7 @@ EOF;
     /**
      * @return void
      */
-    public function testJoinWithI18nDoesNotExecuteAdditionalQueryWhenNoTranslationIsFound()
+    public function testPopulateI18nDoesNotExecuteAdditionalQueryWhenNoTranslationIsFound()
     {
         $this->markTestSkipped();
 
@@ -316,7 +316,7 @@ EOF;
         $o = new I18nBehaviorTest11();
         $o->save();
         $o = I18nBehaviorTest11Query::create()
-            ->joinWithI18n('en_US')
+            ->populateI18n('en_US')
             ->findOne($con);
         $count = $con->getQueryCount();
         $translation = $o->getTranslation('en_US', $con);

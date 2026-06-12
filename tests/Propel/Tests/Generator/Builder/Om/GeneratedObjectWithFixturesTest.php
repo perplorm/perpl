@@ -345,7 +345,7 @@ class GeneratedObjectWithFixturesTest extends BookstoreEmptyTestBase
 
         $c = new Criteria();
         $c->add(BookTableMap::COL_TITLE, 'Don Juan');
-        $books = BookQuery::create(null, $c)->joinWith('Author')->find();
+        $books = BookQuery::create(null, $c)->populateRelation('Author')->find();
         $book = $books[0];
 
         $arr1 = $book->toArray(TableMap::TYPE_PHPNAME, false, [], true);

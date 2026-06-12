@@ -81,7 +81,7 @@ abstract class AbstractFormatterWithHydration extends AbstractFormatter
         $hydrationChain = [];
 
         // related objects added using with()
-        foreach ($this->getWith() as $relAlias => $modelWith) {
+        foreach ($this->getRelatedModelsToPopulate() as $relAlias => $modelWith) {
             // determine class to use
             if ($modelWith->isSingleTableInheritance()) {
                 /** @var class-string<object>|object $class */

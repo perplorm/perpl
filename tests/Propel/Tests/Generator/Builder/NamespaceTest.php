@@ -204,7 +204,7 @@ class NamespaceTest extends TestCaseFixturesDatabase
         NamespacedBookTableMap::clearInstancePool();
         NamespacedPublisherTableMap::clearInstancePool();
         $book2 = NamespacedBookQuery::create()
-            ->joinWith('NamespacedPublisher')
+            ->populateRelation('NamespacedPublisher')
             ->findPk($book->getId());
         $publisher2 = $book2->getNamespacedPublisher();
         $this->assertEquals($publisher->getId(), $publisher2->getId());
@@ -228,7 +228,7 @@ class NamespaceTest extends TestCaseFixturesDatabase
         NamespacedBookTableMap::clearInstancePool();
         NamespacedAuthorTableMap::clearInstancePool();
         $author2 = NamespacedAuthorQuery::create()
-            ->joinWith('NamespacedBook')
+            ->populateRelation('NamespacedBook')
             ->findPk($author->getId());
         $book2 = $author2->getNamespacedBooks()->getFirst();
         $this->assertEquals($book->getId(), $book2->getId());
@@ -293,8 +293,8 @@ class NamespaceTest extends TestCaseFixturesDatabase
         $con = Propel::getServiceContainer()->getConnection(NamespacedBookListRelTableMap::DATABASE_NAME);
         $books = NamespacedBookQuery::create()
             ->orderByTitle()
-            ->joinWith('NamespacedBookListRel')
-            ->joinWith('NamespacedBookListRel.NamespacedBookClub')
+            ->populateRelation('NamespacedBookListRel')
+            ->populateRelation('NamespacedBookListRel.NamespacedBookClub')
             ->find($con);
 
         $array = $books->toArray();

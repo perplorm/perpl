@@ -14,11 +14,13 @@ use Propel\Runtime\Formatter\AbstractFormatter;
 use Propel\Runtime\Map\TableMap;
 use Propel\Runtime\Perpl;
 use Traversable;
+use function array_find;
 use function array_pop;
 use function class_exists;
 use function explode;
 use function is_array;
 use function is_string;
+use function str_contains;
 use function strpos;
 use function substr;
 
@@ -49,9 +51,11 @@ class BaseModelCriteria extends Criteria implements IteratorAggregate
     protected AbstractFormatter|null $formatter = null;
 
     /**
-     * @var array<\Propel\Runtime\ActiveQuery\ModelWith>
+     * Maps relation name to hydration data.
+     *
+     * @var array<string, \Propel\Runtime\ActiveQuery\ModelWith>
      */
-    protected array $with = [];
+    protected array $relatedModelsToPopulate = [];
 
     /**
      * @phpstan-var class-string
@@ -77,21 +81,30 @@ class BaseModelCriteria extends Criteria implements IteratorAggregate
     }
 
     /**
-     * Gets the array of ModelWith specifying which objects must be hydrated
+     * Gets the array of ModelWith specifying which relations must be populated
      * together with the main object.
      *
-     * @see with()
+     * @see ModelCriteria::populateJoinedRelation()
      *
-     * @return array<\Propel\Runtime\ActiveQuery\ModelWith>
+     * @return array<string, \Propel\Runtime\ActiveQuery\ModelWith>
      */
-    public function getWith(): array
+    public function getRelatedModelsToPopulate(): array
     {
-        return $this->with;
+        return $this->relatedModelsToPopulate;
     }
 
     /**
-     * Sets the array of ModelWith specifying which objects must be hydrated
-     * together with the main object.
+     * @deprecated Use aptly named {@see static::getRelatedModelsToPopulate()}
+     *
+     * @return array<string, \Propel\Runtime\ActiveQuery\ModelWith>
+     */
+    public function getWith(): array
+    {
+        return $this->getRelatedModelsToPopulate();
+    }
+
+    /**
+     * @deprecated You should not have to fiddle with this.
      *
      * @param array $with
      *
@@ -99,7 +112,7 @@ class BaseModelCriteria extends Criteria implements IteratorAggregate
      */
     public function setWith(array $with)
     {
-        $this->with = $with;
+        $this->relatedModelsToPopulate = $with;
 
         return $this;
     }
@@ -364,7 +377,7 @@ class BaseModelCriteria extends Criteria implements IteratorAggregate
     #[\Override]
     public function getIterator(): Traversable
     {
-        $res = $this->find(null); // use the default connection
+        $res = $this->find();
         if ($res instanceof IteratorAggregate) {
             return $res->getIterator();
         }
@@ -385,13 +398,7 @@ class BaseModelCriteria extends Criteria implements IteratorAggregate
      */
     public function getModelJoinByTableName(string $tableName): ?ModelJoin
     {
-        foreach ($this->joins as $join) {
-            if ($join instanceof ModelJoin && $join->getTableMapOrFail()->getName() == $tableName) {
-                return $join;
-            }
-        }
-
-        return null;
+        return array_find($this->joins, fn (Join $join) => $join instanceof ModelJoin && $join->getTableMapOrFail()->getName() == $tableName);
     }
 
     /**
@@ -400,5 +407,70 @@ class BaseModelCriteria extends Criteria implements IteratorAggregate
     public function getColumnResolver(): ColumnResolver
     {
         return $this->columnResolver;
+    }
+
+    /**
+     * Returns the class and alias of a string representing a model or a relation
+     * e.g. 'Book b' => array('Book', 'b')
+     * e.g. 'Book' => array('Book', null)
+     *
+     * @param string $class The classname to explode
+     *
+     * @return array list($className, $aliasName)
+     */
+    public static function getClassAndAlias(string $class): array
+    {
+        if (str_contains($class, ' ')) {
+            [$class, $alias] = explode(' ', $class);
+        } else {
+            $alias = null;
+        }
+        if (strpos($class, '\\') === 0) {
+            $class = substr($class, 1);
+        }
+
+        return [$class, $alias];
+    }
+
+    /**
+     * Returns the name of a relation from a string.
+     * The input looks like '$leftName.$relationName $relationAlias'
+     *
+     * @param string $relation Relation to use for the join
+     *
+     * @return string the relationName used in the join
+     */
+    public static function getRelationName(string $relation): string
+    {
+        // get the relationName
+        [$fullName, $relationAlias] = self::getClassAndAlias($relation);
+        if ($relationAlias) {
+            $relationName = $relationAlias;
+        } elseif (strpos($fullName, '.') === false) {
+            $relationName = $fullName;
+        } else {
+            [, $relationName] = explode('.', $fullName);
+        }
+
+        return $relationName;
+    }
+
+    /**
+     * Ensures deep cloning of attached objects
+     *
+     * @return void
+     */
+    #[\Override]
+    public function __clone()
+    {
+        parent::__clone();
+
+        foreach ($this->relatedModelsToPopulate as $key => $modelWith) {
+            $this->relatedModelsToPopulate[$key] = clone $modelWith;
+        }
+
+        if ($this->formatter !== null) {
+            $this->formatter = clone $this->formatter;
+        }
     }
 }

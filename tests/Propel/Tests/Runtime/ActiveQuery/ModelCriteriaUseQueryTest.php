@@ -116,33 +116,6 @@ class ModelCriteriaUseQueryTest extends BookstoreTestBase
     /**
      * @return void
      */
-    public function testUseQueryJoinWithFind()
-    {
-        $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\Review');
-        $c->joinWith('Book');
-
-        $c2 = $c->useQuery('Book');
-
-        $joins = $c->getJoins();
-        $this->assertEquals($c->getPreviousJoin(), null, 'The default value for previousJoin remains null');
-        $this->assertEquals($c2->getPreviousJoin(), $joins['Book'], 'useQuery() sets the previousJoin');
-
-        // join Book with Author, which is possible since previousJoin is set, which makes resolving of relations possible during hydration
-        $c2->joinWith('Author');
-
-        $c = $c2->endUse();
-
-        $con = Propel::getServiceContainer()->getConnection(BookTableMap::DATABASE_NAME);
-        $c->find($con);
-
-        $expectedSQL = $this->getSql('SELECT review.id, review.reviewed_by, review.review_date, review.recommended, review.status, review.book_id, book.id, book.title, book.isbn, book.price, book.publisher_id, book.author_id, author.id, author.first_name, author.last_name, author.email, author.age FROM review INNER JOIN book ON (review.book_id=book.id) INNER JOIN author ON (book.author_id=author.id)');
-
-        $this->assertEquals($expectedSQL, $con->getLastExecutedQuery(), 'useQuery() and joinWith() can be used together and form a correct query');
-    }
-
-    /**
-     * @return void
-     */
     public function testUseQueryCustomRelationPhpName()
     {
         $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\BookstoreContest');

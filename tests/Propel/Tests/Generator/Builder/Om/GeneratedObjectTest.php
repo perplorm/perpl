@@ -1317,8 +1317,8 @@ EOF;
         ContestTableMap::clearInstancePool();
 
         $contestDb = ContestQuery::create()
-                ->joinWith('Contest.Country')
-                ->joinWith('Country.CountryTranslation')
+                ->populateRelation('Contest.Country')
+                ->populateRelation('Country.CountryTranslation')
                 ->findPk($contest->getId());
 
         $translations = $contestDb->getCountry()->getCountryTranslations();
