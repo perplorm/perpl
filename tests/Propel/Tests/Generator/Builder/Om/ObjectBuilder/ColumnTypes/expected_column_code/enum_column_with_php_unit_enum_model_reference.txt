@@ -1,0 +1,86 @@
+Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes\EnumBinaryColumnCodeProducer
+
+
+addColumnAttributes():
+
+    /**
+     * Value of [unit_enum_from_int_column] field.
+     *
+     * Note: this column has a database default value of: 1
+     */
+    protected ColorsUnitEnum|null $unit_enum_from_int_column = null;
+
+
+addAccessor():
+
+    /**
+     * Get the [unit_enum_from_int_column] column value.
+     *
+     * @throws \Propel\Runtime\Exception\PropelException
+     *
+     * @return \Propel\Tests\Helpers\ColorsUnitEnum|null
+     */
+    public function getUnitEnumFromIntColumn()
+    {
+        if ($this->unit_enum_from_int_column === null) {
+            return null;
+        }
+        $valueSet = TableTableMap::getValueSet(TableTableMap::COL_UNIT_ENUM_FROM_INT_COLUMN);
+        if (!isset($valueSet[$this->unit_enum_from_int_column])) {
+            throw new PropelException('Unknown stored enum key: ' . $this->unit_enum_from_int_column);
+        }
+
+        return $valueSet[$this->unit_enum_from_int_column];
+    }
+
+
+addMutator():
+
+    /**
+     * Set the value of [unit_enum_from_int_column] column.
+     *
+     * @param string|null $v new value
+     *
+     * @throws \Propel\Runtime\Exception\PropelException
+     *
+     * @return $this
+     */
+    public function setUnitEnumFromIntColumn($v)
+    {
+        if ($v !== null) {
+            $valueSet = TableTableMap::getValueSet(TableTableMap::COL_UNIT_ENUM_FROM_INT_COLUMN);
+            $keyId = array_search($v, $valueSet);
+            if (!is_int($keyId)) {
+                throw new PropelException("Value '$v' is not accepted in this enumerated column");
+            }
+            $v = $keyId;
+        }
+
+        if ($this->unit_enum_from_int_column !== $v) {
+            $this->unit_enum_from_int_column = $v;
+            $this->modifiedColumns[TableTableMap::COL_UNIT_ENUM_FROM_INT_COLUMN] = true;
+        }
+
+        return $this;
+    }
+
+
+getDefaultValueString:
+1
+
+getApplyDefaultValueStatement:
+
+        $this->unit_enum_from_int_column = 1;
+
+buildCreateFromFilterValueExpression:
+TableTableMap::getValueSet(TableTableMap::COL_UNIT_ENUM_FROM_INT_COLUMN)[$value] ?? $value
+
+getHydrateStatement:
+
+            if ($value !== null && !defined("ColorsUnitEnum::$value")) {
+                throw new PropelException("Cannot hydrate model field `unit_enum_from_int_column`: DB value `$value` is not in enum ColorsUnitEnum");
+            }
+            $this->unit_enum_from_int_column = ($value === null) ? null : ColorsUnitEnum::$value;
+
+getAccessValueStatement:
+$this->unit_enum_from_int_column?->name

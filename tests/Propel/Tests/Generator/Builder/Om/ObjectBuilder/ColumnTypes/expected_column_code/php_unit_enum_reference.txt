@@ -1,0 +1,25 @@
+
+    /**
+     * Filter the query on the unit_enum_column column
+     *
+     * @param Propel\Tests\Helpers\ColorsUnitEnum|array<Propel\Tests\Helpers\ColorsUnitEnum|string>|string|null $unitEnumColumn Enum case, DB value or array of those.
+     * @param string|null $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return $this
+     */
+    public function filterByUnitEnumColumn($unitEnumColumn = null, ?string $comparison = null)
+    {
+        $resolvedColumn = $this->resolveLocalColumnByName('unit_enum_column');
+        if ($unitEnumColumn instanceof ColorsUnitEnum) {
+            $unitEnumColumn = $unitEnumColumn->name;
+        } elseif (is_array($unitEnumColumn)) {
+             $unitEnumColumn = array_map(fn ($i) => $i instanceof ColorsUnitEnum ? $i->name : $i, $unitEnumColumn);
+        }
+
+        if ($comparison === null && is_array($unitEnumColumn)) {
+            $comparison = Criteria::IN;
+        }
+        $this->addUsingOperator($resolvedColumn, $unitEnumColumn, $comparison);
+
+        return $this;
+    }

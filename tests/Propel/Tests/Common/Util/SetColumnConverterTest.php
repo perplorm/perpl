@@ -14,7 +14,7 @@ use Propel\Common\Exception\SetColumnConverterException;
 use Propel\Common\Util\SetColumnConverter;
 use Propel\Runtime\Exception\PropelException;
 use Propel\Tests\Helpers\ColorsBackedEnum;
-use Propel\Tests\Helpers\ColorsBasicEnum;
+use Propel\Tests\Helpers\ColorsUnitEnum;
 
 /**
  * Tests for SetColumnConverter class.
@@ -233,7 +233,7 @@ class SetColumnConverterTest extends TestCase
     public static function GetEnumItemsDataProvider(): array
     {
         return [
-            [ColorsBasicEnum::class, ['Red', 'Blue', 'Yellow']],
+            [ColorsUnitEnum::class, ['Red', 'Blue', 'Yellow']],
             [ColorsBackedEnum::class, ['red', 'blue', 'yellow']],
         ];
     }

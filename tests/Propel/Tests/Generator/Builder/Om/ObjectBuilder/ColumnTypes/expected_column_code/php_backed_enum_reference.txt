@@ -1,0 +1,25 @@
+
+    /**
+     * Filter the query on the backed_enum_column column
+     *
+     * @param Propel\Tests\Helpers\ColorsBackedEnum|array<Propel\Tests\Helpers\ColorsBackedEnum|string>|string|null $backedEnumColumn Enum case, DB value or array of those.
+     * @param string|null $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return $this
+     */
+    public function filterByBackedEnumColumn($backedEnumColumn = null, ?string $comparison = null)
+    {
+        $resolvedColumn = $this->resolveLocalColumnByName('backed_enum_column');
+        if ($backedEnumColumn instanceof ColorsBackedEnum) {
+            $backedEnumColumn = $backedEnumColumn->value;
+        } elseif (is_array($backedEnumColumn)) {
+             $backedEnumColumn = array_map(fn ($i) => $i instanceof ColorsBackedEnum ? $i->value : $i, $backedEnumColumn);
+        }
+
+        if ($comparison === null && is_array($backedEnumColumn)) {
+            $comparison = Criteria::IN;
+        }
+        $this->addUsingOperator($resolvedColumn, $backedEnumColumn, $comparison);
+
+        return $this;
+    }

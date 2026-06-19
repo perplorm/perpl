@@ -7,8 +7,8 @@ namespace Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes;
 use Propel\Generator\Exception\EngineException;
 use Propel\Runtime\Exception\PropelException;
 use function array_search;
+use function implode;
 use function in_array;
-use function sprintf;
 
 class EnumBinaryColumnCodeProducer extends ColumnCodeProducer
 {
@@ -27,7 +27,7 @@ class EnumBinaryColumnCodeProducer extends ColumnCodeProducer
 
         $valueSet = $this->column->getValueSet();
         if (!in_array($defaultValue, $valueSet)) {
-            throw new EngineException(sprintf('Default Value "%s" is not among the enumerated values', $defaultValue));
+            throw new EngineException("Default Value `$defaultValue` is not among the enumerated values: " . implode(', ', $valueSet));
         }
 
         return (string)array_search($defaultValue, $valueSet);

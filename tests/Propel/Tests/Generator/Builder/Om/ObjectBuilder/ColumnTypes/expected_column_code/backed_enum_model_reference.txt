@@ -1,0 +1,62 @@
+Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes\ColumnCodeProducer
+
+
+addColumnAttributes():
+
+    /**
+     * Value of [backed_enum_column] field.
+     *
+     * Note: this column has a database default value of: ColorsBackedEnum::Red
+     */
+    protected ColorsBackedEnum|null $backed_enum_column = null;
+
+
+addAccessor():
+
+    /**
+     * Get the [backed_enum_column] column value.
+     *
+     * @return \Propel\Tests\Helpers\ColorsBackedEnum|null
+     */
+    public function getBackedEnumColumn()
+    {
+        return $this->backed_enum_column;
+    }
+
+
+addMutator():
+
+    /**
+     * Set the value of [backed_enum_column] column.
+     *
+     * @param \Propel\Tests\Helpers\ColorsBackedEnum|null $v New value
+     *
+     * @return $this
+     */
+    public function setBackedEnumColumn($v)
+    {
+        if ($this->backed_enum_column !== $v) {
+            $this->backed_enum_column = $v;
+            $this->modifiedColumns[TableTableMap::COL_BACKED_ENUM_COLUMN] = true;
+        }
+
+        return $this;
+    }
+
+
+getDefaultValueString:
+ColorsBackedEnum::Red
+
+getApplyDefaultValueStatement:
+
+        $this->backed_enum_column = ColorsBackedEnum::Red;
+
+buildCreateFromFilterValueExpression:
+ColorsBackedEnum::from($value)
+
+getHydrateStatement:
+
+            $this->backed_enum_column = ($value === null) ? null : ColorsBackedEnum::from($value);
+
+getAccessValueStatement:
+$this->backed_enum_column?->value

@@ -1,0 +1,83 @@
+Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes\EnumBinaryColumnCodeProducer
+
+
+addColumnAttributes():
+
+    /**
+     * Value of [backed_enum_from_int_column] field.
+     *
+     * Note: this column has a database default value of: 1
+     */
+    protected ColorsBackedEnum|null $backed_enum_from_int_column = null;
+
+
+addAccessor():
+
+    /**
+     * Get the [backed_enum_from_int_column] column value.
+     *
+     * @throws \Propel\Runtime\Exception\PropelException
+     *
+     * @return \Propel\Tests\Helpers\ColorsBackedEnum|null
+     */
+    public function getBackedEnumFromIntColumn()
+    {
+        if ($this->backed_enum_from_int_column === null) {
+            return null;
+        }
+        $valueSet = TableTableMap::getValueSet(TableTableMap::COL_BACKED_ENUM_FROM_INT_COLUMN);
+        if (!isset($valueSet[$this->backed_enum_from_int_column])) {
+            throw new PropelException('Unknown stored enum key: ' . $this->backed_enum_from_int_column);
+        }
+
+        return $valueSet[$this->backed_enum_from_int_column];
+    }
+
+
+addMutator():
+
+    /**
+     * Set the value of [backed_enum_from_int_column] column.
+     *
+     * @param string|null $v new value
+     *
+     * @throws \Propel\Runtime\Exception\PropelException
+     *
+     * @return $this
+     */
+    public function setBackedEnumFromIntColumn($v)
+    {
+        if ($v !== null) {
+            $valueSet = TableTableMap::getValueSet(TableTableMap::COL_BACKED_ENUM_FROM_INT_COLUMN);
+            $keyId = array_search($v, $valueSet);
+            if (!is_int($keyId)) {
+                throw new PropelException("Value '$v' is not accepted in this enumerated column");
+            }
+            $v = $keyId;
+        }
+
+        if ($this->backed_enum_from_int_column !== $v) {
+            $this->backed_enum_from_int_column = $v;
+            $this->modifiedColumns[TableTableMap::COL_BACKED_ENUM_FROM_INT_COLUMN] = true;
+        }
+
+        return $this;
+    }
+
+
+getDefaultValueString:
+1
+
+getApplyDefaultValueStatement:
+
+        $this->backed_enum_from_int_column = 1;
+
+buildCreateFromFilterValueExpression:
+TableTableMap::getValueSet(TableTableMap::COL_BACKED_ENUM_FROM_INT_COLUMN)[$value] ?? $value
+
+getHydrateStatement:
+
+            $this->backed_enum_from_int_column = ($value === null) ? null : ColorsBackedEnum::from($value);
+
+getAccessValueStatement:
+$this->backed_enum_from_int_column?->value

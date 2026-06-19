@@ -16,7 +16,7 @@ addAccessor():
     /**
      * Get the [manually_typed_column] column value.
      *
-     * @return FooType|null
+     * @return \FooType|null
      */
     public function getMyCol()
     {
@@ -29,7 +29,7 @@ addMutator():
     /**
      * Set the value of [manually_typed_column] column.
      *
-     * @param FooType|null $v New value
+     * @param \FooType|null $v New value
      *
      * @return $this
      */

@@ -11,6 +11,7 @@ use Propel\Generator\Model\PropelTypes;
 use Propel\Generator\Platform\OraclePlatform;
 use Propel\Runtime\Util\UuidConverter;
 use function array_intersect;
+use function assert;
 use function explode;
 use function settype;
 use function str_starts_with;
@@ -221,10 +222,10 @@ class ColumnCodeProducer extends AbstractSubsectionCodeProducer
             $enumClassName = $this->declareClass($col->getPhpType());
 
             return "
-            if ($valueVariable !== null && !defined($enumClassName::class . '::' . $valueVariable)) {
-                throw new PropelException(\"Unknown enum item `$valueVariable` for enum '. $enumClassName::class);
+            if ($valueVariable !== null && !defined(\"$enumClassName::{$valueVariable}\")) {
+                throw new PropelException(\"Cannot hydrate model field `{$col->getName()}`: DB value `$valueVariable` is not in enum $enumClassName\");
             }
-            $attribute = ($valueVariable === null) ? null : constant($enumClassName::class . '::' . $valueVariable);";
+            $attribute = ($valueVariable === null) ? null : $enumClassName::{$valueVariable};";
         } elseif ($col->isPhpObjectType()) {
             $constructor = $this->declareClass($col->getPhpType());
 
@@ -261,20 +262,25 @@ class ColumnCodeProducer extends AbstractSubsectionCodeProducer
     public function getApplyDefaultValueStatement(): string
     {
         $attribute = $this->getAttributeName();
-        $defaultValue = $this->getDefaultValueString();
-        if ($this->column->isPhpBackedEnumType()) {
-            $enumClass = $this->declareClass($this->column->getPhpType());
-            $defaultValue = "$enumClass::from($defaultValue)";
-        } elseif ($this->column->isPhpUnitEnumType()) {
-            $enumClass = $this->declareClass($this->column->getPhpType());
-            $defaultValue = "constant($enumClass::class . '::' . $defaultValue)";
-        } elseif ($this->column->isPhpObjectType()) {
-            $constructor = $this->declareClass($this->column->getPhpType());
-            $defaultValue = "new $constructor($defaultValue )";
-        }
+        $defaultValue = $this->buildStatementToInitDefaultValue();
 
         return "
         $attribute = $defaultValue;";
+    }
+
+    /**
+     * @return string
+     */
+    protected function buildStatementToInitDefaultValue(): string
+    {
+        $defaultValue = $this->getDefaultValueString();
+        if (!$this->column->isPhpObjectType() || $this->column->isPhpEnumType()) {
+            return $defaultValue;
+        }
+
+        $className = $this->declareClass($this->column->getPhpType());
+
+        return "new $className($defaultValue)";
     }
 
     /**
@@ -293,7 +299,31 @@ class ColumnCodeProducer extends AbstractSubsectionCodeProducer
             settype($defaultValue, $this->column->getPhpType());
         }
 
+        if ($this->column->isPhpEnumType()) {
+            return $this->buildEnumAccessExpression();
+        }
+
         return var_export($defaultValue, true);
+    }
+
+    /**
+     * Build enum access like `ColorEnum::Red`.
+     *
+     * @return string
+     */
+    protected function buildEnumAccessExpression(): string
+    {
+        assert($this->column->isPhpEnumType());
+
+        $qualifiedEnumClassName = $this->column->getPhpType();
+        $localEnumClassName = $this->declareClass($qualifiedEnumClassName);
+        $phpDefaultValue = $this->column->getPhpDefaultValue();
+
+        $enumCase = $this->column->isPhpBackedEnumType()
+            ? $qualifiedEnumClassName::from($phpDefaultValue)->name
+            : $phpDefaultValue;
+
+        return "$localEnumClassName::$enumCase";
     }
 
     /**
@@ -305,25 +335,14 @@ class ColumnCodeProducer extends AbstractSubsectionCodeProducer
      */
     public function getIsDefaultValueStatement(): string
     {
-            $attribute = $this->getAttributeName();
+        $attribute = $this->getAttributeName();
+        $defaultValueString = $this->buildStatementToInitDefaultValue();
 
-            $defaultValueString = $this->getDefaultValueString();
-        if ($this->column->isPhpBackedEnumType()) {
-            $assumedClassName = $this->declareClass($this->column->getPhpType());
-            $defaultValueString = "$assumedClassName::from($defaultValueString)";
-        } elseif ($this->column->isPhpUnitEnumType()) {
-            $assumedClassName = $this->declareClass($this->column->getPhpType());
-            $defaultValueString = "constant($assumedClassName::class . '::' . $defaultValueString)";
-        } elseif ($this->column->isPhpObjectType()) {
-            $assumedClassName = $this->declareClass($this->column->getPhpType());
-            $defaultValueString = "new $assumedClassName($defaultValueString)";
-        }
+        $equals = str_starts_with($defaultValueString, 'new ')
+            ? '==' // allow object-comparison for custom PHP types
+            : '===';
 
-            $equals = str_starts_with($defaultValueString, 'new ')
-                ? '==' // allow object-comparison for custom PHP types
-                : '===';
-
-            return "$attribute $equals $defaultValueString";
+        return "$attribute $equals $defaultValueString";
     }
 
     /**
@@ -624,6 +643,14 @@ class ColumnCodeProducer extends AbstractSubsectionCodeProducer
      */
     public function buildCreateFromFilterValueExpression(string $valueExpression): string
     {
+        if ($this->column->isPhpEnumType()) {
+            $qualifiedEnumClassName = $this->column->getPhpType();
+            $localEnumClassName = $this->declareClass($qualifiedEnumClassName);
+            $accessor = $this->column->isPhpBackedEnumType() ? "from($valueExpression)" : $valueExpression;
+
+            return "{$localEnumClassName}::$accessor";
+        }
+
         return $valueExpression;
     }
 }

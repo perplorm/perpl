@@ -1,0 +1,65 @@
+Propel\Generator\Builder\Om\ObjectBuilder\ColumnTypes\ColumnCodeProducer
+
+
+addColumnAttributes():
+
+    /**
+     * Value of [unit_enum_column] field.
+     *
+     * Note: this column has a database default value of: ColorsUnitEnum::Red
+     */
+    protected ColorsUnitEnum|null $unit_enum_column = null;
+
+
+addAccessor():
+
+    /**
+     * Get the [unit_enum_column] column value.
+     *
+     * @return \Propel\Tests\Helpers\ColorsUnitEnum|null
+     */
+    public function getUnitEnumColumn()
+    {
+        return $this->unit_enum_column;
+    }
+
+
+addMutator():
+
+    /**
+     * Set the value of [unit_enum_column] column.
+     *
+     * @param \Propel\Tests\Helpers\ColorsUnitEnum|null $v New value
+     *
+     * @return $this
+     */
+    public function setUnitEnumColumn($v)
+    {
+        if ($this->unit_enum_column !== $v) {
+            $this->unit_enum_column = $v;
+            $this->modifiedColumns[TableTableMap::COL_UNIT_ENUM_COLUMN] = true;
+        }
+
+        return $this;
+    }
+
+
+getDefaultValueString:
+ColorsUnitEnum::Red
+
+getApplyDefaultValueStatement:
+
+        $this->unit_enum_column = ColorsUnitEnum::Red;
+
+buildCreateFromFilterValueExpression:
+ColorsUnitEnum::$value
+
+getHydrateStatement:
+
+            if ($value !== null && !defined("ColorsUnitEnum::$value")) {
+                throw new PropelException("Cannot hydrate model field `unit_enum_column`: DB value `$value` is not in enum ColorsUnitEnum");
+            }
+            $this->unit_enum_column = ($value === null) ? null : ColorsUnitEnum::$value;
+
+getAccessValueStatement:
+$this->unit_enum_column?->name

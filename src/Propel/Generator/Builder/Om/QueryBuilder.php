@@ -729,7 +729,7 @@ class QueryBuilder extends AbstractOMBuilder
     /**
      * Filter the query on the $colName column
      *";
-        if ($col->isNumericType()) {
+        if ($col->isNumericType() && !$col->isPhpEnumType()) {
             $script .= "
      * Example usage:
      * <code>
@@ -770,6 +770,11 @@ class QueryBuilder extends AbstractOMBuilder
         } elseif ($col->getType() == PropelTypes::PHP_ARRAY) {
             $script .= "
      * @param array|null \$$variableName The values to use as filter.";
+        } elseif ($col->isPhpEnumType()) {
+            $enumClass = $col->getPhpType();
+            $nativePhpType = $col->getPhpNative();
+            $script .= "
+     * @param $enumClass|array<$enumClass|$nativePhpType>|$nativePhpType|null \$$variableName Enum case, DB value or array of those.";
         } elseif ($col->isTextType()) {
             $script .= "
      * Example usage:
@@ -814,6 +819,19 @@ class QueryBuilder extends AbstractOMBuilder
     public function filterBy$colPhpName(\$$variableName = null, ?string \$comparison = null)
     {
         \$resolvedColumn = \$this->resolveLocalColumnByName('$colName');";
+
+        if ($col->isPhpEnumType()) {
+            $enumClassFq = $col->getPhpType();
+            $enumClassName = $this->declareClass($enumClassFq);
+            $this->declareGlobalFunction('is_array', 'array_map');
+            $payloadProperty = $col->isPhpBackedEnumType() ? 'value' : 'name';
+            $script .= "
+        if (\$$variableName instanceof $enumClassName) {
+            \$$variableName = \${$variableName}->$payloadProperty;
+        } elseif (is_array(\$$variableName)) {
+             \$$variableName = array_map(fn (\$i) => \$i instanceof $enumClassName ? \$i->$payloadProperty : \$i, \$$variableName);
+        }\n";
+        }
 
         if ($col->isNumericType() || $col->isTemporalType()) {
             $this->declareGlobalFunction('is_array');
