@@ -18,6 +18,7 @@ use Propel\Runtime\ActiveQuery\FilterExpression\ExistsFilter;
 use Propel\Runtime\ActiveQuery\FilterExpression\FilterFactory;
 use Propel\Runtime\ActiveQuery\ModelJoin;
 use Propel\Runtime\ActiveQuery\TypedModelCriteria;
+use Propel\Runtime\Exception\EntityNotFoundException;
 use Propel\Runtime\Exception\PropelException;
 use Propel\Runtime\Perpl;
 use function addslashes;
@@ -303,20 +304,23 @@ class QueryBuilder extends AbstractOMBuilder
      */
     protected function addEntityNotFoundExceptionClass(string &$script): void
     {
-        $exeptionClassName = addslashes($this->getEntityNotFoundExceptionClass());
+        $exceptionClassName = $this->getEntityNotFoundExceptionClass();
+
+        if ($exceptionClassName === EntityNotFoundException::class) {
+            return;
+        }
+
         $script .= "
-    /**
-     * @var string
-     */
-    protected \$entityNotFoundExceptionClass = '$exeptionClassName';\n";
+    protected string \$entityNotFoundExceptionClass = '$exceptionClassName';\n";
     }
 
     /**
-     * @return string|null
+     * @return string
      */
-    private function getEntityNotFoundExceptionClass(): string|null
+    private function getEntityNotFoundExceptionClass(): string
     {
-        return $this->getGeneratorConfig()?->getConfigPropertyString('generator.objectModel.entityNotFoundExceptionClass');
+        return $this->getGeneratorConfig()?->getConfigPropertyString('generator.objectModel.entityNotFoundExceptionClass')
+            ?? EntityNotFoundException::class;
     }
 
     /**

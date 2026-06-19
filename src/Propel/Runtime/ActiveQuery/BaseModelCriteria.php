@@ -29,53 +29,36 @@ class BaseModelCriteria extends Criteria implements IteratorAggregate
 {
     /**
      * @psalm-var class-string|null
-     *
-     * @var string|null
      */
-    protected $modelName;
+    protected string|null $modelName = null;
 
     /**
-     * @var string|null
      * @phpstan-var class-string<\Propel\Runtime\Map\TableMap>|null
      */
-    protected $modelTableMapName;
+    protected string|null $modelTableMapName = null;
 
-    /**
-     * @var bool
-     */
-    protected $useAliasInSQL = false;
+    protected bool $useAliasInSQL = false;
 
-    /**
-     * @var string|null
-     */
-    protected $modelAlias;
+    protected string|null $modelAlias = null;
 
-    /**
-     * @var \Propel\Runtime\Map\TableMap
-     */
-    protected $tableMap;
+    protected TableMap|null $tableMap = null;
 
     /**
      * @var \Propel\Runtime\Formatter\AbstractFormatter<array|\Propel\Runtime\ActiveRecord\ActiveRecordInterface, \Propel\Runtime\Collection\Collection<array|\Propel\Runtime\ActiveRecord\ActiveRecordInterface>>|null
      */
-    protected $formatter;
+    protected AbstractFormatter|null $formatter = null;
 
     /**
-     * @var array
+     * @var array<\Propel\Runtime\ActiveQuery\ModelWith>
      */
-    protected $with = [];
+    protected array $with = [];
 
     /**
      * @phpstan-var class-string
-     *
-     * @var string
      */
-    protected $defaultFormatterClass = ModelCriteria::FORMAT_OBJECT;
+    protected string $defaultFormatterClass = ModelCriteria::FORMAT_OBJECT;
 
-    /**
-     * @var \Propel\Runtime\ActiveQuery\ColumnResolver\ColumnResolver
-     */
-    protected $columnResolver;
+    protected ColumnResolver $columnResolver;
 
     /**
      * Creates a new instance with the default capacity which corresponds to

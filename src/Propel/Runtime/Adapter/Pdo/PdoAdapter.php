@@ -473,7 +473,7 @@ abstract class PdoAdapter
      */
     public function createSelectSqlPart(Criteria $criteria, array &$fromClause, bool $aliasAll = false): string
     {
-        $selectClause = [];
+        $selectExpressions = [];
         $localFromClause = [];
 
         if ($aliasAll) {
@@ -482,22 +482,23 @@ abstract class PdoAdapter
         } else {
             foreach ($criteria->getSelectColumnsRaw() as $column) {
                 if ($column instanceof AbstractColumnExpression) {
-                    $selectClause[] = $column->getColumnExpressionInQuery(true);
-                    $tableName = $column->getTableAlias();
+                    $selectExpressions[] = $column->getColumnExpressionInQuery(true);
+                    $tableNameOrAlias = $column->getTableAlias();
                 } else {
                     // expect every column to be of "table.column" formation
                     // it could be a function:  e.g. MAX(books.price)
                     $criteria->replaceColumnNames($column);
-                    $selectClause[] = $column; // the full column name: e.g. MAX(books.price)
-                    $tableName = $this->findTableNameInColumnIdentifier($column);
+                    $selectExpressions[] = $column; // the full column name: e.g. MAX(books.price)
+                    $tableNameOrAlias = $this->findTableNameInColumnIdentifier($column);
                 }
-                if ($tableName === null) {
+                if ($tableNameOrAlias === null) {
                     continue;
                 }
 
                 // resolve table alias
-                $sourceTableName = $criteria->getTableForAlias($tableName);
-                $localFromClause[$sourceTableName ? $sourceTableName . ' ' . $tableName : $tableName] = 1;
+                $sourceTableName = $criteria->getTableForAlias($tableNameOrAlias);
+                $tableId = $sourceTableName ? "$sourceTableName $tableNameOrAlias" : $tableNameOrAlias;
+                $localFromClause[$tableId] = 1;
             }
         }
 
@@ -505,7 +506,7 @@ abstract class PdoAdapter
         foreach ($criteria->getAsColumns() as $alias => $col) {
             $expression = $criteria->normalizeFilterExpression($col);
             $clause = $expression->getNormalizedFilterExpression();
-            $selectClause[] = "$clause AS $alias";
+            $selectExpressions[] = "$clause AS $alias";
         }
 
         $selectModifiers = $criteria->getSelectModifiers();
@@ -514,9 +515,9 @@ abstract class PdoAdapter
         array_push($fromClause, ...array_keys($localFromClause));
 
         return 'SELECT '
-            . ($queryComment ? '/* ' . $queryComment . ' */ ' : '')
+            . ($queryComment ? "/* $queryComment */ " : '')
             . ($selectModifiers ? (implode(' ', $selectModifiers) . ' ') : '')
-            . implode(', ', $selectClause);
+            . implode(', ', $selectExpressions);
     }
 
     /**

@@ -16,11 +16,13 @@ use Propel\Runtime\ActiveQuery\FilterExpression\ColumnFilterInterface;
 use Propel\Runtime\ActiveQuery\FilterExpression\ColumnToQueryFilter;
 use Propel\Runtime\ActiveQuery\FilterExpression\ExistsFilter;
 use Propel\Runtime\ActiveQuery\ModelCriteria as ActiveQueryModelCriteria;
+use Propel\Runtime\ActiveRecord\MutableActiveRecordInterface;
 use Propel\Runtime\Collection\ArrayCollection;
 use Propel\Runtime\Collection\ObjectCollection;
 use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\DataFetcher\DataFetcherInterface;
 use Propel\Runtime\Exception\ClassNotFoundException;
+use Propel\Runtime\Exception\EntityNotFoundException;
 use Propel\Runtime\Exception\LogicException;
 use Propel\Runtime\Exception\PropelException;
 use Propel\Runtime\Exception\RuntimeException;
@@ -34,6 +36,7 @@ use function array_key_exists;
 use function array_merge;
 use function array_shift;
 use function array_values;
+use function assert;
 use function count;
 use function current;
 use function end;
@@ -88,45 +91,39 @@ class ModelCriteria extends BaseModelCriteria
 
     /**
      * Parent query (i.e. this is a useQuery)
-     *
-     * @var \Propel\Runtime\ActiveQuery\ModelCriteria|null
      */
-    protected $primaryCriteria;
+    protected ModelCriteria|null $primaryCriteria = null;
 
     /**
-     * @var string|null
+     * @var class-string<\Exception>
      */
-    protected $entityNotFoundExceptionClass;
+    protected string $entityNotFoundExceptionClass = EntityNotFoundException::class;
 
     /**
      * This is introduced to prevent useQuery->join from going wrong
      *
      * @var \Propel\Runtime\ActiveQuery\Join|null
      */
-    protected $previousJoin;
+    protected Join|null $previousJoin = null;
 
     /**
      * Whether to clone the current object before termination methods
-     *
-     * @var bool
      */
-    protected $isKeepQuery = true;
+    protected bool $isKeepQuery = true;
 
     /**
      * User-selected columns.
      *
-     * Set in {@see static::select()}. Will be added as AS columns in {@see static::configureSelectColumns()}
+     * Set in {@see static::select()}. Will be added as AS columns in {@see static::setupUserSelectedColumns()}
      *
      * @var array<string>|null
      */
-    protected $select;
+    protected array|null $select = null;
 
     /**
      * Used to memorize whether we added self-select columns before.
-     *
-     * @var bool
      */
-    protected $isSelfSelected = false;
+    protected bool $isSelfSelected = false;
 
     /**
      * Indicates that this query is wrapped in an InnerQueryCriterion.
@@ -135,10 +132,8 @@ class ModelCriteria extends BaseModelCriteria
      *
      * @see ModelCriteria::useInnerQueryFilter()
      * @see ModelCriteria::endUse()
-     *
-     * @var bool
      */
-    protected $isInnerQueryInCriterion = false;
+    protected bool $isInnerQueryInCriterion = false;
 
     /**
      * Adds a condition on a column based on a column phpName and a value
@@ -710,16 +705,20 @@ class ModelCriteria extends BaseModelCriteria
     }
 
     /**
-     * Adds a relation to hydrate together with the main object
-     * The relation must be initialized via a join() prior to calling with()
+     * Adds a relation to hydrate together with the main object.
+     *
+     * The relation must be initialized via a join() prior to calling with().
+     *
      * Examples:
      * <code>
-     *   $c->join('Book.Author');
-     *   $c->with('Author');
+     *   $c
+     *      ->join('Book.Author')
+     *      ->with('Author')
      *
-     *   $c->join('Book.Author a', Criteria::RIGHT_JOIN);
-     *   $c->with('a');
+     *      ->join('Book.Author a', Criteria::RIGHT_JOIN)
+     *      ->with('a');
      * </code>
+     *
      * WARNING: on a one-to-many relationship, the use of with() combined with limit()
      * will return a wrong number of results for the related objects
      *
@@ -1060,7 +1059,7 @@ class ModelCriteria extends BaseModelCriteria
     #[\Override]
     public function addSubquery(Criteria $subQuery, ?string $alias = null, bool $addAliasAndSelectColumns = true)
     {
-        if (!$subQuery->hasSelectClause()) {
+        if (!$subQuery->hasSelectClause() && $subQuery instanceof ModelCriteria) {
             $subQuery->addSelfSelectColumns();
         }
 
@@ -1075,30 +1074,30 @@ class ModelCriteria extends BaseModelCriteria
 
         if ($alias === null) {
             // get the default alias set in parent::addSubquery()
-            end($this->selectQueries);
-            $alias = (string)key($this->selectQueries);
+            end($this->subqueries);
+            $alias = (string)key($this->subqueries);
         }
 
         if ($subQuery->modelTableMapName === $this->modelTableMapName) {
             $this->setModelAlias($alias, true);
             $this->addSelfSelectColumns(true);
         } else {
-            $tableMapClassName = (string)$subQuery->modelTableMapName;
+            $tableMapClassName = $subQuery->modelTableMapName;
             $this->addSelfSelectColumnsFromTableMapClass($tableMapClassName, $alias);
         }
 
         return $this;
     }
 
-   /**
-    * @deprecated use aptly named Criteria::addSubquery().
-    *
-    * @param \Propel\Runtime\ActiveQuery\Criteria $subQueryCriteria Criteria to build the subquery from
-    * @param string|null $alias alias for the subQuery
-    * @param bool $addAliasAndSelectColumns Set to false if you want to manually add the aliased select columns
-    *
-    * @return $this
-    */
+    /**
+     * @deprecated use aptly named Criteria::addSubquery().
+     *
+     * @param \Propel\Runtime\ActiveQuery\Criteria $subQueryCriteria Criteria to build the subquery from
+     * @param string|null $alias alias for the subQuery
+     * @param bool $addAliasAndSelectColumns Set to false if you want to manually add the aliased select columns
+     *
+     * @return $this
+     */
     public function addSelectQuery(Criteria $subQueryCriteria, ?string $alias = null, bool $addAliasAndSelectColumns = true)
     {
         return $this->addSubquery($subQueryCriteria, $alias, $addAliasAndSelectColumns);
@@ -1117,8 +1116,9 @@ class ModelCriteria extends BaseModelCriteria
             return $this;
         }
 
-        /** @var string $tableMapClassName */
         $tableMapClassName = $this->modelTableMapName;
+        assert($tableMapClassName !== null);
+
         $alias = ($this->useAliasInSQL) ? $this->modelAlias : null;
 
         $this->addSelfSelectColumnsFromTableMapClass($tableMapClassName, $alias);
@@ -1481,20 +1481,11 @@ class ModelCriteria extends BaseModelCriteria
     }
 
     /**
-     * @throws \Propel\Runtime\Exception\PropelException
-     *
      * @return \Exception
      */
     private function createEntityNotFoundException(): Exception
     {
-        if ($this->entityNotFoundExceptionClass === null) {
-            throw new PropelException('Please define a entityNotFoundExceptionClass property with the name of your NotFoundException-class in ' . static::class);
-        }
-
-        /** @phpstan-var \Exception $exception */
-        $exception = new $this->entityNotFoundExceptionClass("{$this->getModelShortName()} could not be found");
-
-        return $exception;
+        return new $this->entityNotFoundExceptionClass("{$this->getModelShortName()} could not be found");
     }
 
     /**
@@ -2019,8 +2010,9 @@ class ModelCriteria extends BaseModelCriteria
                 throw new LogicException('Parameter #1 `$updateValues` must be an array while `$forceIndividualSaves = true`.');
             }
             // Update rows one by one
-            $objects = $this->setFormatter(self::FORMAT_OBJECT)->find($con);
+            $objects = $this->findObjects($con);
             foreach ($objects as $object) {
+                assert($object instanceof MutableActiveRecordInterface);
                 foreach ($updateValues as $key => $value) {
                     $object->setByName($key, $value);
                 }

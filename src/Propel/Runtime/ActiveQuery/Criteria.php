@@ -34,12 +34,14 @@ use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\DataFetcher\DataFetcherInterface;
 use Propel\Runtime\Exception\LogicException;
 use Propel\Runtime\Exception\PropelException;
+use Propel\Runtime\Exception\RuntimeException;
 use Propel\Runtime\Map\DatabaseMap;
 use Propel\Runtime\Map\TableMap;
 use Propel\Runtime\Perpl;
 use Propel\Runtime\Util\PropelConditionalProxy;
 use function array_diff;
 use function array_intersect_key;
+use function array_key_exists;
 use function array_map;
 use function array_merge;
 use function array_unique;
@@ -253,164 +255,145 @@ class Criteria
      */
     public const LOGICAL_AND = 'AND';
 
-    /**
-     * @var bool
-     */
-    protected $ignoreCase = false;
+    protected bool $ignoreCase = false;
 
     /**
-     * Columns used in SELECT
+     * Columns used in SELECT (without AS alias)
      *
      * @var array<string|\Propel\Runtime\ActiveQuery\ColumnResolver\ColumnExpression\AbstractColumnExpression>
      */
-    protected $selectColumns = [];
+    protected array $selectColumns = [];
 
     /**
-     * Storage of aliased select data. Collection of column names.
+     * Columns used in SELECT with an AS alias. Maps alias to column clause.
      *
-     * @var array<string>
+     * Set as virtual columns on model.
+     *
+     * @var array<string, string>
      */
-    protected $asColumns = [];
+    protected array $asColumns = [];
 
     /**
      * Storage of select modifiers data. Collection of modifier names.
      *
      * @var array<string>
      */
-    protected $selectModifiers = [];
+    protected array $selectModifiers = [];
 
     /**
      * Lock to be used to retrieve rows (if any).
      *
      * @var \Propel\Runtime\ActiveQuery\Lock|null
      */
-    protected $lock;
+    protected Lock|null $lock = null;
 
     /**
      * Storage of conditions data. Collection of Criterion objects.
      *
      * @var \Propel\Runtime\ActiveQuery\FilterExpression\FilterCollectorCombiner
      */
-    protected $filterCollector;
+    protected FilterCollectorCombiner $filterCollector;
 
     /**
      * Storage of conditions data. Collection of Criterion objects.
      *
      * @var \Propel\Runtime\ActiveQuery\ColumnResolver\ColumnExpression\UpdateColumn\UpdateColumnCollector
      */
-    protected $updateValues;
+    protected UpdateColumnCollector $updateValues;
 
     /**
      * Storage of ordering data. Collection of column names.
      *
      * @var array<string>
      */
-    protected $orderByColumns = [];
+    protected array $orderByColumns = [];
 
     /**
      * Storage of grouping data. Collection of column names.
      *
      * @var array<string>
      */
-    protected $groupByColumns = [];
+    protected array $groupByColumns = [];
 
     /**
      * Storage of having data.
      *
      * @var \Propel\Runtime\ActiveQuery\FilterExpression\ColumnFilterInterface|null
      */
-    protected $having;
+    protected ColumnFilterInterface|null $having = null;
 
     /**
      * Storage of join data. collection of Join objects.
      *
      * @var array<\Propel\Runtime\ActiveQuery\Join>
      */
-    protected $joins = [];
+    protected array $joins = [];
 
     /**
      * @var array<\Propel\Runtime\ActiveQuery\Criteria>
      */
-    protected $selectQueries = [];
+    protected array $subqueries = [];
 
     /**
      * The name of the database.
-     *
-     * @var string
      */
-    protected $dbName;
+    protected string $dbName;
 
     /**
      * The primary table for this Criteria.
      * Useful in cases where there are no select or where
      * columns.
-     *
-     * @var string
      */
-    protected $primaryTableName;
+    protected string|null $primaryTableName = null;
 
     /**
      * The name of the database as given in the constructor.
-     *
-     * @var string|null
      */
-    protected $originalDbName;
+    protected string|null $originalDbName = null;
 
     /**
      * To limit the number of rows to return. <code>-1</code> means return all
      * rows.
-     *
-     * @var int
      */
-    protected $limit = -1;
+    protected int $limit = -1;
 
     /**
      * To start the results at a row other than the first one.
-     *
-     * @var int
      */
-    protected $offset = 0;
+    protected int $offset = 0;
 
     /**
      * Comment to add to the SQL query
-     *
-     * @var string
      */
-    protected $queryComment;
+    protected string|null $queryComment = null;
 
     /**
      * @var array<string>
      */
-    protected $aliases = [];
+    protected array $aliases = [];
 
     /**
      * Default operator for combination of criterions
      *
      * @see addUsingOperator()
-     *
-     * @var \Propel\Runtime\ActiveQuery\FilterExpression\CombineOperatorManager
      */
     protected CombineOperatorManager $filterOperatorManager;
 
     /**
      * @var \Propel\Runtime\Util\PropelConditionalProxy<static>|null
      */
-    protected $conditionalProxy;
+    protected PropelConditionalProxy|null $conditionalProxy = null;
 
     /**
      * Whether identifier should be quoted.
-     *
-     * @var bool
      */
-    protected $identifierQuoting = false;
+    protected bool $identifierQuoting = false;
 
     /**
      * Set false if main table name should only be added if used in SELECT
      * or WHERE (emulates older behavior for BC).
-     *
-     * @var bool
      */
-    protected $autoAddTableName = true;
+    protected bool $autoAddTableName = true;
 
     /**
      * Creates a new instance with the default capacity which corresponds to
@@ -475,8 +458,8 @@ class Criteria
         $this->having = null;
         $this->asColumns = [];
         $this->joins = [];
-        $this->selectQueries = [];
-        $this->dbName = $this->originalDbName;
+        $this->subqueries = [];
+        $this->dbName = $this->originalDbName ?? $this->dbName;
         $this->offset = 0;
         $this->limit = -1;
         $this->aliases = [];
@@ -495,16 +478,19 @@ class Criteria
      * myCrit->addAsColumn('alias', 'ALIAS('.MyTableMap::ID.')');
      * </code>
      *
-     * If the name already exists, it is replaced by the new clause.
-     *
-     * @param string $name Wanted Name of the column (alias).
+     * @param string $columnAlias Column name in output (AS alias).
      * @param string $clause SQL clause to select from the table
+     *
+     * @throws \Propel\Runtime\Exception\RuntimeException
      *
      * @return $this A modified Criteria object.
      */
-    public function addAsColumn(string $name, string $clause)
+    public function addAsColumn(string $columnAlias, string $clause)
     {
-        $this->asColumns[$name] = $clause;
+        if (isset($this->asColumns[$columnAlias]) && $this->asColumns[$columnAlias] !== $clause) {
+            throw new RuntimeException("Column alias '$columnAlias' already registered, cannot add twice.");
+        }
+        $this->asColumns[$columnAlias] = $clause;
 
         return $this;
     }
@@ -523,13 +509,25 @@ class Criteria
     /**
      * Returns the column name associated with an alias (AS-column).
      *
+     * @param string $alias Alias
+     *
+     * @return string|null
+     */
+    public function getColumnClauseByAlias(string $alias): ?string
+    {
+        return $this->asColumns[$alias] ?? null;
+    }
+
+    /**
+     * @deprecated Use aptly named {@see static::getColumnClauseByAlias()}
+     *
      * @param string $as Alias
      *
      * @return string|null
      */
     public function getColumnForAs(string $as): ?string
     {
-        return $this->asColumns[$as] ?? null;
+        return $this->getColumnClauseByAlias($as);
     }
 
     /**
@@ -1025,16 +1023,36 @@ class Criteria
      * @param self $subQuery Criteria to build the subquery from
      * @param string|null $alias alias for the subQuery
      *
+     * @throws \Propel\Runtime\Exception\RuntimeException
+     *
      * @return $this this modified Criteria object (Fluid API)
      */
     public function addSubquery(self $subQuery, ?string $alias = null)
     {
-        if ($alias === null) {
-            $alias = 'alias_' . ($subQuery->forgeSelectQueryAlias() + count($this->selectQueries));
+        if ($alias && array_key_exists($alias, $this->subqueries)) {
+            throw new RuntimeException("Subquery alias `$alias` already exists.");
+        } elseif (!$alias) {
+            $alias = 'subquery_' . (1 + $this->countSubqueriesRecursive() + $subQuery->countSubqueriesRecursive());
+            while (array_key_exists($alias, $this->subqueries)) {
+                $alias .= 'i'; // user must have manually set the auto-generated name, add `i`s as last resort
+            }
         }
-        $this->selectQueries[$alias] = $subQuery;
+        $this->subqueries[$alias] = $subQuery;
 
         return $this;
+    }
+
+    /**
+     * @return int
+     */
+    protected function countSubqueriesRecursive(): int
+    {
+        $count = 0;
+        foreach ($this->getSubqueries() as $subquery) {
+            $count += 1 + $subquery->countSubqueriesRecursive();
+        }
+
+        return $count;
     }
 
     /**
@@ -1042,9 +1060,19 @@ class Criteria
      *
      * @return bool
      */
+    public function hasSubqueries(): bool
+    {
+        return (bool)$this->subqueries;
+    }
+
+    /**
+     * @deprecated Use aptly named {@see static::hasSubqueries()}
+     *
+     * @return bool
+     */
     public function hasSelectQueries(): bool
     {
-        return (bool)$this->selectQueries;
+        return $this->hasSubqueries();
     }
 
     /**
@@ -1052,9 +1080,19 @@ class Criteria
      *
      * @return array<\Propel\Runtime\ActiveQuery\Criteria>
      */
+    public function getSubqueries(): array
+    {
+        return $this->subqueries;
+    }
+
+    /**
+     * @deprecated Use aptly named {@see static::getSubqueries()}
+     *
+     * @return array<\Propel\Runtime\ActiveQuery\Criteria>
+     */
     public function getSelectQueries(): array
     {
-        return $this->selectQueries;
+        return $this->getSubqueries();
     }
 
     /**
@@ -1064,9 +1102,21 @@ class Criteria
      *
      * @return self
      */
+    public function getSubquery(string $alias): self
+    {
+        return $this->subqueries[$alias];
+    }
+
+    /**
+     * @deprecated Use aptly named {@see static::getSubquery()}
+     *
+     * @param string $alias alias for the subQuery
+     *
+     * @return self
+     */
     public function getSelectQuery(string $alias): self
     {
-        return $this->selectQueries[$alias];
+        return $this->getSubquery($alias);
     }
 
     /**
@@ -1076,22 +1126,21 @@ class Criteria
      *
      * @return bool
      */
-    public function hasSelectQuery(string $alias): bool
+    public function hasSubquery(string $alias): bool
     {
-        return isset($this->selectQueries[$alias]);
+        return isset($this->subqueries[$alias]);
     }
 
     /**
-     * @return int
+     * @deprecated Use aptly named {@see static::hasSubquery()}
+     *
+     * @param string $alias
+     *
+     * @return bool
      */
-    public function forgeSelectQueryAlias(): int
+    public function hasSelectQuery(string $alias): bool
     {
-        $aliasNumber = 0;
-        foreach ($this->getSelectQueries() as $c1) {
-            $aliasNumber += $c1->forgeSelectQueryAlias();
-        }
-
-        return ++$aliasNumber;
+        return $this->hasSubquery($alias);
     }
 
     /**

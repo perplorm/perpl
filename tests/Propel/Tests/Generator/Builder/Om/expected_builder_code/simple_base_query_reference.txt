@@ -37,10 +37,10 @@ use function sprintf;
  *
  * @method \IdTable|null findOneById(int $id) Return the first \IdTable filtered by the id column
  *
- * @method \IdTable requirePk($key, \Propel\Runtime\Connection\ConnectionInterface|null $con = null) Return the \IdTable by primary key and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method \IdTable requireOne(\Propel\Runtime\Connection\ConnectionInterface|null $con = null) Return the first \IdTable matching the query and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method \IdTable requirePk($key, \Propel\Runtime\Connection\ConnectionInterface|null $con = null) Return the \IdTable by primary key and throws Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method \IdTable requireOne(\Propel\Runtime\Connection\ConnectionInterface|null $con = null) Return the first \IdTable matching the query and throws Propel\Runtime\Exception\EntityNotFoundException when not found
  *
- * @method \IdTable requireOneById(int $id) Return the first \IdTable filtered by the id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method \IdTable requireOneById(int $id) Return the first \IdTable filtered by the id column and throws Propel\Runtime\Exception\EntityNotFoundException when not found
  *
  * @method \Base\Collection\IdTableCollection|array<\IdTable>|\Propel\Runtime\Collection\Collection<\IdTable> find(\Propel\Runtime\Connection\ConnectionInterface|null $con = null) Return \IdTable objects based on current ModelCriteria
  * @method \Base\Collection\IdTableCollection findObjects(\Propel\Runtime\Connection\ConnectionInterface|null $con = null) Get \IdTable objects in ObjectCollection
@@ -54,11 +54,6 @@ use function sprintf;
  */
 abstract class IdTableQuery extends TypedModelCriteria
 {
-    /**
-     * @var string
-     */
-    protected $entityNotFoundExceptionClass = '\\Propel\\Runtime\\Exception\\EntityNotFoundException';
-
     /**
      * Initializes internal state of IdTableQuery object.
      *

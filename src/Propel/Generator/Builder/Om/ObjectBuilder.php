@@ -26,6 +26,7 @@ use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\FilterExpression\FilterCollector;
 use Propel\Runtime\ActiveQuery\ModelCriteria;
 use Propel\Runtime\ActiveRecord\ActiveRecordInterface;
+use Propel\Runtime\ActiveRecord\MutableActiveRecordInterface;
 use Propel\Runtime\Collection\ObjectCombinationCollection;
 use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Exception\BadMethodCallException;
@@ -321,8 +322,14 @@ class ObjectBuilder extends AbstractObjectBuilder
  */";
         }
 
+        $interfaces = $this->declareClasses(...array_filter([
+            ActiveRecordInterface::class,
+            $this->isAddGenericMutators() ? MutableActiveRecordInterface::class : null,
+        ]));
+        $interfacesCsv = implode(', ', $interfaces);
+
         $script .= "
-abstract class {$this->getUnqualifiedClassName()}$parentClass implements ActiveRecordInterface";
+abstract class {$this->getUnqualifiedClassName()}$parentClass implements $interfacesCsv";
 
         if ($interface) {
             $script .= ', Child' . ClassTools::classname($interface);
@@ -351,7 +358,6 @@ abstract class {$this->getUnqualifiedClassName()}$parentClass implements ActiveR
 
         $this->declareClasses(
             AbstractParser::class,
-            ActiveRecordInterface::class,
             BadMethodCallException::class,
             ConnectionInterface::class,
             Criteria::class,
@@ -1694,8 +1700,7 @@ $indent};";
     protected function addHashCode(string &$script): void
     {
         $this->declareClass('\RuntimeException');
-        $this->declareGlobalFunction('crc32', 'json_encode', 'spl_object_hash');
-        $this->declareGlobalConstant('JSON_UNESCAPED_UNICODE');
+        $this->declareGlobalFunction('spl_object_hash');
         $primaryKeyFKNames = [];
         $foreignKeyPKCount = 0;
         foreach ($this->getTable()->getForeignKeys() as $foreignKey) {
@@ -1724,6 +1729,8 @@ $indent};";
     {";
         // use PK if available
         if ($this->getTable()->hasPrimaryKey()) {
+            $this->declareGlobalFunction('crc32', 'json_encode');
+            $this->declareGlobalConstant('JSON_UNESCAPED_UNICODE');
             $primaryKeys = $this->getTable()->getPrimaryKey();
             $checks = array_map(fn ($pk) => "\$this->get{$pk->getPhpName()}() !== null", $primaryKeys);
             $offset = '                     ';
@@ -1742,6 +1749,8 @@ $indent};";
 
         // use foreign object hashes if available
         if ($foreignKeyPKCount > 0) {
+            $this->declareGlobalFunction('crc32', 'json_encode');
+            $this->declareGlobalConstant('JSON_UNESCAPED_UNICODE');
             $fkNamesString = "['" . implode("', '", $primaryKeyFKNames) . "']";
             $script .= "
         \$fkFieldNames = $fkNamesString;
