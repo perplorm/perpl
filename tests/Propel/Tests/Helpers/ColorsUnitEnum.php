@@ -2,7 +2,7 @@
 
 namespace Propel\Tests\Helpers;
 
-enum ColorsBasicEnum
+enum ColorsUnitEnum
 {
     case Red;
     case Blue;

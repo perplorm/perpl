@@ -13,6 +13,8 @@ use Propel\Generator\Platform\MysqlPlatform;
 use Propel\Generator\Platform\PlatformInterface;
 use Propel\Tests\Attributes\ComparesGeneratedFile;
 use Propel\Tests\CompareGeneratedCodeTestCase;
+use Propel\Tests\Helpers\ColorsBackedEnum;
+use Propel\Tests\Helpers\ColorsUnitEnum;
 
 class ColumnCodeTest extends CompareGeneratedCodeTestCase
 {
@@ -41,6 +43,8 @@ class ColumnCodeTest extends CompareGeneratedCodeTestCase
             [['<column name="native_enum_column" type="ENUM_NATIVE" valueSet="foo,bar"/>', null, $mysqlPlatform], __DIR__ . '/expected_column_code/enum_native_model_reference.txt'],
             [['<column name="native_set_column" type="SET_NATIVE" valueSet="foo,bar"/>', null, $mysqlPlatform], __DIR__ . '/expected_column_code/set_native_model_reference.txt'],
             [['<column name="lazy_loaded_blob_column" type="BLOB" lazyLoad="true"/>', null, null], __DIR__ . '/expected_column_code/lazy_lob_model_reference.txt'],
+            [['<column name="unit_enum_column" type="VARCHAR" size="42" defaultValue="Red" phpType="'. ColorsUnitEnum::class .'"/>', null, null], __DIR__ . '/expected_column_code/unit_enum_model_reference.txt'],
+            [['<column name="backed_enum_column" type="VARCHAR" size="42" defaultValue="red" phpType="'. ColorsBackedEnum::class .'"/>', null, null], __DIR__ . '/expected_column_code/backed_enum_model_reference.txt'],
         ];
     }
 
@@ -106,6 +110,8 @@ class ColumnCodeTest extends CompareGeneratedCodeTestCase
             [['<column name="bin_set_column" type="SET_BINARY" valueSet="foo,bar"/>', null, null], __DIR__ . '/expected_column_code/set_binary_query_reference.txt'],
             [['<column name="native_enum_column" type="ENUM_NATIVE" valueSet="foo,bar"/>', null, $mysqlPlatform], __DIR__ . '/expected_column_code/enum_native_query_reference.txt'],
             [['<column name="native_set_column" type="SET_NATIVE" valueSet="foo,bar"/>', null, $mysqlPlatform], __DIR__ . '/expected_column_code/set_native_query_reference.txt'],
+            [['<column name="backed_enum_column" type="VARCHAR" size="12" phpType="'. ColorsBackedEnum::class .'" defaultValue="red"/>', null, null], __DIR__ . '/expected_column_code/php_backed_enum_reference.txt'],
+            [['<column name="unit_enum_column" type="VARCHAR" size="12" phpType="'. ColorsUnitEnum::class .'" defaultValue="Red"/>', null, null], __DIR__ . '/expected_column_code/php_unit_enum_reference.txt'],
         ];
     }
 

@@ -9,6 +9,7 @@ use LogicException;
 use Propel\Common\Util\SetColumnConverter;
 use Propel\Generator\Exception\EngineException;
 use Propel\Generator\Exception\LogicException as ExceptionLogicException;
+use Propel\Generator\Exception\SchemaException;
 use Propel\Generator\Platform\PlatformInterface;
 use function addcslashes;
 use function count;
@@ -17,10 +18,8 @@ use function is_string;
 use function lcfirst;
 use function rtrim;
 use function sprintf;
-use function strrpos;
 use function strtolower;
 use function strtoupper;
-use function substr;
 
 /**
  * A class for holding data about a column used in an application.
@@ -294,6 +293,7 @@ class Column extends MappingModel
 
     /**
      * @throws \Propel\Generator\Exception\EngineException
+     * @throws \Propel\Generator\Exception\SchemaException
      *
      * @return void
      */
@@ -355,6 +355,11 @@ class Column extends MappingModel
                 $valueEnumClass = $this->getAttribute('valueEnum');
                 $valueSet = SetColumnConverter::getItemsFromEnum($valueEnumClass);
                 $this->setValueSet($valueSet);
+            } elseif ($this->phpType && ($this->isPhpUnitEnumType() || $this->isPhpBackedEnumType())) {
+                /** @var class-string<\UnitEnum> $enumClass */
+                $enumClass = $this->phpType;
+                $valueSet = SetColumnConverter::getItemsFromEnum($enumClass);
+                $this->setValueSet($valueSet);
             }
 
             // Add type, size information to associated Domain object
@@ -403,6 +408,10 @@ class Column extends MappingModel
                 $this->getAttribute('name'),
                 $e->getMessage(),
             ));
+        }
+
+        if ($this->isPhpEnumType() && ($this->isBinaryEnumType() || $this->isBinarySetType())) {
+            throw new SchemaException("Column `{$this->getTableName()}.{$this->getName()}`: Combining binary ENUM/SET type with a PHP enum type (`phpType=\"{$this->getPhpType()}\"` is not supported");
         }
     }
 
@@ -1742,6 +1751,36 @@ class Column extends MappingModel
     }
 
     /**
+     * @return bool
+     */
+    public function isPhpEnumType(): bool
+    {
+        return $this->isPhpUnitEnumType() || $this->isPhpBackedEnumType();
+    }
+
+    /**
+     * @see PropelTypes::isPhpBackedEnumType()
+     *
+     * @return bool
+     */
+    public function isPhpBackedEnumType(): bool
+    {
+        return $this->phpType && PropelTypes::isPhpBackedEnumType($this->phpType);
+    }
+
+    /**
+     * Returns whether this column's phpType is a UnitEnum (non-backed).
+     *
+     * @see PropelTypes::isPhpUnitEnumType()
+     *
+     * @return bool
+     */
+    public function isPhpUnitEnumType(): bool
+    {
+        return $this->phpType && PropelTypes::isPhpUnitEnumType($this->phpType);
+    }
+
+    /**
      * Returns an instance of PlatformInterface interface.
      *
      * @return \Propel\Generator\Platform\PlatformInterface|null
@@ -1834,30 +1873,16 @@ class Column extends MappingModel
             return 'mixed';
         } elseif ($this->isPhpArrayType()) {
             return 'string';
-        } elseif ($this->isLobType()) {
-            $phpType = $this->getPhpType();
-
+        }
+        $phpType = $this->getPhpType();
+        if ($this->isLobType()) {
             return $phpType && $phpType !== 'string' ? "$phpType|string" : 'string';
-        } elseif ($this->getPhpType()) {
-            return $this->getPhpType();
+        } elseif ($phpType && PropelTypes::isPhpObjectType($phpType) && $phpType !== 'stdClass') {
+            return $phpType[0] === '\\' ? $phpType : "\\$phpType";
+        } elseif ($phpType) {
+            return $phpType;
         } else {
             return 'mixed';
         }
-    }
-
-    /**
-     * The column type literal as used in argument or method return type hint.
-     *
-     * @return string
-     */
-    public function resolveTypehintType(): string
-    {
-        $type = $this->resolveQualifiedType();
-        $lastSlashPos = strrpos($type, '\\');
-        if ($lastSlashPos !== false) {
-            $type = substr($type, $lastSlashPos + 1);
-        }
-
-        return $type;
     }
 }

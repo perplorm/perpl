@@ -359,6 +359,7 @@
         <column name="tags" type="ARRAY"/>
         <column name="uuid" required="false" type="UUID"/>
         <column name="uuid_bin" required="false" type="UUID_BINARY"/>
+        <column name="color" type="VARCHAR" size="7" phpType="\Propel\Tests\Helpers\ColorsBackedEnum"/>
         <index>
             <index-column name="uuid_bin"/>
         </index>

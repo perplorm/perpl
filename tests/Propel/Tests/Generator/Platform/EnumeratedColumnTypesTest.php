@@ -8,6 +8,7 @@
 
 namespace Propel\Tests\Generator\Platform;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use Propel\Generator\Builder\Om\AbstractOMBuilder;
 use Propel\Generator\Builder\Om\BuilderType;
 use Propel\Generator\Config\QuickGeneratorConfig;
@@ -21,7 +22,7 @@ use Propel\Generator\Platform\PgsqlPlatform;
 use Propel\Generator\Platform\PlatformInterface;
 use Propel\Generator\Platform\SqlitePlatform;
 use Propel\Tests\Helpers\ColorsBackedEnum;
-use Propel\Tests\Helpers\ColorsBasicEnum;
+use Propel\Tests\Helpers\ColorsUnitEnum;
 use Propel\Tests\TestCase;
 
 class EnumeratedColumnTypesTest extends TestCase
@@ -110,7 +111,7 @@ class EnumeratedColumnTypesTest extends TestCase
     public static function GetEnumItemsDataProvider(): array
     {
         return [
-            [ColorsBasicEnum::class, "`foo` ENUM('Red','Blue','Yellow')"],
+            [ColorsUnitEnum::class, "`foo` ENUM('Red','Blue','Yellow')"],
             [ColorsBackedEnum::class, "`foo` ENUM('red','blue','yellow')"],
         ];
     }
@@ -124,6 +125,43 @@ class EnumeratedColumnTypesTest extends TestCase
         $ddl = $platform->getColumnDDL($column);
 
         $this->assertEquals($expectedColumnDdl, $ddl);
+    }
+
+    public function testIsPhpBackedEnumType(): void
+    {
+        $this->assertTrue(PropelTypes::isPhpBackedEnumType(ColorsBackedEnum::class));
+        $this->assertFalse(PropelTypes::isPhpBackedEnumType(ColorsUnitEnum::class));
+        $this->assertFalse(PropelTypes::isPhpBackedEnumType('string'));
+        $this->assertFalse(PropelTypes::isPhpBackedEnumType(\stdClass::class));
+    }
+
+    public function testIsPhpUnitEnumType(): void
+    {
+        $this->assertTrue(PropelTypes::isPhpUnitEnumType(ColorsUnitEnum::class));
+        $this->assertFalse(PropelTypes::isPhpUnitEnumType(ColorsBackedEnum::class));
+        $this->assertFalse(PropelTypes::isPhpUnitEnumType('string'));
+        $this->assertFalse(PropelTypes::isPhpUnitEnumType(\stdClass::class));
+    }
+
+
+    public static function EnumTypedColumnXmlDataProvider(): array
+    {
+        return [ // column xml, is object type, is backed enum type, is unit enum type
+            ['<column name="color" type="VARCHAR" size="16" phpType="' . ColorsBackedEnum::class . '"/>', true, true, false],
+            ['<column name="color" type="VARCHAR" size="16" phpType="' . ColorsUnitEnum::class . '"/>', true, false, true],
+            ['<column name="amount" type="DECIMAL" phpType="\stdClass"/>', true, false, false],
+            ['<column name="enum" type="ENUM_BINARY"/>', false, false, false],
+        ];
+    }
+
+    #[DataProvider('EnumTypedColumnXmlDataProvider')]
+    public function testColumnPhpTypeDetection(string $columnXml, bool $isObject, bool $isBackedEnum, bool $isUnitEnum): void
+    {
+        $column = $this->buildColumnForPlatform(new DefaultPlatform(), false, $columnXml);
+
+        $this->assertSame($isObject, $column->isPhpObjectType());
+        $this->assertSame($isBackedEnum, $column->isPhpBackedEnumType());
+        $this->assertSame($isUnitEnum, $column->isPhpUnitEnumType());
     }
 
     /**

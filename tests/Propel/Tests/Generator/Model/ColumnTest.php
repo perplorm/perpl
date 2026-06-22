@@ -10,8 +10,11 @@ namespace Propel\Tests\Generator\Model;
 
 use PDO;
 use Propel\Generator\Exception\EngineException;
+use Propel\Generator\Exception\SchemaException;
 use Propel\Generator\Model\Column;
 use Propel\Generator\Model\PropelTypes;
+use Propel\Tests\Helpers\ColorsBackedEnum;
+use Propel\Tests\Helpers\ColorsUnitEnum;
 
 /**
  * Tests for package handling.
@@ -1156,5 +1159,19 @@ class ColumnTest extends ModelTestCase
 
         $this->assertEquals($column->getPhpName(), 'Aliases');
         $this->assertEquals($column->getPhpSingularName(), 'Alias');
+    }
+
+    public function testNoBinaryEnumWithPhpBackedEnum()
+    {
+        $this->expectException(SchemaException::class);
+        $this->expectExceptionMessage('Column `table.foo`: Combining binary ENUM/SET type with a PHP enum type (`phpType="Propel\Tests\Helpers\ColorsBackedEnum"` is not supported');
+        $this->buildColumnFromSchema('<column name="foo" type="ENUM_BINARY" phpType="' . ColorsBackedEnum::class. '"/>');
+    }
+
+    public function testNoBinaryEnumWithPhpUnitEnum()
+    {
+        $this->expectException(SchemaException::class);
+        $this->expectExceptionMessage('Column `table.foo`: Combining binary ENUM/SET type with a PHP enum type (`phpType="Propel\Tests\Helpers\ColorsUnitEnum"` is not supported');
+        $this->buildColumnFromSchema('<column name="foo" type="ENUM_BINARY" phpType="' . ColorsUnitEnum::class. '"/>');
     }
 }
