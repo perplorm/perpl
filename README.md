@@ -132,6 +132,10 @@ Propel restricts reading behaviors from repositories to one per repo. This allow
 Creates methods for all elements of ternary relation (Propel only uses first foreign key).
 Fixes naming issues and detects duplicates in model method names.
 
+# Contribute
+
+Please do! Submit issues, file bug reports, request features, open pull requests or just join the discussions.
+
 # Disclaimer
 
 Built with care, tested, provided as is. Test before deployment. Let me know how it goes!
