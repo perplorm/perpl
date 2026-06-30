@@ -185,6 +185,9 @@ class XmlDumper implements DumperInterface
      */
     private function appendVendorInformationNode(VendorInfo $vendorInfo, DOMNode $parentNode): void
     {
+        if (!$vendorInfo->getParameters()) {
+            return;
+        }
         /** @var \DOMElement $vendorNode */
         $vendorNode = $parentNode->appendChild($this->document->createElement('vendor'));
         $vendorNode->setAttribute('type', $vendorInfo->getType());

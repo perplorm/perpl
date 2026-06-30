@@ -216,7 +216,7 @@ abstract class AbstractSchemaParser implements SchemaParserInterface
      *
      * @return \Propel\Generator\Model\VendorInfo
      */
-    protected function getNewVendorInfoObject(array $params): VendorInfo
+    protected function createVendorInfoObject(array $params): VendorInfo
     {
         $type = $this->getPlatform()->getDatabaseType();
 

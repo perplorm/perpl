@@ -9,12 +9,15 @@
 namespace Propel\Tests\Generator\Reverse;
 
 use PDO;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Propel\Generator\Config\QuickGeneratorConfig;
 use Propel\Generator\Model\Column;
 use Propel\Generator\Model\Table;
 use Propel\Generator\Model\ColumnDefaultValue;
 use Propel\Generator\Model\Database;
+use Propel\Generator\Model\VendorInfo;
 use Propel\Generator\Platform\DefaultPlatform;
+use Propel\Generator\Platform\MysqlPlatform;
 use Propel\Generator\Reverse\MysqlSchemaParser;
 use Propel\Tests\Bookstore\Map\BookTableMap;
 
@@ -256,6 +259,55 @@ EOT;
             $this->assertNull($contentTextNone->getDefaultValue(), 'TEXT column without explicit default should have no default');
         } finally {
             $this->con->exec('DROP TABLE IF EXISTS test_text_defaults');
+        }
+    }
+
+    public static function BundleVendorInfoDataProvider(): array
+    {
+        $addTable = function (Database $db, string $name, string $engine) {
+            $table = new Table($name);
+            $vi = new VendorInfo('mysql');
+            $vi->setParameters(['Engine' => $engine]);
+            $table->addVendorInfo($vi);
+            $db->addTable($table);
+        };
+
+        $sameEngineDb = new Database(null, new MysqlPlatform());
+        $addTable($sameEngineDb, 'foo', 'engine_1');
+        $addTable($sameEngineDb, 'bar', 'engine_1');
+
+        $mixedEngineDb = new Database(null, new MysqlPlatform());
+        $addTable($mixedEngineDb, 'foo', 'engine_1');
+        $addTable($mixedEngineDb, 'bar', 'engine_2');
+
+        $incompleteEngineDb = new Database(null, new MysqlPlatform());
+        $addTable($incompleteEngineDb, 'foo', 'engine_1');
+        $incompleteEngineDb->addTable(new Table('bar'));
+
+        $nonEmptyDb = new Database(null, new MysqlPlatform());
+        $addTable($nonEmptyDb, 'foo', 'engine_1');
+        $vi = $nonEmptyDb->getVendorInfoForType('mysql'); // Note: creates new VI
+        
+
+        return [ // db, expected db engine, expected table engines
+            [$sameEngineDb, 'engine_1', [null, null]],
+            [$mixedEngineDb, null, ['engine_1', 'engine_2']],
+            [$incompleteEngineDb, null, ['engine_1', null]],
+        ];
+    }
+
+    #[DataProvider('BundleVendorInfoDataProvider')]
+    public function testBundleEngine(Database $db, string|null $expectedDbEngine, array $expectTableEngines): void
+    {
+        $parser = new MysqlSchemaParser();
+        $this->callMethod($parser, 'bundleEngineInformation', [$db]);
+        $dbVendorInfo = $db->getVendorInfoForType('mysql');
+
+        $this->assertSame($expectedDbEngine, $dbVendorInfo->getParameter('Engine'));
+        foreach ($db->getTables() as $i => $table) {
+            $vi = $table->getVendorInformation()['mysql'] ?? null;
+            $tableEngine = $vi?->getParameter('Engine');
+            $this->assertSame($expectTableEngines[$i], $tableEngine);
         }
     }
 }

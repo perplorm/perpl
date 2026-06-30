@@ -15,10 +15,14 @@ use Propel\Generator\Model\Index;
 use Propel\Generator\Model\PropelTypes;
 use Propel\Generator\Model\Table;
 use Propel\Generator\Model\Unique;
+use Propel\Generator\Model\VendorInfo;
 use Propel\Generator\Platform\MysqlPlatform;
 use Propel\Runtime\Connection\ConnectionInterface;
 use RuntimeException;
+use function array_all;
+use function array_key_exists;
 use function array_keys;
+use function array_map;
 use function assert;
 use function count;
 use function explode;
@@ -26,6 +30,7 @@ use function implode;
 use function in_array;
 use function preg_match;
 use function preg_match_all;
+use function reset;
 use function sprintf;
 use function str_ends_with;
 use function str_replace;
@@ -153,6 +158,10 @@ class MysqlSchemaParser extends AbstractSchemaParser
             $this->addColumnDescriptionsToTable($table);
         }
 
+        if (!$this->addVendorInfo) {
+            $this->bundleEngineInformation($database);
+        }
+
         return count($database->getTables());
     }
 
@@ -257,7 +266,7 @@ class MysqlSchemaParser extends AbstractSchemaParser
         $column->setNotNull($null === 'NO');
 
         if ($this->addVendorInfo) {
-            $vi = $this->getNewVendorInfoObject($row);
+            $vi = $this->createVendorInfoObject($row);
             $column->addVendorInfo($vi);
         }
 
@@ -654,7 +663,7 @@ EOT;
                     $indexes[$name] = new Index($name);
                 }
                 if ($this->addVendorInfo) {
-                    $vi = $this->getNewVendorInfoObject($row);
+                    $vi = $this->createVendorInfoObject($row);
                     $indexes[$name]->addVendorInfo($vi);
                 }
                 $indexes[$name]->setTable($table);
@@ -716,9 +725,40 @@ EOT;
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         if (!$this->addVendorInfo) {
             // since we depend on `Engine` in the MysqlPlatform, we always have to extract this vendor information
-            $row = ['Engine' => $row ? $row['Engine'] : null];
+            $row = ['Engine' => $row['Engine'] ?? null];
         }
-        $vi = $this->getNewVendorInfoObject($row);
+        $vi = $this->createVendorInfoObject($row);
         $table->addVendorInfo($vi);
+    }
+
+    /**
+     * If all tables share the same Engine (i.e. InnoDb), put it on the database rather than on the table.
+     *
+     * @param \Propel\Generator\Model\Database $database
+     *
+     * @return void
+     */
+    protected function bundleEngineInformation(Database $database)
+    {
+        $tableVendorInfos = array_map(fn (Table $table) => $table->getVendorInformation()['mysql'] ?? null, $database->getTables());
+        $tableEngines = array_map(fn (VendorInfo|null $vi) => $vi?->getParameter('Engine'), $tableVendorInfos);
+        if (!$tableEngines) {
+            return;
+        }
+        $engine = reset($tableEngines);
+        $allSameEngine = array_all($tableEngines, fn (string|null $e) => $e === $engine);
+        if (!$allSameEngine) {
+            return;
+        }
+        $dbVendorInfos = $database->getVendorInformation();
+        if (!array_key_exists('mysql', $dbVendorInfos)) {
+            $database->addVendorInfo($this->createVendorInfoObject([]));
+        }
+        $database->getVendorInfoForType('mysql')->setParameter('Engine', $engine);
+        foreach ($tableVendorInfos as $tableVendorInfo) {
+            $params = $tableVendorInfo->getParameters();
+            unset($params['Engine']);
+            $tableVendorInfo->setParameters($params);
+        }
     }
 }
