@@ -43,7 +43,12 @@ class ObjectFormatter extends AbstractFormatter
 
         $collection = $this->getCollection();
 
-        if ($this->isWithOneToMany()) {
+        if (!$this->populatesListOnTarget()) {
+            // only many-to-one relationships
+            foreach ($dataFetcher as $row) {
+                $collection[] = $this->getAllObjectsFromRow($row);
+            }
+        } else {
             if ($this->hasLimit) {
                 $dataFetcher->close();
 
@@ -58,11 +63,6 @@ class ObjectFormatter extends AbstractFormatter
                     $this->objects[$serializedPk] = $object;
                     $collection[] = $object;
                 }
-            }
-        } else {
-            // only many-to-one relationships
-            foreach ($dataFetcher as $row) {
-                $collection[] = $this->getAllObjectsFromRow($row);
             }
         }
         $dataFetcher->close();
@@ -92,7 +92,7 @@ class ObjectFormatter extends AbstractFormatter
         $this->checkInit();
         $result = null;
 
-        if ($this->isWithOneToMany() && $this->hasLimit) {
+        if ($this->populatesListOnTarget() && $this->hasLimit) {
             throw new LogicException('Cannot use limit() in conjunction with with() on a one-to-many relationship. Please remove the with() call, or the limit() call.');
         }
 
@@ -131,15 +131,15 @@ class ObjectFormatter extends AbstractFormatter
     public function getAllObjectsFromRow(array $row): ActiveRecordInterface
     {
         // main object
-        [$obj, $col] = $this->getTableMap()->populateObject($row, 0, $this->getDataFetcher()->getIndexType());
+        [$mainObject, $col] = $this->getTableMap()->populateObject($row, 0, $this->getDataFetcher()->getIndexType());
 
-        $pk = $obj->getPrimaryKey();
+        $pk = $mainObject->getPrimaryKey();
         $serializedPk = serialize($pk);
 
         if (isset($this->objects[$serializedPk])) {
             //if instance pooling is disabled, we need to make sure we're working on the correct (already fetched) object
             //so one-to-many relations are correctly loaded.
-            $obj = $this->objects[$serializedPk];
+            $mainObject = $this->objects[$serializedPk];
         }
 
         /** @var array<string, object> $hydrationChain */
@@ -147,49 +147,41 @@ class ObjectFormatter extends AbstractFormatter
 
         // related objects added using with()
         $indexType = $this->getDataFetcher()->getIndexType();
-        foreach ($this->getRelatedModelsToPopulate() as $modelWith) {
-            [$endObject, $col] = $modelWith->getTableMap()->populateObject($row, $col, $indexType);
+        foreach ($this->getRelatedModelsToPopulate() as $relationPopulator) {
+            [$relatedObject, $col] = $relationPopulator->getTableMap()->populateObject($row, $col, $indexType);
 
-            if ($modelWith->getLeftPhpName() !== null && !isset($hydrationChain[$modelWith->getLeftPhpName()])) {
+            $leftPhpName = $relationPopulator->getLeftPhpName();
+            if ($leftPhpName && !isset($hydrationChain[$leftPhpName])) {
                 continue;
             }
 
-            if ($modelWith->isPrimary()) {
-                $startObject = $obj;
-            } elseif ($hydrationChain && !empty($hydrationChain[$modelWith->getLeftPhpName()])) {
-                $startObject = $hydrationChain[$modelWith->getLeftPhpName()];
+            if ($relationPopulator->joinsToMainModel()) {
+                $targetObject = $mainObject;
+            } elseif ($hydrationChain && !empty($hydrationChain[$leftPhpName])) {
+                $targetObject = $hydrationChain[$leftPhpName];
             } else {
                 continue;
             }
 
             // as we may be in a left join, the endObject may be empty
             // in which case it should not be related to the previous object
-            if ($endObject === null || $endObject->isPrimaryKeyNull()) {
-                if ($modelWith->isAdd()) {
-                    $initMethod = $modelWith->getInitMethod();
-                    $startObject->$initMethod(false);
-                }
+            if ($relatedObject === null || $relatedObject->isPrimaryKeyNull()) {
+                $relationPopulator->initRelationOnTarget($targetObject);
 
                 continue;
             }
 
-            $hydrationChain[$modelWith->getRightPhpName()] = $endObject;
-
-            $relationMethod = $modelWith->getRelationMethod();
-            $startObject->$relationMethod($endObject);
-
-            if ($modelWith->isAdd()) {
-                $resetPartialMethod = $modelWith->getResetPartialMethod();
-                $startObject->$resetPartialMethod(false);
-            }
+            $hydrationChain[$relationPopulator->getRightPhpName()] = $relatedObject;
+            $relationPopulator->addModelToTarget($relatedObject, $targetObject);
+            $relationPopulator->resetPartialRelationOnTarget($targetObject);
         }
 
         // columns added using withColumn()
         foreach ($this->getAsColumns() as $alias => $clause) {
-            $obj->setVirtualColumn($alias, $row[$col]);
+            $mainObject->setVirtualColumn($alias, $row[$col]);
             $col++;
         }
 
-        return $obj;
+        return $mainObject;
     }
 }

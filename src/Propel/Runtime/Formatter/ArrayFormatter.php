@@ -36,7 +36,7 @@ class ArrayFormatter extends AbstractFormatterWithHydration
 
         $collection = $this->getCollection();
 
-        if ($this->isWithOneToMany() && $this->hasLimit) {
+        if ($this->populatesListOnTarget() && $this->hasLimit) {
             $dataFetcher->close();
 
             throw new LogicException('Cannot use limit() in conjunction with with() on a one-to-many relationship. Please remove the with() call, or the limit() call.');
@@ -83,7 +83,7 @@ class ArrayFormatter extends AbstractFormatterWithHydration
         $this->checkInit();
         $result = null;
 
-        if ($this->isWithOneToMany() && $this->hasLimit) {
+        if ($this->populatesListOnTarget() && $this->hasLimit) {
             $dataFetcher->close();
 
             throw new LogicException('Cannot use limit() in conjunction with with() on a one-to-many relationship. Please remove the with() call, or the limit() call.');

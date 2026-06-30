@@ -781,7 +781,7 @@ class ModelCriteria extends BaseModelCriteria
         $this->addRelationSelectColumns($relationName);
 
         // list the join for later hydration in the formatter
-        $this->relatedModelsToPopulate[$relationName] = new ModelWith($join);
+        $this->relatedModelsToPopulate[$relationName] = new RelationPopulator($join);
 
         return $this;
     }
@@ -1028,7 +1028,6 @@ class ModelCriteria extends BaseModelCriteria
 
         parent::mergeWith($criteria, $operator);
 
-        // merge with
         if ($criteria instanceof ModelCriteria) {
             $this->relatedModelsToPopulate = array_merge($this->relatedModelsToPopulate, $criteria->relatedModelsToPopulate);
         }

@@ -53,7 +53,7 @@ class BaseModelCriteria extends Criteria implements IteratorAggregate
     /**
      * Maps relation name to hydration data.
      *
-     * @var array<string, \Propel\Runtime\ActiveQuery\ModelWith>
+     * @var array<string, \Propel\Runtime\ActiveQuery\RelationPopulator>
      */
     protected array $relatedModelsToPopulate = [];
 
@@ -86,7 +86,7 @@ class BaseModelCriteria extends Criteria implements IteratorAggregate
      *
      * @see ModelCriteria::populateJoinedRelation()
      *
-     * @return array<string, \Propel\Runtime\ActiveQuery\ModelWith>
+     * @return array<string, \Propel\Runtime\ActiveQuery\RelationPopulator>
      */
     public function getRelatedModelsToPopulate(): array
     {
@@ -96,7 +96,7 @@ class BaseModelCriteria extends Criteria implements IteratorAggregate
     /**
      * @deprecated Use aptly named {@see static::getRelatedModelsToPopulate()}
      *
-     * @return array<string, \Propel\Runtime\ActiveQuery\ModelWith>
+     * @return array<string, \Propel\Runtime\ActiveQuery\RelationPopulator>
      */
     public function getWith(): array
     {

@@ -271,6 +271,7 @@
     </NonVariableReferenceReturn>
     <UnsupportedPropertyReferenceUsage>
       <code><![CDATA[$arrayToAugment = &$this->alreadyHydratedObjects[$this->class][$mainKey]]]></code>
+      <code><![CDATA[$arrayToAugment[$relationName] = &$this->alreadyHydratedObjects[$relationAlias][$key]]]></code>
     </UnsupportedPropertyReferenceUsage>
   </file>
   <file src="src/Propel/Runtime/Formatter/ObjectFormatter.php">

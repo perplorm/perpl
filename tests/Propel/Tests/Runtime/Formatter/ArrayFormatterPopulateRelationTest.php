@@ -32,7 +32,7 @@ use Propel\Tests\Helpers\Bookstore\BookstoreEmptyTestBase;
  *
  * @group database
  */
-class ArrayFormatterWithTest extends BookstoreEmptyTestBase
+class ArrayFormatterPopulateRelationTest extends BookstoreEmptyTestBase
 {
     /**
      * @return void

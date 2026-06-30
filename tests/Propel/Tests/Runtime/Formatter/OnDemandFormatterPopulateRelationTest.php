@@ -30,7 +30,7 @@ use Propel\Tests\Helpers\Bookstore\BookstoreEmptyTestBase;
  *
  * @group database
  */
-class OnDemandFormatterWithTest extends BookstoreEmptyTestBase
+class OnDemandFormatterPopulateRelationTest extends BookstoreEmptyTestBase
 {
     /**
      * @return void

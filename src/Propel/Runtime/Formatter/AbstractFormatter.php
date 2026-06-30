@@ -6,11 +6,13 @@ namespace Propel\Runtime\Formatter;
 
 use LogicException;
 use Propel\Runtime\ActiveQuery\BaseModelCriteria;
+use Propel\Runtime\ActiveQuery\RelationPopulator;
 use Propel\Runtime\ActiveRecord\ActiveRecordInterface;
 use Propel\Runtime\DataFetcher\DataFetcherInterface;
 use Propel\Runtime\Exception\PropelException;
 use Propel\Runtime\Map\TableMap;
 use Propel\Runtime\Perpl;
+use function array_any;
 
 /**
  * Abstract class for query formatter
@@ -38,7 +40,7 @@ abstract class AbstractFormatter
     protected $tableMap;
 
     /**
-     * @var array<\Propel\Runtime\ActiveQuery\ModelWith>
+     * @var array<\Propel\Runtime\ActiveQuery\RelationPopulator>
      */
     protected $relatedModelsToPopulate = [];
 
@@ -177,7 +179,7 @@ abstract class AbstractFormatter
     }
 
     /**
-     * @return array<\Propel\Runtime\ActiveQuery\ModelWith>
+     * @return array<\Propel\Runtime\ActiveQuery\RelationPopulator>
      */
     public function getRelatedModelsToPopulate(): array
     {
@@ -199,7 +201,7 @@ abstract class AbstractFormatter
     /**
      * @deprecated Use aptly named {static::getRelatedModelsToPopulate()}
      *
-     * @return array<\Propel\Runtime\ActiveQuery\ModelWith>
+     * @return array<\Propel\Runtime\ActiveQuery\RelationPopulator>
      */
     public function getWith(): array
     {
@@ -326,15 +328,9 @@ abstract class AbstractFormatter
     /**
      * @return bool
      */
-    protected function isWithOneToMany(): bool
+    protected function populatesListOnTarget(): bool
     {
-        foreach ($this->relatedModelsToPopulate as $modelWith) {
-            if ($modelWith->isWithOneToMany()) {
-                return true;
-            }
-        }
-
-        return false;
+        return array_any($this->relatedModelsToPopulate, fn (RelationPopulator $p) => $p->populatesListOnTarget());
     }
 
     /**

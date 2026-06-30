@@ -71,21 +71,23 @@ abstract class AbstractFormatterWithHydration extends AbstractFormatter
         $mainKey = $tableMap::getPrimaryKeyHashFromRow($row, 0, $indexType);
         // we hydrate the main object even in case of a one-to-many relationship
         // in order to get the $col variable increased anyway
-        $obj = $this->getSingleObjectFromRow($row, (string)$this->class, $col);
+        $mainObject = $this->getSingleObjectFromRow($row, (string)$this->class, $col);
 
         if (!isset($this->alreadyHydratedObjects[$this->class][$mainKey])) {
-            $this->alreadyHydratedObjects[$this->class][$mainKey] = $obj->toArray();
+            $this->alreadyHydratedObjects[$this->class][$mainKey] = $mainObject->toArray();
             $mainObjectIsNew = true;
         }
 
         $hydrationChain = [];
 
         // related objects added using with()
-        foreach ($this->getRelatedModelsToPopulate() as $relAlias => $modelWith) {
+        foreach ($this->getRelatedModelsToPopulate() as $relationAlias => $relationPopulator) {
             // determine class to use
-            if ($modelWith->isSingleTableInheritance()) {
+            if (!$relationPopulator->isSingleTableInheritance()) {
+                $class = $relationPopulator->getModelName();
+            } else {
                 /** @var class-string<object>|object $class */
-                $class = $modelWith->getTableMap()::getOMClass($row, $col, false);
+                $class = $relationPopulator->getTableMap()::getOMClass($row, $col, false);
                 $reflectionClass = new ReflectionClass($class);
                 $class = $reflectionClass->getName();
                 if ($reflectionClass->isAbstract()) {
@@ -94,41 +96,38 @@ abstract class AbstractFormatterWithHydration extends AbstractFormatter
 
                     continue;
                 }
-            } else {
-                $class = $modelWith->getModelName();
             }
 
             // hydrate related object or take it from registry
-            $key = $modelWith->getTableMap()::getPrimaryKeyHashFromRow($row, $col, $indexType) ?? 'null';
+            $key = $relationPopulator->getTableMap()::getPrimaryKeyHashFromRow($row, $col, $indexType) ?? 'null';
             // we hydrate the main object even in case of a one-to-many relationship
             // in order to get the $col variable increased anyway
-            $secondaryObject = $this->getSingleObjectFromRow($row, $class, $col);
-            if (!isset($this->alreadyHydratedObjects[$relAlias][$key])) {
-                $this->alreadyHydratedObjects[$relAlias][$key] = $secondaryObject->isPrimaryKeyNull() ? [] : $secondaryObject->toArray();
+            $relatedObject = $this->getSingleObjectFromRow($row, $class, $col);
+            if (!isset($this->alreadyHydratedObjects[$relationAlias][$key])) {
+                $this->alreadyHydratedObjects[$relationAlias][$key] = $relatedObject->isPrimaryKeyNull() ? [] : $relatedObject->toArray();
             }
 
-            if ($modelWith->isPrimary()) {
+            if ($relationPopulator->joinsToMainModel()) {
                 $arrayToAugment = &$this->alreadyHydratedObjects[$this->class][$mainKey];
             } else {
-                $arrayToAugment = &$hydrationChain[$modelWith->getLeftPhpName()];
+                $arrayToAugment = &$hydrationChain[$relationPopulator->getLeftPhpName()];
             }
 
-            if ($modelWith->isAdd()) {
-                if (
-                    !isset($arrayToAugment[$modelWith->getRelationName()]) ||
-                    !in_array(
-                        $this->alreadyHydratedObjects[$relAlias][$key],
-                        $arrayToAugment[$modelWith->getRelationName()],
-                        true,
-                    )
-                ) {
-                    $arrayToAugment[$modelWith->getRelationName()][] = &$this->alreadyHydratedObjects[$relAlias][$key];
-                }
-            } else {
-                $arrayToAugment[$modelWith->getRelationName()] = &$this->alreadyHydratedObjects[$relAlias][$key];
+            $relationName = $relationPopulator->getRelationName();
+            if (!$relationPopulator->populatesListOnTarget()) {
+                $arrayToAugment[$relationName] = &$this->alreadyHydratedObjects[$relationAlias][$key];
+            } elseif (
+                !isset($arrayToAugment[$relationName]) ||
+                !in_array(
+                    $this->alreadyHydratedObjects[$relationAlias][$key],
+                    $arrayToAugment[$relationName],
+                    true,
+                )
+            ) {
+                $arrayToAugment[$relationName][] = &$this->alreadyHydratedObjects[$relationAlias][$key];
             }
 
-            $hydrationChain[$modelWith->getRightPhpName()] = &$this->alreadyHydratedObjects[$relAlias][$key];
+            $hydrationChain[$relationPopulator->getRightPhpName()] = &$this->alreadyHydratedObjects[$relationAlias][$key];
         }
 
         // columns added using withColumn()

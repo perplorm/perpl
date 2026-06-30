@@ -36,7 +36,7 @@ use Propel\Tests\Helpers\Bookstore\BookstoreEmptyTestBase;
  *
  * @group database
  */
-class ObjectFormatterWithTest extends BookstoreEmptyTestBase
+class ObjectFormatterPopulateRelationTest extends BookstoreEmptyTestBase
 {
     /**
      * @return void

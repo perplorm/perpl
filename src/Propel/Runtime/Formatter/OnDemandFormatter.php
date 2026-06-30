@@ -59,7 +59,7 @@ class OnDemandFormatter extends ObjectFormatter
             $dataFetcher = $this->getDataFetcher();
         }
 
-        if ($this->isWithOneToMany()) {
+        if ($this->populatesListOnTarget()) {
             $dataFetcher->close();
 
             throw new LogicException('OnDemandFormatter cannot hydrate related objects using a one-to-many relationship. Try removing with() from your query.');
@@ -107,63 +107,60 @@ class OnDemandFormatter extends ObjectFormatter
     #[\Override]
     public function getAllObjectsFromRow(array $row): ActiveRecordInterface
     {
-        $col = 0;
+        $currentColumnIndex = 0;
 
         // main object
         $this->checkInit();
         /** @var \Propel\Runtime\Map\TableMap $tableMap */
         $tableMap = $this->tableMap;
-        $class = $this->isSingleTableInheritance ? $tableMap::getOMClass($row, $col, false) : $this->class;
-        /** @var RowFormat $obj */
-        $obj = $this->getSingleObjectFromRow($row, $class, $col);
+        $class = $this->isSingleTableInheritance ? $tableMap::getOMClass($row, $currentColumnIndex, false) : $this->class;
+        /** @var RowFormat $mainObject */
+        $mainObject = $this->getSingleObjectFromRow($row, $class, $currentColumnIndex);
 
-        /** @var array<string, object> $hydrationChain */
+        /** @var array<string, RowFormat> $hydrationChain */
         $hydrationChain = [];
 
         // related objects using 'with'
-        foreach ($this->getRelatedModelsToPopulate() as $modelWith) {
-            if ($modelWith->isSingleTableInheritance()) {
+        foreach ($this->getRelatedModelsToPopulate() as $relationPopulator) {
+            if ($relationPopulator->isSingleTableInheritance()) {
                 /** @var class-string<object>|object $class */
-                $class = $modelWith->getTableMap()::getOMClass($row, $col, false);
+                $class = $relationPopulator->getTableMap()::getOMClass($row, $currentColumnIndex, false);
                 $reflectionClass = new ReflectionClass($class);
                 $class = $reflectionClass->getName();
                 if ($reflectionClass->isAbstract()) {
                     $tableMapClass = "Map\\{$class}TableMap";
-                    $col += $tableMapClass::NUM_COLUMNS;
+                    $currentColumnIndex += $tableMapClass::NUM_COLUMNS;
 
                     continue;
                 }
             } else {
-                $class = $modelWith->getModelName();
+                $class = $relationPopulator->getModelName();
             }
-            $endObject = $this->getSingleObjectFromRow($row, $class, $col);
-            if ($modelWith->isPrimary()) {
-                $startObject = $obj;
-            } elseif ($hydrationChain && isset($hydrationChain[$modelWith->getLeftPhpName()])) {
-                $startObject = $hydrationChain[$modelWith->getLeftPhpName()];
+            $relatedObject = $this->getSingleObjectFromRow($row, $class, $currentColumnIndex);
+            if ($relationPopulator->joinsToMainModel()) {
+                $targetObject = $mainObject;
+            } elseif ($hydrationChain && isset($hydrationChain[$relationPopulator->getLeftPhpName()])) {
+                $targetObject = $hydrationChain[$relationPopulator->getLeftPhpName()];
             } else {
                 continue;
             }
+
             // as we may be in a left join, the endObject may be empty
             // in which case it should not be related to the previous object
-            if ($endObject->isPrimaryKeyNull()) {
-                if ($modelWith->isAdd()) {
-                    $initMethod = $modelWith->getInitMethod();
-                    $startObject->$initMethod(false);
-                }
+            if ($relatedObject->isPrimaryKeyNull()) {
+                $relationPopulator->initRelationOnTarget($targetObject);
 
                 continue;
             }
 
-            $hydrationChain[$modelWith->getRightPhpName()] = $endObject;
-            $relationMethod = $modelWith->getRelationMethod();
-            $startObject->$relationMethod($endObject);
+            $hydrationChain[$relationPopulator->getRightPhpName()] = $relatedObject;
+            $relationPopulator->addModelToTarget($relatedObject, $targetObject);
         }
         foreach ($this->getAsColumns() as $alias => $clause) {
-            $obj->setVirtualColumn($alias, $row[$col]);
-            $col++;
+            $mainObject->setVirtualColumn($alias, $row[$currentColumnIndex]);
+            $currentColumnIndex++;
         }
 
-        return $obj;
+        return $mainObject;
     }
 }
