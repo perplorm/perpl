@@ -147,4 +147,16 @@ class InQueryTests extends TestCaseFixturesDatabase
         $expected = 'SELECT  FROM author WHERE author.id NOT IN (SELECT book.author_id AS "book.author_id" FROM book WHERE book.price<=:p1)';
         $this->assertQuerySqlSame($expected, $query);
     }
+
+    public function testRelationNameAsOuterAlias(): void
+    {
+        $query = AuthorQuery::create()
+            ->useBookQuery('Book')
+                ->useInBookSummaryQuery()
+                    ->filterBySummary('foo')
+                ->endUse()
+            ->endUse();
+        $expected = 'SELECT  FROM author LEFT JOIN book Book ON (author.id=Book.author_id) WHERE Book.id IN (SELECT book_summary.book_id AS "book_summary.book_id" FROM book_summary WHERE book_summary.summary=:p1)';
+        $this->assertQuerySqlSame($expected, $query);
+    }
 }

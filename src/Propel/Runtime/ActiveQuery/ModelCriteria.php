@@ -802,19 +802,20 @@ class ModelCriteria extends BaseModelCriteria
     public function useQuery(string $relationName, ?string $secondaryCriteriaClass = null): self
     {
         if (!isset($this->joins[$relationName])) {
-            throw new PropelException('Unknown class or alias ' . $relationName);
+            throw new PropelException("Unknown class or alias $relationName");
         }
 
         /** @var \Propel\Runtime\ActiveQuery\ModelJoin $modelJoin */
         $modelJoin = $this->joins[$relationName];
-        $className = $modelJoin->getTableMap() ? (string)$modelJoin->getTableMap()->getClassName() : '';
+        $className = $modelJoin->getTableMap()?->getClassName();
         $secondaryCriteria = $secondaryCriteriaClass
             ? new $secondaryCriteriaClass()
             : PropelQuery::from($className);
 
         if ($className !== $relationName) {
-            $modelName = $modelJoin->getRelationMap() ? $modelJoin->getRelationMap()->getName() : '';
-            $secondaryCriteria->setModelAlias($relationName, !($relationName == $modelName));
+            $modelName = $modelJoin->getRelationMap()?->getName() ?? '';
+            $useAlias = $relationName !== $modelName || (isset($this->aliases[$relationName]) && $this->aliases[$relationName] === $modelJoin->getRightTableName()); // make sure
+            $secondaryCriteria->setModelAlias($relationName, $useAlias);
         }
         $secondaryCriteria->filterOperatorManager->setOperator($this->filterOperatorManager->getCurrentPermanentOperator());
         $secondaryCriteria->setPrimaryCriteria($this, $modelJoin);
