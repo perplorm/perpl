@@ -7,9 +7,9 @@
         <column name="id" required="true" primaryKey="true" autoIncrement="true" type="INTEGER" description="Book Id"/>
         <column name="title" type="VARCHAR" required="true" description="Book Title" primaryString="true"/>
         <column name="isbn" required="true" type="VARCHAR" size="24" phpName="ISBN" description="ISBN Number" primaryString="false"/>
-        <column name="price" required="false" type="FLOAT" description="Price of the book."/>
-        <column name="publisher_id" required="false" type="INTEGER" description="Foreign Key Publisher"/>
-        <column name="author_id" required="false" type="INTEGER" description="Foreign Key Author"/>
+        <column name="price" type="FLOAT" description="Price of the book."/>
+        <column name="publisher_id" type="INTEGER" description="Foreign Key Publisher"/>
+        <column name="author_id" type="INTEGER" description="Foreign Key Author"/>
         <foreign-key foreignTable="publisher" onDelete="setnull">
             <reference local="publisher_id" foreign="id"/>
         </foreign-key>
@@ -52,7 +52,7 @@
         <column name="review_date" required="true" type="DATE" default="2001-01-01" description="Date of Review"/>
         <column name="recommended" required="true" type="BOOLEAN" description="Does reviewer recommend book?"/>
         <column name="status" type="VARCHAR" size="8" description="The status of this review."/>
-        <column name="book_id" required="false" type="INTEGER" description="Book ID for this review"/>
+        <column name="book_id" type="INTEGER" description="Book ID for this review"/>
         <foreign-key foreignTable="book" onDelete="cascade">
             <reference local="book_id" foreign="id"/>
         </foreign-key>
@@ -62,10 +62,10 @@
     <table name="essay" >
         <column name="id" required="true" primaryKey="true" autoIncrement="true" type="INTEGER"/>
         <column name="title" type="VARCHAR" required="true" primaryString="true"/>
-        <column name="first_author_id" required="false" type="INTEGER" description="Foreign Key Author"/>
-        <column name="second_author_id" required="false" type="INTEGER" description="Foreign Key Author"/>
+        <column name="first_author_id" type="INTEGER" description="Foreign Key Author"/>
+        <column name="second_author_id" type="INTEGER" description="Foreign Key Author"/>
         <column name="subtitle" type="VARCHAR" phpName="SecondTitle"/>
-        <column name="next_essay_id" required="false" type="INTEGER" description="Book Id"/>
+        <column name="next_essay_id" type="INTEGER" description="Book Id"/>
         <foreign-key foreignTable="author" onDelete="setnull" onUpdate="cascade" phpName="FirstAuthor">
             <reference local="first_author_id" foreign="id"/>
         </foreign-key>
@@ -81,8 +81,8 @@
     <table name="composite_essay" >
         <column name="id" required="true" primaryKey="true" autoIncrement="true" type="INTEGER"/>
         <column name="title" type="VARCHAR" required="true" primaryString="true"/>
-        <column name="first_essay_id" required="false" type="INTEGER" description="Book Id"/>
-        <column name="second_essay_id" required="false" type="INTEGER" description="Book Id"/>
+        <column name="first_essay_id" type="INTEGER" description="Book Id"/>
+        <column name="second_essay_id" type="INTEGER" description="Book Id"/>
         <foreign-key foreignTable="composite_essay" onDelete="setnull" onUpdate="cascade" phpName="firstEssay">
             <reference local="first_essay_id" foreign="id"/>
         </foreign-key>
@@ -123,8 +123,8 @@
     <table name="book_club_list" description="Reading list for a book club.">
         <column name="id" required="true" primaryKey="true" autoIncrement="true" type="INTEGER" description="Unique ID for a school reading list."/>
         <column name="group_leader" required="true" type="VARCHAR" size="100" description="The name of the teacher in charge of summer reading."/>
-        <column name="theme" required="false" type="VARCHAR" size="50" description="The theme, if applicable, for the reading list."/>
-        <column name="created_at" required="false" type="TIMESTAMP" size="6"/>
+        <column name="theme" type="VARCHAR" size="50" description="The theme, if applicable, for the reading list."/>
+        <column name="created_at" type="TIMESTAMP" size="6"/>
     </table>
 
     <table name="book_x_list" phpName="BookListRel" isCrossRef="true"
@@ -180,7 +180,7 @@
         <column name="not_enabled" type="BOOLEAN" default="false"/>
         <column name="created" type="TIMESTAMP" defaultExpr="CURRENT_TIMESTAMP"/>
         <column name="updated" type="TIMESTAMP" defaultExpr="CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"/>
-        <column name="role_id" type="INTEGER" required="false" default="null"/>
+        <column name="role_id" type="INTEGER" default="null"/>
         <column name="authenticator" type="VARCHAR" size="32" defaultExpr="'Password'"/>
         <foreign-key foreignTable="bookstore_employee" onDelete="cascade">
             <reference local="employee_id" foreign="id"/>
@@ -268,7 +268,7 @@
     <!--  test default values on foreign keys, default expr w/ reloadOnUpdate="true" -->
     <table name="bookstore_sale" reloadOnUpdate="true">
         <column name="id" type="INTEGER" primaryKey="true" autoIncrement="true"/>
-        <column name="bookstore_id" type="INTEGER" required="false" default="1"/>
+        <column name="bookstore_id" type="INTEGER" default="1"/>
         <column name="publisher_id" type="INTEGER" required="false"/>
         <column name="sale_name" type="VARCHAR" size="100" required="false"/>
         <column name="discount" type="TINYINT" description="Discount percentage" defaultExpr="10"/>
@@ -357,8 +357,8 @@
         <column name="style" type="ENUM" valueSet="novel, essay, poetry"/>
         <column name="style2" type="SET" valueSet="novel, essay, poetry"/>
         <column name="tags" type="ARRAY"/>
-        <column name="uuid" required="false" type="UUID"/>
-        <column name="uuid_bin" required="false" type="UUID_BINARY"/>
+        <column name="uuid" type="UUID"/>
+        <column name="uuid_bin" type="UUID_BINARY"/>
         <column name="color" type="VARCHAR" size="7" phpType="\Propel\Tests\Helpers\ColorsBackedEnum"/>
         <index>
             <index-column name="uuid_bin"/>
@@ -414,8 +414,8 @@
     <table name="polymorphic_relation_log">
         <column name="id" primaryKey="true" autoIncrement="true" type="INTEGER"/>
         <column name="message" type="VARCHAR" required="true"/>
-        <column name="target_id" required="false" type="INTEGER"/>
-        <column name="target_type" required="false" type="VARCHAR" size="55"/>
+        <column name="target_id" type="INTEGER"/>
+        <column name="target_type" type="VARCHAR" size="55"/>
 
         <foreign-key foreignTable="author" onDelete="setnull" onUpdate="cascade">
             <reference local="target_type" value="author"/>
