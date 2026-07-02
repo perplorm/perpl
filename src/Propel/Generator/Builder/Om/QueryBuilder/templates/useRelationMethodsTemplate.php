@@ -2,7 +2,7 @@
     /**
      * Use the <?= $relationName ?> relation <?= $foreignTablePhpName ?> object
      *
-     * @see useQuery()
+     * @see \Propel\Runtime\ActiveQuery\ModelCriteria::useQuery()
      *
      * @param string|null $relationAlias optional alias for the relation,
      *                                   to be used as main alias in the secondary query
