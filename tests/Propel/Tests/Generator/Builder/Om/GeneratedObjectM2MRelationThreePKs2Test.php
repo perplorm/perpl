@@ -147,7 +147,7 @@ class GeneratedObjectM2MRelationThreePKs2Test extends PlatformDatabaseBuildTimeB
         $this->assertEquals(2, $newHansObject->countGroups());
         $this->assertEquals('Admins', $newHansObject->getGroups('lead')->getFirst()->getName());
 
-        $this->assertCount(2, RelationpkUserQuery::create()->filterByGroup($admins)->find());
+        $this->assertCount(1, RelationpkUserQuery::create()->filterByGroup($admins)->find());
         $this->assertCount(
             1,
             RelationpkUserQuery::create()

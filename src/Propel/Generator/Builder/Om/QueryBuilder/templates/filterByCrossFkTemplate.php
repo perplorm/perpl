@@ -11,7 +11,7 @@
     public function filterBy<?= $crossRelationName ?>(<?= $targetTableClassName ?> <?= $varName ?>, ?string $comparison = null)
     {
         $this
-            ->use<?= $relationName ?>Query()
+            ->useIn<?= $relationName ?>Query()
             ->filterBy<?= $crossRelationName ?>(<?= $varName ?>, $comparison)
             ->endUse();
 

@@ -12,6 +12,7 @@ use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\Criterion\ExistsCriterion;
 use Propel\Runtime\ActiveQuery\ModelCriteria;
 use Propel\Runtime\ActiveQuery\ModelJoin;
+use Propel\Runtime\Collection\ObjectCollection;
 use Propel\Runtime\Exception\PropelException;
 use Propel\Runtime\Map\TableMap;
 use Propel\Runtime\Propel;
@@ -935,26 +936,21 @@ class QueryBuilderTest extends BookstoreTestBase
      */
     public function testFilterByRefFkObjectCollection()
     {
-        BookstoreDataPopulator::depopulate($this->con);
-        BookstoreDataPopulator::populate($this->con);
+        $bookIds = [42, 43];
+        $books = array_map(fn ($id) => (new Book())->setId($id), $bookIds);
+        $booksCollection = new ObjectCollection($books);
 
-        $books = BookQuery::create()
-            ->orderByTitle()
-            ->limit(2)
-            ->find($this->con);
+        $filterByRelationSql = AuthorQuery::create()
+            ->filterByBook($booksCollection)
+            ->toString();
 
-        $authors = AuthorQuery::create()
-            ->filterByBook($books)
-            ->find($this->con);
-        $q1 = $this->con->getLastExecutedQuery();
+        $filterByInQuerySql = AuthorQuery::create()
+            ->useInBookQuery()
+                ->filterById($bookIds)
+            ->endUse()
+            ->toString();
 
-        $authors = AuthorQuery::create()
-            ->addJoin(AuthorTableMap::COL_ID, BookTableMap::COL_AUTHOR_ID, Criteria::LEFT_JOIN)
-            ->add(BookTableMap::COL_ID, $books->getPrimaryKeys(), Criteria::IN)
-            ->find($this->con);
-        $q2 = $this->con->getLastExecutedQuery();
-
-        $this->assertEquals($q2, $q1, 'filterByRefFk() accepts a collection and results to an IN query in the joined table');
+        $this->assertEquals($filterByInQuerySql, $filterByRelationSql, 'filterByRefFk() accepts a collection and results to an IN query in the joined table');
     }
 
     /**

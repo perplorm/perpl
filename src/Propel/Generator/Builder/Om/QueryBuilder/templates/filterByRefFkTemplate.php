@@ -33,7 +33,7 @@
 <?php if (!$isComposite): ?>
         } elseif (<?= $varName ?> instanceof ObjectCollection) {
             $this
-                ->use<?= $relationName ?>Query()
+                ->useIn<?= $relationName ?>Query()
                 ->filterByPrimaryKeys(<?= $varName ?>->getPrimaryKeys())
                 ->endUse();
 <?php endif; ?>
