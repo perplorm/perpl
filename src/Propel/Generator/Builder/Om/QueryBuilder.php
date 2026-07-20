@@ -235,7 +235,6 @@ class QueryBuilder extends AbstractOMBuilder
             Criteria::class,
             Exception::class,
             FilterFactory::class,
-            ModelJoin::class,
             PropelException::class,
             Perpl::class,
             TypedModelCriteria::class,

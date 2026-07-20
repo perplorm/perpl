@@ -9,21 +9,8 @@
      */
     public function join<?= $relationName ?>(?string $relationAlias = null, ?string $joinType = <?= $joinType ?>)
     {
-        $tableMap = $this->getTableMap();
-        $relationMap = $tableMap->getRelation('<?= $relationName ?>');
+        $join = $this->createModelJoinForRelation('<?= $relationName ?>', $relationAlias, $joinType);
+        $this->addJoinObject($join, $relationAlias);
 
-        $join = new ModelJoin();
-        $join->setJoinType($joinType);
-        $leftAlias = $this->useAliasInSQL ? $this->getModelAlias() : null;
-        $join->setupJoinCondition($this, $relationMap, $leftAlias, $relationAlias);
-        $previousJoin = $this->getPreviousJoin();
-        if ($previousJoin instanceof ModelJoin) {
-            $join->setPreviousJoin($previousJoin);
-        }
-
-        if ($relationAlias) {
-            $this->addAlias($relationAlias, $relationMap->getRightTable()->getName());
-        }
-
-        return $this->addJoinObject($join, $relationAlias ?: '<?= $relationName ?>');
+        return $this;
     }

@@ -461,11 +461,7 @@ class ModelCriteria extends BaseModelCriteria
             $join->setParentJoin($parentJoin);
         }
         $join->setRelationMap($relationMap, $leftTableAlias, $relationAlias);
-
-        if ($relationAlias !== null) {
-            $this->addAlias($relationAlias, $relationMap->getRightTable()->getName());
-        }
-        $this->addJoinObject($join, $relationAlias ?? $relationName);
+        $this->addJoinObject($join, $relationAlias);
 
         return $this;
     }
@@ -509,6 +505,33 @@ class ModelCriteria extends BaseModelCriteria
         $relationMap = $tableMap->getRelation($relationName);
 
         return [$relationMap, $relationName, $leftName, $parentJoin];
+    }
+
+    /**
+     * @param string $relationName
+     * @param string|null $rightTableAlias
+     * @param string|null $joinType
+     *
+     * @return \Propel\Runtime\ActiveQuery\ModelJoin
+     */
+    protected function createModelJoinForRelation(
+        string $relationName,
+        string|null $rightTableAlias = null,
+        string|null $joinType = Criteria::INNER_JOIN
+    ): ModelJoin {
+        $join = new ModelJoin();
+        $join->setJoinType($joinType);
+
+        $relationMap = $this->getTableMapOrFail()->getRelation($relationName);
+        $leftAlias = $this->useAliasInSQL ? $this->getModelAlias() : null;
+        $join->setupJoinCondition($this, $relationMap, $leftAlias, $rightTableAlias);
+
+        $parentJoin = $this->getParentJoin();
+        if ($parentJoin instanceof ModelJoin) {
+            $join->setParentJoin($parentJoin);
+        }
+
+        return $join;
     }
 
     /**
@@ -594,14 +617,24 @@ class ModelCriteria extends BaseModelCriteria
     #[\Override]
     public function addJoinObject(Join $join, ?string $name = null)
     {
-        if (!in_array($join, $this->joins)) { // compare equality, NOT identity
-            if ($name === null) {
-                $this->joins[] = $join;
+        $setAlias = (bool)$name;
+
+        if (!$name && $join instanceof ModelJoin) {
+            $name = $join->getRelationMap()->getName();
+        }
+
+        if (!$name) {
+            return parent::addJoinObject($join);
+        }
+
+        if (in_array($join, $this->joins)) {
+            trigger_error("Trying to add same join twice: `$name`", E_USER_WARNING);
             } else {
                 $this->joins[$name] = $join;
             }
-        } else {
-            trigger_error("Adding same join twice: `$name`", E_USER_WARNING);
+
+        if ($setAlias) {
+            $this->addAlias($name, $join->getRightTableName());
         }
 
         return $this;
