@@ -36,7 +36,7 @@ class ModelCriteriaUseQueryTest extends BookstoreTestBase
 
         $c2 = $c->useQuery('Author');
         $this->assertTrue($c2 instanceof AuthorQuery, 'useQuery() returns a secondary Criteria');
-        $this->assertEquals($c, $c2->getPrimaryCriteria(), 'useQuery() sets the primary Criteria os the secondary Criteria');
+        $this->assertEquals($c, $c2->getParentQuery(), 'useQuery() sets the primary Criteria os the secondary Criteria');
         $c2->where('Author.FirstName = ?', 'john');
         $c2->limit(5);
 
@@ -70,7 +70,7 @@ class ModelCriteriaUseQueryTest extends BookstoreTestBase
 
         $c2 = $c->useQuery('a');
         $this->assertTrue($c2 instanceof AuthorQuery, 'useQuery() returns a secondary Criteria');
-        $this->assertEquals($c, $c2->getPrimaryCriteria(), 'useQuery() sets the primary Criteria os the secondary Criteria');
+        $this->assertEquals($c, $c2->getParentQuery(), 'useQuery() sets the primary Criteria os the secondary Criteria');
         $this->assertEquals(['a' => 'author'], $c2->getAliases(), 'useQuery() sets the secondary Criteria alias correctly');
         $c2->where('a.FirstName = ?', 'john');
         $c2->limit(5);
@@ -122,7 +122,7 @@ class ModelCriteriaUseQueryTest extends BookstoreTestBase
         $c->leftJoin('Propel\Tests\Bookstore\BookstoreContest.Work');
         $c2 = $c->useQuery('Work');
         $this->assertTrue($c2 instanceof BookQuery, 'useQuery() returns a secondary Criteria');
-        $this->assertEquals($c, $c2->getPrimaryCriteria(), 'useQuery() sets the primary Criteria os the secondary Criteria');
+        $this->assertEquals($c, $c2->getParentQuery(), 'useQuery() sets the primary Criteria os the secondary Criteria');
         //$this->assertEquals(array('a' => 'author'), $c2->getAliases(), 'useQuery() sets the secondary Criteria alias correctly');
         $c2->where('Work.Title = ?', 'War And Peace');
 
@@ -146,7 +146,7 @@ class ModelCriteriaUseQueryTest extends BookstoreTestBase
         $c->leftJoin('Propel\Tests\Bookstore\BookstoreContest.Work w');
         $c2 = $c->useQuery('w');
         $this->assertTrue($c2 instanceof BookQuery, 'useQuery() returns a secondary Criteria');
-        $this->assertEquals($c, $c2->getPrimaryCriteria(), 'useQuery() sets the primary Criteria os the secondary Criteria');
+        $this->assertEquals($c, $c2->getParentQuery(), 'useQuery() sets the primary Criteria os the secondary Criteria');
         $this->assertEquals(['w' => 'book'], $c2->getAliases(), 'useQuery() sets the secondary Criteria alias correctly');
         $c2->where('w.Title = ?', 'War And Peace');
 

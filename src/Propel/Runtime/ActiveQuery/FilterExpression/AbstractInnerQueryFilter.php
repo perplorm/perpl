@@ -155,7 +155,7 @@ abstract class AbstractInnerQueryFilter extends AbstractFilter
         $this->innerQuery = $innerQuery;
 
         if ($this->innerQuery instanceof ModelCriteria && $outerQuery instanceof ModelCriteria) {
-            $this->innerQuery->setPrimaryCriteria($outerQuery, null); // HACK - ColumnResolver uses primary criteria to remove aliases from topmost query
+            $this->innerQuery->setParentQuery($outerQuery, null); // HACK - ColumnResolver uses primary criteria to remove aliases from topmost query
         }
     }
 

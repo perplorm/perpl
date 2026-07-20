@@ -106,7 +106,7 @@ class ColumnResolver
             return $this->getColumnFromSubQuery($sourceQuery, $sourceQuery->getSubquery($prefix), $prefix, $columnIdentifier, $failSilently);
         }
 
-        if (!$isMainOrJoin && $sourceQuery instanceof ModelCriteria && $sourceQuery->getPrimaryCriteria()) {
+        if (!$isMainOrJoin && $sourceQuery instanceof ModelCriteria && $sourceQuery->getParentQuery()) {
             $resolvedColumn = $this->getQueryFromOuterQuery($sourceQuery, $prefix, $columnIdentifier);
             if ($resolvedColumn) {
                 return $resolvedColumn;
@@ -139,15 +139,15 @@ class ColumnResolver
      */
     protected function getQueryFromOuterQuery(ModelCriteria $sourceQuery, string $prefix, string $columnIdentifier): ?AbstractColumnExpression
     {
-        if (!$sourceQuery->getPrimaryCriteria()) {
+        if (!$sourceQuery->getParentQuery()) {
             return null;
         }
 
         $tableAlias = null;
         $tableMap = null;
         $parentQuery = $sourceQuery;
-        while (!$tableAlias && $parentQuery->getPrimaryCriteria()) {
-            $parentQuery = $parentQuery->getPrimaryCriteria();
+        while (!$tableAlias && $parentQuery->getParentQuery()) {
+            $parentQuery = $parentQuery->getParentQuery();
             [$tableAlias, $tableMap] = $this->resolveTableIdentifierInQuery($prefix, $parentQuery);
         }
 

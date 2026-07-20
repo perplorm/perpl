@@ -57,7 +57,7 @@ class RelationPopulator
         $this->rightPhpName = $join->hasRelationAlias() ? $join->getRelationAlias() : $relationName;
 
         if (!$join->isPrimary()) {
-            $this->leftPhpName = $join->hasLeftTableAlias() ? $join->getLeftTableAlias() : $join->getPreviousJoin()->getRelationMap()->getName();
+            $this->leftPhpName = $join->hasLeftTableAlias() ? $join->getLeftTableAlias() : $join->getParentJoin()->getRelationMap()->getName();
         }
     }
 
