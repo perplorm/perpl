@@ -10,7 +10,6 @@ use Propel\Runtime\ActiveQuery\FilterExpression\JoinCondition;
 use Propel\Runtime\Exception\LogicException;
 use Propel\Runtime\Map\RelationMap;
 use Propel\Runtime\Map\TableMap;
-use function get_class;
 use function trigger_deprecation;
 
 /**
@@ -279,31 +278,6 @@ class ModelJoin extends Join
     }
 
     /**
-     * This method returns the last related, but already hydrated object up until this join
-     * Starting from $startObject and continuously calling the getters to get
-     * to the base object for the current join.
-     *
-     * This method only works if ({@see static::parentJoin}) is available,
-     * which only happens when you provide dotted relations when calling join
-     *
-     * @param object $mainObject the start object all joins originate from and which has already hydrated
-     *
-     * @return object The base Object of this join
-     */
-    public function getObjectToRelate(object $mainObject): object
-    {
-        if ($this->isPrimary()) {
-            return $mainObject;
-        }
-
-        $parentJoin = $this->getParentJoin();
-        $parentObject = $parentJoin->getObjectToRelate($mainObject);
-        $method = 'get' . $parentJoin->getRelationMap()->getName();
-
-        return $parentObject->$method();
-    }
-
-    /**
      * @param \Propel\Runtime\ActiveQuery\Join $join
      *
      * @return bool
@@ -316,18 +290,6 @@ class ModelJoin extends Join
             && $this->relationMap == $join->getRelationMap()
             && $this->parentJoin == $join->getParentJoin()
             && $this->rightTableAlias == $join->getRightTableAlias();
-    }
-
-    /**
-     * @return string
-     */
-    public function __toString(): string
-    {
-        return parent::toString()
-            . ' tableMap: ' . ($this->tableMap ? get_class($this->tableMap) : 'null')
-            . ' relationMap: ' . $this->relationMap->getName()
-            . ' parentJoin: ' . ($this->parentJoin ? "($this->parentJoin)" : 'null')
-            . ' relationAlias: ' . $this->rightTableAlias;
     }
 
     /**

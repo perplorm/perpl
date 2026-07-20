@@ -9,6 +9,7 @@
 namespace Propel\Tests\Runtime\ActiveQuery;
 
 use Propel\Runtime\ActiveQuery\ModelCriteria;
+use Propel\Runtime\Exception\PropelException;
 use Propel\Runtime\Propel;
 use Propel\Tests\Bookstore\AuthorQuery;
 use Propel\Tests\Bookstore\BookQuery;
@@ -183,5 +184,12 @@ class ModelCriteriaUseQueryTest extends BookstoreTestBase
         $expectedSQL = $this->getSql("SELECT $columns FROM book LEFT JOIN author ON (book.author_id=author.id) WHERE ((book.price=:p1 OR (author.age=:p2 OR author.first_name=:p3)) OR book.title=:p4) AND book.isbn=:p5");
 
         $this->assertEquals($expectedSQL, $sql);
+    }
+
+    public function testExceptionOnUnknownRelation(): void
+    {
+        $this->expectException(PropelException::class);
+        $this->expectExceptionMessage('Unknown class or alias `LeUnknownRelation`');
+        BookQuery::create()->useQuery('LeUnknownRelation');
     }
 }

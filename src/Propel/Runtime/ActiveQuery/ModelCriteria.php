@@ -770,7 +770,7 @@ class ModelCriteria extends BaseModelCriteria
     public function useQuery(string $relationName, ?string $queryClass = null): self
     {
         if (!isset($this->joins[$relationName])) {
-            throw new PropelException("Unknown class or alias $relationName");
+            throw new PropelException("Unknown class or alias `$relationName`");
         }
 
         /** @var \Propel\Runtime\ActiveQuery\ModelJoin $modelJoin */
