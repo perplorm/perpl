@@ -6,6 +6,7 @@ namespace Propel\Runtime\ActiveQuery;
 
 use ArrayIterator;
 use IteratorAggregate;
+use Propel\Runtime\ActiveQuery\ColumnResolver\ColumnExpression\AbstractColumnExpression;
 use Propel\Runtime\ActiveQuery\ColumnResolver\ColumnExpression\UnresolvedColumnExpression;
 use Propel\Runtime\ActiveQuery\ColumnResolver\ColumnResolver;
 use Propel\Runtime\ActiveQuery\ColumnResolver\NormalizedFilterExpression;
@@ -558,6 +559,10 @@ class BaseModelCriteria extends Criteria implements IteratorAggregate
     {
         if (!$columnArray) {
             throw new PropelException('You must ask for at least one column');
+        }
+
+        if ($columnArray instanceof AbstractColumnExpression) {
+            $columnArray = [$columnArray];
         }
 
         $this->selectColumns = ($columnArray === '*')
