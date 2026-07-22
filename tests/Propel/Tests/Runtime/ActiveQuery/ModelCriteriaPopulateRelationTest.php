@@ -7,6 +7,7 @@ namespace Propel\Tests\Runtime\ActiveQuery;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\Exception\UnknownRelationException;
+use Propel\Runtime\Exception\PropelException;
 use Propel\Runtime\Map\TableMap;
 use Propel\Tests\Bookstore\AuthorQuery;
 use Propel\Tests\Bookstore\BookQuery;
@@ -224,6 +225,23 @@ class ModelCriteriaPopulateRelationTest extends BookstoreTestBase
     /**
      * @return void
      */
+    public function testPopulateNested()
+    {
+        $c = AuthorQuery::create('a');
+        $c->populateRelation('a.Book b');
+        $c->populateRelation('b.Publisher p');
+
+        $joins = $c->getJoins();
+        $expectedJoinKeys = ['b', 'p'];
+        $this->assertEquals($expectedJoinKeys, array_keys($joins), 'populateRelation() adds the join');
+        $populators = $c->getRelatedModelsToPopulate();
+        $this->assertEquals($expectedJoinKeys, array_keys($populators));
+
+    }
+
+    /**
+     * @return void
+     */
     public function testPopulateRelationTwice()
     {
         $c = BookQuery::create();
@@ -262,5 +280,26 @@ class ModelCriteriaPopulateRelationTest extends BookstoreTestBase
 
         $books = $this->getObjectPropertyValue($author, 'collBooks');
         $this->assertCount(1, $books);
+    }
+
+    public static function ErrorTestDataProvider(): array
+    {
+        return [
+            [null, 'Book.Media'],
+            ['b', 'b.Media'],
+        ];
+    }
+
+    /**
+     * @return void
+     */
+    #[DataProvider('ErrorTestDataProvider')]
+    public function testErrorWhenPopulatingInChildQuery(string|null $alias, string $expectedRelation)
+    {
+        $childQuery = AuthorQuery::create()->useBookQuery($alias);
+
+        $this->expectException(PropelException::class);
+        $this->expectExceptionMessage("Cannot populate model through child query. Use populateRelation('$expectedRelation') on the outmost query.");
+        $childQuery->populateMedia();
     }
 }

@@ -451,7 +451,7 @@ class ModelCriteria extends BaseModelCriteria
     public function join(string $relationSpecifier, string $joinType = Criteria::INNER_JOIN)
     {
         [$relationIdentifier, $relationAlias] = self::splitIdentifierAndAlias($relationSpecifier); // remove alias from "Book b"
-        [$relationMap, $relationName, $leftName, $parentJoin] = $this->resolveJoinContext($relationIdentifier);
+        [$relationMap, $leftName, $parentJoin] = $this->resolveJoinContext($relationIdentifier);
         $leftTableAlias = isset($this->aliases[$leftName]) ? $leftName : null;
 
         // set up ModelJoin
@@ -481,7 +481,7 @@ class ModelCriteria extends BaseModelCriteria
             $parentJoin = $this->getParentJoin();
             $relationMap = $this->getTableMap()->getRelation($relationIdentifier);
 
-            return [$relationMap, $relationIdentifier, $leftName, $parentJoin];
+            return [$relationMap, $leftName, $parentJoin];
         }
 
         // $relation looks like '$leftName.$relationName $relationAlias'
@@ -504,7 +504,7 @@ class ModelCriteria extends BaseModelCriteria
 
         $relationMap = $tableMap->getRelation($relationName);
 
-        return [$relationMap, $relationName, $leftName, $parentJoin];
+        return [$relationMap, $leftName, $parentJoin];
     }
 
     /**
@@ -705,6 +705,10 @@ class ModelCriteria extends BaseModelCriteria
      */
     public function populateJoinedRelation(string $relationName): static
     {
+        if ($this->parentQuery) {
+            throw new PropelException("Cannot populate model through child query. Use populateRelation('{$this->getModelAliasOrName()}.$relationName') on the outmost query.");
+        }
+
         if (!isset($this->joins[$relationName])) {
             $registeredJoinNamesCsv = implode(', ', array_keys($this->joins)) ?: '[none]';
 
