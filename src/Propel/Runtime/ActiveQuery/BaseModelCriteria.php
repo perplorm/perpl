@@ -93,7 +93,7 @@ class BaseModelCriteria extends Criteria implements IteratorAggregate
      * Gets the array of ModelWith specifying which relations must be populated
      * together with the main object.
      *
-     * @see ModelCriteria::populateJoinedRelation()
+     * @see ModelCriteria::populateRelation()
      *
      * @return array<string, \Propel\Runtime\ActiveQuery\RelationPopulator>
      */

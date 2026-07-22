@@ -57,10 +57,8 @@ class ArrayFormatterPopulateRelationTest extends BookstoreEmptyTestBase
         $c = (new ModelCriteria('bookstore', '\Propel\Tests\Bookstore\Book'))
             ->setFormatter(ModelCriteria::FORMAT_ARRAY)
             ->orderBy('Propel\Tests\Bookstore\Book.Title')
-            ->join('Propel\Tests\Bookstore\Book.Author')
-            ->populateJoinedRelation('Author')
-            ->join('Propel\Tests\Bookstore\Book.Publisher')
-            ->populateJoinedRelation('Publisher')
+            ->populateRelation('Propel\Tests\Bookstore\Book.Author')
+            ->populateRelation('Propel\Tests\Bookstore\Book.Publisher')
             ;
 
         $this->assertCorrectHydration($c, 'without instance pool');
@@ -78,10 +76,8 @@ class ArrayFormatterPopulateRelationTest extends BookstoreEmptyTestBase
         $c = (new ModelCriteria('bookstore', '\Propel\Tests\Bookstore\Book'))
             ->setFormatter(ModelCriteria::FORMAT_ARRAY)
             ->orderBy('Propel\Tests\Bookstore\Book.Title')
-            ->join('Propel\Tests\Bookstore\Book.Author a')
-            ->populateJoinedRelation('a')
-            ->join('Propel\Tests\Bookstore\Book.Publisher p')
-            ->populateJoinedRelation('p')
+            ->populateRelation('Propel\Tests\Bookstore\Book.Author a')
+            ->populateRelation('Propel\Tests\Bookstore\Book.Publisher p')
             ;
 
         $this->assertCorrectHydration($c, 'with alias');
@@ -100,10 +96,8 @@ class ArrayFormatterPopulateRelationTest extends BookstoreEmptyTestBase
             ->setFormatter(ModelCriteria::FORMAT_ARRAY)
             ->setModelAlias('b', true)
             ->orderBy('b.Title')
-            ->join('b.Author a')
-            ->populateJoinedRelation('a')
-            ->join('b.Publisher p')
-            ->populateJoinedRelation('p')
+            ->populateRelation('b.Author a')
+            ->populateRelation('b.Publisher p')
         ;
         $this->assertCorrectHydration($c, 'with main alias');
     }
@@ -118,10 +112,8 @@ class ArrayFormatterPopulateRelationTest extends BookstoreEmptyTestBase
         $c = (new ModelCriteria('bookstore', '\Propel\Tests\Bookstore\Book'))
             ->setFormatter(ModelCriteria::FORMAT_ARRAY)
             ->orderBy('Propel\Tests\Bookstore\Book.Title')
-            ->join('Propel\Tests\Bookstore\Book.Author')
-            ->populateJoinedRelation('Author')
-            ->join('Propel\Tests\Bookstore\Book.Publisher')
-            ->populateJoinedRelation('Publisher')
+            ->populateRelation('Propel\Tests\Bookstore\Book.Author')
+            ->populateRelation('Propel\Tests\Bookstore\Book.Publisher')
         ;
         $this->assertCorrectHydration($c, 'with instance pool');
     }
@@ -139,8 +131,7 @@ class ArrayFormatterPopulateRelationTest extends BookstoreEmptyTestBase
         $c = new ModelCriteria('bookstore', '\Propel\Tests\Bookstore\Book');
         $c->setFormatter(ModelCriteria::FORMAT_ARRAY);
         $c->where('Propel\Tests\Bookstore\Book.Title = ?', 'Foo');
-        $c->leftJoin('Propel\Tests\Bookstore\Book.Author');
-        $c->populateJoinedRelation('Author');
+        $c->populateRelation('Propel\Tests\Bookstore\Book.Author');
         $con = Propel::getServiceContainer()->getConnection(BookTableMap::DATABASE_NAME);
         $book = $c->findOne($con);
         $count = $con->getQueryCount();
@@ -157,8 +148,7 @@ class ArrayFormatterPopulateRelationTest extends BookstoreEmptyTestBase
         BookstoreEmployeeTableMap::clearInstancePool();
         $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\BookstoreEmployee');
         $c->setFormatter(ModelCriteria::FORMAT_ARRAY);
-        $c->join('Propel\Tests\Bookstore\BookstoreEmployee.Supervisor s');
-        $c->populateJoinedRelation('s');
+        $c->populateRelation('Propel\Tests\Bookstore\BookstoreEmployee.Supervisor s');
         $c->where('s.Name = ?', 'John');
         $emp = $c->findOne();
         $this->assertEquals($emp['Name'], 'Pieter', 'Main object is correctly hydrated');
@@ -194,8 +184,7 @@ class ArrayFormatterPopulateRelationTest extends BookstoreEmptyTestBase
 
         $c = new ModelCriteria('bookstore', '\Propel\Tests\Bookstore\Book');
         $c->setFormatter(ModelCriteria::FORMAT_ARRAY);
-        $c->join('Propel\Tests\Bookstore\Book.Author');
-        $c->populateJoinedRelation('Author');
+        $c->populateRelation('Propel\Tests\Bookstore\Book.Author');
         $books = $c->find();
 
         $this->assertCount(2, $books);
@@ -229,8 +218,7 @@ class ArrayFormatterPopulateRelationTest extends BookstoreEmptyTestBase
 
         $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\Essay');
         $c->setFormatter(ModelCriteria::FORMAT_ARRAY);
-        $c->join('Propel\Tests\Bookstore\Essay.FirstAuthor');
-        $c->populateJoinedRelation('FirstAuthor');
+        $c->populateRelation('Propel\Tests\Bookstore\Essay.FirstAuthor');
         $c->where('Propel\Tests\Bookstore\Essay.Title = ?', 'Foo');
         $essay = $c->findOne();
         $this->assertEquals($essay['Title'], 'Foo', 'Main object is correctly hydrated');
@@ -251,10 +239,8 @@ class ArrayFormatterPopulateRelationTest extends BookstoreEmptyTestBase
         $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\Review');
         $c->setFormatter(ModelCriteria::FORMAT_ARRAY);
         $c->where('Propel\Tests\Bookstore\Review.Recommended = ?', true);
-        $c->join('Propel\Tests\Bookstore\Review.Book');
-        $c->populateJoinedRelation('Book');
-        $c->join('Book.Author');
-        $c->populateJoinedRelation('Author');
+        $c->populateRelation('Propel\Tests\Bookstore\Review.Book');
+        $c->populateRelation('Book.Author');
         $review = $c->findOne();
         $this->assertEquals($review['ReviewedBy'], 'Washington Post', 'Main object is correctly hydrated');
         $book = $review['Book'];
@@ -299,8 +285,7 @@ class ArrayFormatterPopulateRelationTest extends BookstoreEmptyTestBase
         $c = new ModelCriteria('bookstore', '\Propel\Tests\Bookstore\Book');
         $c->setFormatter(ModelCriteria::FORMAT_ARRAY);
         $c->add(BookTableMap::COL_ISBN, '043935806X');
-        $c->leftJoin('Propel\Tests\Bookstore\Book.Review');
-        $c->populateJoinedRelation('Review');
+        $c->populateRelation('Propel\Tests\Bookstore\Book.Review');
         $c->limit(5);
         $books = $c->find();
     }
@@ -318,8 +303,7 @@ class ArrayFormatterPopulateRelationTest extends BookstoreEmptyTestBase
         $c = new ModelCriteria('bookstore', '\Propel\Tests\Bookstore\Book');
         $c->setFormatter(ModelCriteria::FORMAT_ARRAY);
         $c->add(BookTableMap::COL_ISBN, '043935806X');
-        $c->leftJoin('Propel\Tests\Bookstore\Book.Review');
-        $c->populateJoinedRelation('Review');
+        $c->populateRelation('Propel\Tests\Bookstore\Book.Review');
         $con = Propel::getServiceContainer()->getConnection(BookTableMap::DATABASE_NAME);
         $books = $c->find($con);
         $this->assertEquals(1, count($books), 'with() does not duplicate the main object');
@@ -362,7 +346,7 @@ class ArrayFormatterPopulateRelationTest extends BookstoreEmptyTestBase
             ->setFormatter(ModelCriteria::FORMAT_ARRAY)
             ->leftJoin('Propel\Tests\Bookstore\Author.Book')
             ->orderBy('Book.Title')
-            ->populateJoinedRelation('Book')
+            ->populateRelation('Book')
             ->find();
         $this->assertEquals(2, count($authors), 'with() used on a many-to-many doesn\'t change the main object count');
     }
@@ -506,7 +490,7 @@ class ArrayFormatterPopulateRelationTest extends BookstoreEmptyTestBase
         $c->join('Propel\Tests\Bookstore\Book.Author');
         $c->withColumn('Author.FirstName', 'AuthorName');
         $c->withColumn('Author.LastName', 'AuthorName2');
-        $c->populateJoinedRelation('Author');
+        $c->populateRelation('Author');
         $con = Propel::getServiceContainer()->getConnection(BookTableMap::DATABASE_NAME);
         $book = $c->findOne($con);
         $this->assertEquals(['Id', 'Title', 'ISBN', 'Price', 'PublisherId', 'AuthorId', 'Author', 'AuthorName', 'AuthorName2'], array_keys($book), 'withColumn() do not change the resulting model class');

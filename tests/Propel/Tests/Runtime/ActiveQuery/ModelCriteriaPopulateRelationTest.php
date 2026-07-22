@@ -6,7 +6,7 @@ namespace Propel\Tests\Runtime\ActiveQuery;
 
 use PHPUnit\Framework\Attributes\DataProvider;
 use Propel\Runtime\ActiveQuery\Criteria;
-use Propel\Runtime\ActiveQuery\Exception\UnknownRelationException;
+use Propel\Runtime\ActiveQuery\RelationPopulator;
 use Propel\Runtime\Exception\PropelException;
 use Propel\Runtime\Map\TableMap;
 use Propel\Tests\Bookstore\AuthorQuery;
@@ -18,21 +18,25 @@ use Propel\Tests\Bookstore\Map\ReviewTableMap;
 use Propel\Tests\Bookstore\ReviewQuery;
 use Propel\Tests\Helpers\Bookstore\BookstoreDataPopulator;
 use Propel\Tests\Helpers\Bookstore\BookstoreTestBase;
-use function array_key_exists;
 use function array_keys;
 use function array_map;
 use function array_merge;
 
 /**
+ * @group database
  */
 class ModelCriteriaPopulateRelationTest extends BookstoreTestBase
 {
+    /**
+     * @return void
+     */
     public static function setUpBeforeClass(): void
     {
         parent::setUpBeforeClass();
         BookstoreDataPopulator::depopulate();
         BookstoreDataPopulator::populate();
     }
+
     /**
      * @return void
      */
@@ -40,21 +44,10 @@ class ModelCriteriaPopulateRelationTest extends BookstoreTestBase
     {
         $c = BookQuery::create();
         $c->join('Propel\Tests\Bookstore\Book.Author');
-        $c->populateJoinedRelation('Author');
+        $c->populateRelation('Author');
         $withs = $c->getRelatedModelsToPopulate();
-        $this->assertTrue(array_key_exists('Author', $withs), 'with() adds an entry to the internal list of Withs');
-        $this->assertInstanceOf('Propel\Runtime\ActiveQuery\ModelWith', $withs['Author'], 'with() references the ModelWith object');
-    }
-
-    /**
-     * @return void
-     */
-    public function testWithThrowsExceptionWhenJoinLacks()
-    {
-        $this->expectException(UnknownRelationException::class);
-
-        $c = BookQuery::create();
-        $c->populateJoinedRelation('Propel\Tests\Bookstore\Author');
+        $this->assertArrayHasKey('Author', $withs, 'with() adds an entry to the internal list of Withs');
+        $this->assertInstanceOf(RelationPopulator::class, $withs['Author'], 'with() references the ModelWith object');
     }
 
     /**
@@ -64,21 +57,38 @@ class ModelCriteriaPopulateRelationTest extends BookstoreTestBase
     {
         $c = BookQuery::create();
         $c->join('Propel\Tests\Bookstore\Book.Author a');
-        $c->populateJoinedRelation('a');
+        $c->populateRelation('a');
         $withs = $c->getRelatedModelsToPopulate();
-        $this->assertTrue(array_key_exists('a', $withs), 'with() uses the alias for the index of the internal list of Withs');
+        $this->assertArrayHasKey('a', $withs, 'with() uses the alias for the index of the internal list of Withs');
+        $this->assertCount(1, $withs);
+
+        $expectedColumns = [
+            ...$this->buildFieldNamesFromTableMap(BookTableMap::class),
+            'a.id',
+            'a.first_name',
+            'a.last_name',
+            'a.email',
+            'a.age',
+        ];
+        $this->assertEquals($expectedColumns, $c->getSelectColumns(), 'with() adds the columns of the related table');
     }
 
     /**
      * @return void
      */
-    public function testWithThrowsExceptionWhenNotUsingAlias()
+    public function testAliasResolvesDifferent()
     {
-        $this->expectException(UnknownRelationException::class);
-
         $c = BookQuery::create();
-        $c->join('Propel\Tests\Bookstore\Book.Author a');
-        $c->populateJoinedRelation('Propel\Tests\Bookstore\Author');
+        $c->join('Author a');
+        $c->populateRelation('Author');
+
+        $withs = $c->getRelatedModelsToPopulate();
+        $this->assertArrayHasKey('Author', $withs);
+        $this->assertCount(1, $withs);
+
+        $joins = $c->getJoins();
+        $this->assertArrayHasKey('Author', $joins);
+        $this->assertArrayHasKey('a', $joins);
     }
 
     /**
@@ -88,47 +98,10 @@ class ModelCriteriaPopulateRelationTest extends BookstoreTestBase
     {
         $c = BookQuery::create();
         $c->join('Propel\Tests\Bookstore\Book.Author');
-        $c->populateJoinedRelation('Author');
+        $c->populateRelation('Author');
         $expectedColumns = $this->buildFieldNamesFromTableMap(BookTableMap::class, AuthorTableMap::class);
 
         $this->assertEquals($expectedColumns, $c->getSelectColumns(), 'with() adds the columns of the related table');
-    }
-
-    /**
-     * @return void
-     */
-    public function testWithAliasAddsSelectColumns()
-    {
-        $c = BookQuery::create();
-        $c->join('Propel\Tests\Bookstore\Book.Author a');
-        $c->populateJoinedRelation('a');
-        $expectedColumns = [
-            ...$this->buildFieldNamesFromTableMap(BookTableMap::class),
-            'a.id',
-            'a.first_name',
-            'a.last_name',
-            'a.email',
-            'a.age',
-        ];
-        $this->assertEquals($expectedColumns, $c->getSelectColumns(), 'with() adds the columns of the related table');
-    }
-
-    /**
-     * @return void
-     */
-    public function testPopulateRelationAlias()
-    {
-        $c = BookQuery::create();
-        $c->populateRelation('Propel\Tests\Bookstore\Book.Author a');
-        $expectedColumns = [
-            ...$this->buildFieldNamesFromTableMap(BookTableMap::class),
-            'a.id',
-            'a.first_name',
-            'a.last_name',
-            'a.email',
-            'a.age',
-        ];
-        $this->assertEquals($expectedColumns, $c->getSelectColumns(), 'populateRelation() adds the join with the alias');
     }
 
     /**
@@ -139,7 +112,7 @@ class ModelCriteriaPopulateRelationTest extends BookstoreTestBase
         $c = BookQuery::create();
         $c->setModelAlias('b', true);
         $c->join('b.Author a');
-        $c->populateJoinedRelation('a');
+        $c->populateRelation('a');
         $expectedColumns = [
             'b.id',
             'b.title',
@@ -162,8 +135,7 @@ class ModelCriteriaPopulateRelationTest extends BookstoreTestBase
     public function testWithOneToManyAddsSelectColumns()
     {
         $c = AuthorQuery::create();
-        $c->leftJoin('Propel\Tests\Bookstore\Author.Book');
-        $c->populateJoinedRelation('Book');
+        $c->populateRelation('Book');
         $expectedColumns = $this->buildFieldNamesFromTableMap(AuthorTableMap::class, BookTableMap::class);
 
         $this->assertEquals($expectedColumns, $c->getSelectColumns(), 'with() adds the columns of the related table even in a one-to-many relationship');
@@ -262,8 +234,6 @@ class ModelCriteriaPopulateRelationTest extends BookstoreTestBase
     }
 
     /**
-     * @group database
-     * 
      * @return void
      */
     public function testPopulateWithVirtualColumns()
@@ -302,4 +272,32 @@ class ModelCriteriaPopulateRelationTest extends BookstoreTestBase
         $this->expectExceptionMessage("Cannot populate model through child query. Use populateRelation('$expectedRelation') on the outmost query.");
         $childQuery->populateMedia();
     }
+
+    /**
+     * @return void
+     */
+    public function testErrorOnWrongJoinType(): void
+    {
+        $a = AuthorQuery::create()->joinBook(null, Criteria::LEFT_JOIN);
+
+        $this->expectException(PropelException::class);
+        $this->expectExceptionMessage("Requested INNER JOIN, but existing join uses LEFT JOIN");
+
+        $a->populateRelation('Book', Criteria::INNER_JOIN);
+    }
+
+    /**
+     * @return void
+     */
+    public function testErrorOnManyToMany(): void
+    {
+        $a = BookQuery::create();
+
+        $this->expectException(PropelException::class);
+        $this->expectExceptionMessage('Propel\Runtime\ActiveQuery\ModelCriteria::populateRelation does not allow hydration for many-to-many relationships');
+
+        $a->populateRelation('Book.FavoriteBookClubList');
+    }
+
+
 }
