@@ -18,11 +18,8 @@ use Propel\Tests\Bookstore\ReviewQuery;
 use Propel\Tests\TestCaseFixtures;
 
 /**
- * Test class for ModelWith.
- *
- * @author François Zaninotto
  */
-class ModelPopulateRelationTest extends TestCaseFixtures
+class RelationPopulatorTest extends TestCaseFixtures
 {
     /**
      * @return void
