@@ -450,7 +450,7 @@ class ModelCriteria extends BaseModelCriteria
      */
     public function join(string $relationSpecifier, string $joinType = Criteria::INNER_JOIN)
     {
-        [$relationIdentifier, $relationAlias] = self::getClassAndAlias($relationSpecifier); // remove alias from "Book b"
+        [$relationIdentifier, $relationAlias] = self::splitIdentifierAndAlias($relationSpecifier); // remove alias from "Book b"
         [$relationMap, $relationName, $leftName, $parentJoin] = $this->resolveJoinContext($relationIdentifier);
         $leftTableAlias = isset($this->aliases[$leftName]) ? $leftName : null;
 
