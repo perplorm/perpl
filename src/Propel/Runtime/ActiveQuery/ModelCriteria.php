@@ -9,7 +9,6 @@ use Propel\Runtime\ActiveQuery\ColumnResolver\ColumnExpression\AbstractColumnExp
 use Propel\Runtime\ActiveQuery\ColumnResolver\ColumnExpression\LocalColumnExpression;
 use Propel\Runtime\ActiveQuery\Criterion\ExistsQueryCriterion;
 use Propel\Runtime\ActiveQuery\Exception\UnknownColumnException;
-use Propel\Runtime\ActiveQuery\Exception\UnknownRelationException;
 use Propel\Runtime\ActiveQuery\FilterExpression\ClauseList;
 use Propel\Runtime\ActiveQuery\FilterExpression\ColumnFilterInterface;
 use Propel\Runtime\ActiveQuery\FilterExpression\ColumnToQueryFilter;
@@ -30,7 +29,6 @@ use Propel\Runtime\Map\RelationMap;
 use Propel\Runtime\Perpl;
 use Propel\Runtime\Util\PropelModelPager;
 use function array_key_last;
-use function array_keys;
 use function array_merge;
 use function array_shift;
 use function array_values;
@@ -38,7 +36,6 @@ use function assert;
 use function count;
 use function current;
 use function explode;
-use function implode;
 use function in_array;
 use function is_array;
 use function lcfirst;
@@ -443,15 +440,14 @@ class ModelCriteria extends BaseModelCriteria
      *    => $c->addJoin(BookTableMap::AUTHOR_ID, 'a.ID', Criteria::RIGHT_JOIN);
      * </code>
      *
-     * @param string $relationSpecifier Relation name or identifier (i.e. `Book`, `Book b`, `Author.Book`)
+     * @param string $relationSpecifier Relation name or identifier (i.e. `Book`, `Book b`, `Author.Book`, `Author.Book b`)
      * @param string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
      *
      * @return $this
      */
     public function join(string $relationSpecifier, string $joinType = Criteria::INNER_JOIN)
     {
-        [$relationIdentifier, $relationAlias] = self::getClassAndAlias($relationSpecifier); // remove alias from "Book b"
-        [$relationMap, $relationName, $leftName, $parentJoin] = $this->resolveJoinContext($relationIdentifier);
+        [$relationMap, $relationAlias, $leftName, $parentJoin] = $this->resolveJoinContext($relationSpecifier);
         $leftTableAlias = isset($this->aliases[$leftName]) ? $leftName : null;
 
         // set up ModelJoin
@@ -467,21 +463,23 @@ class ModelCriteria extends BaseModelCriteria
     }
 
     /**
-     * @param string $relationIdentifier
+     * @param string $relationSpecifier
      *
      * @throws \Propel\Runtime\Exception\PropelException
      *
-     * @return array{\Propel\Runtime\Map\RelationMap, string, string|null, \Propel\Runtime\ActiveQuery\Join|null}
+     * @return array{\Propel\Runtime\Map\RelationMap, string|null, string|null, \Propel\Runtime\ActiveQuery\Join|null}
      */
-    protected function resolveJoinContext(string $relationIdentifier): array
+    protected function resolveJoinContext(string $relationSpecifier): array
     {
+        [$relationIdentifier, $relationAlias] = self::splitIdentifierAndAlias($relationSpecifier);
+
         if (!str_contains($relationIdentifier, '.')) {
             // simple relation name, refers to the current table
             $leftName = $this->getModelAliasOrName();
             $parentJoin = $this->getParentJoin();
             $relationMap = $this->getTableMap()->getRelation($relationIdentifier);
 
-            return [$relationMap, $relationIdentifier, $leftName, $parentJoin];
+            return [$relationMap, $relationAlias, $leftName, $parentJoin];
         }
 
         // $relation looks like '$leftName.$relationName $relationAlias'
@@ -504,7 +502,46 @@ class ModelCriteria extends BaseModelCriteria
 
         $relationMap = $tableMap->getRelation($relationName);
 
-        return [$relationMap, $relationName, $leftName, $parentJoin];
+        return [$relationMap, $relationAlias, $leftName, $parentJoin];
+    }
+
+    /**
+     * @param string $relationSpecifier
+     * @param string|null $joinType
+     *
+     * @return array{string, \Propel\Runtime\ActiveQuery\ModelJoin}
+     */
+    protected function getOrCreateJoin(string $relationSpecifier, string|null $joinType = null): array
+    {
+        if ($this->joins[$relationSpecifier] ?? false) {
+            $join = $this->joins[$relationSpecifier];
+            assert($join instanceof ModelJoin);
+
+            return [$relationSpecifier, $join];
+        }
+
+        [$relationMap, $relationAlias, $leftName, $parentJoin] = $this->resolveJoinContext($relationSpecifier);
+
+        $key = $relationAlias ?? $relationMap->getName();
+        if ($this->joins[$key] ?? false) {
+            $join = $this->joins[$key];
+            assert($join instanceof ModelJoin);
+
+            return [$key, $join];
+        }
+
+        $leftTableAlias = isset($this->aliases[$leftName]) ? $leftName : null;
+
+        // set up ModelJoin
+        $join = new ModelJoin();
+        $join->setJoinType($joinType ?? Criteria::INNER_JOIN);
+        if ($parentJoin instanceof ModelJoin) {
+            $join->setParentJoin($parentJoin);
+        }
+        $join->setRelationMap($relationMap, $leftTableAlias, $relationAlias);
+        $this->addJoinObject($join, $relationAlias);
+
+        return [(string)array_key_last($this->joins), $join];
     }
 
     /**
@@ -641,26 +678,45 @@ class ModelCriteria extends BaseModelCriteria
     }
 
     /**
-     * Populate related models by joining data to this query.
+     * Populate a related model in the same query.
      *
      * <code>
      * $book = BookQuery::create()->populateAuthor()->findOne();
      * $author = $book->getAuthor(); // <-- no additional query needed, author is already populated
      * </code>
      *
-     * This is typically 30 to 50% faster than populating via additional queries (like {@see ObjectCollection::populateRelation()}).
+     * This is typically 30 to 50% faster than populating via additional
+     * queries (like {@see ObjectCollection::populateRelation()}).
      *
-     * Use {@see static::populateJoinedRelation()} if the join was already added (for example via useQuery).
+     * If the join is already registered, re-use it by passing the same
+     * identifier (alias if specified, relation name otherwise) to this method.
      *
-     * @param string $relationName Relation to use for the join
-     * @param string $joinType Accepted values are null, 'left join', 'right join', 'inner join', defaults to left join.
+     * WARNING: On a one-to-many relationship, combining populateRelation()
+     * with limit() will return fewer results than requested, since the joined
+     * result contains rows only used to populate models of the many-side.
+     *
+     * @param string $relationSpecifier Relation name, optionally with source and alias (i.e. 'Book', 'Book b', 'Author.Book b', 'a.Book b')
+     * @param string|null $joinType Accepted values are null, 'left join', 'right join', 'inner join', defaults to left join.
+     *
+     * @throws \Propel\Runtime\Exception\PropelException
      *
      * @return $this
      */
-    public function populateRelation(string $relationName, string $joinType = Criteria::LEFT_JOIN): static
+    public function populateRelation(string $relationSpecifier, string|null $joinType = null): static
     {
-        $this->join($relationName, $joinType);
-        $this->populateJoinedRelation(self::getRelationName($relationName));
+        if ($this->parentQuery) {
+            trigger_deprecation('Perpl', '2.10.0', "Populating model through child query is fragile. Use populateRelation('{$this->getModelAliasOrName()}.$relationSpecifier') on the outmost query.");
+        }
+
+        [$relationIdentifier, $join] = $this->getOrCreateJoin($relationSpecifier, $joinType ?? Criteria::LEFT_JOIN);
+        if ($joinType && $joinType !== $join->getJoinType()) {
+            throw new PropelException("Requested $joinType, but existing join uses {$join->getJoinType()}");
+        }
+        if ($join->getRelationMap()?->getType() === RelationMap::MANY_TO_MANY) {
+            throw new PropelException(__METHOD__ . ' does not allow hydration for many-to-many relationships');
+        }
+
+        $this->relatedModelsToPopulate[$relationIdentifier] = new RelationPopulator($join);
 
         return $this;
     }
@@ -679,51 +735,7 @@ class ModelCriteria extends BaseModelCriteria
     }
 
     /**
-     * Adds a relation to hydrate together with the main object.
-     *
-     * NOTE: The relation must be initialized via a join() prior to calling populateJoinedRelation().
-     * Use {@see static::populateRelation()} to add and hydrate join in a single call.
-     *
-     * Examples:
-     * <code>
-     * $authorsWithBooks = AuthorQuery::create()
-     *      ->useBookQuery()->endUse() // adds a join to Book
-     *      ->populateJoinedRelation('Book')
-     *      ->find();
-     * </code>
-     *
-     * WARNING: On a one-to-many relationship, combining populateJoinedRelation() with limit() will
-     * return fewer results than requested, since the joined result contains rows only used to populate
-     * models of the many-side.
-     *
-     * @param string $relationName Relation to use for the join
-     *
-     * @throws \Propel\Runtime\ActiveQuery\Exception\UnknownRelationException
-     * @throws \Propel\Runtime\Exception\PropelException
-     *
-     * @return $this
-     */
-    public function populateJoinedRelation(string $relationName): static
-    {
-        if (!isset($this->joins[$relationName])) {
-            $registeredJoinNamesCsv = implode(', ', array_keys($this->joins)) ?: '[none]';
-
-            throw new UnknownRelationException("No join registered as `$relationName`. Registered joins: $registeredJoinNamesCsv");
-        }
-
-        /** @var \Propel\Runtime\ActiveQuery\ModelJoin $join */
-        $join = $this->joins[$relationName];
-        if ($join->getRelationMap()?->getType() === RelationMap::MANY_TO_MANY) {
-            throw new PropelException(__METHOD__ . ' does not allow hydration for many-to-many relationships');
-        }
-
-        $this->relatedModelsToPopulate[$relationName] = new RelationPopulator($join);
-
-        return $this;
-    }
-
-    /**
-     * @deprecated Use aptly named {@see static::populateJoinedRelation()}.
+     * @deprecated Use aptly named {@see static::populateRelation()}.
      *
      * @param string $relationName Relation to use for the join
      *
@@ -731,7 +743,7 @@ class ModelCriteria extends BaseModelCriteria
      */
     public function with(string $relationName)
     {
-        return $this->populateJoinedRelation($relationName);
+        return $this->populateRelation($relationName);
     }
 
     /**

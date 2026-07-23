@@ -62,8 +62,7 @@ class ObjectFormatterPopulateRelationTest extends BookstoreEmptyTestBase
     {
         BookstoreDataPopulator::populate();
         $bookQuery = BookQuery::create()
-            ->leftJoinReview('review')
-            ->populateJoinedRelation('review')
+            ->populateRelation('Review')
             ->filterByISBN('043935806X'); //Harry Potter
 
         Propel::disableInstancePooling();
@@ -88,9 +87,9 @@ class ObjectFormatterPopulateRelationTest extends BookstoreEmptyTestBase
         $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\Book');
         $c->orderBy('Propel\Tests\Bookstore\Book.Title');
         $c->join('Propel\Tests\Bookstore\Book.Author');
-        $c->populateJoinedRelation('Author');
+        $c->populateRelation('Author');
         $c->join('Propel\Tests\Bookstore\Book.Publisher');
-        $c->populateJoinedRelation('Publisher');
+        $c->populateRelation('Publisher');
         $this->assertCorrectHydration1($c, 'without instance pool');
     }
 
@@ -105,9 +104,9 @@ class ObjectFormatterPopulateRelationTest extends BookstoreEmptyTestBase
         $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\Book');
         $c->orderBy('Propel\Tests\Bookstore\Book.Title');
         $c->join('Propel\Tests\Bookstore\Book.Author a');
-        $c->populateJoinedRelation('a');
+        $c->populateRelation('a');
         $c->join('Propel\Tests\Bookstore\Book.Publisher p');
-        $c->populateJoinedRelation('p');
+        $c->populateRelation('p');
         $this->assertCorrectHydration1($c, 'with alias');
     }
 
@@ -123,9 +122,9 @@ class ObjectFormatterPopulateRelationTest extends BookstoreEmptyTestBase
         $c->setModelAlias('b', true);
         $c->orderBy('b.Title');
         $c->join('b.Author a');
-        $c->populateJoinedRelation('a');
+        $c->populateRelation('a');
         $c->join('b.Publisher p');
-        $c->populateJoinedRelation('p');
+        $c->populateRelation('p');
         $this->assertCorrectHydration1($c, 'with main alias');
     }
 
@@ -139,9 +138,9 @@ class ObjectFormatterPopulateRelationTest extends BookstoreEmptyTestBase
         $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\Book');
         $c->orderBy('Propel\Tests\Bookstore\Book.Title');
         $c->join('Propel\Tests\Bookstore\Book.Author');
-        $c->populateJoinedRelation('Author');
+        $c->populateRelation('Author');
         $c->join('Propel\Tests\Bookstore\Book.Publisher');
-        $c->populateJoinedRelation('Publisher');
+        $c->populateRelation('Publisher');
         $this->assertCorrectHydration1($c, 'with instance pool');
     }
 
@@ -155,9 +154,9 @@ class ObjectFormatterPopulateRelationTest extends BookstoreEmptyTestBase
         $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\Book');
         $c->orderBy('Propel\Tests\Bookstore\Book.Title');
         $c->join('Propel\Tests\Bookstore\Book.Author');
-        $c->populateJoinedRelation('Author');
+        $c->populateRelation('Author');
         $c->join('Propel\Tests\Bookstore\Book.Publisher');
-        $c->populateJoinedRelation('Publisher');
+        $c->populateRelation('Publisher');
         $this->assertCorrectHydration1($c, 'without instance pool');
         Propel::enableInstancePooling();
     }
@@ -175,7 +174,7 @@ class ObjectFormatterPopulateRelationTest extends BookstoreEmptyTestBase
         $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\Book');
         $c->where('Propel\Tests\Bookstore\Book.Title = ?', 'Foo');
         $c->leftJoin('Propel\Tests\Bookstore\Book.Author');
-        $c->populateJoinedRelation('Author');
+        $c->populateRelation('Author');
         $con = Propel::getServiceContainer()->getConnection(BookTableMap::DATABASE_NAME);
         $book = $c->findOne($con);
         $count = $con->getQueryCount();
@@ -235,7 +234,7 @@ class ObjectFormatterPopulateRelationTest extends BookstoreEmptyTestBase
         BookstoreEmployeeTableMap::clearInstancePool();
         $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\BookstoreEmployee');
         $c->join('Propel\Tests\Bookstore\BookstoreEmployee.Supervisor s');
-        $c->populateJoinedRelation('s');
+        $c->populateRelation('s');
         $c->where('s.Name = ?', 'John');
         $con = Propel::getServiceContainer()->getConnection(BookTableMap::DATABASE_NAME);
         $emp = $c->findOne($con);
@@ -270,7 +269,7 @@ class ObjectFormatterPopulateRelationTest extends BookstoreEmptyTestBase
 
         $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\Essay');
         $c->join('Propel\Tests\Bookstore\Essay.FirstAuthor');
-        $c->populateJoinedRelation('FirstAuthor');
+        $c->populateRelation('FirstAuthor');
         $c->where('Propel\Tests\Bookstore\Essay.Title = ?', 'Foo');
         $con = Propel::getServiceContainer()->getConnection(BookTableMap::DATABASE_NAME);
         $essay = $c->findOne($con);
@@ -302,7 +301,7 @@ class ObjectFormatterPopulateRelationTest extends BookstoreEmptyTestBase
             ->useEssayRelatedByFirstAuthorIdQuery()
             ->orderByTitle()
             ->endUse()
-            ->populateJoinedRelation('EssayRelatedByFirstAuthorId');
+            ->populateRelation('EssayRelatedByFirstAuthorId');
 
         $author = $query->find()->get(0); // should not throw a notice
         $this->assertTrue(true);
@@ -321,9 +320,9 @@ class ObjectFormatterPopulateRelationTest extends BookstoreEmptyTestBase
         $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\Review');
         $c->where('Propel\Tests\Bookstore\Review.Recommended = ?', true);
         $c->join('Propel\Tests\Bookstore\Review.Book');
-        $c->populateJoinedRelation('Book');
+        $c->populateRelation('Book');
         $c->join('Book.Author');
-        $c->populateJoinedRelation('Author');
+        $c->populateRelation('Author');
         $con = Propel::getServiceContainer()->getConnection(BookTableMap::DATABASE_NAME);
         $review = $c->findOne($con);
         $count = $con->getQueryCount();
@@ -371,7 +370,7 @@ class ObjectFormatterPopulateRelationTest extends BookstoreEmptyTestBase
         $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\Book');
         $c->add(BookTableMap::COL_ISBN, '043935806X');
         $c->leftJoin('Book.Review');
-        $c->populateJoinedRelation('Review');
+        $c->populateRelation('Review');
         $c->limit(5);
         $c->find();
     }
@@ -388,7 +387,7 @@ class ObjectFormatterPopulateRelationTest extends BookstoreEmptyTestBase
         $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\Book');
         $c->add(BookTableMap::COL_ISBN, '043935806X');
         $c->leftJoin('Propel\Tests\Bookstore\Book.Review');
-        $c->populateJoinedRelation('Review');
+        $c->populateRelation('Review');
         $con = Propel::getServiceContainer()->getConnection(BookTableMap::DATABASE_NAME);
         $books = $c->find($con);
         $this->assertEquals(1, count($books), 'with() does not duplicate the main object');
@@ -434,7 +433,7 @@ class ObjectFormatterPopulateRelationTest extends BookstoreEmptyTestBase
         $authors = AuthorQuery::create()
             ->leftJoin('Propel\Tests\Bookstore\Author.Book')
             ->orderBy('Book.Title')
-            ->populateJoinedRelation('Book')
+            ->populateRelation('Book')
             ->find();
         $this->assertEquals(2, count($authors), 'with() used on a many-to-many doesn\'t change the main object count');
     }
@@ -511,40 +510,6 @@ class ObjectFormatterPopulateRelationTest extends BookstoreEmptyTestBase
         // should not raise a notice
         $reviews = $c->find($this->con);
         $this->assertTrue(true);
-    }
-
-    /**
-     * @return void
-     */
-    public function testFindOneWithOneToManyThenManyToOneUsingJoinRelated()
-    {
-        BookstoreDataPopulator::populate();
-        BookTableMap::clearInstancePool();
-        AuthorTableMap::clearInstancePool();
-        ReviewTableMap::clearInstancePool();
-
-        $con = Propel::getServiceContainer()->getConnection(AuthorTableMap::DATABASE_NAME);
-        $authors = AuthorQuery::create()
-            ->filterByLastName('Rowling')
-            ->joinBook('book')
-            ->populateJoinedRelation('book')
-            ->useQuery('book')
-            ->joinReview('review')
-            ->with('review')
-            ->endUse()
-            ->find($con);
-        $this->assertEquals(1, count($authors), 'with() does not duplicate the main object');
-        $rowling = $authors[0];
-        $count = $con->getQueryCount();
-        $this->assertEquals($rowling->getFirstName(), 'J.K.', 'Main object is correctly hydrated');
-        $books = $rowling->getBooks();
-        $this->assertEquals($count, $con->getQueryCount(), 'with() hydrates the related objects to save a query ');
-        $this->assertEquals(1, count($books), 'Related objects are correctly hydrated');
-        $book = $books[0];
-        $this->assertEquals($book->getTitle(), 'Harry Potter and the Order of the Phoenix', 'Related object is correctly hydrated');
-        $reviews = $book->getReviews();
-        $this->assertEquals($count, $con->getQueryCount(), 'with() hydrates the related objects to save a query ');
-        $this->assertEquals(2, count($reviews), 'Related objects are correctly hydrated');
     }
 
     /**
@@ -640,7 +605,7 @@ class ObjectFormatterPopulateRelationTest extends BookstoreEmptyTestBase
         $c->join('Propel\Tests\Bookstore\Book.Author');
         $c->withColumn('Author.FirstName', 'AuthorName');
         $c->withColumn('Author.LastName', 'AuthorName2');
-        $c->populateJoinedRelation('Author');
+        $c->populateRelation('Author');
         $con = Propel::getServiceContainer()->getConnection(BookTableMap::DATABASE_NAME);
         $book = $c->findOne($con);
         $this->assertTrue($book instanceof Book, 'withColumn() do not change the resulting model class');
@@ -707,9 +672,9 @@ class ObjectFormatterPopulateRelationTest extends BookstoreEmptyTestBase
             ->useBookOpinionQuery(null, Criteria::LEFT_JOIN)
             ->leftJoinBookReader()
             ->endUse()
-            ->populateJoinedRelation('Author')
-            ->populateJoinedRelation('BookOpinion')
-            ->populateJoinedRelation('BookReader');
+            ->populateRelation('Author')
+            ->populateRelation('BookOpinion')
+            ->populateRelation('BookReader');
 
         $books = $query->find($this->con)->get(0);
         $this->assertEquals(0, count($books->getBookOpinions()));
