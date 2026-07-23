@@ -8,6 +8,7 @@
 
 namespace Propel\Tests;
 
+use ErrorException;
 use PHPUnit\Framework\TestCase as PHPUnitTestCase;
 use Propel\Generator\Builder\Util\SchemaReader;
 use Propel\Generator\Config\QuickGeneratorConfig;
@@ -20,6 +21,8 @@ use Propel\Tests\Helpers\Assertion\MatchesFormattedVendorSql;
 use ReflectionClass;
 use ReflectionProperty;
 use function is_object;
+use function restore_error_handler;
+use function set_error_handler;
 use function sprintf;
 
 class TestCase extends PHPUnitTestCase
@@ -311,5 +314,34 @@ class TestCase extends PHPUnitTestCase
         $database = static::buildDatabaseFromSchema($schema, $additionalConfig, $platform);
 
         return $database->getTable('table')->getColumns()[0];
+    }
+
+    /**
+     * Expect an error with a specific error level. Catches non-error errors like E_USER_DEPRECATED:
+     * <code>$this->expectErrorLevel(E_USER_DEPRECATED, fn() => $childQuery->populateMedia(), $message)</code>
+     *
+     * @param int $errorLevels
+     * @param callable $op
+     * @param string|null $message
+     *
+     * @return void
+     */
+    public function expectErrorLevel(int $errorLevels, callable $op, string|null $message = null)
+    {
+        set_error_handler(static function (int $errno, string $errstr) use ($errorLevels) {
+            static::assertSame($errorLevels, $errno);
+            throw new ErrorException($errstr, $errno);
+        }, $errorLevels);
+
+        $this->expectException(ErrorException::class);
+        if ($message) {
+            $this->expectExceptionMessage($message);
+        }
+    
+        try {
+            $op();
+        } finally {
+            restore_error_handler();
+        }
     }
 }

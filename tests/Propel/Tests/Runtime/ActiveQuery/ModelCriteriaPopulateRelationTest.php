@@ -268,9 +268,8 @@ class ModelCriteriaPopulateRelationTest extends BookstoreTestBase
     {
         $childQuery = AuthorQuery::create()->useBookQuery($alias);
 
-        $this->expectException(PropelException::class);
-        $this->expectExceptionMessage("Cannot populate model through child query. Use populateRelation('$expectedRelation') on the outmost query.");
-        $childQuery->populateMedia();
+        $message = "Since Perpl 2.10.0: Populating model through child query is fragile. Use populateRelation('$expectedRelation') on the outmost query.";
+        $this->expectErrorLevel(E_USER_DEPRECATED, fn() => $childQuery->populateMedia(), $message);
     }
 
     /**

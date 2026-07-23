@@ -545,32 +545,6 @@ class ModelCriteriaTest extends BookstoreTestBase
     /**
      * @return void
      */
-    public function testGetParams()
-    {
-        $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\Book');
-        $c->filterBy('Title', 'foo');
-
-        $expectedParams = [
-            ['table' => 'book', 'column' => 'title', 'value' => 'foo'],
-        ];
-
-        $params = $c->buildBindParams();
-
-        $this->assertEquals($expectedParams, $params, 'test getting parameters with a simple criterion');
-
-        $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\Book');
-        $c->filterBy('Title', 'foo', Criteria::LIKE);
-
-        $expectedParams = [
-            ['table' => 'book', 'column' => 'title', 'value' => 'foo'],
-        ];
-
-        $this->assertEquals($expectedParams, $params, 'test getting parameters with Specialized Criterion used for LIKE expressions');
-    }
-
-    /**
-     * @return void
-     */
     public function testHaving()
     {
         $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\Book');

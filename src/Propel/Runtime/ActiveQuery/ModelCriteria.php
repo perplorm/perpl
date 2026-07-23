@@ -705,7 +705,7 @@ class ModelCriteria extends BaseModelCriteria
     public function populateRelation(string $relationSpecifier, string|null $joinType = null): static
     {
         if ($this->parentQuery) {
-            throw new PropelException("Cannot populate model through child query. Use populateRelation('{$this->getModelAliasOrName()}.$relationSpecifier') on the outmost query.");
+            trigger_deprecation('Perpl', '2.10.0', "Populating model through child query is fragile. Use populateRelation('{$this->getModelAliasOrName()}.$relationSpecifier') on the outmost query.");
         }
 
         [$relationIdentifier, $join] = $this->getOrCreateJoin($relationSpecifier, $joinType ?? Criteria::LEFT_JOIN);
