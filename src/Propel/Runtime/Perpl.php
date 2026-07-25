@@ -26,7 +26,7 @@ class Perpl
      *
      * @var string
      */
-    public const VERSION = '2.9.0';
+    public const VERSION = '2.10.0';
 
     /**
      * A constant for <code>default</code>.
