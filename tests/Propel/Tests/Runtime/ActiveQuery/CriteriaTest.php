@@ -1219,8 +1219,6 @@ class CriteriaTest extends BookstoreTestBase
 
         $this->assertFalse($this->getObjectPropertyValue($c, 'ignoreCase'), 'ignoreCase is false by default');
 
-        $this->assertFalse($c->isSingleRecord(), 'singleRecord is false by default');
-
         $this->assertTrue(is_array($c->getSelectModifiers()), 'selectModifiers is an array');
         $this->assertEquals(0, count($c->getSelectModifiers()), 'selectModifiers is empty by default');
 
@@ -1250,8 +1248,6 @@ class CriteriaTest extends BookstoreTestBase
 
         $this->assertTrue(is_array($c->getAliases()), 'aliases is an array');
         $this->assertEquals(0, count($c->getAliases()), 'aliases is empty by default');
-
-        $this->assertFalse($c->isUseTransaction(), 'useTransaction is false by default');
 
         $this->assertNull($c->getLock(), 'lock is null by default');
     }

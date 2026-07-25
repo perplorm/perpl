@@ -24,7 +24,7 @@ public function populateI18n($locale = '<?php echo $defaultLocale ?>', $joinType
 {
     $this
         ->joinI18n($locale, null, $joinType)
-        ->populateJoinedRelation('<?php echo $i18nRelationName ?>');
+        ->populateRelation('<?php echo $i18nRelationName ?>');
 
     // adjust RelationPopulator to additional join condition
     $this->relatedModelsToPopulate['<?php echo $i18nRelationName ?>']->overridePopulatesListOnTarget(false);

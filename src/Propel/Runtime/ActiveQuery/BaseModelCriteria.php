@@ -93,7 +93,7 @@ class BaseModelCriteria extends Criteria implements IteratorAggregate
      * Gets the array of ModelWith specifying which relations must be populated
      * together with the main object.
      *
-     * @see ModelCriteria::populateJoinedRelation()
+     * @see ModelCriteria::populateRelation()
      *
      * @return array<string, \Propel\Runtime\ActiveQuery\RelationPopulator>
      */
@@ -445,16 +445,16 @@ class BaseModelCriteria extends Criteria implements IteratorAggregate
      *
      * @param string $class The classname to explode
      *
-     * @return array list($className, $aliasName)
+     * @return array{string, string|null}
      */
-    public static function getClassAndAlias(string $class): array
+    public static function splitIdentifierAndAlias(string $class): array
     {
         if (str_contains($class, ' ')) {
             [$class, $alias] = explode(' ', $class);
         } else {
             $alias = null;
         }
-        if (strpos($class, '\\') === 0) {
+        if ($class[0] === '\\') { // per convention, remove starting backslash from namespace
             $class = substr($class, 1);
         }
 
@@ -472,7 +472,7 @@ class BaseModelCriteria extends Criteria implements IteratorAggregate
     public static function getRelationName(string $relation): string
     {
         // get the relationName
-        [$fullName, $relationAlias] = self::getClassAndAlias($relation);
+        [$fullName, $relationAlias] = self::splitIdentifierAndAlias($relation);
         if ($relationAlias) {
             $relationName = $relationAlias;
         } elseif (strpos($fullName, '.') === false) {

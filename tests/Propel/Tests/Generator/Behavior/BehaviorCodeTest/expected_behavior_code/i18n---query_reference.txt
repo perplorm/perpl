@@ -46,7 +46,7 @@ public function populateI18n($locale = 'en_US', $joinType = Criteria::LEFT_JOIN)
 {
     $this
         ->joinI18n($locale, null, $joinType)
-        ->populateJoinedRelation('TableI18n');
+        ->populateRelation('TableI18n');
 
     // adjust RelationPopulator to additional join condition
     $this->relatedModelsToPopulate['TableI18n']->overridePopulatesListOnTarget(false);

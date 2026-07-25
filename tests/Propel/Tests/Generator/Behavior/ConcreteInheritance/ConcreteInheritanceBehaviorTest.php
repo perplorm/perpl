@@ -367,17 +367,9 @@ EOF;
         $article = new ConcreteArticleSetPk();
         $article->setId(4);
 
-        set_error_handler(static function (int $errno, string $errstr): never {
-            throw new PropelException($errstr, $errno);
-        }, E_WARNING);
-
         $this->expectException(PropelException::class);
-        try {
-            $article->save();
-        } finally {
-            restore_error_handler();
-        }
-        $this->fail('getParentOrCreate() returns a new parent object on new child objects with pk set');
+        $this->expectExceptionMessage('Unable to execute INSERT statement [INSERT INTO concrete_content_set_pk (id, descendant_class) VALUES (:p0, :p1)]');
+        $article->save();
     }
 
     /**
