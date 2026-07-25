@@ -1,0 +1,66 @@
+name: update version
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_type:
+        description: 'Type of release'
+        required: true
+        type: choice
+        options:
+          - 'major'
+          - 'minor'
+          - 'patch'
+        default: 'minor'
+
+jobs:
+    update-version:
+        name: 'Update Version'
+        runs-on: ubuntu-24.04
+        permissions:
+          contents: write
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v5
+
+            - name: Resolve version from current tag 
+              run: |
+                git fetch --prune --unshallow --tags origin main
+                IFS=. read -r MAJOR MINOR PATCH <<< $(git describe --tags --abbrev=0)
+                MAJOR=${MAJOR#v}
+                case "${{ github.event.inputs.release_type }}" in
+                  major)
+                    MAJOR=$((MAJOR + 1))
+                    MINOR=0
+                    PATCH=0
+                    ;;
+                  minor)
+                    MINOR=$((MINOR + 1))
+                    PATCH=0
+                    ;;
+                  patch)
+                    PATCH=$((PATCH + 1))
+                    ;;
+                esac
+                VERSION_NUMBER="${MAJOR}.${MINOR}.${PATCH}"
+                echo Version name: v$VERSION_NUMBER
+                echo "VERSION_NUMBER=$VERSION_NUMBER" >> $GITHUB_ENV
+
+            - name: Update version in \Propel\Runtime\Perpl
+              run: |
+                sed -i "s/public const VERSION = '.*';/public const VERSION = '${VERSION_NUMBER}';/" src/Propel/Runtime/Perpl.php
+                cat src/Propel/Runtime/Perpl.php
+
+            - name: Commit and push changes
+              run: |
+                git config --global user.name "Github Actions"
+                git config --global user.email "actions@github.com"
+                git add src/Propel/Runtime/Perpl.php
+                git commit -m "Update version number to ${VERSION_NUMBER}"
+                git push origin HEAD:main
+
+            - name: Create release
+              run: |
+                gh release create v${VERSION_NUMBER} --generate-notes
+              env:
+                GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
