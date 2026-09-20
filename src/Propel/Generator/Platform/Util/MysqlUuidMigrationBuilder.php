@@ -55,21 +55,21 @@ class MysqlUuidMigrationBuilder
         // remove constraints and indexes
         $indexes = $this->getSharedIndexes($fromColumn, $toColumn);
         foreach ($indexes as $index) {
-            $sqlBlock[] = $this->platform->getDropIndexDDL($index);
+            $sqlBlock[] = $this->platform->buildDropIndexDdl($index);
         }
         $movePrimaryKey = $fromColumn->isPrimaryKey() && $toColumn->isPrimaryKey();
         if ($movePrimaryKey) {
-            $sqlBlock[] = $this->platform->getDropPrimaryKeyDDL($fromColumn->getTable());
+            $sqlBlock[] = $this->platform->buildDropPrimaryKeyDdl($fromColumn->getTable());
         }
 
         $sqlBlock[] = $this->buildUuidMigrationStatements($toColumn, $toUuidBinary);
 
         // restore column constraints
         if ($movePrimaryKey) {
-            $sqlBlock[] = $this->platform->getAddPrimaryKeyDDL($toColumn->getTable());
+            $sqlBlock[] = $this->platform->buildAddPrimaryKeyDdl($toColumn->getTable());
         }
         foreach ($indexes as $index) {
-            $sqlBlock[] = $this->platform->getAddIndexDDL($index);
+            $sqlBlock[] = $this->platform->buildAddIndexDdl($index);
         }
 
         $sqlBlock[] = "# END migration of UUIDs in column '{$fromColumn->getName()}'\n";
@@ -153,7 +153,7 @@ EOT;
         $columnName = $this->quoteIdentifier($column->getName());
         $tmpColumnName = $this->quoteIdentifier($column->getName() . '_' . bin2hex(random_bytes(4)));
         $swapFlag = $column->getTable()->getVendorInfoForType('mysql')->getUuidSwapFlagLiteral();
-        $columnDefinition = $this->platform->getColumnDDL($column);
+        $columnDefinition = $this->platform->buildColumnDdl($column);
         $sqlType = $this->platform->getSqlTypeExpression($column);
 
         $convertFunction = ($toUuidBinary) ? 'UUID_TO_BIN' : 'BIN_TO_UUID';

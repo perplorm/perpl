@@ -8,6 +8,7 @@ use DateTimeInterface;
 use PDO;
 use PDOException;
 use Propel\Generator\Model\Datatype\ColumnType;
+use Propel\Generator\Model\IdMethod;
 use Propel\Runtime\ActiveQuery\ColumnResolver\ColumnExpression\AbstractColumnExpression;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\Adapter\AdapterInterface;
@@ -38,11 +39,12 @@ use function strpos;
 use function strrpos;
 use function strtolower;
 use function substr;
+use function trigger_deprecation;
 
 /**
  * Base for PDO database adapters.
  */
-abstract class PdoAdapter
+abstract class PdoAdapter implements AdapterInterface
 {
     /**
      * Indicates if the database system can process DELETE statements with
@@ -64,6 +66,7 @@ abstract class PdoAdapter
      *
      * @return \Propel\Runtime\Connection\PdoConnection
      */
+    #[\Override]
     public function getConnection(array $params): PdoConnection
     {
         $params = $this->prepareParams($params);
@@ -92,6 +95,7 @@ abstract class PdoAdapter
     /**
      * @return class-string<\PDO>
      */
+    #[\Override]
     public function getPdoSubclass(): string
     {
         return PDO::class;
@@ -205,6 +209,7 @@ abstract class PdoAdapter
      *
      * @return void
      */
+    #[\Override]
     public function setCharset(ConnectionInterface $con, string $charset): void
     {
         $con->exec(sprintf("SET NAMES '%s'", $charset));
@@ -244,6 +249,7 @@ abstract class PdoAdapter
      *
      * @return string The string in a case that can be ignored.
      */
+    #[\Override]
     public function ignoreCaseInOrderBy(string $in): string
     {
         return $this->ignoreCase($in);
@@ -256,6 +262,7 @@ abstract class PdoAdapter
      *
      * @return string The text delimiter.
      */
+    #[\Override]
     public function getStringDelimiter(): string
     {
         return '\'';
@@ -268,6 +275,7 @@ abstract class PdoAdapter
      *
      * @return string The quoted identifier.
      */
+    #[\Override]
     public function quoteIdentifier(string $text): string
     {
         return '"' . $text . '"';
@@ -283,6 +291,7 @@ abstract class PdoAdapter
      *
      * @return string
      */
+    #[\Override]
     public function quote(string $text): string
     {
         $pos = strrpos($text, '.');
@@ -303,13 +312,12 @@ abstract class PdoAdapter
      *
      * @return string
      */
+    #[\Override]
     public function quoteColumnIdentifier(?string $tableAlias, string $columnName): string
     {
-        if ($tableAlias) {
-            return $this->quoteIdentifierTable($tableAlias) . '.' . $this->quoteIdentifier($columnName);
-        }
-
-        return $this->quoteIdentifier($columnName);
+        return $tableAlias
+            ? $this->quoteIdentifierTable($tableAlias) . '.' . $this->quoteIdentifier($columnName)
+            : $this->quoteIdentifier($columnName);
     }
 
     /**
@@ -322,52 +330,79 @@ abstract class PdoAdapter
      *
      * @return string The quoted table name
      */
+    #[\Override]
     public function quoteIdentifierTable(string $table): string
     {
         return implode(' ', array_map([$this, 'quoteIdentifier'], explode(' ', $table)));
     }
 
     /**
-     * Returns the native ID method for this RDBMS.
+     * Whether an ID generation system requires getting ID _before_ performing INSERT.
      *
-     * @return int One of AdapterInterface:ID_METHOD_SEQUENCE, AdapterInterface::ID_METHOD_AUTOINCREMENT.
+     * @param \Propel\Generator\Model\IdMethod $idMethod
+     *
+     * @return bool
      */
-    protected function getIdMethod(): int
+    #[\Override]
+    public function isGetIdBeforeInsert(IdMethod $idMethod): bool
     {
-        return AdapterInterface::ID_METHOD_AUTOINCREMENT;
+        return $idMethod->isGetIdBeforeInsert();
     }
 
     /**
      * Whether this adapter uses an ID generation system that requires getting ID _before_ performing INSERT.
      *
-     * @return bool
-     */
-    public function isGetIdBeforeInsert(): bool
-    {
-        return $this->getIdMethod() === AdapterInterface::ID_METHOD_SEQUENCE;
-    }
-
-    /**
-     * Whether this adapter uses an ID generation system that requires getting ID _before_ performing INSERT.
+     * @param \Propel\Generator\Model\IdMethod $idMethod
      *
      * @return bool
      */
-    public function isGetIdAfterInsert(): bool
+    #[\Override]
+    public function isGetIdAfterInsert(IdMethod $idMethod): bool
     {
-        return $this->getIdMethod() === AdapterInterface::ID_METHOD_AUTOINCREMENT;
+        return $idMethod->isGetIdAfterInsert();
     }
 
     /**
-     * Gets the generated ID (either last ID for autoincrement or next sequence ID).
-     *
      * @param \Propel\Runtime\Connection\ConnectionInterface $con
-     * @param string|null $name
+     * @param string $sequenceName
+     *
+     * @throws \Propel\Runtime\Adapter\Exception\AdapterException Thrown if vendor does not support sequences.
      *
      * @return string|int
      */
-    public function getId(ConnectionInterface $con, ?string $name = null)
+    #[\Override]
+    public function loadNextValueFromSequence(ConnectionInterface $con, string $sequenceName)
     {
-        return $con->lastInsertId($name);
+        throw new AdapterException(self::class . ' does not support sequences');
+    }
+
+    /**
+     * Load last inserted autogenerated id (or optionally from specified sequence).
+     *
+     * @param \Propel\Runtime\Connection\ConnectionInterface $con
+     * @param string|null $sequenceName
+     *
+     * @return string|int|null
+     */
+    #[\Override]
+    public function loadLastInsertedId(ConnectionInterface $con, string|null $sequenceName = null)
+    {
+        return $con->lastInsertId($sequenceName);
+    }
+
+    /**
+     * @deprecated Use {@see static::loadLastInsertedId()} or {@see static::loadNextValueFromSequence()}.
+     *
+     * @param \Propel\Runtime\Connection\ConnectionInterface $con
+     * @param string|null $sequenceName
+     *
+     * @return string|int|null
+     */
+    public function getId(ConnectionInterface $con, string|null $sequenceName = null)
+    {
+        trigger_deprecation('Perpl', '2.10.3', 'PdoAdapter::getId() should not be used anymore - change to loadLastInsertedId() or loadNextValueFromSequence()');
+
+        return $this->loadLastInsertedId($con, $sequenceName);
     }
 
     /**
@@ -378,6 +413,7 @@ abstract class PdoAdapter
      *
      * @return string|null The formatted temporal value
      */
+    #[\Override]
     public function formatTemporalValue(DateTimeInterface|string|int|null $value, ColumnMap $cMap): string|null
     {
         if ($value === null || $value === '') {
@@ -407,6 +443,7 @@ abstract class PdoAdapter
      *
      * @return string
      */
+    #[\Override]
     public function getTimestampFormatter(): string
     {
         return 'Y-m-d H:i:s.u';
@@ -417,14 +454,14 @@ abstract class PdoAdapter
      *
      * @return string
      */
+    #[\Override]
     public function getGroupBy(Criteria $criteria): string
     {
         $groupBy = $criteria->getGroupByColumns();
-        if ($groupBy) {
-            return 'GROUP BY ' . implode(',', $groupBy);
-        }
 
-        return '';
+        return $groupBy
+            ? 'GROUP BY ' . implode(',', $groupBy)
+            : '';
     }
 
     /**
@@ -432,6 +469,7 @@ abstract class PdoAdapter
      *
      * @return string
      */
+    #[\Override]
     public function getDateFormatter(): string
     {
         return 'Y-m-d';
@@ -442,6 +480,7 @@ abstract class PdoAdapter
      *
      * @return string
      */
+    #[\Override]
     public function getTimeFormatter(): string
     {
         return 'H:i:s.u';

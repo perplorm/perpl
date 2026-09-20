@@ -22,8 +22,7 @@ class MappingModelTest extends TestCase
     #[\PHPUnit\Framework\Attributes\DataProvider('providerForGetDefaultValueForArray')]
     public function testGetDefaultValueForArray(string $value, $expected)
     {
-        $mappingModel = new TestableMappingModel();
-        $this->assertEquals($expected, $mappingModel->buildDefaultValueExpressionForArray($value));
+        $this->assertEquals($expected, MappingModel::buildDefaultValueExpressionForArray($value));
     }
 
     public static function providerForGetDefaultValueForArray()
@@ -42,11 +41,6 @@ class MappingModelTest extends TestCase
 
 class TestableMappingModel extends MappingModel
 {
-    public function buildDefaultValueExpressionForArray(string $value): ?string
-    {
-        return parent::buildDefaultValueExpressionForArray($value);
-    }
-
     /**
      * @return void
      */

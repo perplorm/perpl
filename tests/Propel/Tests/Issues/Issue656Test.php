@@ -43,7 +43,7 @@ class Issue656Test extends TestCase
 </database>
 EOF;
             $builder = new QuickBuilder();
-            $builder->setSchema($schema);
+            $builder->setSchemaXml($schema);
             $builder->buildClasses();
         }
     }

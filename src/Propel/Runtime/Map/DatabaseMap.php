@@ -102,7 +102,7 @@ class DatabaseMap
             $this->tables[$tableName] = $table;
         }
 
-        $phpName = $table->getClassName();
+        $phpName = $table->getModelClassName();
         $this->addTableByPhpName($phpName, $table);
     }
 

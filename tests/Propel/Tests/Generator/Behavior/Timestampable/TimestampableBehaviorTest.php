@@ -310,7 +310,7 @@ class TimestampableBehaviorTest extends BookstoreTestBase
 EOF;
 
         $builder = new QuickBuilder();
-        $builder->setSchema($schema);
+        $builder->setSchemaXml($schema);
         $builder->build();
 
         $this->assertTrue(method_exists('TableWithoutUpdatedAt', 'getCreatedAt'));
@@ -344,7 +344,7 @@ EOF;
 EOF;
 
         $builder = new QuickBuilder();
-        $builder->setSchema($schema);
+        $builder->setSchemaXml($schema);
         $builder->build();
 
         $this->assertFalse(method_exists('TableWithoutCreatedAt', 'getCreatedAt'));
@@ -385,7 +385,7 @@ EOF;
                 ],
             ],
         ]);
-        $builder->setSchema($schema);
+        $builder->setSchemaXml($schema);
         $builder->setConfig($config);
         $builder->build();
 
@@ -411,7 +411,7 @@ EOF;
 EOF;
 
         $builder = new QuickBuilder();
-        $builder->setSchema($schema);
+        $builder->setSchemaXml($schema);
         $builder->build();
 
         $obj = new TableColumnTypes();

@@ -399,6 +399,14 @@ class Column extends MappingModel
     }
 
     /**
+     * @return \Propel\Generator\Model\IdMethod|null
+     */
+    public function getIdMethod(): IdMethod|null
+    {
+        return $this->isAutoIncrement ? $this->parentTable?->getIdMethod() : null;
+    }
+
+    /**
      * Returns the fully qualified column name (table.COLUMN or table.column).
      *
      * @param bool $lowercaseColumnName
@@ -1583,30 +1591,31 @@ class Column extends MappingModel
      *
      * @throws \Propel\Generator\Exception\EngineException
      *
-     * @return string
+     * @return string|null
      */
-    public function getAutoIncrementString(): string
+    public function buildAutoIncrementString(): string|null
     {
-        if ($this->isAutoIncrement() && $this->parentTable->getIdMethod() === IdMethod::NATIVE) {
-            return $this->getPlatform()->getAutoIncrement();
+        $idMethod = $this->getIdMethod();
+        if (!$idMethod) {
+            return null;
+        }
+        if ($this->isAutoIncrement() && $idMethod === IdMethod::NO_ID_METHOD) {
+            $columnName = $this->getFullyQualifiedName();
+
+            throw new EngineException("Column `$columnName` uses auto increment but no idMethod is set on database or table.");
+        }
+        $autoIncrementClause = $this->getPlatform()->buildAutoIncrementColumnDdl($idMethod, $this);
+
+        if ($autoIncrementClause !== null) {
+            return $autoIncrementClause;
         }
 
-        if ($this->isAutoIncrement()) {
-            throw new EngineException(sprintf(
-                'You have specified autoIncrement for column "%s", but you have not specified idMethod="native" for table "%s".',
-                $this->name,
-                $this->parentTable->getName(),
-            ));
-        }
+        $columnName = $this->getFullyQualifiedName();
 
-        return '';
+        throw new EngineException("Column `$columnName` auto increment id method `$idMethod->value` is not compatible with current platform.");
     }
 
     /**
-     * Sets whether this column is an auto incremented value.
-     *
-     * Use isAutoIncrement() to find out if it is set or not.
-     *
      * @param bool $flag
      *
      * @return void

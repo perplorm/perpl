@@ -123,7 +123,7 @@ class EnumeratedColumnTypesTest extends TestCase
         $columnXml = '<column name="foo" type="ENUM_NATIVE" valueEnum="' . $enumClass . '"/>';
         $platform = new MysqlPlatform();
         $column = $this->buildColumnForPlatform($platform, false, $columnXml);
-        $ddl = $platform->getColumnDDL($column);
+        $ddl = $platform->buildColumnDdl($column);
 
         $this->assertEquals($expectedColumnDdl, $ddl);
     }

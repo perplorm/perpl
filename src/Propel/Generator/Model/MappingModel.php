@@ -6,12 +6,10 @@ namespace Propel\Generator\Model;
 
 use Propel\Common\Util\SetColumnConverter;
 use function array_change_key_case;
-use function explode;
-use function implode;
 use function in_array;
 use function is_bool;
 use function is_numeric;
-use function sprintf;
+use function preg_replace;
 use function strtolower;
 use function trim;
 use const CASE_LOWER;
@@ -123,25 +121,13 @@ abstract class MappingModel implements MappingModelInterface
      *
      * @return string|null
      */
-    protected function buildDefaultValueExpressionForArray(string $stringValue): ?string
+    public static function buildDefaultValueExpressionForArray(string $stringValue): ?string
     {
-        $stringValue = trim($stringValue);
+        $values = trim(preg_replace("/\s*(,\s*)+/", ' | ', $stringValue));
 
-        if (!$stringValue) {
-            return null;
-        }
-
-        $values = [];
-        foreach (explode(',', $stringValue) as $v) {
-            $values[] = trim($v);
-        }
-
-        $value = implode(' | ', $values);
-        if ($value === ' | ') {
-            return null;
-        }
-
-        return sprintf('||%s||', $value);
+        return $values && $values !== '|'
+            ? "||$values||"
+            : null;
     }
 
     /**

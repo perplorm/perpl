@@ -963,7 +963,7 @@ EOT;
     protected function buildSchema(string $schema): Database
     {
         $builder = new QuickBuilder();
-        $builder->setSchema($schema);
+        $builder->setSchemaXml($schema);
 
         return $builder->getDatabase();
     }
@@ -980,7 +980,7 @@ EOT;
     {
         $inputMessage ??= '';
         $platform = new MysqlPlatform();
-        $sql = $platform->getModifyTableDDL($diff);
+        $sql = $platform->buildModifyTableDdl($diff);
 
         return <<<EOT
 $inputMessage

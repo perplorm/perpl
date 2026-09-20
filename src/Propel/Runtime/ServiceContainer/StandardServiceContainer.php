@@ -434,15 +434,11 @@ class StandardServiceContainer implements ServiceContainerInterface
     #[\Override]
     public function getConnection(?string $name = null, string $mode = ServiceContainerInterface::CONNECTION_WRITE): ConnectionInterface
     {
-        if ($name === null) {
-            $name = $this->getDefaultDatasource();
-        }
+        $name ??= $this->getDefaultDatasource();
 
-        if ($mode === ServiceContainerInterface::CONNECTION_READ) {
-            return $this->getReadConnection($name);
-        }
-
-        return $this->getWriteConnection($name);
+        return $mode === ServiceContainerInterface::CONNECTION_READ
+            ? $this->getReadConnection($name)
+            : $this->getWriteConnection($name);
     }
 
     /**

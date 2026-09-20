@@ -787,7 +787,7 @@ class ModelCriteria extends BaseModelCriteria
 
         /** @var \Propel\Runtime\ActiveQuery\ModelJoin $modelJoin */
         $modelJoin = $this->joins[$relationName];
-        $className = $modelJoin->getTableMap()?->getClassName();
+        $className = $modelJoin->getTableMap()?->getModelClassName();
         $childQuery = $queryClass
             ? new $queryClass()
             : PropelQuery::from($className);
@@ -845,7 +845,7 @@ class ModelCriteria extends BaseModelCriteria
         ?string $operatorDeclaration = null
     ) {
         $relationMap = $this->getTableMapOrFail()->getRelation($relationName);
-        $className = (string)$relationMap->getRightTable()->getClassName();
+        $className = (string)$relationMap->getRightTable()->getModelClassName();
 
         /** @var static $innerQuery */
         $innerQuery = ($queryClass === null) ? PropelQuery::from($className) : new $queryClass();

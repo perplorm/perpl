@@ -367,7 +367,7 @@ class ObjectCollection extends Collection
         $relationMap = $this->getFormatter()->getTableMap()->getRelation($relation);
         if ($this->isEmpty()) {
             // save a useless query and return an empty collection
-            $relationClassName = $relationMap->getRightTable()->getClassName();
+            $relationClassName = $relationMap->getRightTable()->getModelClassName();
             $collectionClassName = $relationMap->getRightTable()->getCollectionClassName();
 
             /** @var \Propel\Runtime\Collection\Collection<\Propel\Runtime\ActiveRecord\ActiveRecordInterface> $collection */
@@ -382,7 +382,7 @@ class ObjectCollection extends Collection
 
         $symRelationMap = $relationMap->getSymmetricalRelation();
 
-        $query = PropelQuery::from($relationMap->getRightTable()->getClassName());
+        $query = PropelQuery::from($relationMap->getRightTable()->getModelClassName());
         if ($criteria !== null) {
             $query->mergeWith($criteria);
         }

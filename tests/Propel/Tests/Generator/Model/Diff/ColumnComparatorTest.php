@@ -12,6 +12,7 @@ use Propel\Generator\Model\Column;
 use Propel\Generator\Model\ColumnDefaultValue;
 use Propel\Generator\Model\Datatype\ColumnType;
 use Propel\Generator\Model\Diff\ColumnComparator;
+use Propel\Generator\Model\IdMethod;
 use Propel\Generator\Model\Table;
 use Propel\Generator\Platform\MysqlPlatform;
 use Propel\Tests\TestCase;
@@ -239,10 +240,11 @@ class ColumnComparatorTest extends TestCase
     public function testIgnoreIntegerSizeOnMySQL()
     {
         $platform = new MysqlPlatform();
-        $domain = clone $platform->getColumnTypeMapping(ColumnType::INTEGER);
+        $domain = $platform->getColumnTypeMapping(ColumnType::INTEGER);
 
         $tableStub = $this->createStub(Table::class);
         $tableStub->method('getPlatform')->willReturn($platform);
+        $tableStub->method('getIdMethod')->willReturn(IdMethod::NO_ID_METHOD);
 
         $fromColumn = new Column('foo');
         $fromColumn->setTable($tableStub);

@@ -33,8 +33,8 @@ class Issue915Test extends BookstoreTestBase
 </database>
 EOF;
             $builder = new QuickBuilder();
-            $builder->setSchema($schema);
-            $builder->buildClasses(null, true);
+            $builder->setSchemaXml($schema);
+            $builder->buildClasses();
         }
     }
 

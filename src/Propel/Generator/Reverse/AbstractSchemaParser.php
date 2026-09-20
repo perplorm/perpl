@@ -10,85 +10,58 @@ use Propel\Generator\Model\VendorInfo;
 use Propel\Generator\Platform\PlatformInterface;
 use Propel\Runtime\Connection\ConnectionInterface;
 use RuntimeException;
+use function assert;
 
 /**
  * Base class for reverse engineering a database schema.
  */
 abstract class AbstractSchemaParser implements SchemaParserInterface
 {
-    /**
-     * The database connection.
-     *
-     * @var \Propel\Runtime\Connection\ConnectionInterface
-     */
-    protected $dbh;
+    protected ConnectionInterface|null $con = null;
 
     /**
      * Stack of warnings.
      *
      * @var list<string>
      */
-    protected $warnings = [];
+    protected array $warnings = [];
 
     /**
      * GeneratorConfig object holding build properties.
-     *
-     * @var \Propel\Generator\Config\AbstractGeneratorConfig
      */
-    private $generatorConfig;
+    private AbstractGeneratorConfig|null $generatorConfig = null;
 
     /**
      * Map native DB types to Propel types.
      * (Override in subclasses.)
      *
-     * @var array<\Propel\Generator\Model\Datatype\ColumnType>
+     * @var array<\Propel\Generator\Model\Datatype\ColumnType>|null
      */
-    protected $nativeToPropelTypeMap;
+    protected array|null $nativeToPropelTypeMap = null;
+
+    protected string $migrationTableName = 'propel_migration';
+
+    protected PlatformInterface|null $platform = null;
 
     /**
-     * Map to hold reverse type mapping (initialized on-demand).
-     *
-     * @var array
+     * @param \Propel\Runtime\Connection\ConnectionInterface|null $con Optional database connection
      */
-    protected $reverseTypeMap;
-
-    /**
-     * Name of the propel migration table - to be ignored in reverse
-     *
-     * @var string
-     */
-    protected $migrationTable = 'propel_migration';
-
-    /**
-     * The database's platform.
-     *
-     * @var \Propel\Generator\Platform\PlatformInterface|null
-     */
-    protected $platform;
-
-    /**
-     * Constructor.
-     *
-     * @param \Propel\Runtime\Connection\ConnectionInterface|null $dbh Optional database connection
-     */
-    public function __construct(?ConnectionInterface $dbh = null)
+    public function __construct(?ConnectionInterface $con = null)
     {
-        if ($dbh !== null) {
-            $this->setConnection($dbh);
+        if ($con) {
+            $this->setConnection($con);
         }
     }
 
     /**
-     * Sets the database connection.
-     *
-     * @param \Propel\Runtime\Connection\ConnectionInterface $dbh
+     * @param \Propel\Runtime\Connection\ConnectionInterface $con
      *
      * @return void
      */
     #[\Override]
-    public function setConnection(ConnectionInterface $dbh): void
+    public function setConnection(ConnectionInterface $con): void
     {
-        $this->dbh = $dbh;
+        $this->con = $con;
     }
 
     /**
@@ -99,35 +72,33 @@ abstract class AbstractSchemaParser implements SchemaParserInterface
     #[\Override]
     public function getConnection(): ConnectionInterface
     {
-        return $this->dbh;
+        assert($this->con !== null);
+
+        return $this->con;
     }
 
     /**
-     * Setter for the migrationTable property
-     *
-     * @param string $migrationTable
+     * @param string $migrationTableName
      *
      * @return void
      */
-    public function setMigrationTable(string $migrationTable): void
+    public function setMigrationTable(string $migrationTableName): void
     {
-        $this->migrationTable = $migrationTable;
+        $this->migrationTableName = $migrationTableName;
     }
 
     /**
-     * Getter for the migrationTable property
-     *
      * @return string
      */
     public function getMigrationTable(): string
     {
-        return $this->migrationTable;
+        return $this->migrationTableName;
     }
 
     /**
      * Pushes a message onto the stack of warnings.
      *
-     * @param string $msg The warning message.
+     * @param string $msg
      *
      * @return void
      */
@@ -137,8 +108,6 @@ abstract class AbstractSchemaParser implements SchemaParserInterface
     }
 
     /**
-     * Gets array of warning messages.
-     *
      * @return array<string>
      */
     #[\Override]
@@ -161,8 +130,6 @@ abstract class AbstractSchemaParser implements SchemaParserInterface
     }
 
     /**
-     * Gets the GeneratorConfig option.
-     *
      * @return \Propel\Generator\Config\AbstractGeneratorConfig|null
      */
     public function getGeneratorConfig(): ?AbstractGeneratorConfig
@@ -171,7 +138,7 @@ abstract class AbstractSchemaParser implements SchemaParserInterface
     }
 
     /**
-     * Gets a type mapping from native type to Propel type.
+     * Gets a type mapping from native type to column type.
      *
      * @return array<\Propel\Generator\Model\Datatype\ColumnType>
      */
@@ -186,9 +153,7 @@ abstract class AbstractSchemaParser implements SchemaParserInterface
      */
     protected function getMappedPropelType(string $nativeType): ?ColumnType
     {
-        if ($this->nativeToPropelTypeMap === null) {
-            $this->nativeToPropelTypeMap = $this->buildTypeMapping();
-        }
+        $this->nativeToPropelTypeMap ??= $this->buildTypeMapping();
 
         return $this->nativeToPropelTypeMap[$nativeType] ?? null;
     }
@@ -230,8 +195,6 @@ abstract class AbstractSchemaParser implements SchemaParserInterface
     }
 
     /**
-     * Returns the database's platform.
-     *
      * @throws \RuntimeException
      *
      * @return \Propel\Generator\Platform\PlatformInterface
@@ -239,15 +202,12 @@ abstract class AbstractSchemaParser implements SchemaParserInterface
     #[\Override]
     public function getPlatform(): PlatformInterface
     {
-        if ($this->platform === null) {
-            $this->platform = $this->getGeneratorConfig()->getConfiguredPlatform();
-        }
+        $this->platform ??= $this->getGeneratorConfig()->getConfiguredPlatform();
 
-        $platform = $this->platform;
-        if ($platform === null) {
+        if (!$this->platform) {
             throw new RuntimeException('No platform set, please use `hasPlatform()` to check for existence first.');
         }
 
-        return $platform;
+        return $this->platform;
     }
 }

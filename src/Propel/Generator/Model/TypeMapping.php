@@ -303,7 +303,7 @@ class TypeMapping extends MappingModel
         return match ($this->columnType) {
             ColumnType::BOOLEAN,
             ColumnType::BOOLEAN_EMU => $this->booleanValue($value),
-            ColumnType::ARRAY => $this->buildDefaultValueExpressionForArray((string)$value),
+            ColumnType::ARRAY => MappingModel::buildDefaultValueExpressionForArray((string)$value),
             ColumnType::SET_BINARY => $this->buildDefaultValueExpressionForSet((string)$value),
             default => $value
         };

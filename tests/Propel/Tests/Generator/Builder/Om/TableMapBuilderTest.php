@@ -473,7 +473,7 @@ class TableMapBuilderTest extends BookstoreTestBase
 </database>
 XML;
         $builder = new QuickBuilder();
-        $builder->setSchema($databaseXml);
+        $builder->setSchemaXml($databaseXml);
         $builder->build();
 
         $this->assertTrue(\class_exists('\\ExampleNamespace\\Greens\\Map\\GreenThingTableMap'));

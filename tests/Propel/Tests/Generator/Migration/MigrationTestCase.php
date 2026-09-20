@@ -75,16 +75,16 @@ class MigrationTestCase extends TestCaseFixturesDatabase
      *
      * @throws \Propel\Generator\Exception\BuildException
      *
-     * @return \Propel\Generator\Model\Database|false
+     * @return \Propel\Generator\Model\Database|null
      */
-    public function applyXml($xml, $changeRequired = false)
+    public function applyXml($xml, $changeRequired = false): Database|null
     {
         $this->readDatabase();
 
         $builder = new QuickBuilder();
         $builder->setIdentifierQuoting(true);
         $builder->setPlatform($this->database->getPlatform());
-        $builder->setSchema($xml);
+        $builder->setSchemaXml($xml);
 
         $database = $builder->getDatabase();
         $database->setSchema('migration');
@@ -92,7 +92,7 @@ class MigrationTestCase extends TestCaseFixturesDatabase
 
         $diff = DatabaseComparator::computeDiff($this->database, $database);
 
-        if (false === $diff) {
+        if ($diff === false) {
             if ($changeRequired) {
                 throw new BuildException(sprintf(
                     "No changes in schema to current database: \nSchema database:\n%s\n\nCurrent Database:\n%s",
@@ -101,9 +101,9 @@ class MigrationTestCase extends TestCaseFixturesDatabase
                 ));
             }
 
-            return false;
+            return null;
         }
-        $sql = $this->database->getPlatform()->getModifyDatabaseDDL($diff);
+        $sql = $this->database->getPlatform()->buildModifyDatabaseDdl($diff);
 
         $this->con->beginTransaction();
         if (!$sql) {
@@ -202,7 +202,7 @@ class MigrationTestCase extends TestCaseFixturesDatabase
         $this->readDatabase();
         $diff = DatabaseComparator::computeDiff($this->database, $database);
         if ($diff) {
-            $sql = $this->database->getPlatform()->getModifyDatabaseDDL($diff);
+            $sql = $this->database->getPlatform()->buildModifyDatabaseDdl($diff);
 
             throw new BuildException(sprintf(
                 "There are unexpected diffs (real to model): \n%s\n-----%s-----\nCurrent Database: \n%s\nTo XML Database: \n%s\n",

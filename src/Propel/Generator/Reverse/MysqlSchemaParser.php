@@ -184,7 +184,7 @@ class MysqlSchemaParser extends AbstractSchemaParser
             }
         }
 
-        $dataFetcher = $this->dbh->query($sql);
+        $dataFetcher = $this->con->query($sql);
 
         if ($dataFetcher === false) {
             throw new RuntimeException('PdoConnection::query() did not return a result set as a statement object.');
@@ -218,7 +218,7 @@ class MysqlSchemaParser extends AbstractSchemaParser
     protected function addColumns(Table $table): void
     {
         /** @var \PDOStatement $stmt */
-        $stmt = $this->dbh->query(sprintf('SHOW COLUMNS FROM %s', $this->getPlatform()->doQuoting($table->getName())));
+        $stmt = $this->con->query(sprintf('SHOW COLUMNS FROM %s', $this->getPlatform()->doQuoting($table->getName())));
 
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             $column = $this->getColumnFromRow($row, $table);
@@ -479,7 +479,7 @@ WHERE table_schema=DATABASE()
   AND table_name=($tableName)
 EOT;
 
-        $dataFetcher = $this->dbh->query($query);
+        $dataFetcher = $this->con->query($query);
         if ($dataFetcher === false) {
             throw new RuntimeException('PdoConnection::query() did not return a result set as a statement object.');
         }
@@ -509,7 +509,7 @@ WHERE table_schema=DATABASE()
   AND column_name=($columnName)
 EOT;
 
-        $dataFetcher = $this->dbh->query($query);
+        $dataFetcher = $this->con->query($query);
         if ($dataFetcher === false) {
             throw new RuntimeException('PdoConnection::query() did not return a result set as a statement object.');
         }
@@ -531,7 +531,7 @@ EOT;
     {
         $database = $table->getDatabase();
 
-        $dataFetcher = $this->dbh->query(sprintf('SHOW CREATE TABLE %s', $this->getPlatform()->doQuoting($table->getName())));
+        $dataFetcher = $this->con->query(sprintf('SHOW CREATE TABLE %s', $this->getPlatform()->doQuoting($table->getName())));
 
         if ($dataFetcher === false) {
             throw new RuntimeException('PdoConnection::query() did not return a result set as a statement object.');
@@ -632,7 +632,7 @@ EOT;
     protected function addIndexes(Table $table): void
     {
         /** @var \PDOStatement $stmt */
-        $stmt = $this->dbh->query(sprintf('SHOW INDEX FROM %s', $this->getPlatform()->doQuoting($table->getName())));
+        $stmt = $this->con->query(sprintf('SHOW INDEX FROM %s', $this->getPlatform()->doQuoting($table->getName())));
 
         // Loop through the returned results, grouping the same key_name together
         // adding each column for that key.
@@ -687,7 +687,7 @@ EOT;
     protected function addPrimaryKey(Table $table): void
     {
         /** @var \PDOStatement $stmt */
-        $stmt = $this->dbh->query(sprintf('SHOW KEYS FROM %s', $this->getPlatform()->doQuoting($table->getName())));
+        $stmt = $this->con->query(sprintf('SHOW KEYS FROM %s', $this->getPlatform()->doQuoting($table->getName())));
 
         // Loop through the returned results, grouping the same key_name together
         // adding each column for that key.
@@ -714,7 +714,7 @@ EOT;
     protected function addTableVendorInfo(Table $table): void
     {
         /** @var \PDOStatement $stmt */
-        $stmt = $this->dbh->query("SHOW TABLE STATUS LIKE '" . $table->getName() . "'");
+        $stmt = $this->con->query("SHOW TABLE STATUS LIKE '" . $table->getName() . "'");
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         if (!$this->addVendorInfo) {
             // since we depend on `Engine` in the MysqlPlatform, we always have to extract this vendor information

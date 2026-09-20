@@ -24,11 +24,11 @@ interface SchemaParserInterface
     /**
      * Sets the database connection.
      *
-     * @param \Propel\Runtime\Connection\ConnectionInterface $dbh
+     * @param \Propel\Runtime\Connection\ConnectionInterface $con
      *
      * @return void
      */
-    public function setConnection(ConnectionInterface $dbh): void;
+    public function setConnection(ConnectionInterface $con): void;
 
     /**
      * Sets the GeneratorConfig to use in the parsing.
@@ -59,7 +59,7 @@ interface SchemaParserInterface
     public function setPlatform(PlatformInterface $platform): void;
 
     /**
-     * Parse the schema and populate passed-in Database model object.
+     * Read database structure into provided Database object..
      *
      * @param \Propel\Generator\Model\Database $database
      * @param array<\Propel\Generator\Model\Table> $additionalTables additional tables to parse and add to $database

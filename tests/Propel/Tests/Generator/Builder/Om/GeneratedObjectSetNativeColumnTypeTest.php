@@ -60,12 +60,12 @@ class GeneratedObjectSetNativeColumnTypeTest extends TestCaseFixtures
 </database>
 EOF;
         $builder = new QuickBuilder();
-        $builder->setSchema($schema);
+        $builder->setSchemaXml($schema);
         $builder->setVfs(false);
         $builder->setPlatform(new MysqlPlatform());
         $connection = Propel::getServiceContainer()->getConnection('bookstore');
         $connection->exec('DROP TABLE IF EXISTS native_set_entity;');
-        $builder->buildSQL($connection);
+        $builder->buildAndRunSql($connection);
         $builder->buildClasses();
     }
 

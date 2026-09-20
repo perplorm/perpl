@@ -20,7 +20,6 @@ use Propel\Generator\Model\ForeignKey;
 use Propel\Generator\Model\IdMethod;
 use Propel\Generator\Model\Table;
 use Propel\Generator\Platform\MssqlPlatform;
-use Propel\Generator\Platform\PlatformInterface;
 use Propel\Runtime\ActiveQuery\ColumnResolver\ColumnExpression\LocalColumnExpression;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\FilterExpression\FilterCollector;
@@ -34,6 +33,7 @@ use Propel\Runtime\Exception\PropelException;
 use Propel\Runtime\Map\TableMap;
 use Propel\Runtime\Parser\AbstractParser;
 use Propel\Runtime\Perpl;
+use function addcslashes;
 use function addslashes;
 use function array_any;
 use function array_filter;
@@ -2186,20 +2186,19 @@ $indent};";
      */
     protected function doInsert(ConnectionInterface \$con): void
     {";
-        if ($this->getPlatform() instanceof MssqlPlatform) {
+        if (!$this->getPlatform() instanceof MssqlPlatform) {
+            $script .= $this->addDoInsertBodyRaw();
+        } else {
             if ($table->hasAutoIncrementPrimaryKey()) {
+                $incrementedColumnName = $this->getColumnConstant($table->getAutoIncrementPrimaryKey());
                 $script .= "
-        \$this->modifiedColumns[" . $this->getColumnConstant($table->getAutoIncrementPrimaryKey()) . '] = true;';
+        \$this->modifiedColumns[$incrementedColumnName] = true;";
             }
             $script .= "
         \$criteria = \$this->buildCriteria();";
-            if ($this->getTable()->getIdMethod() != IdMethod::NO_ID_METHOD) {
-                $script .= $this->addDoInsertBodyWithIdMethod();
-            } else {
-                $script .= $this->addDoInsertBodyStandard();
-            }
-        } else {
-            $script .= $this->addDoInsertBodyRaw();
+            $script .= $this->getTable()->getIdMethod() !== IdMethod::NO_ID_METHOD
+                ? $this->addDoInsertBodyWithIdMethod()
+                : $this->addDoInsertBodyStandard();
         }
         $script .= "
         \$this->setNew(false);
@@ -2281,70 +2280,74 @@ $indent};";
             PDO::class,
             Perpl::class,
         );
-        $this->declareGlobalFunction('implode', 'array_keys', 'sprintf');
+        $this->declareGlobalFunction('implode', 'array_keys');
 
         $table = $this->getTable();
         /** @var \Propel\Generator\Platform\DefaultPlatform $platform */
         $platform = $this->getPlatform();
-        $primaryKeyMethodInfo = '';
-        if ($table->getIdMethodParameters()) {
-            $params = $table->getIdMethodParameters();
-            $imp = $params[0];
-            $primaryKeyMethodInfo = $imp->getValue();
-        } elseif ($table->getIdMethod() == IdMethod::NATIVE && ($platform->getNativeIdMethod() == PlatformInterface::SEQUENCE || $platform->getNativeIdMethod() == PlatformInterface::SERIAL)) {
-            $primaryKeyMethodInfo = $platform->getSequenceName($table);
-        }
-        $query = 'INSERT INTO ' . $this->quoteIdentifier($table->getName()) . ' (%s) VALUES (%s)';
-        $script = "
-        \$modifiedColumns = [];
-        \$index = 0;";
+        $pkSequenceName = $table->resolveDefaultIdSequenceName() ?? '';
+        $tableName = $this->quoteIdentifier($table->getName());
+        $uneditableColumns = [];
+
+        $script = '';
 
         foreach ($table->getPrimaryKey() as $column) {
             if (!$column->isAutoIncrement()) {
                 continue;
             }
             $constantName = $this->getColumnConstant($column);
-            if ($platform->supportsInsertNullPk()) {
+            $fieldVariable = '$this->' . $column->getLowercasedName();
+
+            if (!$table->isAllowPkInsert()) {
+                $script .= "
+        if ($fieldVariable !== null) {
+            throw new PropelException('Cannot insert a value for auto-increment primary key ($constantName)');
+        }\n";
+            }
+
+            if ($platform->supportsInsertNullPk() && !$table->getIdMethod()->isGetIdBeforeInsert()) {
                 $script .= "
         \$this->modifiedColumns[$constantName] = true;";
             }
-            $columnProperty = $column->getLowercasedName();
-            if (!$table->isAllowPkInsert()) {
-                $script .= "
-        if (\$this->{$columnProperty} !== null) {
-            throw new PropelException('Cannot insert a value for auto-increment primary key (' . $constantName . ')');
-        }";
-            } elseif (!$platform->supportsInsertNullPk()) {
-                $script .= "
-        // add primary key column only if it is not null since this database does not accept that
-        if (\$this->{$columnProperty} !== null) {
-            \$this->modifiedColumns[$constantName] = true;
-        }";
+
+            if (!$table->isAllowPkInsert() && !$platform->supportsInsertNullPk() && !$table->getIdMethod()->isGetIdBeforeInsert()) {
+                $uneditableColumns[] = $column;
             }
         }
 
         // if non auto-increment but using sequence, get the id first
-        if (!$platform->isNativeIdMethodAutoIncrement() && $table->getIdMethod() === 'native') {
+        if ($table->getIdMethod()->isGetIdBeforeInsert()) {
             $column = $table->getFirstPrimaryKeyColumn();
             if (!$column) {
                 throw new PropelException('Cannot find primary key column in table `' . $table->getName() . '`.');
             }
-            $columnProperty = $column->getLowercasedName();
+            $constantName = $this->getColumnConstant($column);
+            $fieldVariable = $column->getLowercasedName();
+            $loadNextSequenceValueStatement = $platform->buildLoadNextSequenceValueStatement(
+                "\$this->{$fieldVariable}",
+                '$con',
+                $pkSequenceName,
+                '                ',
+                $column->getPhpType(),
+            );
             $script .= "
-        if (\$this->{$columnProperty} === null) {
-            try {";
-            $script .= $platform->getIdentifierPhp('$this->' . $columnProperty, '$con', $primaryKeyMethodInfo, '                ', $column->getPhpType());
-            $script .= "
+        if (\$this->{$fieldVariable} === null) {
+            try {{$loadNextSequenceValueStatement}
             } catch (Exception \$e) {
                 throw new PropelException('Unable to get sequence id.', 0, \$e);
             }
+            \$this->modifiedColumns[$constantName] = true;
         }\n";
         }
 
         $script .= "
+        \$modifiedColumns = [];
+        \$index = 0;";
 
-         // check the columns in natural order for more readable SQL queries";
         foreach ($table->getColumns() as $column) {
+            if (in_array($column, $uneditableColumns)) {
+                continue;
+            }
             $constantName = $this->getColumnConstant($column);
             $identifier = var_export($this->quoteIdentifier($column->getName()), true);
             $script .= "
@@ -2353,13 +2356,11 @@ $indent};";
         }";
         }
 
+        $escapedTableName = addcslashes($tableName, '"');
         $script .= "
-
-        \$sql = sprintf(
-            '$query',
-            implode(', ', \$modifiedColumns),
-            implode(', ', array_keys(\$modifiedColumns)),
-        );
+        \$columnList = implode(', ', \$modifiedColumns);
+        \$columnValues = implode(', ', array_keys(\$modifiedColumns));
+        \$sql = \"INSERT INTO $escapedTableName (\$columnList) VALUES (\$columnValues)\";
 
         try {
             \$stmt = \$con->prepare(\$sql);
@@ -2372,6 +2373,9 @@ $indent};";
         $tab = '                        ';
         foreach ($this->columnCodeProducers as $columnCodeProducer) {
             $column = $columnCodeProducer->getColumn();
+            if (in_array($column, $uneditableColumns)) {
+                continue;
+            }
             $columnNameCase = var_export($this->quoteIdentifier($column->getName()), true);
             $accessValueStatement = $columnCodeProducer->getAccessValueStatement();
             $bindValueStatement = $platform->getColumnBindingPHP($column, '$identifier', $accessValueStatement, $tab);
@@ -2391,11 +2395,14 @@ $indent};";
         }\n";
 
         // if auto-increment, get the id after
-        if ($platform->isNativeIdMethodAutoIncrement() && $table->getIdMethod() === 'native') {
+        if ($table->getIdMethod()->isGetIdAfterInsert()) {
+            $lastInsertedIdStatement = $platform->buildLastInsertedIdStatement(
+                '$pk',
+                '$con',
+                $pkSequenceName,
+            );
             $script .= "
-        try {";
-            $script .= $platform->getIdentifierPhp('$pk', '$con', $primaryKeyMethodInfo);
-            $script .= "
+        try {{$lastInsertedIdStatement}
         } catch (Exception \$e) {
             throw new PropelException('Unable to get autoincrement id.', 0, \$e);
         }";
@@ -2403,15 +2410,14 @@ $indent};";
             if ($column) {
                 $columnName = $column->getPhpName();
                 $cast = $column->isNumericType() ? '(int)' : '(string)';
-                if ($table->isAllowPkInsert()) {
-                    $script .= "
+                $setValueStatement = "\$this->set{$columnName}($cast\$pk);";
+
+                $script .= !$table->isAllowPkInsert()
+                ? "\n        $setValueStatement"
+                : "
         if (\$pk !== null) {
-            \$this->set{$columnName}($cast\$pk);
+            $setValueStatement
         }";
-                } else {
-                    $script .= "
-        \$this->set{$columnName}($cast\$pk);";
-                }
             }
             $script .= "\n";
         }

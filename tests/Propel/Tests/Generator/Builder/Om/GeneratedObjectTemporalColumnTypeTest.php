@@ -216,7 +216,7 @@ EOF;
 </database>
 EOF;
         $builder = new QuickBuilder();
-        $builder->setSchema($schema);
+        $builder->setSchemaXml($schema);
         $builder->setPlatform(new MysqlPlatform());
         $builder->buildClasses();
         $r = new ComplexColumnTypeEntity6();

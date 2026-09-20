@@ -97,7 +97,7 @@ class XmlDumper implements DumperInterface
         /** @var \DOMElement $databaseNode */
         $databaseNode = $parentNode->appendChild($this->document->createElement('database'));
         $databaseNode->setAttribute('name', $database->getName());
-        $databaseNode->setAttribute('defaultIdMethod', $database->getDefaultIdMethod());
+        $databaseNode->setAttribute('defaultIdMethod', $database->getDefaultIdMethod()->value);
 
         $package = $database->getPackage();
         if ($package) {
@@ -210,6 +210,8 @@ class XmlDumper implements DumperInterface
      */
     private function appendTableNode(Table $table, DOMNode $parentNode): void
     {
+        $platform = $table->getPlatform();
+
         /** @var \DOMElement $tableNode */
         $tableNode = $parentNode->appendChild($this->document->createElement('table'));
         $tableNode->setAttribute('name', $table->getCommonName());
@@ -221,8 +223,11 @@ class XmlDumper implements DumperInterface
         }
 
         $idMethod = $table->getIdMethod();
+        if ($platform && $idMethod === $platform->getNativeIdMethod()) {
+            $idMethod = IdMethod::NATIVE;
+        }
         if ($idMethod !== $database->getDefaultIdMethod() && $idMethod !== IdMethod::NO_ID_METHOD) {
-            $tableNode->setAttribute('idMethod', $idMethod);
+            $tableNode->setAttribute('idMethod', $idMethod->value);
         }
 
         if ($table->hasCustomPhpName()) {

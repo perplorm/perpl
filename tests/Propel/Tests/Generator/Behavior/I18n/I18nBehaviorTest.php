@@ -35,11 +35,11 @@ class I18nBehaviorTest extends TestCase
 </database>
 EOF;
         $builder = new QuickBuilder();
-        $builder->setSchema($schema);
+        $builder->setSchemaXml($schema);
         $expected = <<<EOF
------------------------------------------------------------------------
+-- ---------------------------------------------------------------------
 -- i18n_behavior_test_0_i18n
------------------------------------------------------------------------
+-- ---------------------------------------------------------------------
 
 DROP TABLE IF EXISTS i18n_behavior_test_0_i18n;
 
@@ -53,7 +53,7 @@ CREATE TABLE i18n_behavior_test_0_i18n
         ON DELETE CASCADE
 );
 EOF;
-        $this->assertStringContainsString($expected, $builder->getSQL());
+        $this->assertStringContainsString($expected, $builder->buildSql());
     }
 
     /**
@@ -75,11 +75,11 @@ EOF;
 </database>
 EOF;
         $builder = new QuickBuilder();
-        $builder->setSchema($schema);
+        $builder->setSchemaXml($schema);
         $expected = <<<EOF
------------------------------------------------------------------------
+-- ---------------------------------------------------------------------
 -- i18n_behavior_test_0_i18n
------------------------------------------------------------------------
+-- ---------------------------------------------------------------------
 
 DROP TABLE IF EXISTS i18n_behavior_test_0_i18n;
 
@@ -93,7 +93,7 @@ CREATE TABLE i18n_behavior_test_0_i18n
         ON DELETE CASCADE
 );
 EOF;
-        $this->assertStringContainsString($expected, $builder->getSQL());
+        $this->assertStringContainsString($expected, $builder->buildSql());
     }
 
     /**
@@ -114,9 +114,9 @@ EOF;
 </database>
 EOF;
         $builder = new QuickBuilder();
-        $builder->setSchema($schema);
+        $builder->setSchemaXml($schema);
 
-        $this->assertEmpty($builder->getSQL());
+        $this->assertEmpty($builder->buildSql());
     }
 
     public static function schemaDataProvider()
@@ -161,17 +161,17 @@ EOF;
     public function testModifyTableAddsI18nTable($schema)
     {
         $builder = new QuickBuilder();
-        $builder->setSchema($schema);
+        $builder->setSchemaXml($schema);
         $expected = <<<EOF
------------------------------------------------------------------------
+-- ---------------------------------------------------------------------
 -- i18n_behavior_test_0_i18n
------------------------------------------------------------------------
+-- ---------------------------------------------------------------------
 
 DROP TABLE IF EXISTS i18n_behavior_test_0_i18n;
 
 CREATE TABLE i18n_behavior_test_0_i18n
 EOF;
-        $this->assertStringContainsString($expected, $builder->getSQL());
+        $this->assertStringContainsString($expected, $builder->buildSql());
     }
 
     /**
@@ -181,11 +181,11 @@ EOF;
     public function testModifyTableRelatesI18nTableToMainTable($schema)
     {
         $builder = new QuickBuilder();
-        $builder->setSchema($schema);
+        $builder->setSchemaXml($schema);
         $expected = <<<EOF
 FOREIGN KEY (id) REFERENCES i18n_behavior_test_0 (id)
 EOF;
-        $this->assertStringContainsString($expected, $builder->getSQL());
+        $this->assertStringContainsString($expected, $builder->buildSql());
     }
 
     /**
@@ -195,14 +195,14 @@ EOF;
     public function testModifyTableAddsLocaleColumnToI18n($schema)
     {
         $builder = new QuickBuilder();
-        $builder->setSchema($schema);
+        $builder->setSchemaXml($schema);
         $expected = <<<EOF
 CREATE TABLE i18n_behavior_test_0_i18n
 (
     id INTEGER NOT NULL,
     locale VARCHAR(5) DEFAULT 'en_US' NOT NULL,
 EOF;
-        $this->assertStringContainsString($expected, $builder->getSQL());
+        $this->assertStringContainsString($expected, $builder->buildSql());
     }
 
     /**
@@ -212,7 +212,7 @@ EOF;
     public function testModifyTableMovesI18nColumns($schema)
     {
         $builder = new QuickBuilder();
-        $builder->setSchema($schema);
+        $builder->setSchemaXml($schema);
         $expected = <<<EOF
 CREATE TABLE i18n_behavior_test_0_i18n
 (
@@ -223,7 +223,7 @@ CREATE TABLE i18n_behavior_test_0_i18n
     UNIQUE (id,locale),
     FOREIGN KEY (id) REFERENCES i18n_behavior_test_0 (id)
 EOF;
-        $this->assertStringContainsString($expected, $builder->getSQL());
+        $this->assertStringContainsString($expected, $builder->buildSql());
     }
 
     /**
@@ -233,7 +233,7 @@ EOF;
     public function testModifyTableDoesNotMoveNonI18nColumns($schema)
     {
         $builder = new QuickBuilder();
-        $builder->setSchema($schema);
+        $builder->setSchemaXml($schema);
         $expected = <<<EOF
 CREATE TABLE i18n_behavior_test_0
 (
@@ -242,7 +242,7 @@ CREATE TABLE i18n_behavior_test_0
     UNIQUE (id)
 );
 EOF;
-        $this->assertStringContainsString($expected, $builder->getSQL());
+        $this->assertStringContainsString($expected, $builder->buildSql());
     }
 
     /**
@@ -261,11 +261,11 @@ EOF;
 </database>
 EOF;
         $builder = new QuickBuilder();
-        $builder->setSchema($schema);
+        $builder->setSchemaXml($schema);
         $expected = <<<EOF
------------------------------------------------------------------------
+-- ---------------------------------------------------------------------
 -- foo_table
------------------------------------------------------------------------
+-- ---------------------------------------------------------------------
 
 DROP TABLE IF EXISTS foo_table;
 
@@ -279,7 +279,7 @@ CREATE TABLE foo_table
         ON DELETE CASCADE
 );
 EOF;
-        $this->assertStringContainsString($expected, $builder->getSQL());
+        $this->assertStringContainsString($expected, $builder->buildSql());
     }
 
     /**
@@ -298,11 +298,11 @@ EOF;
 </database>
 EOF;
         $builder = new QuickBuilder();
-        $builder->setSchema($schema);
+        $builder->setSchemaXml($schema);
         $expected = <<<EOF
------------------------------------------------------------------------
+-- ---------------------------------------------------------------------
 -- i18n_behavior_test_0_i18n
------------------------------------------------------------------------
+-- ---------------------------------------------------------------------
 
 DROP TABLE IF EXISTS i18n_behavior_test_0_i18n;
 
@@ -316,7 +316,7 @@ CREATE TABLE i18n_behavior_test_0_i18n
         ON DELETE CASCADE
 );
 EOF;
-        $this->assertStringContainsString($expected, $builder->getSQL());
+        $this->assertStringContainsString($expected, $builder->buildSql());
     }
 
     /**
@@ -335,11 +335,11 @@ EOF;
 </database>
 EOF;
         $builder = new QuickBuilder();
-        $builder->setSchema($schema);
+        $builder->setSchemaXml($schema);
         $expected = <<<EOF
------------------------------------------------------------------------
+-- ---------------------------------------------------------------------
 -- i18n_behavior_test_0_i18n
------------------------------------------------------------------------
+-- ---------------------------------------------------------------------
 
 DROP TABLE IF EXISTS i18n_behavior_test_0_i18n;
 
@@ -353,7 +353,7 @@ CREATE TABLE i18n_behavior_test_0_i18n
         ON DELETE CASCADE
 );
 EOF;
-        $this->assertStringContainsString($expected, $builder->getSQL());
+        $this->assertStringContainsString($expected, $builder->buildSql());
     }
 
     /**
@@ -372,11 +372,11 @@ EOF;
 </database>
 EOF;
         $builder = new QuickBuilder();
-        $builder->setSchema($schema);
+        $builder->setSchemaXml($schema);
         $expected = <<<EOF
------------------------------------------------------------------------
+-- ---------------------------------------------------------------------
 -- i18n_behavior_test_0_i18n
------------------------------------------------------------------------
+-- ---------------------------------------------------------------------
 
 DROP TABLE IF EXISTS i18n_behavior_test_0_i18n;
 
@@ -390,7 +390,7 @@ CREATE TABLE i18n_behavior_test_0_i18n
         ON DELETE CASCADE
 );
 EOF;
-        $this->assertStringContainsString($expected, $builder->getSQL());
+        $this->assertStringContainsString($expected, $builder->buildSql());
     }
 
     public static function customPkSchemaDataProvider()
@@ -436,11 +436,11 @@ EOF;
     public function testModifyTableRelatesI18nTableToMainTableWithCustomPk($schema)
     {
         $builder = new QuickBuilder();
-        $builder->setSchema($schema);
+        $builder->setSchemaXml($schema);
         $expected = <<<EOF
------------------------------------------------------------------------
+-- ---------------------------------------------------------------------
 -- i18n_behavior_test_custom_pk_0_i18n
------------------------------------------------------------------------
+-- ---------------------------------------------------------------------
 
 DROP TABLE IF EXISTS i18n_behavior_test_custom_pk_0_i18n;
 
@@ -453,6 +453,6 @@ CREATE TABLE i18n_behavior_test_custom_pk_0_i18n
     UNIQUE (custom_id,locale),
     FOREIGN KEY (custom_id) REFERENCES i18n_behavior_test_custom_pk_0 (id)
 EOF;
-        $this->assertStringContainsString($expected, $builder->getSQL());
+        $this->assertStringContainsString($expected, $builder->buildSql());
     }
 }

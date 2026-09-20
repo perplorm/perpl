@@ -14,10 +14,12 @@ use Propel\Generator\Exception\EngineException;
 use Propel\Generator\Exception\InvalidArgumentException;
 use Propel\Generator\Model\Column;
 use Propel\Generator\Model\Database;
+use Propel\Generator\Model\IdMethod;
+use Propel\Generator\Model\IdMethodParameter;
 use Propel\Generator\Model\Index;
 use Propel\Generator\Model\Schema;
 use Propel\Generator\Model\Table;
-use Propel\Tests\TestCase;
+use Propel\Generator\Platform\DefaultPlatform;
 
 /**
  * Unit test suite for Table model class.
@@ -646,7 +648,7 @@ class TableTest extends ModelTestCase
         $column3 = $this->getColumnMock('rank');
 
         $table = new Table('');
-        $table->setIdMethod('native');
+        $table->setIdMethod(IdMethod::NATIVE);
         $table->addColumn($column1);
         $table->addColumn($column2);
         $table->addColumn($column3);
@@ -669,7 +671,7 @@ class TableTest extends ModelTestCase
         $column3 = $this->getColumnMock('isbn');
 
         $table = new Table('');
-        $table->setIdMethod('native');
+        $table->setIdMethod(IdMethod::NATIVE);
         $table->addColumn($column1);
         $table->addColumn($column2);
         $table->addColumn($column3);
@@ -692,7 +694,7 @@ class TableTest extends ModelTestCase
         $column3 = $this->getColumnMock('isbn');
 
         $table = new Table('');
-        $table->setIdMethod('none');
+        $table->setIdMethod(IdMethod::NO_ID_METHOD);
         $table->addColumn($column1);
         $table->addColumn($column2);
         $table->addColumn($column3);
@@ -719,7 +721,7 @@ class TableTest extends ModelTestCase
         $column3 = $this->getColumnMock('isbn');
 
         $table = new Table('');
-        $table->setIdMethod('native');
+        $table->setIdMethod(IdMethod::AUTO_INCREMENT);
         $table->addColumn($column1);
         $table->addColumn($column2);
         $table->addColumn($column3);
@@ -1123,5 +1125,49 @@ class TableTest extends ModelTestCase
     public function testHasCustomPhpName(Table $table, bool $expected, string $description): void
     {
         $this->assertSame($expected, $table->hasCustomPhpName(), $description);
+    }
+
+
+    public static function SequenceNameDataProvider(): array
+    {
+        $defaultSequenceTable = new Table('foo');
+        $defaultSequenceTable->setIdMethod(IdMethod::SEQUENCE);
+
+        $db = new Database();
+        $db->setPlatform(new DefaultPlatform());
+        $db->addTable($defaultSequenceTable);
+
+        $noSequenceTable = clone $defaultSequenceTable;
+        $noSequenceTable ->setIdMethod(IdMethod::NO_ID_METHOD);
+
+        $manualSequenceTable = clone $defaultSequenceTable;
+        $idMethodParameter = new IdMethodParameter();
+        $idMethodParameter->setValue('foo_sequence');
+        $manualSequenceTable->addIdMethodParameter($idMethodParameter);
+
+        $longSequenceTable = new Table('table_name_above_supported_identifier_length_of_sixty-four_characters');
+        $longSequenceTable->setIdMethod(IdMethod::SEQUENCE);
+        $db->addTable($longSequenceTable);
+
+        $longManualSequenceTable = clone $defaultSequenceTable;
+        $idMethodParameter = new IdMethodParameter();
+        $idMethodParameter->setValue('sequence_name_above_supported_identifier_length_of_sixty-four_characters');
+        $longManualSequenceTable->addIdMethodParameter($idMethodParameter);
+
+        return [
+            [$defaultSequenceTable, 'foo_SEQ'], 
+            [$noSequenceTable, null],
+            [$manualSequenceTable, 'foo_sequence'],
+            [$longSequenceTable, 'table_name_above_supported_identifier_length_of_sixty-four~2_SEQ'],
+            [$longManualSequenceTable, 'sequence_name_above_supported_identifier_length_of_sixty-four_~3'],
+        ];
+    }
+    /**
+     * @return void
+     */
+    #[DataProvider('SequenceNameDataProvider')]
+    public function testGetSequenceNameDefault(Table $table, $expectedSequenceName)
+    {
+        $this->assertEquals($expectedSequenceName, $table->resolveDefaultIdSequenceName());
     }
 }

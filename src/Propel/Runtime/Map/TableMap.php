@@ -5,6 +5,7 @@ declare(strict_types = 1);
 namespace Propel\Runtime\Map;
 
 use Propel\Generator\Model\Datatype\ColumnType;
+use Propel\Generator\Model\IdMethod;
 use Propel\Runtime\Collection\ObjectCollection;
 use Propel\Runtime\Exception\LogicException;
 use Propel\Runtime\Map\Exception\ColumnNotFoundException;
@@ -12,9 +13,11 @@ use Propel\Runtime\Map\Exception\RelationNotFoundException;
 use function array_find;
 use function array_key_exists;
 use function array_keys;
+use function assert;
 use function implode;
 use function sprintf;
 use function substr;
+use function trigger_deprecation;
 
 /**
  * TableMap is used to model a table in a database.
@@ -76,62 +79,36 @@ class TableMap
     public const DEFAULT_OBJECT_COLLECTION = ObjectCollection::class;
 
     /**
-     * Columns in the table
-     *
      * @var array<\Propel\Runtime\Map\ColumnMap>
      */
-    protected $columns = [];
+    protected array $columns = [];
 
     /**
      * Columns in the table, using table phpName as key
      *
      * @var array<\Propel\Runtime\Map\ColumnMap>
      */
-    protected $columnsByPhpName = [];
+    protected array $columnsByPhpName = [];
 
     /**
-     * Map of normalized column names
-     *
      * @var array<string>
      */
     protected $normalizedColumnNameMap = [];
 
-    /**
-     * The database this table belongs to
-     *
-     * @var \Propel\Runtime\Map\DatabaseMap
-     */
-    protected $dbMap;
+    protected DatabaseMap|null $dbMap = null;
+
+    protected string|null $tableName = null;
+
+    protected string|null $phpName = null;
 
     /**
-     * The name of the table
+     * @var class-string<\Propel\Runtime\ActiveRecord\ActiveRecordInterface>
      */
-    protected ?string $tableName = null;
+    protected string|null $modeClassname = null;
 
-    /**
-     * The PHP name of the table
-     *
-     * @var string
-     */
-    protected $phpName;
+    protected string|null $package = null;
 
-    /**
-     * The ClassName for this table
-     *
-     * @psalm-var class-string<\Propel\Runtime\ActiveRecord\ActiveRecordInterface>
-     *
-     * @var string
-     */
-    protected $classname;
-
-    /**
-     * The Package for this table
-     *
-     * @var string
-     */
-    protected $package;
-
-    protected bool $useIdGenerator = false;
+    protected IdMethod $idMethod;
 
     protected bool $isSingleTableInheritance = false;
 
@@ -160,12 +137,7 @@ class TableMap
      */
     protected bool $relationsBuilt = false;
 
-    /**
-     *  Object to store information that is needed if the for generating primary keys
-     *
-     * @var mixed
-     */
-    protected $pkInfo;
+    protected string|null $idSequenceName = null;
 
     protected bool $identifierQuoting = false;
 
@@ -183,6 +155,8 @@ class TableMap
             $this->setDatabaseMap($dbMap);
         }
 
+        $this->idMethod = IdMethod::NO_ID_METHOD;
+
         $this->initialize();
     }
 
@@ -197,9 +171,7 @@ class TableMap
     }
 
     /**
-     * Set the DatabaseMap containing this TableMap.
-     *
-     * @param \Propel\Runtime\Map\DatabaseMap $dbMap A DatabaseMap.
+     * @param \Propel\Runtime\Map\DatabaseMap $dbMap
      *
      * @return void
      */
@@ -209,19 +181,17 @@ class TableMap
     }
 
     /**
-     * Get the DatabaseMap containing this TableMap.
-     *
-     * @return \Propel\Runtime\Map\DatabaseMap A DatabaseMap.
+     * @return \Propel\Runtime\Map\DatabaseMap
      */
     public function getDatabaseMap(): DatabaseMap
     {
+        assert($this->dbMap !== null);
+
         return $this->dbMap;
     }
 
     /**
-     * Set the name of the Table.
-     *
-     * @param string|null $name The name of the table.
+     * @param string|null $name
      *
      * @return void
      */
@@ -231,9 +201,7 @@ class TableMap
     }
 
     /**
-     * Get the name of the Table.
-     *
-     * @return string|null A String with the name of the table.
+     * @return string|null
      */
     public function getName(): ?string
     {
@@ -241,27 +209,7 @@ class TableMap
     }
 
     /**
-     * Get the name of the Table.
-     *
-     * @throws \Propel\Runtime\Exception\LogicException
-     *
-     * @return string A String with the name of the table.
-     */
-    public function getNameOrFail(): string
-    {
-        $name = $this->getName();
-
-        if ($name === null) {
-            throw new LogicException('Name is not defined.');
-        }
-
-        return $name;
-    }
-
-    /**
-     * Set the PHP name of the Table.
-     *
-     * @param string $phpName The PHP Name for this table
+     * @param string $phpName
      *
      * @return void
      */
@@ -271,9 +219,7 @@ class TableMap
     }
 
     /**
-     * Get the PHP name of the Table.
-     *
-     * @return string|null A String with the name of the table.
+     * @return string|null
      */
     public function getPhpName(): ?string
     {
@@ -281,11 +227,9 @@ class TableMap
     }
 
     /**
-     * Get the PHP name of the Table.
-     *
      * @throws \Propel\Runtime\Exception\LogicException
      *
-     * @return string A String with the name of the table.
+     * @return string
      */
     public function getPhpNameOrFail(): string
     {
@@ -299,30 +243,38 @@ class TableMap
     }
 
     /**
-     * Set the ClassName of the Table. Could be useful for calling
+     * Set the model ClassName of the Table. Could be useful for calling
      * tableMap and Object methods dynamically.
      *
      * @psalm-param class-string<\Propel\Runtime\ActiveRecord\ActiveRecordInterface> $classname
      *
-     * @param string $classname The ClassName
+     * @param string $classname
      *
      * @return void
      */
-    public function setClassName(string $classname): void
+    public function setModelClassName(string $classname): void
     {
-        $this->classname = $classname;
+        $this->modeClassname = $classname;
     }
 
     /**
-     * Get the ClassName of the Propel Class belonging to this table.
-     *
      * @psalm-return class-string<\Propel\Runtime\ActiveRecord\ActiveRecordInterface>
+     *
+     * @return string|null
+     */
+    public function getModelClassName(): ?string
+    {
+        return $this->modeClassname;
+    }
+
+    /**
+     * @deprecated Use aptly named {@see static::getModelClassName()}
      *
      * @return string|null
      */
     public function getClassName(): ?string
     {
-        return $this->classname;
+        return $this->modeClassname;
     }
 
     /**
@@ -334,7 +286,7 @@ class TableMap
      */
     public function getClassNameOrFail(): string
     {
-        $className = $this->getClassName();
+        $className = $this->getModelClassName();
 
         if ($className === null) {
             throw new LogicException('Class name is not defined.');
@@ -344,8 +296,6 @@ class TableMap
     }
 
     /**
-     * Get the Collection ClassName to this table.
-     *
      * @return class-string
      */
     public function getCollectionClassName(): string
@@ -354,9 +304,7 @@ class TableMap
     }
 
     /**
-     * Set the Package of the Table
-     *
-     * @param string $package The Package
+     * @param string $package
      *
      * @return void
      */
@@ -366,8 +314,6 @@ class TableMap
     }
 
     /**
-     * Get the Package of the table.
-     *
      * @return string|null
      */
     public function getPackage(): ?string
@@ -376,25 +322,59 @@ class TableMap
     }
 
     /**
-     * Set whether to use Id generator for primary key.
+     * @param \Propel\Generator\Model\IdMethod $idMethod
      *
-     * @param bool $bit
+     * @throws \Propel\Runtime\Exception\LogicException
      *
      * @return void
      */
-    public function setUseIdGenerator(bool $bit): void
+    public function setIdMethod(IdMethod $idMethod): void
     {
-        $this->useIdGenerator = $bit;
+        if ($idMethod === IdMethod::NATIVE) {
+            throw new LogicException('Cannot use meta-type IdMethod::Native for specific database table.');
+        }
+
+        $this->idMethod = $idMethod;
     }
 
     /**
-     * Whether to use Id generator for primary key.
+     * @return \Propel\Generator\Model\IdMethod
+     */
+    public function getIdMethod(): IdMethod
+    {
+        return $this->idMethod;
+    }
+
+    /**
+     * @deprecated Change id method via {@see static::setIdMethod()}
+     *
+     * @param bool $newIdsAreProvidedByDb
+     *
+     * @return void
+     */
+    public function setUseIdGenerator(bool $newIdsAreProvidedByDb): void
+    {
+        trigger_deprecation('Perpl', '2.10.3', 'Change id method via TableMap::setIdMethod()');
+    }
+
+    /**
+     * Check if autogenerated id of new rows has to be retrieved from DB.
+     *
+     * @return bool
+     */
+    public function isUsingAutoIncrementedIds(): bool
+    {
+        return $this->idMethod !== IdMethod::NO_ID_METHOD;
+    }
+
+    /**
+     * @deprecated Use aptly named {@see static::databaseGeneratesId()}
      *
      * @return bool
      */
     public function isUseIdGenerator(): bool
     {
-        return $this->useIdGenerator;
+        return $this->isUsingAutoIncrementedIds();
     }
 
     /**
@@ -422,23 +402,23 @@ class TableMap
     /**
      * Sets the name of the sequence used to generate a key
      *
-     * @param mixed $pkInfo information needed to generate a key
+     * @param string|null $idSequenceName
      *
      * @return void
      */
-    public function setPrimaryKeyMethodInfo($pkInfo): void
+    public function setPrimaryKeyMethodInfo(string|null $idSequenceName): void
     {
-        $this->pkInfo = $pkInfo;
+        $this->idSequenceName = $idSequenceName;
     }
 
     /**
      * Get the name of the sequence used to generate a primary key
      *
-     * @return mixed
+     * @return string|null
      */
-    public function getPrimaryKeyMethodInfo()
+    public function getIdSequenceName(): string|null
     {
-        return $this->pkInfo;
+        return $this->idSequenceName;
     }
 
     /**
@@ -928,6 +908,6 @@ class TableMap
     {
         return $this->tableName === $identifier
             || $this->phpName === $identifier
-            || $this->classname === ($identifier[0] === '\\' ? $identifier : '\\' . $identifier);
+            || $this->modeClassname === ($identifier[0] === '\\' ? $identifier : '\\' . $identifier);
     }
 }

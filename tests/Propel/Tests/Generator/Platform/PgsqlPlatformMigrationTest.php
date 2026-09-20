@@ -12,6 +12,9 @@ use Propel\Generator\Builder\Util\SchemaReader;
 use Propel\Generator\Model\Column;
 use Propel\Generator\Model\Datatype\ColumnType;
 use Propel\Generator\Model\Diff\ColumnComparator;
+use Propel\Generator\Model\Diff\TableComparator;
+use Propel\Generator\Model\Diff\TableDiff;
+use Propel\Generator\Model\IdMethod;
 use Propel\Generator\Model\Table;
 use Propel\Generator\Platform\PgsqlPlatform;
 use Propel\Generator\Platform\PlatformInterface;
@@ -40,11 +43,15 @@ BEGIN;
 
 DROP TABLE IF EXISTS "foo1" CASCADE;
 
+DROP SEQUENCE IF EXISTS "foo1_id_seq";
+
 ALTER TABLE "foo3" RENAME TO "foo4";
+
+CREATE SEQUENCE IF NOT EXISTS "foo5_id_seq";
 
 CREATE TABLE "foo5"
 (
-    "id" serial NOT NULL,
+    "id" INTEGER DEFAULT nextval('foo5_id_seq'::regclass) NOT NULL,
     "lkdjfsh" INTEGER,
     "dfgdsgf" TEXT,
     PRIMARY KEY ("id")
@@ -61,7 +68,7 @@ ALTER TABLE "foo2"
 COMMIT;
 
 END;
-        $this->assertEquals($expected, static::getPlatform()->getModifyDatabaseDDL($databaseDiff));
+        $this->assertEquals($expected, static::getPlatform()->buildModifyDatabaseDdl($databaseDiff));
     }
 
     /**
@@ -73,7 +80,7 @@ END;
         $expected = '
 ALTER TABLE "foo1" RENAME TO "foo2";
 ';
-        $this->assertEquals($expected, static::getPlatform()->getRenameTableDDL($fromName, $toName));
+        $this->assertEquals($expected, static::getPlatform()->buildRenameTableDdl($fromName, $toName));
     }
 
     /**
@@ -111,7 +118,7 @@ ALTER TABLE "foo" ADD CONSTRAINT "foo1_fk_1"
     REFERENCES "foo2" ("bar");
 
 END;
-        $this->assertEquals($expected, static::getPlatform()->getModifyTableDDL($tableDiff));
+        $this->assertEquals($expected, static::getPlatform()->buildModifyTableDdl($tableDiff));
     }
 
     /**
@@ -129,7 +136,7 @@ ALTER TABLE "foo" ALTER COLUMN "baz" DROP NOT NULL;
 ALTER TABLE "foo" ADD "baz3" TEXT;
 
 END;
-        $this->assertEquals($expected, static::getPlatform()->getModifyTableColumnsDDL($tableDiff));
+        $this->assertEquals($expected, static::getPlatform()->buildModifyTableColumnsDdl($tableDiff));
     }
 
     /**
@@ -145,7 +152,7 @@ ALTER TABLE "foo" DROP CONSTRAINT "foo_pkey";
 ALTER TABLE "foo" ADD PRIMARY KEY ("id","bar");
 
 END;
-        $this->assertEquals($expected, static::getPlatform()->getModifyTablePrimaryKeyDDL($tableDiff));
+        $this->assertEquals($expected, static::getPlatform()->buildModifyTablePrimaryKeyDdl($tableDiff));
     }
 
     /**
@@ -169,7 +176,7 @@ DROP INDEX "bar_baz_fk";
 CREATE INDEX "bar_baz_fk" ON "foo" ("id","bar","baz");
 
 END;
-        $this->assertEquals($expected, static::getPlatform()->getModifyTableIndicesDDL($tableDiff));
+        $this->assertEquals($expected, static::getPlatform()->buildModifyTableIndicesDdl($tableDiff));
     }
 
     /**
@@ -193,7 +200,7 @@ ALTER TABLE "foo1" ADD CONSTRAINT "foo1_fk_2"
     REFERENCES "foo2" ("bar","id");
 
 END;
-        $this->assertEquals($expected, static::getPlatform()->getModifyTableForeignKeysDDL($tableDiff));
+        $this->assertEquals($expected, static::getPlatform()->buildModifyTableForeignKeysDdl($tableDiff));
     }
 
     /**
@@ -207,7 +214,7 @@ END;
 ALTER TABLE "foo1" DROP CONSTRAINT "foo1_fk_1";
 
 END;
-        $this->assertEquals($expected, static::getPlatform()->getModifyTableForeignKeysDDL($tableDiff));
+        $this->assertEquals($expected, static::getPlatform()->buildModifyTableForeignKeysDdl($tableDiff));
         $expected = <<<END
 
 ALTER TABLE "foo1" ADD CONSTRAINT "foo1_fk_1"
@@ -215,7 +222,7 @@ ALTER TABLE "foo1" ADD CONSTRAINT "foo1_fk_1"
     REFERENCES "foo2" ("bar");
 
 END;
-        $this->assertEquals($expected, static::getPlatform()->getModifyTableForeignKeysDDL($tableDiff->getReverseDiff()));
+        $this->assertEquals($expected, static::getPlatform()->buildModifyTableForeignKeysDdl($tableDiff->getReverseDiff()));
     }
 
     /**
@@ -225,9 +232,9 @@ END;
     public function testGetModifyTableForeignKeysSkipSql2DDL($tableDiff)
     {
         $expected = '';
-        $this->assertEquals($expected, static::getPlatform()->getModifyTableForeignKeysDDL($tableDiff));
+        $this->assertEquals($expected, static::getPlatform()->buildModifyTableForeignKeysDdl($tableDiff));
         $expected = '';
-        $this->assertEquals($expected, static::getPlatform()->getModifyTableForeignKeysDDL($tableDiff->getReverseDiff()));
+        $this->assertEquals($expected, static::getPlatform()->buildModifyTableForeignKeysDdl($tableDiff->getReverseDiff()));
     }
 
     /**
@@ -239,7 +246,7 @@ END;
         $expected = '
 ALTER TABLE "foo" DROP COLUMN "bar";
 ';
-        $this->assertEquals($expected, static::getPlatform()->getRemoveColumnDDL($column));
+        $this->assertEquals($expected, static::getPlatform()->buildRemoveColumnDdl($column));
     }
 
     /**
@@ -251,7 +258,7 @@ ALTER TABLE "foo" DROP COLUMN "bar";
         $expected = '
 ALTER TABLE "foo" RENAME COLUMN "bar1" TO "bar2";
 ';
-        $this->assertEquals($expected, static::getPlatform()->getRenameColumnDDL($fromColumn, $toColumn));
+        $this->assertEquals($expected, static::getPlatform()->buildRenameColumnDdl($fromColumn, $toColumn));
     }
 
     /**
@@ -263,7 +270,7 @@ ALTER TABLE "foo" RENAME COLUMN "bar1" TO "bar2";
         $expected = '
 ALTER TABLE "foo" ALTER COLUMN "bar" TYPE DOUBLE PRECISION;
 ';
-        $this->assertEquals($expected, static::getPlatform()->getModifyColumnDDL($columnDiff));
+        $this->assertEquals($expected, static::getPlatform()->buildModifyColumnDdl($columnDiff));
     }
 
     /**
@@ -292,7 +299,7 @@ ALTER TABLE "foo" ALTER COLUMN "bar" TYPE DOUBLE PRECISION;
 ALTER TABLE "foo" ALTER COLUMN "bar" SET DEFAULT -100;
 
 END;
-        $this->assertEquals($expected, static::getPlatform()->getModifyColumnDDL($columnDiff));
+        $this->assertEquals($expected, static::getPlatform()->buildModifyColumnDdl($columnDiff));
     }
 
     /**
@@ -308,7 +315,7 @@ ALTER TABLE "foo" ALTER COLUMN "bar1" TYPE DOUBLE PRECISION;
 ALTER TABLE "foo" ALTER COLUMN "bar2" SET NOT NULL;
 
 END;
-        $this->assertEquals($expected, static::getPlatform()->getModifyColumnsDDL($columnDiffs));
+        $this->assertEquals($expected, static::getPlatform()->buildModifyColumnsDdl($columnDiffs));
     }
 
     /**
@@ -320,7 +327,7 @@ END;
         $expected = '
 ALTER TABLE "foo" ADD "bar" INTEGER;
 ';
-        $this->assertEquals($expected, static::getPlatform()->getAddColumnDDL($column));
+        $this->assertEquals($expected, static::getPlatform()->buildAddColumnDdl($column));
     }
 
     /**
@@ -336,7 +343,7 @@ ALTER TABLE "foo" ADD "bar1" INTEGER;
 ALTER TABLE "foo" ADD "bar2" DOUBLE PRECISION DEFAULT -1 NOT NULL;
 
 END;
-        $this->assertEquals($expected, static::getPlatform()->getAddColumnsDDL($columns));
+        $this->assertEquals($expected, static::getPlatform()->buildAddColumnsDdl($columns));
     }
 
     /**
@@ -413,7 +420,7 @@ EOF;
 ALTER TABLE "test" ALTER COLUMN "test" DROP DEFAULT;
 
 EOF;
-        $this->assertEquals($expected, static::getPlatform()->getModifyColumnDDL($columnDiffs));
+        $this->assertEquals($expected, static::getPlatform()->buildModifyColumnDdl($columnDiffs));
     }
 
     /**
@@ -444,10 +451,69 @@ EOF;
 
 ALTER TABLE "foo" ALTER COLUMN "id" TYPE uuid USING id::uuid;
 
+ALTER TABLE "foo" ALTER COLUMN "id" DROP DEFAULT;
+
+DROP SEQUENCE IF EXISTS foo_id_seq CASCADE;
+
 ALTER TABLE "foo" ALTER COLUMN "id" SET DEFAULT vendor_specific_uuid_generator_function();
 
 END;
-        $this->assertEquals($expected, static::getPlatform()->getModifyTableColumnsDDL($tableDiff));
+        $this->assertEquals($expected, static::getPlatform()->buildModifyTableColumnsDdl($tableDiff));
+    }
+
+    protected static function buildTableDiffForIdMethods(IdMethod $fromId, IdMethod $toId): TableDiff
+    {
+$schema = <<<EOF
+        <database name="test" identifierQuoting="true">
+            <table name="foo">
+                <column name="id" primaryKey="true" type="INTEGER" autoIncrement="true"/>
+            </table>
+        </database>
+EOF;
+        $sequenceTable = static::getTableFromSchema($schema);
+        $sequenceTable->setIdMethod($fromId);
+
+        $identityTable = clone $sequenceTable;
+        $identityTable->setIdMethod($toId);
+
+        return TableComparator::computeDiff($sequenceTable, $identityTable);
+    }
+
+    public static function IdMethodDataProvider(): array
+    {
+        return [
+            [
+                'from sequence to identity',
+                static::buildTableDiffForIdMethods(IdMethod::SEQUENCE, IdMethod::IDENTITY),
+                '
+ALTER TABLE "foo" ALTER COLUMN "id" DROP DEFAULT;
+
+DROP SEQUENCE IF EXISTS foo_id_seq CASCADE;
+
+ALTER TABLE "foo" ALTER COLUMN "id" ADD GENERATED ALWAYS AS IDENTITY;
+
+SELECT setval(pg_get_serial_sequence(\'foo\', \'id\'), (SELECT COALESCE(MAX("id"),1) FROM "foo"));
+'
+            ],[
+                'from identity to sequence',
+                static::buildTableDiffForIdMethods(IdMethod::IDENTITY, IdMethod::SEQUENCE),
+                '
+ALTER TABLE "foo" ALTER COLUMN "id" DROP IDENTITY;
+
+CREATE SEQUENCE IF NOT EXISTS foo_id_seq OWNED BY "foo"."id";
+
+ALTER TABLE "foo" ALTER COLUMN "id" SET DEFAULT nextval(\'foo_id_seq\'::regclass);
+
+SELECT setval(\'foo_id_seq\', (SELECT COALESCE(MAX("id"),1) FROM "foo"));
+'
+                ]
+        ];
+    }
+
+    #[\PHPUnit\Framework\Attributes\DataProvider('IdMethodDataProvider')]
+    public function testMigrateFromSequenceToIdentity(string $description, TableDiff $tableDiff, string $expected): void
+    {
+        $this->assertEquals($expected, static::getPlatform()->buildModifyTableColumnsDdl($tableDiff));
     }
 
     /**
@@ -463,6 +529,6 @@ ALTER TABLE "foo" ALTER COLUMN "id" TYPE BYTEA USING NULL;
 ALTER TABLE "foo" ALTER COLUMN "id" SET DEFAULT vendor_specific_uuid_generator_function();
 
 END;
-        $this->assertEquals($expected, static::getPlatform()->getModifyTableColumnsDDL($tableDiff));
+        $this->assertEquals($expected, static::getPlatform()->buildModifyTableColumnsDdl($tableDiff));
     }
 }

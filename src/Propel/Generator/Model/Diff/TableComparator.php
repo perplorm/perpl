@@ -16,12 +16,7 @@ use function strtolower;
  */
 class TableComparator
 {
-    /**
-     * The table difference.
-     *
-     * @var \Propel\Generator\Model\Diff\TableDiff
-     */
-    protected $tableDiff;
+    protected TableDiff $tableDiff;
 
     /**
      * @param \Propel\Generator\Model\Diff\TableDiff|null $tableDiff
@@ -32,8 +27,6 @@ class TableComparator
     }
 
     /**
-     * Returns the table difference.
-     *
      * @return \Propel\Generator\Model\Diff\TableDiff
      */
     public function getTableDiff(): TableDiff
@@ -42,8 +35,6 @@ class TableComparator
     }
 
     /**
-     * Sets the table the comparator starts from.
-     *
      * @param \Propel\Generator\Model\Table $fromTable
      *
      * @return void
@@ -54,8 +45,6 @@ class TableComparator
     }
 
     /**
-     * Returns the table the comparator starts from.
-     *
      * @return \Propel\Generator\Model\Table
      */
     public function getFromTable(): Table
@@ -64,8 +53,6 @@ class TableComparator
     }
 
     /**
-     * Sets the table the comparator goes to.
-     *
      * @param \Propel\Generator\Model\Table $toTable
      *
      * @return void
@@ -76,8 +63,6 @@ class TableComparator
     }
 
     /**
-     * Returns the table the comparator goes to.
-     *
      * @return \Propel\Generator\Model\Table
      */
     public function getToTable(): Table
@@ -86,8 +71,6 @@ class TableComparator
     }
 
     /**
-     * Returns the computed difference between two table objects.
-     *
      * @param \Propel\Generator\Model\Table $fromTable
      * @param \Propel\Generator\Model\Table $toTable
      * @param bool $caseInsensitive

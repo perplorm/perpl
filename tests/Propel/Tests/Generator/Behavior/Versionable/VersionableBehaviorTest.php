@@ -40,11 +40,11 @@ EOF;
     public function testModifyTableAddsVersionColumn($schema)
     {
         $builder = new QuickBuilder();
-        $builder->setSchema($schema);
+        $builder->setSchemaXml($schema);
         $expected = <<<EOF
------------------------------------------------------------------------
+-- ---------------------------------------------------------------------
 -- versionable_behavior_test_0
------------------------------------------------------------------------
+-- ---------------------------------------------------------------------
 
 DROP TABLE IF EXISTS versionable_behavior_test_0;
 
@@ -56,7 +56,7 @@ CREATE TABLE versionable_behavior_test_0
     UNIQUE (id)
 );
 EOF;
-        $this->assertStringContainsString($expected, $builder->getSQL());
+        $this->assertStringContainsString($expected, $builder->buildSql());
     }
 
     /**
@@ -76,11 +76,11 @@ EOF;
 </database>
 EOF;
         $builder = new QuickBuilder();
-        $builder->setSchema($schema);
+        $builder->setSchemaXml($schema);
         $expected = <<<EOF
------------------------------------------------------------------------
+-- ---------------------------------------------------------------------
 -- versionable_behavior_test_0
------------------------------------------------------------------------
+-- ---------------------------------------------------------------------
 
 DROP TABLE IF EXISTS versionable_behavior_test_0;
 
@@ -92,7 +92,7 @@ CREATE TABLE versionable_behavior_test_0
     UNIQUE (id)
 );
 EOF;
-        $this->assertStringContainsString($expected, $builder->getSQL());
+        $this->assertStringContainsString($expected, $builder->buildSql());
     }
 
     /**
@@ -111,11 +111,11 @@ EOF;
 </database>
 EOF;
         $builder = new QuickBuilder();
-        $builder->setSchema($schema);
+        $builder->setSchemaXml($schema);
         $expected = <<<EOF
------------------------------------------------------------------------
+-- ---------------------------------------------------------------------
 -- versionable_behavior_test_0
------------------------------------------------------------------------
+-- ---------------------------------------------------------------------
 
 DROP TABLE IF EXISTS versionable_behavior_test_0;
 
@@ -127,7 +127,7 @@ CREATE TABLE versionable_behavior_test_0
     UNIQUE (id)
 );
 EOF;
-        $this->assertStringContainsString($expected, $builder->getSQL());
+        $this->assertStringContainsString($expected, $builder->buildSql());
     }
 
     public static function foreignTableSchemaDataProvider()
@@ -161,11 +161,11 @@ EOF;
     public function testModifyTableAddsVersionColumnForForeignKeysIfForeignTableIsVersioned($schema)
     {
         $builder = new QuickBuilder();
-        $builder->setSchema($schema);
+        $builder->setSchemaXml($schema);
         $expected = <<<EOF
------------------------------------------------------------------------
+-- ---------------------------------------------------------------------
 -- versionable_behavior_test_0
------------------------------------------------------------------------
+-- ---------------------------------------------------------------------
 
 DROP TABLE IF EXISTS versionable_behavior_test_0;
 
@@ -179,12 +179,12 @@ CREATE TABLE versionable_behavior_test_0
     FOREIGN KEY (foreign_id) REFERENCES versionable_behavior_test_1 (id)
 );
 EOF;
-        $this->assertStringContainsString($expected, $builder->getSQL());
+        $this->assertStringContainsString($expected, $builder->buildSql());
         $expected = <<<EOF
 
------------------------------------------------------------------------
+-- ---------------------------------------------------------------------
 -- versionable_behavior_test_0_version
------------------------------------------------------------------------
+-- ---------------------------------------------------------------------
 
 DROP TABLE IF EXISTS versionable_behavior_test_0_version;
 
@@ -201,7 +201,7 @@ CREATE TABLE versionable_behavior_test_0_version
         ON DELETE CASCADE
 );
 EOF;
-        $this->assertStringContainsString($expected, $builder->getSQL());
+        $this->assertStringContainsString($expected, $builder->buildSql());
     }
 
     /**
@@ -211,11 +211,11 @@ EOF;
     public function testModifyTableAddsVersionColumnForReferrersIfForeignTableIsVersioned($schema)
     {
         $builder = new QuickBuilder();
-        $builder->setSchema($schema);
+        $builder->setSchemaXml($schema);
         $expected = <<<EOF
------------------------------------------------------------------------
+-- ---------------------------------------------------------------------
 -- versionable_behavior_test_1
------------------------------------------------------------------------
+-- ---------------------------------------------------------------------
 
 DROP TABLE IF EXISTS versionable_behavior_test_1;
 
@@ -227,12 +227,12 @@ CREATE TABLE versionable_behavior_test_1
     UNIQUE (id)
 );
 EOF;
-        $this->assertStringContainsString($expected, $builder->getSQL());
+        $this->assertStringContainsString($expected, $builder->buildSql());
         $expected = <<<EOF
 
------------------------------------------------------------------------
+-- ---------------------------------------------------------------------
 -- versionable_behavior_test_1_version
------------------------------------------------------------------------
+-- ---------------------------------------------------------------------
 
 DROP TABLE IF EXISTS versionable_behavior_test_1_version;
 
@@ -249,7 +249,7 @@ CREATE TABLE versionable_behavior_test_1_version
         ON DELETE CASCADE
 );
 EOF;
-        $this->assertStringContainsString($expected, $builder->getSQL());
+        $this->assertStringContainsString($expected, $builder->buildSql());
     }
 
     /**
@@ -295,11 +295,11 @@ EOF;
     public function testModifyTableAddsVersionTable($schema)
     {
         $builder = new QuickBuilder();
-        $builder->setSchema($schema);
+        $builder->setSchemaXml($schema);
         $expected = <<<EOF
------------------------------------------------------------------------
+-- ---------------------------------------------------------------------
 -- versionable_behavior_test_0_version
------------------------------------------------------------------------
+-- ---------------------------------------------------------------------
 
 DROP TABLE IF EXISTS versionable_behavior_test_0_version;
 
@@ -314,7 +314,7 @@ CREATE TABLE versionable_behavior_test_0_version
         ON DELETE CASCADE
 );
 EOF;
-        $this->assertStringContainsString($expected, $builder->getSQL());
+        $this->assertStringContainsString($expected, $builder->buildSql());
     }
 
     /**
@@ -334,11 +334,11 @@ EOF;
 </database>
 EOF;
         $builder = new QuickBuilder();
-        $builder->setSchema($schema);
+        $builder->setSchemaXml($schema);
         $expected = <<<EOF
------------------------------------------------------------------------
+-- ---------------------------------------------------------------------
 -- foo_ver
------------------------------------------------------------------------
+-- ---------------------------------------------------------------------
 
 DROP TABLE IF EXISTS foo_ver;
 
@@ -353,7 +353,7 @@ CREATE TABLE foo_ver
         ON DELETE CASCADE
 );
 EOF;
-        $this->assertStringContainsString($expected, $builder->getSQL());
+        $this->assertStringContainsString($expected, $builder->buildSql());
     }
 
     /**
@@ -375,12 +375,12 @@ EOF;
 </database>
 EOF;
         $builder = new QuickBuilder();
-        $builder->setSchema($schema);
+        $builder->setSchemaXml($schema);
         $expected = <<<EOF
 
------------------------------------------------------------------------
+-- ---------------------------------------------------------------------
 -- versionable_behavior_test_0
------------------------------------------------------------------------
+-- ---------------------------------------------------------------------
 
 DROP TABLE IF EXISTS versionable_behavior_test_0;
 
@@ -392,9 +392,9 @@ CREATE TABLE versionable_behavior_test_0
     UNIQUE (id)
 );
 
------------------------------------------------------------------------
+-- ---------------------------------------------------------------------
 -- versionable_behavior_test_0_version
------------------------------------------------------------------------
+-- ---------------------------------------------------------------------
 
 DROP TABLE IF EXISTS versionable_behavior_test_0_version;
 
@@ -406,7 +406,7 @@ CREATE TABLE versionable_behavior_test_0_version
 );
 
 EOF;
-        $this->assertEquals($expected, $builder->getSQL());
+        $this->assertEquals($expected, $builder->buildSql());
     }
 
     public static function logSchemaDataProvider()
@@ -435,11 +435,11 @@ EOF;
     public function testModifyTableAddsLogColumns($schema)
     {
         $builder = new QuickBuilder();
-        $builder->setSchema($schema);
+        $builder->setSchemaXml($schema);
         $expected = <<<EOF
------------------------------------------------------------------------
+-- ---------------------------------------------------------------------
 -- versionable_behavior_test_0
------------------------------------------------------------------------
+-- ---------------------------------------------------------------------
 
 DROP TABLE IF EXISTS versionable_behavior_test_0;
 
@@ -454,7 +454,7 @@ CREATE TABLE versionable_behavior_test_0
     UNIQUE (id)
 );
 EOF;
-        $this->assertStringContainsString($expected, $builder->getSQL());
+        $this->assertStringContainsString($expected, $builder->buildSql());
     }
 
     /**
@@ -464,11 +464,11 @@ EOF;
     public function testModifyTableAddsVersionTableLogColumns($schema)
     {
         $builder = new QuickBuilder();
-        $builder->setSchema($schema);
+        $builder->setSchemaXml($schema);
         $expected = <<<EOF
------------------------------------------------------------------------
+-- ---------------------------------------------------------------------
 -- versionable_behavior_test_0_version
------------------------------------------------------------------------
+-- ---------------------------------------------------------------------
 
 DROP TABLE IF EXISTS versionable_behavior_test_0_version;
 
@@ -486,7 +486,7 @@ CREATE TABLE versionable_behavior_test_0_version
         ON DELETE CASCADE
 );
 EOF;
-        $this->assertStringContainsString($expected, $builder->getSQL());
+        $this->assertStringContainsString($expected, $builder->buildSql());
     }
 
     /**
@@ -504,9 +504,9 @@ EOF;
 </database>
 EOF;
         $expected = <<<EOF
------------------------------------------------------------------------
+-- ---------------------------------------------------------------------
 -- versionable_behavior_test_0_version
------------------------------------------------------------------------
+-- ---------------------------------------------------------------------
 
 DROP TABLE IF EXISTS versionable_behavior_test_0_version;
 
@@ -522,8 +522,8 @@ CREATE TABLE versionable_behavior_test_0_version
 );
 EOF;
         $builder = new QuickBuilder();
-        $builder->setSchema($schema);
-        $this->assertStringContainsString($expected, $builder->getSQL());
+        $builder->setSchemaXml($schema);
+        $this->assertStringContainsString($expected, $builder->buildSql());
     }
 
     /**
@@ -560,8 +560,8 @@ CREATE TABLE versionable_behavior_test_0_version
 CREATE INDEX versionable_behavior_test_0_version_i_14f552 ON versionable_behavior_test_0_version (bar);
 EOF;
         $builder = new QuickBuilder();
-        $builder->setSchema($schema);
-        $this->assertStringContainsString($expected, $builder->getSQL());
+        $builder->setSchemaXml($schema);
+        $this->assertStringContainsString($expected, $builder->buildSql());
     }
 
     /**
@@ -580,9 +580,9 @@ EOF;
 EOF;
 
         $builder = new QuickBuilder();
-        $builder->setSchema($schema);
+        $builder->setSchemaXml($schema);
 
-        $this->assertEmpty($builder->getSQL());
+        $this->assertEmpty($builder->buildSql());
     }
 
     public static function tablePrefixSchemaDataProvider()
@@ -607,11 +607,11 @@ XML;
     public function testModifyTableAddsVersionColumnWithPrefix($schema)
     {
         $builder = new QuickBuilder();
-        $builder->setSchema($schema);
+        $builder->setSchemaXml($schema);
         $expected = <<<SQL
------------------------------------------------------------------------
+-- ---------------------------------------------------------------------
 -- prefix_versionable_behavior_test_0
------------------------------------------------------------------------
+-- ---------------------------------------------------------------------
 
 DROP TABLE IF EXISTS prefix_versionable_behavior_test_0;
 
@@ -623,7 +623,7 @@ CREATE TABLE prefix_versionable_behavior_test_0
     UNIQUE (id)
 );
 SQL;
-        $this->assertStringContainsString($expected, $builder->getSQL());
+        $this->assertStringContainsString($expected, $builder->buildSql());
     }
 
     /**
@@ -633,11 +633,11 @@ SQL;
     public function testModifyTableAddsVersionTableWithPrefix($schema)
     {
         $builder = new QuickBuilder();
-        $builder->setSchema($schema);
+        $builder->setSchemaXml($schema);
         $expected = <<<SQL
------------------------------------------------------------------------
+-- ---------------------------------------------------------------------
 -- prefix_versionable_behavior_test_0_version
------------------------------------------------------------------------
+-- ---------------------------------------------------------------------
 
 DROP TABLE IF EXISTS prefix_versionable_behavior_test_0_version;
 
@@ -652,6 +652,6 @@ CREATE TABLE prefix_versionable_behavior_test_0_version
         ON DELETE CASCADE
 );
 SQL;
-        $this->assertStringContainsString($expected, $builder->getSQL());
+        $this->assertStringContainsString($expected, $builder->buildSql());
     }
 }

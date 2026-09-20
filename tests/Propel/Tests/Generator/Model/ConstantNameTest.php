@@ -104,7 +104,7 @@ XML;
     protected function buildClasses($schema)
     {
         $builder = new QuickBuilder();
-        $builder->setSchema($schema);
+        $builder->setSchemaXml($schema);
         $builder->buildClasses();
     }
 }

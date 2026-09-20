@@ -18,10 +18,10 @@ abstract class PlatformTestBase extends TestCase
 {
     protected static function getDatabaseFromSchema($schema)
     {
-        $xtad = new SchemaReader(static::getPlatform());
-        $appData = $xtad->parseString($schema);
+        $reader = new SchemaReader(static::getPlatform());
+        $schema = $reader->parseString($schema);
 
-        return $appData->getDatabase();
+        return $schema->getDatabase();
     }
 
     protected static function getTableFromSchema($schema, $tableName = 'foo')

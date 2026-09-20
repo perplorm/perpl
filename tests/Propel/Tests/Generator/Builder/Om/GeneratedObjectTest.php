@@ -722,7 +722,7 @@ class GeneratedObjectTest extends BookstoreTestBase
         </database>
 XML;
         $builder = new QuickBuilder();
-        $builder->setSchema($databaseXml);
+        $builder->setSchemaXml($databaseXml);
         $builder->build();
 
         $t = new \ExampleNamespace\Thing();
@@ -905,7 +905,7 @@ EOF;
         $extraConf['propel']['generator']['objectModel']['defaultKeyType'] = 'camelName';
         $generatorConfig = new QuickGeneratorConfig($extraConf);
         $builder = new QuickBuilder();
-        $builder->setSchema($schema);
+        $builder->setSchemaXml($schema);
         $builder->setConfig($generatorConfig);
         $builder->buildClasses();
 

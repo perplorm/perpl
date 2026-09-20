@@ -8,7 +8,6 @@ use PDO;
 use Propel\Runtime\ActiveQuery\ColumnResolver\ColumnExpression\AbstractColumnExpression;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\Lock;
-use Propel\Runtime\Adapter\AdapterInterface;
 use Propel\Runtime\Adapter\SqlAdapterInterface;
 use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Exception\InvalidArgumentException;
@@ -100,21 +99,10 @@ class PgsqlAdapter extends PdoAdapter implements SqlAdapterInterface
     }
 
     /**
-     * @see AdapterInterface::getIdMethod()
-     *
-     * @return int
-     */
-    #[\Override]
-    protected function getIdMethod(): int
-    {
-        return AdapterInterface::ID_METHOD_SEQUENCE;
-    }
-
-    /**
      * Gets ID for specified sequence name.
      *
      * @param \Propel\Runtime\Connection\ConnectionInterface $con
-     * @param string|null $name
+     * @param string|null $sequenceName
      *
      * @throws \Propel\Runtime\Exception\InvalidArgumentException
      * @throws \RuntimeException
@@ -122,13 +110,13 @@ class PgsqlAdapter extends PdoAdapter implements SqlAdapterInterface
      * @return int
      */
     #[\Override]
-    public function getId(ConnectionInterface $con, ?string $name = null): int
+    public function loadNextValueFromSequence(ConnectionInterface $con, ?string $sequenceName = null): int
     {
-        if ($name === null) {
+        if ($sequenceName === null) {
             throw new InvalidArgumentException('Unable to fetch next sequence ID without sequence name.');
         }
 
-        $dataFetcher = $con->query(sprintf('SELECT nextval(%s)', $con->quote($name)));
+        $dataFetcher = $con->query(sprintf('SELECT nextval(%s)', $con->quote($sequenceName)));
 
         if ($dataFetcher === false) {
             throw new RuntimeException('PdoConnection::query() did not return a result set as a statement object.');

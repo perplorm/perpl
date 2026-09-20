@@ -2061,11 +2061,11 @@ class Criteria
      */
     public function quoteColumnIdentifier(?string $tableAlias, string $columnAlias, ?TableMap $tableMap = null): string
     {
-        if (!$this->isIdentifierQuotingEnabled() && !($tableMap && $tableMap->isIdentifierQuotingEnabled())) {
-            return $tableAlias ? "$tableAlias.$columnAlias" : $columnAlias;
+        if ($this->isIdentifierQuotingEnabled() || $tableMap?->isIdentifierQuotingEnabled()) {
+            return $this->getAdapter()->quoteColumnIdentifier($tableAlias, $columnAlias);
         }
 
-        return $this->getAdapter()->quoteColumnIdentifier($tableAlias, $columnAlias);
+        return $tableAlias ? "$tableAlias.$columnAlias" : $columnAlias;
     }
 
     /**

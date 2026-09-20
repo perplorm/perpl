@@ -20,7 +20,7 @@ class ColumnComparator
      * @param \Propel\Generator\Model\Column $fromColumn
      * @param \Propel\Generator\Model\Column $toColumn
      *
-     * @return \Propel\Generator\Model\Diff\ColumnDiff|false return false if the two columns are similar
+     * @return \Propel\Generator\Model\Diff\ColumnDiff|false
      */
     public static function computeDiff(Column $fromColumn, Column $toColumn)
     {
@@ -30,7 +30,10 @@ class ColumnComparator
         }
 
         $platform = $fromColumn->getPlatform() ?: $toColumn->getPlatform();
-        if ($platform && $platform->getColumnDDL($fromColumn) === $platform->getColumnDDL($toColumn)) {
+        $fromDDL = $platform?->buildColumnDdl($fromColumn);
+        $toDDL = $platform?->buildColumnDdl($toColumn);
+
+        if ($platform && $fromDDL === $toDDL && empty($changedProperties['idMethod'])) { // Note: change to idMethod doesn't have to change DDL
             return false;
         }
         $columnDiff = new ColumnDiff($fromColumn, $toColumn);
@@ -98,6 +101,12 @@ class ColumnComparator
 
         if ($fromColumn->isAutoIncrement() !== $toColumn->isAutoIncrement()) {
             $changedProperties['autoIncrement'] = [$fromColumn->isAutoIncrement(), $toColumn->isAutoIncrement()];
+        }
+
+        $fromIdMethod = $fromColumn->getIdMethod();
+        $toIdMethod = $toColumn->getIdMethod();
+        if ($toColumn->isAutoIncrement() && $fromIdMethod !== $toIdMethod) {
+            $changedProperties['idMethod'] = [$fromIdMethod, $toIdMethod];
         }
 
         return $changedProperties;

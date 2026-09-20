@@ -50,12 +50,12 @@ class BigintTypeTest extends BookstoreTestBase
 </database>
 XML;
         $builder = new QuickBuilder();
-        $builder->setSchema($schema);
+        $builder->setSchemaXml($schema);
         $builder->setVfs(false);
         $builder->setPlatform(TestCase::getPlatform());
         $connection = Perpl::getServiceContainer()->getConnection('bookstore');
         $connection->exec('DROP TABLE IF EXISTS bigint_entity;');
-        $builder->buildSQL($connection);
+        $builder->buildAndRunSql($connection);
         $builder->buildClasses();
     }
 

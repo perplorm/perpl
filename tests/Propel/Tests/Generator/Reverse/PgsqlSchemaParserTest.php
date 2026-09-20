@@ -8,14 +8,13 @@
 
 namespace Propel\Tests\Generator\Reverse;
 
-use PDO;
 use Propel\Generator\Config\QuickGeneratorConfig;
 use Propel\Generator\Model\ColumnDefaultValue;
 use Propel\Generator\Model\Database;
 use Propel\Generator\Model\Datatype\ColumnType;
 use Propel\Generator\Platform\DefaultPlatform;
 use Propel\Generator\Reverse\PgsqlSchemaParser;
-use Propel\Runtime\Propel;
+use Propel\Runtime\Perpl;
 use Propel\Tests\TestCaseFixturesDatabase;
 
 /**
@@ -32,15 +31,15 @@ class PgsqlSchemaParserTest extends TestCaseFixturesDatabase
      */
     protected function setUp(): void
     {
-        parent::setUp();
-        Propel::init(__DIR__ . '/../../../../Fixtures/reverse/pgsql/build/conf/reverse-bookstore-conf.php');
-
-        $this->con = Propel::getConnection('reverse-bookstore');
-        $this->con->beginTransaction();
-
-        if ('pgsql' !== $this->con->getAttribute(PDO::ATTR_DRIVER_NAME)) {
+        if (!$this->runningOnPostgreSQL()) {
             $this->markTestSkipped('This test is designed for PostgreSQL');
         }
+
+        parent::setUp();
+        require_once __DIR__ . '/../../../../Fixtures/reverse/pgsql/build/conf/reverse-bookstore-conf.php';
+
+        $this->con = Perpl::getConnection('reverse-bookstore');
+        $this->con->beginTransaction();
     }
 
     /**
@@ -53,7 +52,7 @@ class PgsqlSchemaParserTest extends TestCaseFixturesDatabase
         }
 
         parent::tearDown();
-        Propel::init(__DIR__ . '/../../../../Fixtures/bookstore/build/conf/bookstore-conf.php');
+        require_once __DIR__ . '/../../../../Fixtures/bookstore/build/conf/bookstore-conf.php';
     }
 
     public static function parseDataProvider()
@@ -86,7 +85,7 @@ class PgsqlSchemaParserTest extends TestCaseFixturesDatabase
         $this->assertGreaterThanOrEqual(1, $parser->parse($database), 'We parsed at least one table.');
         $table = $database->getTable('foo');
         $columns = $table->getColumns();
-        $this->assertEquals(1, count($columns));
+        $this->assertCount(1, $columns);
         $column = $columns[0];
         $this->assertNotEmpty($column);
 

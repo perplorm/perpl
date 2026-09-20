@@ -8,7 +8,6 @@ use PDO;
 use Propel\Generator\Model\Datatype\ColumnType;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\Lock;
-use Propel\Runtime\Adapter\AdapterInterface;
 use Propel\Runtime\Adapter\SqlAdapterInterface;
 use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Connection\StatementInterface;
@@ -153,17 +152,8 @@ class OracleAdapter extends PdoAdapter implements SqlAdapterInterface
     }
 
     /**
-     * @return int
-     */
-    #[\Override]
-    protected function getIdMethod(): int
-    {
-        return AdapterInterface::ID_METHOD_SEQUENCE;
-    }
-
-    /**
      * @param \Propel\Runtime\Connection\ConnectionInterface $con
-     * @param string|null $name
+     * @param string|null $sequenceName
      *
      * @throws \Propel\Runtime\Exception\InvalidArgumentException
      * @throws \RuntimeException
@@ -171,13 +161,13 @@ class OracleAdapter extends PdoAdapter implements SqlAdapterInterface
      * @return int
      */
     #[\Override]
-    public function getId(ConnectionInterface $con, ?string $name = null): int
+    public function loadNextValueFromSequence(ConnectionInterface $con, ?string $sequenceName = null): int
     {
-        if ($name === null) {
+        if ($sequenceName === null) {
             throw new InvalidArgumentException('Unable to fetch next sequence ID without sequence name.');
         }
 
-        $dataFetcher = $con->query(sprintf('SELECT %s.nextval FROM dual', $name));
+        $dataFetcher = $con->query(sprintf('SELECT %s.nextval FROM dual', $sequenceName));
         if ($dataFetcher === false) {
             throw new RuntimeException('Query returned no statement.');
         }

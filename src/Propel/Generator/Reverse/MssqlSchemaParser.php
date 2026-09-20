@@ -84,7 +84,7 @@ class MssqlSchemaParser extends AbstractSchemaParser
     #[\Override]
     public function parse(Database $database, array $additionalTables = []): int
     {
-        $dataFetcher = $this->dbh->query("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME <> 'dtproperties'");
+        $dataFetcher = $this->con->query("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME <> 'dtproperties'");
 
         if ($dataFetcher === false) {
             throw new RuntimeException('PdoConnection::query() did not return a result set as a statement object.');
@@ -128,7 +128,7 @@ class MssqlSchemaParser extends AbstractSchemaParser
     protected function addColumns(Table $table): void
     {
         /** @var \Propel\Runtime\DataFetcher\PDODataFetcher $dataFetcher */
-        $dataFetcher = $this->dbh->query("sp_columns '" . $table->getName() . "'");
+        $dataFetcher = $this->con->query("sp_columns '" . $table->getName() . "'");
         $dataFetcher->setStyle(PDO::FETCH_ASSOC);
 
         foreach ($dataFetcher as $row) {
@@ -176,7 +176,7 @@ class MssqlSchemaParser extends AbstractSchemaParser
         $database = $table->getDatabase();
 
         /** @var \Propel\Runtime\DataFetcher\PDODataFetcher $dataFetcher */
-        $dataFetcher = $this->dbh->query("select fk.name as CONSTRAINT_NAME, lcol.name as COLUMN_NAME, rtab.name as FK_TABLE_NAME, rcol.name as FK_COLUMN_NAME
+        $dataFetcher = $this->con->query("select fk.name as CONSTRAINT_NAME, lcol.name as COLUMN_NAME, rtab.name as FK_TABLE_NAME, rcol.name as FK_COLUMN_NAME
          from sys.foreign_keys as fk
          inner join sys.foreign_key_columns ref on ref.constraint_object_id = fk.object_id
          inner join sys.columns lcol on lcol.object_id = ref.parent_object_id and lcol.column_id = ref.parent_column_id
@@ -219,7 +219,7 @@ class MssqlSchemaParser extends AbstractSchemaParser
     protected function addIndexes(Table $table): void
     {
         /** @var \Propel\Runtime\DataFetcher\PDODataFetcher $dataFetcher */
-        $dataFetcher = $this->dbh->query("sp_indexes_rowset '" . $table->getName() . "'");
+        $dataFetcher = $this->con->query("sp_indexes_rowset '" . $table->getName() . "'");
         $dataFetcher->setStyle(PDO::FETCH_ASSOC);
 
         $indexes = [];
@@ -269,7 +269,7 @@ class MssqlSchemaParser extends AbstractSchemaParser
      */
     protected function addPrimaryKey(Table $table): void
     {
-        $dataFetcher = $this->dbh->query("SELECT COLUMN_NAME
+        $dataFetcher = $this->con->query("SELECT COLUMN_NAME
             FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
             INNER JOIN INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE ON
             INFORMATION_SCHEMA.TABLE_CONSTRAINTS.CONSTRAINT_NAME = INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE.constraint_name

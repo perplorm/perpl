@@ -88,8 +88,8 @@ class PlatformDatabaseBuildTimeBase extends TestCaseFixtures
         $builder->setPlatform($platform);
         $builder->setParser($this->getParser($this->con));
         $builder->getParser()->setPlatform($platform);
-        $builder->setSchema($schema);
-        $builder->buildClasses(null, true);
+        $builder->setSchemaXml($schema);
+        $builder->buildClasses();
 
         $builder->updateDB($this->con);
     }
@@ -109,7 +109,7 @@ class PlatformDatabaseBuildTimeBase extends TestCaseFixtures
         $builder->setPlatform($platform);
         $builder->setParser($this->getParser($this->con));
         $builder->getParser()->setPlatform($platform);
-        $builder->setSchema($schema);
+        $builder->setSchemaXml($schema);
 
         $builder->updateDB($this->con);
     }

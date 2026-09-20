@@ -183,14 +183,14 @@ class PdoConnection implements ConnectionInterface
     }
 
     /**
-     * @param string|null $name
+     * @param string|null $sequenceName
      *
      * @return string|false
      */
     #[\Override]
-    public function lastInsertId(?string $name = null)
+    public function lastInsertId(?string $sequenceName = null)
     {
-        return $this->pdo->lastInsertId($name);
+        return $this->pdo->lastInsertId($sequenceName);
     }
 
     /**

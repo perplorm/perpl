@@ -146,7 +146,7 @@ class SqliteSchemaParser extends AbstractSchemaParser
         $sql = str_replace('%filter%', $filter, $sql);
 
         /** @var \Traversable $dataFetcher */
-        $dataFetcher = $this->dbh->query($sql);
+        $dataFetcher = $this->con->query($sql);
 
         // First load the tables (important that this happens before filling out details of tables)
         foreach ($dataFetcher as $row) {
@@ -195,7 +195,7 @@ class SqliteSchemaParser extends AbstractSchemaParser
         $tableName = $table->getName();
 
         /** @var \PDOStatement $stmt */
-        $stmt = $this->dbh->query("PRAGMA table_info('$tableName')");
+        $stmt = $this->con->query("PRAGMA table_info('$tableName')");
 
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             $name = $row['name'];
@@ -249,7 +249,7 @@ class SqliteSchemaParser extends AbstractSchemaParser
             if ($column->isPrimaryKey()) {
                 // check if autoIncrement
                 /** @var \PDOStatement $autoIncrementStmt */
-                $autoIncrementStmt = $this->dbh->prepare('
+                $autoIncrementStmt = $this->con->prepare('
                 SELECT tbl_name
                 FROM sqlite_master
                 WHERE
@@ -278,7 +278,7 @@ class SqliteSchemaParser extends AbstractSchemaParser
         $database = $table->getDatabase();
 
         /** @var \PDOStatement $stmt */
-        $stmt = $this->dbh->query('PRAGMA foreign_key_list("' . $table->getName() . '")');
+        $stmt = $this->con->query('PRAGMA foreign_key_list("' . $table->getName() . '")');
 
         $lastId = null;
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
@@ -327,7 +327,7 @@ class SqliteSchemaParser extends AbstractSchemaParser
     protected function addIndexes(Table $table): void
     {
         /** @var \PDOStatement $stmt */
-        $stmt = $this->dbh->query('PRAGMA index_list("' . $table->getName() . '")');
+        $stmt = $this->con->query('PRAGMA index_list("' . $table->getName() . '")');
 
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             $name = $row['name'];
@@ -340,7 +340,7 @@ class SqliteSchemaParser extends AbstractSchemaParser
             $index = $row['unique'] ? new Unique($internalName) : new Index($internalName);
 
             /** @var \PDOStatement $stmt2 */
-            $stmt2 = $this->dbh->query("PRAGMA index_info('" . $name . "')");
+            $stmt2 = $this->con->query("PRAGMA index_info('" . $name . "')");
             while ($row2 = $stmt2->fetch(PDO::FETCH_ASSOC)) {
                 $colname = $row2['name'];
                 $index->addColumn($table->getColumn($colname));

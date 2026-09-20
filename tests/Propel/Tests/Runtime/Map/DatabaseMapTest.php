@@ -232,7 +232,7 @@ class DatabaseMapTest extends TestCaseFixtures
             $this->assertTrue(true, 'getTableByPhpName() throws an exception when called on a table with no phpName');
         }
         $tmap2 = new TableMap('foo2');
-        $tmap2->setClassName('Foo2');
+        $tmap2->setModelClassName('Foo2');
         $this->databaseMap->addTableObject($tmap2);
         $this->assertEquals($tmap2, $this->databaseMap->getTableByPhpName('Foo2'), 'getTableByPhpName() returns tableMap when phpName was set by way of TableMap::setPhpName()');
     }

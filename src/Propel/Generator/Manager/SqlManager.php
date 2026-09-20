@@ -122,7 +122,7 @@ class SqlManager extends AbstractManager
             $platform = $database->getPlatform();
             $filename = $database->getName() . '.sql';
 
-            $ddl = $platform->getAddTablesDDL($database);
+            $ddl = $platform->buildAddTablesDdl($database);
 
             $file = $this->getWorkingDirectory() . DIRECTORY_SEPARATOR . $filename;
             // Check if the file changed

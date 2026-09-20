@@ -117,8 +117,8 @@ class ArchivableBehaviorTest extends TestCase
 </database>
 EOF;
             $builder = new QuickBuilder();
-            $builder->setSchema($schema);
-            self::$generatedSQL = $builder->getSQL();
+            $builder->setSchemaXml($schema);
+            self::$generatedSQL = $builder->buildSql();
             $builder->build();
         }
     }
@@ -237,7 +237,7 @@ EOF;
         EOF;
 
         $builder = new QuickBuilder();
-        $builder->setSchema($schema);
+        $builder->setSchemaXml($schema);
 
         $this->expectException(SyncedTableException::class);
         $builder->getDatabase();
@@ -337,7 +337,7 @@ EOF;
 </database>
 EOF;
         $builder = new QuickBuilder();
-        $builder->setSchema($schema);
+        $builder->setSchemaXml($schema);
         $fks = $builder->getDatabase()->getTable($archiveTableName)->getForeignKeys();
 
         $expectedCount = $fkColumnName ? 1 : 0;
@@ -419,8 +419,8 @@ EOF;
 </database>
 EOF;
         $builder = new QuickBuilder();
-        $builder->setSchema($schema);
-        $sql = $builder->getSQL();
+        $builder->setSchemaXml($schema);
+        $sql = $builder->buildSql();
 
         $this->assertNotEmpty($sql);
     }
@@ -441,9 +441,9 @@ EOF;
 XML;
         $sql = <<<SQL
 
------------------------------------------------------------------------
+-- ---------------------------------------------------------------------
 -- foo_bar_prefix_test_1
------------------------------------------------------------------------
+-- ---------------------------------------------------------------------
 
 DROP TABLE IF EXISTS foo_bar_prefix_test_1;
 
@@ -454,9 +454,9 @@ CREATE TABLE foo_bar_prefix_test_1
     UNIQUE (id)
 );
 
------------------------------------------------------------------------
+-- ---------------------------------------------------------------------
 -- foo_bar_prefix_test_1_archive
------------------------------------------------------------------------
+-- ---------------------------------------------------------------------
 
 DROP TABLE IF EXISTS foo_bar_prefix_test_1_archive;
 
@@ -483,9 +483,9 @@ SQL;
     {
         $builder = new QuickBuilder();
 
-        $builder->setSchema($schema);
+        $builder->setSchemaXml($schema);
 
-        $actualSQL = $builder->getSQL();
+        $actualSQL = $builder->buildSql();
 
         $this->assertEquals($expectSQL, $actualSQL);
     }
@@ -498,7 +498,7 @@ SQL;
     {
         $builder = new QuickBuilder();
 
-        $builder->setSchema($schema);
+        $builder->setSchemaXml($schema);
         $builder->buildClasses();
 
         foreach ($expectClasses as $expectClass) {

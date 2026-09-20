@@ -4,13 +4,14 @@ declare(strict_types = 1);
 
 namespace Propel\Generator\Platform;
 
+use Propel\Generator\Model\Column;
 use Propel\Generator\Model\Database;
 use Propel\Generator\Model\Datatype\ColumnType;
 use Propel\Generator\Model\ForeignKey;
+use Propel\Generator\Model\IdMethod;
 use Propel\Generator\Model\Table;
 use Propel\Generator\Model\Unique;
 use function in_array;
-use function sprintf;
 use function strtr;
 
 /**
@@ -46,7 +47,7 @@ class MssqlPlatform extends DefaultPlatform
             ColumnType::DATETIME,
             ColumnType::TIMESTAMP,
             ColumnType::BU_TIMESTAMP,
-             => 'DATETIME2',
+            => 'DATETIME2',
             ColumnType::TIME => 'TIME',
             ColumnType::BINARY => 'BINARY(7132)',
             ColumnType::VARBINARY,
@@ -99,6 +100,36 @@ class MssqlPlatform extends DefaultPlatform
     }
 
     /**
+     * @return \Propel\Generator\Model\IdMethod
+     */
+    #[\Override]
+    public function getNativeIdMethod(): IdMethod
+    {
+        return IdMethod::IDENTITY;
+    }
+
+    /**
+     * Build column DDL fragment for id method (i.e. 'AUTO_INCREMENT' for native id method in MySQL)
+     *
+     * @param \Propel\Generator\Model\IdMethod $idMethod
+     * @param \Propel\Generator\Model\Column $column
+     *
+     * @return string|null Null means id method is not supported (might trigger Exception),
+     *                     empty string means column DDL is not affected by id method.
+     */
+    #[\Override]
+    protected function resolveAutoIncrementColumnDdl(IdMethod $idMethod, Column $column): string|null
+    {
+        return match ($idMethod) {
+            IdMethod::IDENTITY,
+            => 'IDENTITY(1,1)',
+            IdMethod::NO_ID_METHOD,
+            => '',
+            default => null,
+        };
+    }
+
+    /**
      * Returns the DDL SQL to add the tables of a database
      * together with index and foreign keys.
      * Since MSSQL always checks it the tables in foreign key definitions exist,
@@ -109,22 +140,22 @@ class MssqlPlatform extends DefaultPlatform
      * @return string
      */
     #[\Override]
-    public function getAddTablesDDL(Database $database): string
+    public function buildAddTablesDdl(Database $database): string
     {
-        $ret = $this->getBeginDDL();
+        $ret = $this->buildBeginDdl();
         foreach ($database->getTablesForSql() as $table) {
             $this->normalizeTable($table);
         }
         foreach ($database->getTablesForSql() as $table) {
-            $ret .= $this->getCommentBlockDDL($table->getName());
-            $ret .= $this->getDropTableDDL($table);
-            $ret .= $this->getAddTableDDL($table);
-            $ret .= $this->getAddIndicesDDL($table);
+            $ret .= $this->buildCommentBlockDdl($table->getName());
+            $ret .= $this->buildDropTableDdl($table);
+            $ret .= $this->buildAddTableDdl($table);
+            $ret .= $this->buildAddIndicesDdl($table);
         }
         foreach ($database->getTablesForSql() as $table) {
-            $ret .= $this->getAddForeignKeysDDL($table);
+            $ret .= $this->buildAddForeignKeysDdl($table);
         }
-        $ret .= $this->getEndDDL();
+        $ret .= $this->buildEndDdl();
 
         return $ret;
     }
@@ -135,7 +166,7 @@ class MssqlPlatform extends DefaultPlatform
      * @return string
      */
     #[\Override]
-    public function getDropTableDDL(Table $table): string
+    public function buildDropTableDdl(Table $table): string
     {
         $ret = '';
         foreach ($table->getForeignKeys() as $fk) {
@@ -183,19 +214,15 @@ END
      * @return string
      */
     #[\Override]
-    public function getPrimaryKeyDDL(Table $table): string
+    public function buildPrimaryKeyDdl(Table $table): string
     {
-        if ($table->hasPrimaryKey()) {
-            $pattern = 'CONSTRAINT %s PRIMARY KEY (%s)';
-
-            return sprintf(
-                $pattern,
-                $this->quoteIdentifier($this->getPrimaryKeyName($table)),
-                $this->getColumnListDDL($table->getPrimaryKey()),
-            );
+        if (!$table->hasPrimaryKey()) {
+            return '';
         }
+        $tableName = $this->quoteIdentifier($this->getPrimaryKeyName($table));
+        $columnList = $this->buildColumnListDdl($table->getPrimaryKey());
 
-        return '';
+        return "CONSTRAINT $tableName PRIMARY KEY ($columnList)";
     }
 
     /**
@@ -204,24 +231,19 @@ END
      * @return string
      */
     #[\Override]
-    public function getAddForeignKeyDDL(ForeignKey $fk): string
+    public function buildAddForeignKeyDdl(ForeignKey $fk): string
     {
         if ($fk->isSkipSql() || $fk->isPolymorphic()) {
             return '';
         }
+        $tableName = $this->quoteIdentifier($fk->getTable()->getName());
+        $fkDdl = $this->buildForeignKeyDdl($fk);
 
-        $pattern = "
+        return "
 BEGIN
-ALTER TABLE %s ADD %s
+ALTER TABLE $tableName ADD $fkDdl
 END
-;
-";
-
-        return sprintf(
-            $pattern,
-            $this->quoteIdentifier($fk->getTable()->getName()),
-            $this->getForeignKeyDDL($fk),
-        );
+;\n";
     }
 
     /**
@@ -232,15 +254,12 @@ END
      * @return string
      */
     #[\Override]
-    public function getUniqueDDL(Unique $unique): string
+    public function buildUniqueDdl(Unique $unique): string
     {
-        $pattern = 'CONSTRAINT %s UNIQUE NONCLUSTERED (%s) ON [PRIMARY]';
+        $indexName = $this->quoteIdentifier($unique->getName());
+        $columnDdl = $this->buildColumnListDdl($unique->getColumnObjects());
 
-        return sprintf(
-            $pattern,
-            $this->quoteIdentifier($unique->getName()),
-            $this->getColumnListDDL($unique->getColumnObjects()),
-        );
+        return "CONSTRAINT $indexName UNIQUE NONCLUSTERED ($columnDdl) ON [PRIMARY]";
     }
 
     /**
@@ -249,28 +268,20 @@ END
      * @return string
      */
     #[\Override]
-    public function getForeignKeyDDL(ForeignKey $fk): string
+    public function buildForeignKeyDdl(ForeignKey $fk): string
     {
         if ($fk->isSkipSql() || $fk->isPolymorphic()) {
             return '';
         }
+        $fkName = $this->quoteIdentifier($fk->getName());
+        $localColumnsList = $this->buildColumnListDdl($fk->getLocalColumnObjects());
+        $foreignTableName = $this->quoteIdentifier($fk->getForeignTableName());
+        $foreignColumnsList = $this->buildColumnListDdl($fk->getForeignColumnObjects());
 
-        $pattern = 'CONSTRAINT %s FOREIGN KEY (%s) REFERENCES %s (%s)';
-        $script = sprintf(
-            $pattern,
-            $this->quoteIdentifier($fk->getName()),
-            $this->getColumnListDDL($fk->getLocalColumnObjects()),
-            $this->quoteIdentifier($fk->getForeignTableName()),
-            $this->getColumnListDDL($fk->getForeignColumnObjects()),
-        );
-        if ($fk->hasOnUpdate() && $fk->getOnUpdate() != ForeignKey::SETNULL) {
-            $script .= ' ON UPDATE ' . $fk->getOnUpdate();
-        }
-        if ($fk->hasOnDelete() && $fk->getOnDelete() != ForeignKey::SETNULL) {
-            $script .= ' ON DELETE ' . $fk->getOnDelete();
-        }
+        $onUpdate = $fk->hasOnUpdate() && $fk->getOnUpdate() != ForeignKey::SETNULL ? ' ON UPDATE ' . $fk->getOnUpdate() : '';
+        $onDelete = $fk->hasOnDelete() && $fk->getOnDelete() != ForeignKey::SETNULL ? ' ON DELETE ' . $fk->getOnDelete() : '';
 
-        return $script;
+        return "CONSTRAINT $fkName FOREIGN KEY ($localColumnsList) REFERENCES $foreignTableName ($foreignColumnsList){$onUpdate}{$onDelete}";
     }
 
     /**

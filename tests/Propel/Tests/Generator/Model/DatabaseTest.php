@@ -13,7 +13,7 @@ use Propel\Generator\Exception\BehaviorNotFoundException;
 use Propel\Generator\Exception\EngineException;
 use Propel\Generator\Exception\InvalidArgumentException;
 use Propel\Generator\Model\Database;
-use Propel\Generator\Model\Datatype\ColumnType;
+use Propel\Generator\Model\IdMethod;
 use Propel\Generator\Model\Schema;
 use Propel\Generator\Model\Table;
 use Propel\Generator\Platform\DefaultPlatform;
@@ -39,7 +39,7 @@ class DatabaseTest extends ModelTestCase
 
         $this->assertSame('bookstore', $database->getName());
         $this->assertSame('YAML', $database->getDefaultStringFormat());
-        $this->assertSame('native', $database->getDefaultIdMethod());
+        $this->assertSame(IdMethod::NATIVE, $database->getDefaultIdMethod());
         $this->assertSame('underscore', $database->getDefaultPhpNamingMethod());
         $this->assertEmpty($database->getTablePrefix());
         $this->assertNull($database->getParentSchema());
@@ -76,7 +76,7 @@ class DatabaseTest extends ModelTestCase
         $this->assertSame('CustomBaseObject', $database->getBaseClass());
         $this->assertSame('CustomBaseQueryObject', $database->getBaseQueryClass());
         $this->assertSame('XML', $database->getDefaultStringFormat());
-        $this->assertSame('native', $database->getDefaultIdMethod());
+        $this->assertSame(IdMethod::NATIVE, $database->getDefaultIdMethod());
         $this->assertSame('underscore', $database->getDefaultPhpNamingMethod());
         $this->assertSame('acme_', $database->getTablePrefix());
         $this->assertTrue($database->isHeavyIndexing());
@@ -456,17 +456,6 @@ class DatabaseTest extends ModelTestCase
         $database->setBaseQueryClass($className);
 
         $this->assertSame($expectedClassName, $database->getBaseQueryClass(), $message);
-    }
-
-    /**
-     * @return void
-     */
-    public function testSetDefaultIdMethod()
-    {
-        $database = new Database();
-        $database->setDefaultIdMethod('native');
-
-        $this->assertSame('native', $database->getDefaultIdMethod());
     }
 
     /**

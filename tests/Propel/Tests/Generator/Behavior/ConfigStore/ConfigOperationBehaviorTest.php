@@ -204,7 +204,7 @@ EOT;
     public function buildSchemaXml(string $schemaXml): Database
     {
         $builder = new QuickBuilder();
-        $builder->setSchema($schemaXml);
+        $builder->setSchemaXml($schemaXml);
 
         return $builder->getDatabase();
     }

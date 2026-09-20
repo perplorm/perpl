@@ -249,7 +249,7 @@ class MigrationManager extends AbstractManager
         $table->addColumn($this->createExecutionDatetimeColumn($platform));
 
         // insert the table into the database
-        $statements = $platform->getAddTableDDL($table);
+        $statements = $platform->buildAddTableDdl($table);
         $conn = $this->getAdapterConnection($datasource);
         $res = SqlParser::executeString($statements, $conn);
 
@@ -627,7 +627,7 @@ class MigrationManager extends AbstractManager
         $column->setTable($table);
 
         $connection = $this->getAdapterConnection($datasource);
-        $sql = $platform->getAddColumnDDL($column);
+        $sql = $platform->buildAddColumnDdl($column);
         $stmt = $connection->prepare($sql);
 
         if ($stmt === false) {

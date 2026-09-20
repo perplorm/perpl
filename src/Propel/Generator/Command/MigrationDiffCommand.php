@@ -292,8 +292,8 @@ class MigrationDiffCommand extends AbstractMigrationCommand
             if ($input->getOption('disable-identifier-quoting')) {
                 $platform->setIdentifierQuoting(false);
             }
-            $migrationsUp[$name] = $platform->getModifyDatabaseDDL($databaseDiff);
-            $migrationsDown[$name] = $platform->getModifyDatabaseDDL($databaseDiff->getReverseDiff());
+            $migrationsUp[$name] = $platform->buildModifyDatabaseDdl($databaseDiff);
+            $migrationsDown[$name] = $platform->buildModifyDatabaseDdl($databaseDiff->getReverseDiff());
         }
 
         return [$migrationsUp, $migrationsDown];

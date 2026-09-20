@@ -97,7 +97,7 @@ CREATE TABLE `foo5`
 # This restores the fkey checks, after having unset them earlier
 SET FOREIGN_KEY_CHECKS = 1;
 ";
-        $this->assertEquals($expected, static::getPlatform()->getModifyDatabaseDDL($databaseDiff));
+        $this->assertEquals($expected, static::getPlatform()->buildModifyDatabaseDdl($databaseDiff));
     }
 
     /**
@@ -109,7 +109,7 @@ SET FOREIGN_KEY_CHECKS = 1;
         $expected = "
 RENAME TABLE `foo1` TO `foo2`;
 ";
-        $this->assertEquals($expected, static::getPlatform()->getRenameTableDDL($fromName, $toName));
+        $this->assertEquals($expected, static::getPlatform()->buildRenameTableDdl($fromName, $toName));
     }
 
     /**
@@ -145,7 +145,7 @@ ALTER TABLE `foo` ADD CONSTRAINT `foo1_fk_1`
     FOREIGN KEY (`bar1`)
     REFERENCES `foo2` (`bar`);
 ";
-        $this->assertEquals($expected, static::getPlatform()->getModifyTableDDL($tableDiff));
+        $this->assertEquals($expected, static::getPlatform()->buildModifyTableDdl($tableDiff));
     }
 
     /**
@@ -161,7 +161,7 @@ ALTER TABLE `foo` CHANGE `baz` `baz` VARCHAR(12);
 
 ALTER TABLE `foo` ADD `baz3` TEXT AFTER `baz`;
 ";
-        $this->assertEquals($expected, static::getPlatform()->getModifyTableColumnsDDL($tableDiff));
+        $this->assertEquals($expected, static::getPlatform()->buildModifyTableColumnsDdl($tableDiff));
     }
 
     /**
@@ -175,7 +175,7 @@ ALTER TABLE `foo` DROP PRIMARY KEY;
 
 ALTER TABLE `foo` ADD PRIMARY KEY (`id`,`bar`);
 ";
-        $this->assertEquals($expected, static::getPlatform()->getModifyTablePrimaryKeyDDL($tableDiff));
+        $this->assertEquals($expected, static::getPlatform()->buildModifyTablePrimaryKeyDdl($tableDiff));
     }
 
     /**
@@ -197,7 +197,7 @@ DROP INDEX `bar_baz_fk` ON `foo`;
 
 CREATE INDEX `bar_baz_fk` ON `foo` (`id`, `bar`, `baz`);
 ";
-        $this->assertEquals($expected, static::getPlatform()->getModifyTableIndicesDDL($tableDiff));
+        $this->assertEquals($expected, static::getPlatform()->buildModifyTableIndicesDdl($tableDiff));
     }
 
     /**
@@ -219,7 +219,7 @@ ALTER TABLE `foo1` ADD CONSTRAINT `foo1_fk_2`
     FOREIGN KEY (`bar`,`id`)
     REFERENCES `foo2` (`bar`,`id`);
 ";
-        $this->assertEquals($expected, static::getPlatform()->getModifyTableForeignKeysDDL($tableDiff));
+        $this->assertEquals($expected, static::getPlatform()->buildModifyTableForeignKeysDdl($tableDiff));
     }
 
     /**
@@ -231,13 +231,13 @@ ALTER TABLE `foo1` ADD CONSTRAINT `foo1_fk_2`
         $expected = "
 ALTER TABLE `foo1` DROP FOREIGN KEY `foo1_fk_1`;
 ";
-        $this->assertEquals($expected, static::getPlatform()->getModifyTableForeignKeysDDL($tableDiff));
+        $this->assertEquals($expected, static::getPlatform()->buildModifyTableForeignKeysDdl($tableDiff));
         $expected = "
 ALTER TABLE `foo1` ADD CONSTRAINT `foo1_fk_1`
     FOREIGN KEY (`bar`)
     REFERENCES `foo2` (`bar`);
 ";
-        $this->assertEquals($expected, static::getPlatform()->getModifyTableForeignKeysDDL($tableDiff->getReverseDiff()));
+        $this->assertEquals($expected, static::getPlatform()->buildModifyTableForeignKeysDdl($tableDiff->getReverseDiff()));
     }
 
     /**
@@ -247,9 +247,9 @@ ALTER TABLE `foo1` ADD CONSTRAINT `foo1_fk_1`
     public function testGetModifyTableForeignKeysSkipSql2DDL($tableDiff)
     {
         $expected = '';
-        $this->assertEquals($expected, static::getPlatform()->getModifyTableForeignKeysDDL($tableDiff));
+        $this->assertEquals($expected, static::getPlatform()->buildModifyTableForeignKeysDdl($tableDiff));
         $expected = '';
-        $this->assertEquals($expected, static::getPlatform()->getModifyTableForeignKeysDDL($tableDiff->getReverseDiff()));
+        $this->assertEquals($expected, static::getPlatform()->buildModifyTableForeignKeysDdl($tableDiff->getReverseDiff()));
     }
 
     /**
@@ -261,7 +261,7 @@ ALTER TABLE `foo1` ADD CONSTRAINT `foo1_fk_1`
         $expected = "
 ALTER TABLE `foo` DROP `bar`;
 ";
-        $this->assertEquals($expected, static::getPlatform()->getRemoveColumnDDL($column));
+        $this->assertEquals($expected, static::getPlatform()->buildRemoveColumnDdl($column));
     }
 
     /**
@@ -273,7 +273,7 @@ ALTER TABLE `foo` DROP `bar`;
         $expected = "
 ALTER TABLE `foo` CHANGE `bar1` `bar2` DOUBLE(2);
 ";
-        $this->assertEquals($expected, static::getPlatform()->getRenameColumnDDL($fromColumn, $toColumn));
+        $this->assertEquals($expected, static::getPlatform()->buildRenameColumnDdl($fromColumn, $toColumn));
     }
 
     /**
@@ -285,7 +285,7 @@ ALTER TABLE `foo` CHANGE `bar1` `bar2` DOUBLE(2);
         $expected = "
 ALTER TABLE `foo` CHANGE `bar` `bar` DOUBLE(3);
 ";
-        $this->assertEquals($expected, static::getPlatform()->getModifyColumnDDL($columnDiff));
+        $this->assertEquals($expected, static::getPlatform()->buildModifyColumnDdl($columnDiff));
     }
 
     /**
@@ -299,7 +299,7 @@ ALTER TABLE `foo` CHANGE `bar1` `bar1` DOUBLE(3);
 
 ALTER TABLE `foo` CHANGE `bar2` `bar2` INTEGER NOT NULL;
 ";
-        $this->assertEquals($expected, static::getPlatform()->getModifyColumnsDDL($columnDiffs));
+        $this->assertEquals($expected, static::getPlatform()->buildModifyColumnsDdl($columnDiffs));
     }
 
     /**
@@ -311,7 +311,7 @@ ALTER TABLE `foo` CHANGE `bar2` `bar2` INTEGER NOT NULL;
         $expected = "
 ALTER TABLE `foo` ADD `bar` INTEGER AFTER `id`;
 ";
-        $this->assertEquals($expected, static::getPlatform()->getAddColumnDDL($column));
+        $this->assertEquals($expected, static::getPlatform()->buildAddColumnDdl($column));
     }
 
     /**
@@ -323,7 +323,7 @@ ALTER TABLE `foo` ADD `bar` INTEGER AFTER `id`;
         $expected = "
 ALTER TABLE `foo` ADD `bar` INTEGER FIRST;
 ";
-        $this->assertEquals($expected, static::getPlatform()->getAddColumnDDL($column));
+        $this->assertEquals($expected, static::getPlatform()->buildAddColumnDdl($column));
     }
 
     /**
@@ -337,7 +337,7 @@ ALTER TABLE `foo` ADD `bar1` INTEGER AFTER `id`;
 
 ALTER TABLE `foo` ADD `bar2` DOUBLE(3,2) DEFAULT -1 NOT NULL AFTER `bar1`;
 ";
-        $this->assertEquals($expected, static::getPlatform()->getAddColumnsDDL($columns));
+        $this->assertEquals($expected, static::getPlatform()->buildAddColumnsDdl($columns));
     }
 
     /**
@@ -467,7 +467,7 @@ ALTER TABLE `foo` ADD PRIMARY KEY (`id`);
 ;--sql statement block;
 
 EOT;
-        $actual = static::getPlatform()->getModifyTableColumnsDDL($tableDiff);
+        $actual = static::getPlatform()->buildModifyTableColumnsDdl($tableDiff);
         $this->assertStringMatchesFormat($expected, $actual);
     }
 
@@ -496,7 +496,7 @@ ALTER TABLE `foo` ADD PRIMARY KEY (`id`);
 
 ;--sql statement block;
 EOT;
-        $actual = static::getPlatform()->getModifyTableColumnsDDL($tableDiff);
+        $actual = static::getPlatform()->buildModifyTableColumnsDdl($tableDiff);
         $this->assertStringMatchesFormat($expected, $actual);
     }
 }

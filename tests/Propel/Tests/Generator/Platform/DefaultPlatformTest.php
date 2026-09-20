@@ -8,6 +8,7 @@
 
 namespace Propel\Tests\Generator\Platform;
 
+use BadMethodCallException;
 use Propel\Generator\Config\QuickGeneratorConfig;
 use Propel\Generator\Model\Column;
 use Propel\Generator\Model\Datatype\ColumnType;
@@ -158,7 +159,7 @@ class DefaultPlatformTest extends TestCase
     #[\PHPUnit\Framework\Attributes\DataProvider('getColumnDefaultValueDDLDataProvider')]
     public function testGetColumnDefaultValueDDL($column, $default)
     {
-        $this->assertEquals($default, static::getPlatform()->getColumnDefaultValueDDL($column));
+        $this->assertEquals($default, static::getPlatform()->buildColumnDefaultValueDdl($column));
     }
 
     public static function getColumnBindingDataProvider(): array
@@ -233,5 +234,22 @@ class DefaultPlatformTest extends TestCase
 
         $this->assertEquals($cachedMapping, $integerMapping);
         $this->assertNotSame($cachedMapping, $integerMapping);
+    }
+
+    public function testDeprecatedMethodCall(): void
+    {
+        $platform = new DefaultPlatform();
+        $expectedMessage = 'Since Perpl 2.10.4: Update to new function name: getBeginDDL() is now buildBeginDdl()';
+
+        $this->expectErrorLevel(E_USER_DEPRECATED, [$platform, 'getBeginDDL'], $expectedMessage);
+    }
+
+    public function testInvalidCall(): void
+    {
+        $platform = new DefaultPlatform();
+        $this->expectException(BadMethodCallException::class);
+        $this->expectExceptionMessage('Undefined method Propel\Generator\Platform\DefaultPlatform::leInvalidMethod()');
+
+        $platform->leInvalidMethod();
     }
 }

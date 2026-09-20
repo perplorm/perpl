@@ -47,7 +47,7 @@ class QuickBuilderTest extends TestCase
 </database>
 EOF;
         $builder = new QuickBuilder();
-        $builder->setSchema($xmlSchema);
+        $builder->setSchemaXml($xmlSchema);
 
         return [[$builder]];
     }
@@ -72,9 +72,9 @@ EOF;
     {
         $expected = <<<EOF
 
------------------------------------------------------------------------
+-- ---------------------------------------------------------------------
 -- quick_build_foo_1
------------------------------------------------------------------------
+-- ---------------------------------------------------------------------
 
 DROP TABLE IF EXISTS quick_build_foo_1;
 
@@ -86,7 +86,7 @@ CREATE TABLE quick_build_foo_1
 );
 
 EOF;
-        $this->assertEquals($expected, $builder->getSQL());
+        $this->assertEquals($expected, $builder->buildSql());
     }
 
     /**
@@ -141,7 +141,7 @@ EOF;
 </database>
 EOF;
         $builder = new QuickBuilder();
-        $builder->setSchema($xmlSchema);
+        $builder->setSchemaXml($xmlSchema);
         $builder->build();
         $this->assertEquals(0, QuickBuildFoo2Query::create()->count());
         $foo = new QuickBuildFoo2();
@@ -162,7 +162,7 @@ EOF;
 </database>
 EOF;
         $builder = new QuickBuilder();
-        $builder->setSchema($xmlSchema);
+        $builder->setSchemaXml($xmlSchema);
         $builder->setVfs(false);
         $builder->build();
         $this->assertEquals(0, QuickBuildFoo3Query::create()->count());

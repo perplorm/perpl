@@ -6,9 +6,11 @@ namespace Propel\Generator\Reverse;
 
 use PDO;
 use Propel\Generator\Model\Column;
+use Propel\Generator\Model\ColumnDefaultValue;
 use Propel\Generator\Model\Database;
 use Propel\Generator\Model\Datatype\ColumnType;
 use Propel\Generator\Model\ForeignKey;
+use Propel\Generator\Model\IdMethod;
 use Propel\Generator\Model\Index;
 use Propel\Generator\Model\Table;
 use Propel\Generator\Model\Unique;
@@ -18,12 +20,10 @@ use function count;
 use function explode;
 use function implode;
 use function in_array;
-use function is_string;
 use function preg_match;
 use function preg_replace;
 use function sprintf;
 use function str_replace;
-use function strlen;
 use function strpos;
 use function strtoupper;
 use function substr;
@@ -84,7 +84,6 @@ class PgsqlSchemaParser extends AbstractSchemaParser
             'date' => ColumnType::DATE,
             'time' => ColumnType::TIME,
             'timetz' => ColumnType::TIME,
-            //'year' => ColumnType::YEAR,  ColumnType::YEAR does not exist... does this need to be mapped to a different propel type?
             'datetime' => ColumnType::TIMESTAMP,
             'timestamp' => ColumnType::TIMESTAMP,
             'timestamptz' => ColumnType::TIMESTAMP,
@@ -101,7 +100,7 @@ class PgsqlSchemaParser extends AbstractSchemaParser
     }
 
     /**
-     * Parses a database schema.
+     * Read database structure into provided Database object.
      *
      * @param \Propel\Generator\Model\Database $database
      * @param array<\Propel\Generator\Model\Table> $additionalTables
@@ -165,7 +164,7 @@ class PgsqlSchemaParser extends AbstractSchemaParser
             $params[] = $filterTable->getCommonName();
         } elseif (!$database->getSchema()) {
             /** @var \PDOStatement $stmt */
-            $stmt = $this->dbh->query('SELECT schema_name FROM information_schema.schemata');
+            $stmt = $this->con->query('SELECT schema_name FROM information_schema.schemata');
             $searchPath = [];
 
             while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
@@ -189,7 +188,7 @@ class PgsqlSchemaParser extends AbstractSchemaParser
           ORDER BY relname";
 
         /** @var \PDOStatement $stmt */
-        $stmt = $this->dbh->prepare($sql);
+        $stmt = $this->con->prepare($sql);
 
         $stmt->execute($params);
 
@@ -241,7 +240,7 @@ class PgsqlSchemaParser extends AbstractSchemaParser
         if ($schema) {
             $params = [$schema];
         } elseif (!$table->getDatabase()->getSchema()) {
-            $stmt = $this->dbh->query('SHOW search_path');
+            $stmt = $this->con->query('SHOW search_path');
             if ($stmt === false) {
                 throw new RuntimeException('Could not retrieve search_path from database.');
             }
@@ -257,7 +256,7 @@ class PgsqlSchemaParser extends AbstractSchemaParser
             $searchPath = implode(', ', $searchPath);
         }
 
-        $stmt = $this->dbh->prepare("
+        $stmt = $this->con->prepare("
         SELECT
             column_name,
             data_type,
@@ -265,7 +264,8 @@ class PgsqlSchemaParser extends AbstractSchemaParser
             is_nullable,
             numeric_precision,
             numeric_scale,
-            character_maximum_length
+            character_maximum_length,
+            identity_generation
         FROM information_schema.columns
         WHERE
             table_schema IN ($searchPath) AND table_name = ?
@@ -286,29 +286,15 @@ class PgsqlSchemaParser extends AbstractSchemaParser
 
             $name = $row['column_name'];
             $type = $row['data_type'];
-            $default = $row['column_default'];
+            $default = $row['column_default'] ?? null;
             $isNullable = ($row['is_nullable'] === true || strtoupper($row['is_nullable']) === 'YES');
+            $identityGeneration = $row['identity_generation'] ?: null;
 
             // Check to ensure that this column isn't an array data type
             if ($type === 'ARRAY') {
                 $this->warn(sprintf('Array datatypes are not currently supported [%s.%s]', $table->getName(), $name));
 
                 continue;
-            }
-
-            $autoincrement = null;
-
-            // if column has a default
-
-            if (is_string($default) && (strlen(trim($default)) > 0)) {
-                if (!preg_match('/^nextval\(/', $default)) {
-                    $strDefault = preg_replace('/::[\W\D]*/', '', $default);
-                } else {
-                    $autoincrement = true;
-                    $default = null;
-                }
-            } else {
-                $default = null;
             }
 
             $propelType = $this->getMappedPropelType($type);
@@ -321,10 +307,7 @@ class PgsqlSchemaParser extends AbstractSchemaParser
                 $size = null;
             }
 
-            if (substr(strtoupper($type), 0, 6) === 'SERIAL') {
-                $autoincrement = true;
-                $default = null;
-            }
+            $autoIncrementType = $this->getAutoIncrementType($type, $default, $identityGeneration);
 
             $column = new Column($name);
             $column->setTable($table);
@@ -334,19 +317,58 @@ class PgsqlSchemaParser extends AbstractSchemaParser
                 $column->getTypeMapping()->setScaleToValueIfNotNull($scale);
             }
 
-            if ($default !== null) {
-                $isExpression = $this->isColumnDefaultExpression($default);
-                if (!$isExpression) {
-                    $default = str_replace("'", '', $strDefault);
-                }
-                $column->getTypeMapping()->createDefaultValue($default, $isExpression);
+            if ($default !== null && !$autoIncrementType) {
+                $columnDefaultValue = $this->getColumnDefaultValue($default);
+                $column->getTypeMapping()->setDefaultValue($columnDefaultValue);
             }
 
-            $column->setAutoIncrement((bool)$autoincrement);
+            $column->setAutoIncrement($autoIncrementType !== null);
+            $autoIncrementType && $table->setIdMethod($autoIncrementType);
+
             $column->setNotNull(!$isNullable);
 
             $table->addColumn($column);
         }
+    }
+
+    /**
+     * @param string|null $default
+     *
+     * @return \Propel\Generator\Model\ColumnDefaultValue|null
+     */
+    protected function getColumnDefaultValue(string|null $default): ?ColumnDefaultValue
+    {
+        if ($default === null) {
+            return null;
+        }
+        if ($this->isColumnDefaultExpression($default)) {
+            $defaultType = ColumnDefaultValue::TYPE_EXPR;
+        } else {
+            $defaultType = ColumnDefaultValue::TYPE_VALUE;
+            $strDefault = preg_replace('/::[\W\D]*/', '', $default);
+            $default = str_replace("'", '', $strDefault);
+        }
+
+        return new ColumnDefaultValue($default, $defaultType);
+    }
+
+    /**
+     * @param string $type
+     * @param string|null $default
+     * @param string|null $identityGeneration
+     *
+     * @return \Propel\Generator\Model\IdMethod|null
+     */
+    protected function getAutoIncrementType(string $type, ?string $default, ?string $identityGeneration): IdMethod|null
+    {
+        if ($default && preg_match('/^nextval\(/', $default)) {
+            return IdMethod::SEQUENCE;
+        }
+        if (in_array($identityGeneration, ['ALWAYS', 'BY DEFAULT'], true)) {
+            return IdMethod::IDENTITY;
+        }
+
+        return null;
     }
 
     /**
@@ -367,11 +389,7 @@ class PgsqlSchemaParser extends AbstractSchemaParser
             'LOCALTIMESTAMP' => 'LOCALTIMESTAMP',
         ];
 
-        if (isset($defaultColumnValueExpressions[strtoupper($default)])) {
-            return true;
-        }
-
-        return false;
+        return isset($defaultColumnValueExpressions[strtoupper($default)]);
     }
 
     /**
@@ -387,7 +405,7 @@ class PgsqlSchemaParser extends AbstractSchemaParser
     protected function addForeignKeys(Table $table, int $oid): void
     {
         $database = $table->getDatabase();
-        $stmt = $this->dbh->prepare("SELECT
+        $stmt = $this->con->prepare("SELECT
             conname,
             confupdtype,
             confdeltype,
@@ -515,7 +533,7 @@ class PgsqlSchemaParser extends AbstractSchemaParser
      */
     protected function addIndexes(Table $table, int $oid): void
     {
-        $stmt = $this->dbh->prepare("SELECT
+        $stmt = $this->con->prepare("SELECT
             DISTINCT ON(cls.relname)
             cls.relname as idxname,
             indkey,
@@ -531,7 +549,7 @@ class PgsqlSchemaParser extends AbstractSchemaParser
         $stmt->bindValue(1, $oid);
         $stmt->execute();
 
-        $stmt2 = $this->dbh->prepare("SELECT a.attname
+        $stmt2 = $this->con->prepare("SELECT a.attname
             FROM pg_catalog.pg_class c JOIN pg_catalog.pg_attribute a ON a.attrelid = c.oid
             WHERE c.oid = ? AND a.attnum = ? AND NOT a.attisdropped
             ORDER BY a.attnum");
@@ -589,7 +607,7 @@ class PgsqlSchemaParser extends AbstractSchemaParser
      */
     protected function addPrimaryKey(Table $table, int $oid): void
     {
-        $stmt = $this->dbh->prepare("SELECT
+        $stmt = $this->con->prepare("SELECT
             DISTINCT ON(cls.relname)
             cls.relname as idxname,
             indkey,
@@ -609,7 +627,7 @@ class PgsqlSchemaParser extends AbstractSchemaParser
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             $arrColumns = explode(' ', $row['indkey']);
             foreach ($arrColumns as $intColNum) {
-                $stmt2 = $this->dbh->prepare("SELECT a.attname
+                $stmt2 = $this->con->prepare("SELECT a.attname
                     FROM pg_catalog.pg_class c JOIN pg_catalog.pg_attribute a ON a.attrelid = c.oid
                     WHERE c.oid = ? AND a.attnum = ? AND NOT a.attisdropped
                     ORDER BY a.attnum");
@@ -643,7 +661,7 @@ class PgsqlSchemaParser extends AbstractSchemaParser
         $searchPath = '?';
         $params = [$database->getSchema()];
         if (!$database->getSchema()) {
-            $stmt = $this->dbh->query('SHOW search_path');
+            $stmt = $this->con->query('SHOW search_path');
             if ($stmt === false) {
                 throw new RuntimeException('Query returned no statement.');
             }
@@ -659,7 +677,7 @@ class PgsqlSchemaParser extends AbstractSchemaParser
             $searchPath = implode(', ', $searchPath);
         }
 
-        $stmt = $this->dbh->prepare("
+        $stmt = $this->con->prepare("
             SELECT c.relname, n.nspname
             FROM pg_class c, pg_namespace n
             WHERE

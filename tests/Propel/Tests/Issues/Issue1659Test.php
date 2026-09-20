@@ -54,8 +54,8 @@ class Issue1659Test extends TestCaseFixtures
 </database>
 EOF;
         $builder = new QuickBuilder();
-        $builder->setSchema($schema);
-        $builder->buildClasses(null, true);
+        $builder->setSchemaXml($schema);
+        $builder->buildClasses();
 
         //should build without exception
         $this->assertTrue(class_exists('FkNonPrimary\Event'));
@@ -95,8 +95,8 @@ EOF;
 </database>
 EOF;
         $builder = new QuickBuilder();
-        $builder->setSchema($schema);
-        $builder->buildClasses(null, true);
+        $builder->setSchemaXml($schema);
+        $builder->buildClasses();
 
         //should build without exception
         $this->assertTrue(class_exists('FkNonPrimaryFNonComposite\Event'));

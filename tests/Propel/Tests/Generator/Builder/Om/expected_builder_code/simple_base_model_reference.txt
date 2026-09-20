@@ -30,7 +30,6 @@ use function implode;
 use function json_encode;
 use function lcfirst;
 use function spl_object_hash;
-use function sprintf;
 use function strpos;
 use function substr;
 use const JSON_UNESCAPED_UNICODE;
@@ -603,23 +602,19 @@ abstract class IdTable implements ActiveRecordInterface, MutableActiveRecordInte
      */
     protected function doInsert(ConnectionInterface $con): void
     {
-        $modifiedColumns = [];
-        $index = 0;
-        $this->modifiedColumns[IdTableTableMap::COL_ID] = true;
         if ($this->id !== null) {
-            throw new PropelException('Cannot insert a value for auto-increment primary key (' . IdTableTableMap::COL_ID . ')');
+            throw new PropelException('Cannot insert a value for auto-increment primary key (IdTableTableMap::COL_ID)');
         }
 
-         // check the columns in natural order for more readable SQL queries
+        $this->modifiedColumns[IdTableTableMap::COL_ID] = true;
+        $modifiedColumns = [];
+        $index = 0;
         if ($this->isColumnModified(IdTableTableMap::COL_ID)) {
             $modifiedColumns[':p' . $index++] = 'id';
         }
-
-        $sql = sprintf(
-            'INSERT INTO id_table (%s) VALUES (%s)',
-            implode(', ', $modifiedColumns),
-            implode(', ', array_keys($modifiedColumns)),
-        );
+        $columnList = implode(', ', $modifiedColumns);
+        $columnValues = implode(', ', array_keys($modifiedColumns));
+        $sql = "INSERT INTO id_table ($columnList) VALUES ($columnValues)";
 
         try {
             $stmt = $con->prepare($sql);

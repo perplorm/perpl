@@ -41,8 +41,8 @@ class Issue1192Test extends TestCase
 </database>
 END;
         $builder = new QuickBuilder();
-        $builder->setSchema($schema);
-        $builder->buildClasses(null, true);
+        $builder->setSchemaXml($schema);
+        $builder->buildClasses();
         Propel::getServiceContainer()->setAdapter('issue_1192', new MysqlAdapter());
     }
 

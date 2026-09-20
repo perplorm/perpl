@@ -28,7 +28,7 @@ abstract class PlatformTestProvider extends PlatformTestBase
     public function assertCreateTableMatches(string $expected, $schema, ?string $tableName = 'foo' )
     {
         $table = $this->getTableFromSchema($schema, $tableName);
-        $this->assertEquals($expected, $this->getPlatform()->getAddTableDDL($table));
+        $this->assertEquals($expected, $this->getPlatform()->buildAddTableDdl($table));
     }
 
     /**

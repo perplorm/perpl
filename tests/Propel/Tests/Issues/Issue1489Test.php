@@ -51,7 +51,7 @@ class Issue1489Test extends TestCase
       ';
 
       $quickBuilder = new QuickBuilder();
-      $quickBuilder->setSchema($schema);
+      $quickBuilder->setSchemaXml($schema);
       $quickBuilder->setIdentifierQuoting(true);
       $quickBuilder->setPlatform(new MysqlPlatform());
 

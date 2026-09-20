@@ -42,7 +42,7 @@ EOF;
                     ],
                 ],
             ]);
-            $builder->setSchema($schema);
+            $builder->setSchemaXml($schema);
             $builder->setConfig($config);
             $builder->build();
         }

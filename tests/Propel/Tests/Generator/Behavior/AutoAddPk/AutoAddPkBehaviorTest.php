@@ -38,7 +38,7 @@ class AutoAddPkBehaviorTest extends BookstoreTestBase
         $this->assertEquals($pk->getName(), 'id', 'auto_add_pk adds an id column by default');
         $this->assertEquals($pk->getColumnType(), ColumnType::INTEGER, 'auto_add_pk adds an integer column by default');
         $this->assertTrue($pk->isPrimaryKey(), 'auto_add_pk adds a primary key column by default');
-        $this->assertTrue($table6->isUseIdGenerator(), 'auto_add_pk adds an autoIncrement column by default');
+        $this->assertTrue($table6->isUsingAutoIncrementedIds(), 'auto_add_pk adds an autoIncrement column by default');
     }
 
     /**
@@ -66,7 +66,7 @@ class AutoAddPkBehaviorTest extends BookstoreTestBase
         $this->assertEquals($pk->getName(), 'identifier', 'auto_add_pk accepts customization of pk column name');
         $this->assertEquals($pk->getColumnType(), ColumnType::BIGINT, 'auto_add_pk accepts customization of pk column type');
         $this->assertTrue($pk->isPrimaryKey(), 'auto_add_pk adds a primary key column with custom parameters');
-        $this->assertFalse($table8->isUseIdGenerator(), 'auto_add_pk accepts customization of pk column autoIncrement');
+        $this->assertFalse($table8->isUsingAutoIncrementedIds(), 'auto_add_pk accepts customization of pk column autoIncrement');
     }
 
     /**

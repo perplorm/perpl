@@ -78,7 +78,7 @@ class GeneratedObjectMoreRelationTest extends TestCase
 EOF;
 
             $builder = new QuickBuilder();
-            $builder->setSchema($schema);
+            $builder->setSchemaXml($schema);
             $builder->build();
         }
 

@@ -81,7 +81,7 @@ class TableMapTest extends TestCase
     public function testProperties()
     {
         $tmap = new TableMap();
-        $properties = ['name', 'phpName', 'className', 'package'];
+        $properties = ['name', 'phpName', 'modelClassName', 'package'];
         foreach ($properties as $property) {
             $getter = 'get' . ucfirst($property);
             $setter = 'set' . ucfirst($property);
@@ -250,10 +250,10 @@ class TableMapTest extends TestCase
     public function testAddRelation()
     {
         $foreigntmap1 = new TableMap('bar');
-        $foreigntmap1->setClassName('Bar');
+        $foreigntmap1->setModelClassName('Bar');
         $this->databaseMap->addTableObject($foreigntmap1);
         $foreigntmap2 = new TableMap('baz');
-        $foreigntmap2->setClassName('Baz');
+        $foreigntmap2->setModelClassName('Baz');
         $this->databaseMap->addTableObject($foreigntmap2);
         $rmap1 = $this->tmap->addRelation('Bar', 'Bar', RelationMap::MANY_TO_ONE);
         $rmap2 = $this->tmap->addRelation('Bazz', 'Baz', RelationMap::ONE_TO_MANY);
@@ -334,6 +334,6 @@ class BarTableMap extends TableMap
     public function initialize(): void
     {
         $this->setName('bar');
-        $this->setClassName('Bar');
+        $this->setModelClassName('Bar');
     }
 }
