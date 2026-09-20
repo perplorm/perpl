@@ -158,7 +158,7 @@ jobs:
               - check: PHPCS
                 command: 'cs-check -- --exclude=SlevomatCodingStandard.TypeHints.DeclareStrictTypes'
               - check: Stan
-                command: 'stan -- -a autoload.php.dist'
+                command: 'stan -- -a tests/autoload.php.dist'
               - type: query
                 file-pattern: 'Base/*Query.php'
               - type: model

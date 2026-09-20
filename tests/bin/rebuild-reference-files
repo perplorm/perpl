@@ -5,7 +5,7 @@ use Propel\Tests\Attributes\ComparesGeneratedFile;
 use Propel\Tests\TestCase;
 use Symfony\Component\Finder\Finder;
 
-require_once __DIR__ . '/../../autoload.php.dist';
+require_once __DIR__ . '/../autoload.php.dist';
 
 function findTestFileNames(): array
 {

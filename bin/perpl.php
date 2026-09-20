@@ -4,7 +4,7 @@ if (!class_exists(\Symfony\Component\Console\Application::class)) {
     $autoloadFileCandidates = [
         __DIR__ . '/../../../autoload.php',
         __DIR__ . '/../autoload.php',
-        __DIR__ . '/../autoload.php.dist',
+        __DIR__ . '/../tests/autoload.php.dist',
     ];
     foreach ($autoloadFileCandidates as $file) {
         if (file_exists($file)) {

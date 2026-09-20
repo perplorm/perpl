@@ -1,0 +1,39 @@
+<?php
+
+$root = __DIR__.'/..';
+
+if (file_exists($file = "$root/vendor/autoload.php")) {
+    $loader = require $file;
+
+    $loader->add('Foo', __DIR__ . '/Fixtures/namespaced/build/classes');
+    $loader->add('Baz', __DIR__ . '/Fixtures/namespaced/build/classes');
+    $loader->add('Propel\Tests', array(
+        __DIR__,
+        __DIR__ . '/Fixtures/bookstore/build/classes',
+        __DIR__ . '/Fixtures/schemas/build/classes',
+        __DIR__ . '/Fixtures/quoting/build/classes',
+        __DIR__ . '/Fixtures/instance-pool/build/classes',
+    ));
+    $loader->add('Propel\Tests\Fixtures', __DIR__ . '/Fixtures/classes');
+    $loader->register();
+} elseif (file_exists($file = "$root/vendor/Symfony/Component/ClassLoader/UniversalClassLoader.php")) {
+    require_once $file;
+
+    $loader = new \Symfony\Component\ClassLoader\UniversalClassLoader();
+    $loader->registerNamespaces(array(
+        'Propel\Common'     => "$root/src",
+        'Propel\Runtime'    => "$root/src",
+        'Propel\Generator'  => "$root/src",
+        'Symfony\Component' => "$root/vendor",
+        'Monolog'           => "$root/vendor/Monolog/src/",
+        'Foo'               => __DIR__ . '/Fixtures/namespaced/build/classes',
+        'Baz'               => __DIR__ . '/Fixtures/namespaced/build/classes',
+        'Propel\Tests'      => array(
+            __DIR__,
+            __DIR__ . '/Fixtures/bookstore/build/classes',
+            __DIR__ . '/Fixtures/schemas/build/classes',
+        ),
+        'Propel\Tests\Fixtures' => __DIR__ . '/Fixtures/classes',
+    ));
+    $loader->register();
+}
