@@ -8,7 +8,7 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns="https://getpsalm.org/schema/config"
     xsi:schemaLocation="https://getpsalm.org/schema/config vendor/vimeo/psalm/config.xsd"
-    autoloader="autoload.php.dist"
+    autoloader="tests/autoload.php.dist"
     errorBaseline="psalm-baseline.xml"
 >
     <projectFiles>

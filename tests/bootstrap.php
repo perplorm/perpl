@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . '/../autoload.php.dist';
+require_once __DIR__ . '/autoload.php.dist';
 
 use \Propel\Generator\Util\QuickBuilder;
 
