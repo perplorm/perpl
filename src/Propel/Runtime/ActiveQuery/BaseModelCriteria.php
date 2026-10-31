@@ -21,7 +21,6 @@ use Propel\Runtime\Perpl;
 use Traversable;
 use function array_find;
 use function array_pop;
-use function array_search;
 use function assert;
 use function class_exists;
 use function explode;
@@ -615,9 +614,7 @@ class BaseModelCriteria extends Criteria implements IteratorAggregate
 
         foreach ($this->relatedModelsToPopulate as $populator) {
             $tableMap = $populator->getTableMap();
-            $tableName = $tableMap->getName();
-            $joinedAlias = array_search($tableName, $this->aliases, true) ?: $tableName; // TODO store alias in populator?
-            $relatedModelColumns = $tableMap::buildLocalTableColumnExpressions($this, (string)$joinedAlias);
+            $relatedModelColumns = $tableMap::buildLocalTableColumnExpressions($this, $populator->getNameInQuery());
 
             $selectedColumns = [...$selectedColumns, ...$relatedModelColumns];
         }
