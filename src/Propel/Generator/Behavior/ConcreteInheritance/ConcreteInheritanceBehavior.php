@@ -14,7 +14,6 @@ use Propel\Generator\Util\PhpParser;
 use Propel\Runtime\Exception\PropelException;
 use function array_flip;
 use function explode;
-use function get_class;
 use function in_array;
 use function sprintf;
 use function str_replace;
@@ -155,7 +154,7 @@ class ConcreteInheritanceBehavior extends Behavior
     {
         $database = $this->getTable()->getDatabase();
         $tableName = $database->getTablePrefix() . $this->getParameter('extends');
-        if ($database->getPlatform()->supportsSchemas() && $this->getParameter('schema')) {
+        if ($database->getPlatform()?->supportsSchemas() && $this->getParameter('schema')) {
             $tableName = $this->getParameter('schema') . $database->getPlatform()->getSchemaDelimiter() . $tableName;
         }
 
@@ -197,15 +196,13 @@ class ConcreteInheritanceBehavior extends Behavior
     {
         $parentTable = $this->getParentTable();
 
-        $parentBuilder = match (get_class($builder)) {
-            'Propel\Generator\Builder\Om\ObjectBuilder' => $builder->getStubObjectBuilder($parentTable),
-            'Propel\Generator\Builder\Om\QueryBuilder' => $builder->getStubQueryBuilder($parentTable),
+        $parentBuilder = match (true) {
+            $builder instanceof ObjectBuilder => $builder->getStubObjectBuilder($parentTable),
+            $builder instanceof QueryBuilder => $builder->getStubQueryBuilder($parentTable), // @phpstan-ignore instanceof.alwaysTrue (current signature means only QueryBuilder remains)
             default => null
         };
 
-        return $parentBuilder
-            ? $builder->declareClassFromBuilder($parentBuilder, true)
-            : null;
+        return $builder->declareClassFromBuilder($parentBuilder, true);
     }
 
     /**

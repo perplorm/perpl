@@ -119,33 +119,34 @@ class QueryBuilder extends AbstractOMBuilder
      */
     public function getParentClass(bool $fqcn = false): string
     {
-        $parentClass = $this->resolveParentClass();
+        $qualifiedName = $this->resolveParentClassName();
         if ($fqcn) {
-            return $parentClass;
+            return $qualifiedName;
         }
 
-        $slashPos = strrpos($parentClass, '\\');
+        $localName = $this->referencedClasses->getLocalNameForClass($qualifiedName);
+        if ($localName) {
+            return $localName;
+        }
 
-        return $slashPos === false ? $parentClass : substr($parentClass, $slashPos + 1);
+        $slashPos = strrpos($qualifiedName, '\\');
+
+        return $slashPos === false ? $qualifiedName : substr($qualifiedName, $slashPos + 1);
     }
 
     /**
      * @return class-string
      */
-    protected function resolveParentClass(): string
+    protected function resolveParentClassName(): string
     {
         /** @var class-string|null $parentClass */
         $parentClass = $this->getBehaviorContent('parentClass');
         if ($parentClass) {
-            return $parentClass;
+            return $this->referencedClasses->getQualifiedNameForClassAlias($parentClass) ?? $parentClass;
         }
 
-        $baseQueryClass = $this->getTable()->getBaseQueryClass();
-        if ($baseQueryClass) {
-            return $baseQueryClass;
-        }
-
-        return TypedModelCriteria::class;
+        return $this->getTable()->getBaseQueryClass()
+            ?? TypedModelCriteria::class;
     }
 
     /**
@@ -167,7 +168,7 @@ class QueryBuilder extends AbstractOMBuilder
             'queryClass' => $this->tableNames->useQueryStubClassName(false),
             'modelClass' => $this->tableNames->useObjectStubClassName(false),
             'parentClass' => $this->getParentClass(),
-            'parentClassFq' => $this->getParentClass(true),
+            'parentClassFq' => $this->resolveParentClassName(),
             'entityNotFoundExceptionClass' => $this->getEntityNotFoundExceptionClass(),
             'unqualifiedClassName' => $this->getUnqualifiedClassName(),
 

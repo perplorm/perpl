@@ -525,11 +525,8 @@ class Table extends ScopedMappingModel
      */
     public function getBaseQueryClass(): ?string
     {
-        if ($this->baseQueryClass === null) {
-            return $this->database->getBaseQueryClass();
-        }
-
-        return $this->baseQueryClass;
+        return $this->baseQueryClass
+            ?? $this->database->getBaseQueryClass();
     }
 
     /**

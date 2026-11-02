@@ -44,29 +44,16 @@ use function var_export;
  */
 abstract class DataModelBuilder
 {
-    /**
-     * The current table.
-     *
-     * @var \Propel\Generator\Model\Table
-     */
     private Table $table;
 
     /**
      * The generator config object holding build properties, etc.
-     *
-     * @var \Propel\Generator\Config\AbstractGeneratorConfig|null
      */
-    protected ?AbstractGeneratorConfig $generatorConfig = null;
+    protected AbstractGeneratorConfig|null $generatorConfig = null;
 
-    /**
-     * @var \Propel\Generator\Builder\Util\NameProducer|null
-     */
-    protected $nameProducer;
+    protected NameProducer|null $nameProducer = null;
 
-    /**
-     * @var \Propel\Generator\Builder\Util\ReferencedClasses
-     */
-    protected $referencedClasses;
+    protected ReferencedClasses $referencedClasses;
 
     /**
      * An array of warning messages that can be retrieved for display.
@@ -76,11 +63,9 @@ abstract class DataModelBuilder
     private array $warnings = [];
 
     /**
-     * The platform class
-     *
      * @var \Propel\Generator\Platform\PlatformInterface|null
      */
-    protected ?PlatformInterface $platform = null;
+    protected PlatformInterface|null $platform = null;
 
     /**
      * @param \Propel\Generator\Model\Table $table
