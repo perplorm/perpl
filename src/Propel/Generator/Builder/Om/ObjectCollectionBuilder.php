@@ -30,7 +30,7 @@ class ObjectCollectionBuilder extends AbstractOMBuilder
     /**
      * @var array<array{relationIdentifier: string, relationIdentifierInMethod: string, collectionClassType: string, collectionClassNameFq: class-string, collectionClassName: string}>|null
      */
-    protected $relationCollectionMapping;
+    protected array|null $relationCollectionMapping = null;
 
     /**
      * @return array<array{relationIdentifier: string, relationIdentifierInMethod: string, collectionClassName: string, collectionClassNameFq: class-string, collectionClassType: string}>
@@ -61,17 +61,15 @@ class ObjectCollectionBuilder extends AbstractOMBuilder
     #[\Override]
     public function getNamespace(): ?string
     {
-        $namespace = parent::getNamespace();
-        if (!$namespace) {
+        $rootNamespace = parent::getNamespace();
+        if (!$rootNamespace) {
             return 'Base\\Collection';
         }
 
-        $namespaceMap = $this->getBuildPropertyString('generator.objectModel.namespaceCollection');
-        if (!$namespaceMap) {
-            return $namespace . '\\Base\\Collection';
-        }
+        $collectionRelativeNamespace = $this->getBuildPropertyString('generator.objectModel.namespaceCollection')
+            ?: 'Base\\Collection';
 
-        return "$namespace\\$namespaceMap";
+        return "$rootNamespace\\$collectionRelativeNamespace";
     }
 
     /**
@@ -123,7 +121,7 @@ class ObjectCollectionBuilder extends AbstractOMBuilder
         $script .= $this->renderLocalTemplate('objectCollectionClassOpen', [
             'modelClassName' => $this->getObjectName(),
             'unqualifiedClassName' => $this->getUnprefixedClassName(),
-            'parentClass' => substr($parentClassFq, 1 + strrpos($parentClassFq, '\\')),
+            'parentClass' => $this->referencedClasses->getLocalNameForClass($parentClassFq),
             'parentType' => $this->resolveParentCollectionType(),
             'modelClassNameFq' => $this->getStubObjectBuilder()->getFullyQualifiedClassName(),
         ]);
@@ -222,13 +220,9 @@ class ObjectCollectionBuilder extends AbstractOMBuilder
     {
         $table = $this->getTable();
         $collectionClassNameFq = $this->normalizeClassName($table->getCollectionClassNameFq());
-        if ($collectionClassNameFq && $collectionClassNameFq !== '\\' . ObjectCollection::class) {
-            return $collectionClassNameFq;
-        }
-
         $modelClassName = $this->getStubObjectBuilder()->getFullyQualifiedClassName();
 
-        return '\\' . ObjectCollection::class . "<$modelClassName>";
+        return "$collectionClassNameFq<$modelClassName>";
     }
 
     /**

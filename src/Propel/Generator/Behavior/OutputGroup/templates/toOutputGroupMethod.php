@@ -11,7 +11,7 @@
     /**
      * Turn collection objects into arrays with values specified by output group.
      *
-     * @param array<string, string>|string $outputGroup Name of the output group used for all tables or
+     * @param array<string, string|array<string>>|string $outputGroup Name of the output group used for all tables or
      *                                                  an array mapping model classes to output group name.
      *                                                  If a model class does not have a definition for the
      *                                                  given output group, the whole data is returned.

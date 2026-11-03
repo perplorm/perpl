@@ -122,7 +122,7 @@ class ObjectCollectionBuilderTest extends AgnosticBuilderTestCase
                 </database>',
                 'user',
                 '\Foo\Collection',
-                '\Foo\Collection'
+                '\Foo\Collection<\User>'
             ], [
                 'set by collection-class parameter on database',
                 '<database collection-class="\Foo\Collection">
@@ -130,7 +130,7 @@ class ObjectCollectionBuilderTest extends AgnosticBuilderTestCase
                 </database>',
                 'user',
                 '\Foo\Collection',
-                '\Foo\Collection'
+                '\Foo\Collection<\User>'
             ]
         ];
     }

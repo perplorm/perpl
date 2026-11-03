@@ -113,7 +113,7 @@ class OutputGroupBehavior extends Behavior
     public function modifyTable(): void
     {
         $table = $this->getTable();
-        if ($table->useGeneratedCollectionClass() || $table->hasCollectionClassAttribute()) {
+        if ($table->hasCollectionClassAttribute()) {
              // output group method will be added in addObjectCollectionMethods() or is handled by user
             return;
         }
@@ -138,10 +138,11 @@ class OutputGroupBehavior extends Behavior
      */
     public function getObjectCollectionClass(): string
     {
-        $class = $this->getParameter(self::PARAMETER_OBJECT_COLLECTION_CLASS)
-            ?: ObjectCollectionWithOutputGroups::class;
+        $customClass = $this->getParameter(self::PARAMETER_OBJECT_COLLECTION_CLASS);
 
-        return ScopedMappingModel::makeClassNameAbsolute($class);
+        return $customClass
+            ? ScopedMappingModel::makeClassNameAbsolute($customClass)
+            : '\\' . ObjectCollectionWithOutputGroups::class;
     }
 
     /**
