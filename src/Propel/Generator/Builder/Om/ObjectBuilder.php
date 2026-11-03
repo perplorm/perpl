@@ -269,12 +269,8 @@ class ObjectBuilder extends AbstractObjectBuilder
      */
     protected function getParentClass(): ?string
     {
-        $parentClass = $this->getBehaviorContent('parentClass');
-        if ($parentClass !== null) {
-            return $parentClass;
-        }
-
-        return ClassTools::classname($this->getBaseClass());
+        return $this->getBehaviorContent('parentClass')
+            ?? ClassTools::classname($this->getBaseClass());
     }
 
     /**

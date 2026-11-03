@@ -801,8 +801,6 @@ class Column extends MappingModel
     }
 
     /**
-     * Returns the inheritance type.
-     *
      * @return string|null
      */
     public function getInheritanceType(): ?string
@@ -811,8 +809,6 @@ class Column extends MappingModel
     }
 
     /**
-     * Returns the inheritance list.
-     *
      * @return array<\Propel\Generator\Model\Inheritance>|null
      */
     public function getInheritanceList(): ?array
@@ -821,7 +817,7 @@ class Column extends MappingModel
     }
 
     /**
-     * Returns the inheritance definitions.
+     * @deprecated Use aptly named {@see static::getInheritanceList()}
      *
      * @return array<\Propel\Generator\Model\Inheritance>|null
      */

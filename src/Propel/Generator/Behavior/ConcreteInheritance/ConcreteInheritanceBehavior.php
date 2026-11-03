@@ -6,6 +6,7 @@ namespace Propel\Generator\Behavior\ConcreteInheritance;
 
 use Propel\Generator\Builder\Om\ObjectBuilder;
 use Propel\Generator\Builder\Om\QueryBuilder;
+use Propel\Generator\Exception\EngineException;
 use Propel\Generator\Exception\InvalidArgumentException;
 use Propel\Generator\Model\Behavior;
 use Propel\Generator\Model\ForeignKey;
@@ -14,6 +15,7 @@ use Propel\Generator\Util\PhpParser;
 use Propel\Runtime\Exception\PropelException;
 use function array_flip;
 use function explode;
+use function get_class;
 use function in_array;
 use function sprintf;
 use function str_replace;
@@ -190,16 +192,18 @@ class ConcreteInheritanceBehavior extends Behavior
     /**
      * @param \Propel\Generator\Builder\Om\ObjectBuilder|\Propel\Generator\Builder\Om\QueryBuilder $builder
      *
-     * @return string|null
+     * @throws \Propel\Generator\Exception\EngineException
+     *
+     * @return string
      */
-    public function parentClass($builder): ?string
+    public function parentClass($builder): string
     {
         $parentTable = $this->getParentTable();
 
         $parentBuilder = match (true) {
             $builder instanceof ObjectBuilder => $builder->getStubObjectBuilder($parentTable),
             $builder instanceof QueryBuilder => $builder->getStubQueryBuilder($parentTable), // @phpstan-ignore instanceof.alwaysTrue (current signature means only QueryBuilder remains)
-            default => null
+            default => throw new EngineException('Loading parent class currently not implement for builder type ' . get_class($builder))
         };
 
         return $builder->declareClassFromBuilder($parentBuilder, true);

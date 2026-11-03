@@ -734,13 +734,23 @@ class Table extends ScopedMappingModel
     }
 
     /**
-     * Checks whether the table uses concrete inheritance
+     * Checks whether the table uses single table inheritance
+     *
+     * @return bool
+     */
+    public function usesSingleTableInheritance(): bool
+    {
+        return $this->inheritanceColumn !== null;
+    }
+
+    /**
+     * @deprecated Use aptly named {@see static::usesSingleTableInheritance()}
      *
      * @return bool
      */
     public function usesConcreteInheritance(): bool
     {
-        return ($this->inheritanceColumn !== null);
+        return $this->usesSingleTableInheritance();
     }
 
     /**
@@ -758,7 +768,7 @@ class Table extends ScopedMappingModel
         }
 
         $names = [];
-        foreach ($this->inheritanceColumn->getChildren() as $child) {
+        foreach ($this->inheritanceColumn->getInheritanceList() as $child) {
             $names[] = get_class($child);
         }
 
@@ -2257,7 +2267,7 @@ class Table extends ScopedMappingModel
     }
 
     /**
-     * Collection class name used by this table, fully qualified.
+     * Collection class name used by this table, fully qualified (starting with \).
      *
      * @return class-string
      */

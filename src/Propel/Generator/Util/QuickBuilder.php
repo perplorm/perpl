@@ -528,7 +528,7 @@ class QuickBuilder
         }
 
         $code = '';
-        foreach ($column->getChildren() as $child) {
+        foreach ($column->getInheritanceList() as $child) {
             if (!$child->getAncestor()) {
                 continue;
             }

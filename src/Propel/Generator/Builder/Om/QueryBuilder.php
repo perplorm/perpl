@@ -481,7 +481,7 @@ class QueryBuilder extends AbstractOMBuilder
             return;
         }
 
-        $usesConcreteInheritance = $table->usesConcreteInheritance();
+        $usesConcreteInheritance = $table->usesSingleTableInheritance();
         if ($table->isAbstract() && !$usesConcreteInheritance) {
             $tableName = $table->getPhpName();
             $script .= "

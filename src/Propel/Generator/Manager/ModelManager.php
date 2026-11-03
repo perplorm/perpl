@@ -93,7 +93,7 @@ class ModelManager extends AbstractManager
                     // If table has enumerated children (uses inheritance) then create the empty child stub classes if they don't already exist.
                     $col = $table->getChildrenColumn();
                     if ($col?->isEnumeratedClasses()) {
-                        foreach ($col->getChildren() as $child) {
+                        foreach ($col->getInheritanceList() as $child) {
                             foreach ([BuilderType::QueryInheritance] as $target) {
                                 if (!$child->getAncestor() && $child->getClassName() === $table->getPhpName()) {
                                     continue;

@@ -68,7 +68,7 @@ class OgQueryModifierTest extends TestCase
 abstract class FooQuery
 {     
 EOT;
-        $actual = $this->callMethod($modifier, 'addMethodSignaturesToDocBlock', [$script]);
+        $actual = $this->callMethod($modifier, 'addMethodSignaturesToDocBlock', [$script, 'ModelClass']);
         $expected = <<<EOT
 /**
  * asdf

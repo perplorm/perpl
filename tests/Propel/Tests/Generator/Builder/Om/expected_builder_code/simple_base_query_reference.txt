@@ -43,7 +43,7 @@ use function sprintf;
  * @method \IdTable requireOneById(int $id) Return the first \IdTable filtered by the id column and throws Propel\Runtime\Exception\EntityNotFoundException when not found
  *
  * @method \Base\Collection\IdTableCollection|\Propel\Runtime\Collection\Collection<\IdTable> find(\Propel\Runtime\Connection\ConnectionInterface|null $con = null) Return \IdTable objects based on current ModelCriteria
- * @method \Base\Collection\IdTableCollection findObjects(\Propel\Runtime\Connection\ConnectionInterface|null $con = null) Get \IdTable objects in ObjectCollection
+ * @method \Base\Collection\IdTableCollection findObjects(\Propel\Runtime\Connection\ConnectionInterface|null $con = null) Type-safe version of find(), returning an ObjectCollection.
  *
  * @method array<\IdTable>|\Propel\Runtime\Collection\Collection<\IdTable> findById(int|array<int> $id) Return \IdTable objects filtered by the id column
  *
