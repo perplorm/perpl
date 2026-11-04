@@ -45,7 +45,6 @@ class TableTest extends ModelTestCase
         $this->assertFalse($table->isSkipSql());
         $this->assertFalse($table->isReadOnly());
         $this->assertSame(0, $table->getNumLazyLoadColumns());
-        $this->assertNull($table->getChildrenNames());
         $this->assertFalse($table->hasForeignKeys());
     }
 
@@ -313,54 +312,6 @@ class TableTest extends ModelTestCase
 
         $table->addColumn($column);
         $table->addColumn($column);
-    }
-
-    /**
-     * @return void
-     */
-    public function testGetChildrenNames()
-    {
-        $column = $this->getColumnMock('created_at', ['inheritance' => true]);
-
-        $column
-            ->expects($this->any())
-            ->method('isEnumeratedClasses')
-            ->will($this->returnValue(true));
-
-        $children[] = $this->getMockBuilder('Propel\Generator\Model\Inheritance')->getMock();
-        $children[] = $this->getMockBuilder('Propel\Generator\Model\Inheritance')->getMock();
-
-        $column
-            ->expects($this->any())
-            ->method('getChildren')
-            ->will($this->returnValue($children));
-
-        $table = new Table('books');
-        $table->addColumn($column);
-
-        $names = $table->getChildrenNames();
-
-        $this->assertCount(2, $names);
-        $this->assertSame('Propel\Generator\Model\Inheritance', get_parent_class($names[0]));
-        $this->assertSame('Propel\Generator\Model\Inheritance', get_parent_class($names[1]));
-    }
-
-    /**
-     * @return void
-     */
-    public function testCantGetChildrenNames()
-    {
-        $column = $this->getColumnMock('created_at', ['inheritance' => true]);
-
-        $column
-            ->expects($this->any())
-            ->method('isEnumeratedClasses')
-            ->will($this->returnValue(false));
-
-        $table = new Table('books');
-        $table->addColumn($column);
-
-        $this->assertNull($table->getChildrenNames());
     }
 
     /**

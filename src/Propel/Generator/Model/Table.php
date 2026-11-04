@@ -26,7 +26,6 @@ use function array_reduce;
 use function array_slice;
 use function array_values;
 use function count;
-use function get_class;
 use function implode;
 use function in_array;
 use function is_array;
@@ -751,28 +750,6 @@ class Table extends ScopedMappingModel
     public function usesConcreteInheritance(): bool
     {
         return $this->usesSingleTableInheritance();
-    }
-
-    /**
-     * Returns the subclasses that can be created from this table.
-     *
-     * @return array|null
-     */
-    public function getChildrenNames(): ?array
-    {
-        if (
-            $this->inheritanceColumn === null
-            || !$this->inheritanceColumn->isEnumeratedClasses()
-        ) {
-            return null;
-        }
-
-        $names = [];
-        foreach ($this->inheritanceColumn->getInheritanceList() as $child) {
-            $names[] = get_class($child);
-        }
-
-        return $names;
     }
 
     /**
