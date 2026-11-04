@@ -5,6 +5,7 @@ declare(strict_types = 1);
 namespace Propel\Tests\Runtime\ActiveQuery;
 
 use PHPUnit\Framework\Attributes\DataProvider;
+use Propel\Generator\Util\QuickBuilder;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\RelationPopulator;
 use Propel\Runtime\Exception\PropelException;
@@ -299,4 +300,47 @@ class ModelCriteriaPopulateRelationTest extends BookstoreTestBase
     }
 
 
+    public function testPopulateParallelRelation()
+    {
+        $schemaXml = <<<XML
+    <database name="bookstore" namespace="\ParallelRelationsTest">
+        <table name="person">
+            <column name="id" type="INTEGER" primaryKey="true" autoIncrement="true"/>
+        </table>
+
+        <table name="couple">
+            <column name="id" type="INTEGER" primaryKey="true" autoIncrement="true"/>
+            <column name="person_1_id" type="INTEGER"/>
+            <column name="person_2_id" type="INTEGER"/>
+            <foreign-key foreignTable="person" phpName="Person1">
+                <reference local="person_1_id" foreign="id"/>
+            </foreign-key>
+            <foreign-key foreignTable="person" phpName="Person2">
+                <reference local="person_2_id" foreign="id"/>
+            </foreign-key>
+        </table>
+    </database>
+XML;
+        $b = new QuickBuilder();
+        $b->setSchemaXml($schemaXml);
+        $b->buildClasses();
+
+        $query = \ParallelRelationsTest\CoupleQuery::create()
+            ->populateRelation('Person1 p1')
+            ->populateRelation('Person2 p2');
+
+        $expected = <<<SQL
+        SELECT 
+            couple.id,
+            couple.person_1_id,
+            couple.person_2_id,
+            p1.id,
+            p2.id
+        FROM couple
+        LEFT JOIN person p1 ON (couple.person_1_id=p1.id)
+        LEFT JOIN person p2 ON (couple.person_2_id=p2.id)
+SQL;
+
+        $this->assertVendorSql($expected, $query);
+    }
 }

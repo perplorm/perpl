@@ -514,7 +514,7 @@ class ModelCriteria extends BaseModelCriteria
      */
     protected function getOrCreateJoin(string $relationSpecifier, string|null $joinType = null): array
     {
-        if ($this->joins[$relationSpecifier] ?? false) {
+        if (isset($this->joins[$relationSpecifier])) {
             $join = $this->joins[$relationSpecifier];
             assert($join instanceof ModelJoin);
 

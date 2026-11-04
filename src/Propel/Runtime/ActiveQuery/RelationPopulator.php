@@ -7,6 +7,7 @@ namespace Propel\Runtime\ActiveQuery;
 use Propel\Runtime\ActiveRecord\ActiveRecordInterface;
 use Propel\Runtime\Map\RelationMap;
 use Propel\Runtime\Map\TableMap;
+use function assert;
 use function class_alias;
 use function ltrim;
 
@@ -16,9 +17,9 @@ use function ltrim;
  */
 class RelationPopulator
 {
-    protected string $modelName;
+    protected ModelJoin $join;
 
-    protected TableMap $tableMap;
+    protected string $modelName;
 
     protected string $relationName;
 
@@ -30,17 +31,16 @@ class RelationPopulator
 
     protected string|null $resetPartialMethod = null;
 
-    protected string|null $leftPhpName = null;
-
-    protected string $rightPhpName;
+    protected string|null $parentJoinIdentifier = null;
 
     /**
      * @param \Propel\Runtime\ActiveQuery\ModelJoin $join
      */
     public function __construct(ModelJoin $join)
     {
+        $this->join = $join;
+
         $tableMap = $join->getTableMap();
-        $this->tableMap = $tableMap;
         $this->modelName = ltrim($tableMap->getClassNameOrFail(), '\\');
         $relation = $join->getRelationMap();
         $relationName = $relation->getName();
@@ -50,14 +50,12 @@ class RelationPopulator
         $this->relationName = $populatesListOnTarget ? $relation->getPluralName() : $relationName;
         $this->populateRelationMethod = ($populatesListOnTarget ? 'add' : 'set') . $relationName;
         if ($populatesListOnTarget) {
-            $this->initMethod = 'init' . $this->relationName;
-            $this->resetPartialMethod = 'resetPartial' . $this->relationName;
+            $this->initMethod = "init{$this->relationName}";
+            $this->resetPartialMethod = "resetPartial{$this->relationName}";
         }
 
-        $this->rightPhpName = $join->hasRelationAlias() ? $join->getRelationAlias() : $relationName;
-
         if (!$join->isPrimary()) {
-            $this->leftPhpName = $join->hasLeftTableAlias() ? $join->getLeftTableAlias() : $join->getParentJoin()->getRelationMap()->getName();
+            $this->parentJoinIdentifier = $join->getLeftTableAlias() ?? $join->getParentJoin()->getRightTableAliasOrName();
         }
     }
 
@@ -77,7 +75,7 @@ class RelationPopulator
      */
     public function getTableMap(): TableMap
     {
-        return $this->tableMap;
+        return $this->join->getTableMapOrFail();
     }
 
     /**
@@ -93,7 +91,7 @@ class RelationPopulator
      */
     public function isSingleTableInheritance(): bool
     {
-        return $this->tableMap->isSingleTableInheritance();
+        return $this->getTableMap()->isSingleTableInheritance();
     }
 
     /**
@@ -177,19 +175,50 @@ class RelationPopulator
     }
 
     /**
+     * @deprecated Use aptly named {@see static::getParentJoinIdentifier()}
+     *
      * @return string|null
      */
     public function getLeftPhpName(): ?string
     {
-        return $this->leftPhpName;
+        return $this->getParentJoinIdentifier();
     }
 
     /**
      * @return string|null
      */
+    public function getParentJoinIdentifier(): ?string
+    {
+        return $this->parentJoinIdentifier;
+    }
+
+    /**
+     * @return string
+     */
+    public function getJoinIdentifier(): string
+    {
+        return $this->getNameInQuery();
+    }
+
+    /**
+     * @deprecated Use aptly named {@see static::getJoinIdentifier()}
+     *
+     * @return string|null
+     */
     public function getRightPhpName(): ?string
     {
-        return $this->rightPhpName;
+        return $this->getJoinIdentifier();
+    }
+
+    /**
+     * @return string
+     */
+    public function getNameInQuery(): string
+    {
+        $name = $this->join->getRightTableAliasOrName();
+        assert($name !== null);
+
+        return $name;
     }
 
     /**
@@ -197,7 +226,7 @@ class RelationPopulator
      */
     public function joinsToMainModel(): bool
     {
-        return $this->leftPhpName === null;
+        return $this->parentJoinIdentifier === null;
     }
 
     /**
@@ -205,7 +234,7 @@ class RelationPopulator
      */
     public function __toString(): string
     {
-        return "modelName: {$this->modelName}, relationName: {$this->relationName}, relationMethod: {$this->populateRelationMethod}, leftPhpName: {$this->leftPhpName}, rightPhpName: {$this->rightPhpName}";
+        return "modelName: {$this->modelName}, relationName: {$this->relationName}, relationMethod: {$this->populateRelationMethod}, parent join: {$this->parentJoinIdentifier}, name in query: {$this->getNameInQuery()}";
     }
 }
 

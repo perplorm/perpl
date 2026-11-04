@@ -137,28 +137,28 @@ class RelationPopulatorTest extends TestCaseFixtures
     /**
      * @return void
      */
-    public function testGetLeftPhpName()
+    public function testGetParentJoinIdentifier()
     {
         $q = AuthorQuery::create()
             ->joinBook();
         $joins = $q->getJoins();
         $join = $joins['Book'];
         $with = new RelationPopulator($join);
-        $this->assertNull($with->getLeftPhpName(), 'A ModelWith initialized from a primary join has a null left phpName');
+        $this->assertNull($with->getParentJoinIdentifier(), 'A ModelWith initialized from a primary join has a null left phpName');
 
         $q = AuthorQuery::create('a')
             ->joinBook();
         $joins = $q->getJoins();
         $join = $joins['Book'];
         $with = new RelationPopulator($join);
-        $this->assertNull($with->getLeftPhpName(), 'A ModelWith initialized from a primary join with alias has a null left phpName');
+        $this->assertNull($with->getParentJoinIdentifier(), 'A ModelWith initialized from a primary join with alias has a null left phpName');
 
         $q = AuthorQuery::create()
             ->joinBook('b');
         $joins = $q->getJoins();
         $join = $joins['b'];
         $with = new RelationPopulator($join);
-        $this->assertNull($with->getLeftPhpName(), 'A ModelWith initialized from a primary join with alias has a null left phpName');
+        $this->assertNull($with->getParentJoinIdentifier(), 'A ModelWith initialized from a primary join with alias has a null left phpName');
 
         $q = AuthorQuery::create()
             ->join('Propel\Tests\Bookstore\Author.Book')
@@ -166,7 +166,7 @@ class RelationPopulatorTest extends TestCaseFixtures
         $joins = $q->getJoins();
         $join = $joins['Publisher'];
         $with = new RelationPopulator($join);
-        $this->assertEquals('Book', $with->getLeftPhpName(), 'A ModelWith uses the previous join relation name as left phpName');
+        $this->assertEquals('book', $with->getParentJoinIdentifier(), 'A ModelWith uses the previous join relation name as left phpName');
 
         $q = ReviewQuery::create()
             ->join('Propel\Tests\Bookstore\Review.Book')
@@ -175,7 +175,7 @@ class RelationPopulatorTest extends TestCaseFixtures
         $joins = $q->getJoins();
         $join = $joins['Publisher'];
         $with = new RelationPopulator($join);
-        $this->assertEquals('Book', $with->getLeftPhpName(), 'A ModelWith uses the previous join relation name as left phpName');
+        $this->assertEquals('book', $with->getParentJoinIdentifier(), 'A ModelWith uses the previous join relation name as left phpName');
 
         $q = ReviewQuery::create()
             ->join('Propel\Tests\Bookstore\Review.Book')
@@ -184,10 +184,10 @@ class RelationPopulatorTest extends TestCaseFixtures
         $joins = $q->getJoins();
         $join = $joins['BookOpinion'];
         $with = new RelationPopulator($join);
-        $this->assertEquals('Book', $with->getLeftPhpName(), 'A ModelWith uses the previous join relation name as left phpName');
+        $this->assertEquals('book', $with->getParentJoinIdentifier(), 'A ModelWith uses the previous join relation name as left phpName');
         $join = $joins['BookReader'];
         $with = new RelationPopulator($join);
-        $this->assertEquals('BookOpinion', $with->getLeftPhpName(), 'A ModelWith uses the previous join relation name as left phpName');
+        $this->assertEquals('book_opinion', $with->getParentJoinIdentifier(), 'A ModelWith uses the previous join relation name as left phpName');
 
         $q = BookReaderQuery::create()
             ->join('Propel\Tests\Bookstore\BookReader.BookOpinion')
@@ -196,10 +196,10 @@ class RelationPopulatorTest extends TestCaseFixtures
         $joins = $q->getJoins();
         $join = $joins['Book'];
         $with = new RelationPopulator($join);
-        $this->assertEquals('BookOpinion', $with->getLeftPhpName(), 'A ModelWith uses the previous join relation name as related class');
+        $this->assertEquals('book_opinion', $with->getParentJoinIdentifier(), 'A ModelWith uses the previous join relation name as related class');
         $join = $joins['Author'];
         $with = new RelationPopulator($join);
-        $this->assertEquals('Book', $with->getLeftPhpName(), 'A ModelWith uses the previous join relation name as left phpName');
+        $this->assertEquals('book', $with->getParentJoinIdentifier(), 'A ModelWith uses the previous join relation name as left phpName');
 
         $q = BookSummaryQuery::create()
             ->join('Propel\Tests\Bookstore\BookSummary.SummarizedBook')
@@ -207,56 +207,101 @@ class RelationPopulatorTest extends TestCaseFixtures
         $joins = $q->getJoins();
         $join = $joins['Author'];
         $with = new RelationPopulator($join);
-        $this->assertEquals('SummarizedBook', $with->getLeftPhpName(), 'A ModelWith uses the previous join relation name as left phpName');
+        $this->assertEquals('book', $with->getParentJoinIdentifier(), 'A ModelWith uses the previous join relation name as left phpName');
     }
 
     /**
      * @return void
      */
-    public function testGetRightPhpName()
+    public function testGetJoinIdentifier()
     {
-        $q = AuthorQuery::create()
-            ->joinBook();
-        $joins = $q->getJoins();
-        $join = $joins['Book'];
-        $with = new RelationPopulator($join);
-        $this->assertEquals('Book', $with->getRightPhpName(), 'A ModelWith initialized from a primary join has a right phpName');
+        $join = AuthorQuery::create()
+            ->joinBook()
+            ->getJoin('Book');
+        $populator = new RelationPopulator($join);
+        $this->assertEquals('book', $populator->getJoinIdentifier(), 'A ModelWith initialized from a primary join has a right phpName');
 
-        $q = AuthorQuery::create('a')
-            ->joinBook();
-        $joins = $q->getJoins();
-        $join = $joins['Book'];
-        $with = new RelationPopulator($join);
-        $this->assertEquals('Book', $with->getRightPhpName(), 'A ModelWith initialized from a primary join with alias has a right phpName');
+        $join = AuthorQuery::create('a')
+            ->joinBook()
+            ->getJoin('Book');
+        $populator = new RelationPopulator($join);
+        $this->assertEquals('book', $populator->getJoinIdentifier(), 'A ModelWith initialized from a primary join with alias has a right phpName');
 
-        $q = AuthorQuery::create()
-            ->joinBook('b');
-        $joins = $q->getJoins();
-        $join = $joins['b'];
-        $with = new RelationPopulator($join);
-        $this->assertEquals('b', $with->getRightPhpName(), 'A ModelWith initialized from a primary join with alias uses the alias as right phpName');
+        $join = AuthorQuery::create()
+            ->joinBook('b')
+            ->getJoin('b');
+        $populator = new RelationPopulator($join);
+        $this->assertEquals('b', $populator->getJoinIdentifier(), 'A ModelWith initialized from a primary join with alias uses the alias as right phpName');
 
-        $q = AuthorQuery::create()
+        $join = AuthorQuery::create()
             ->join('Propel\Tests\Bookstore\Author.Book')
-            ->join('Book.Publisher');
-        $joins = $q->getJoins();
-        $join = $joins['Publisher'];
-        $with = new RelationPopulator($join);
-        $this->assertEquals('Publisher', $with->getRightPhpName(), 'A ModelWith has a right phpName even when there are previous joins');
+            ->join('Book.Publisher')
+            ->getJoin('Publisher');
+        $populator = new RelationPopulator($join);
+        $this->assertEquals('publisher', $populator->getJoinIdentifier(), 'A ModelWith has a right phpName even when there are previous joins');
 
-        $q = BookSummaryQuery::create()
-            ->join('Propel\Tests\Bookstore\BookSummary.SummarizedBook');
-        $joins = $q->getJoins();
-        $join = $joins['SummarizedBook'];
-        $with = new RelationPopulator($join);
-        $this->assertEquals('SummarizedBook', $with->getRightPhpName(), 'A ModelWith uses the relation name rather than the class phpName when it exists');
-
-        $q = BookSummaryQuery::create()
+        $join = BookSummaryQuery::create()
             ->join('Propel\Tests\Bookstore\BookSummary.SummarizedBook')
-            ->join('SummarizedBook.Author');
-        $joins = $q->getJoins();
-        $join = $joins['Author'];
-        $with = new RelationPopulator($join);
-        $this->assertEquals('Author', $with->getRightPhpName(), 'A ModelWith has a right phpName even when there are previous joins with custom relation names');
+            ->getJoin('SummarizedBook');
+        $populator = new RelationPopulator($join);
+        $this->assertEquals('book', $populator->getJoinIdentifier(), 'A ModelWith uses the relation name rather than the class phpName when it exists');
+
+        $join = BookSummaryQuery::create()
+            ->join('Propel\Tests\Bookstore\BookSummary.SummarizedBook')
+            ->join('SummarizedBook.Author')
+            ->getJoin('Author');
+        $populator = new RelationPopulator($join);
+        $this->assertEquals('author', $populator->getJoinIdentifier(), 'A ModelWith has a right phpName even when there are previous joins with custom relation names');
+    }
+
+    /**
+     * @return void
+     */
+    public function testGetNameInQuery()
+    {
+        $join = AuthorQuery::create()
+            ->joinBook()
+            ->getJoin('Book');
+        $populator = new RelationPopulator($join);
+        $this->assertEquals('book', $populator->getNameInQuery(), 'should use table name');
+
+        $join = AuthorQuery::create()
+            ->joinBook('b')
+            ->getJoin('b');
+        $populator = new RelationPopulator($join);
+        $this->assertEquals('b', $populator->getNameInQuery(), 'should use alias');
+
+        $join = AuthorQuery::create()
+            ->join('Propel\Tests\Bookstore\Author.Book')
+            ->join('Book.Publisher')
+            ->getJoin('Publisher');
+        $populator = new RelationPopulator($join);
+        $this->assertEquals('publisher', $populator->getNameInQuery(), 'should resolve table name across relations');
+
+        $join = BookSummaryQuery::create()
+            ->join('Propel\Tests\Bookstore\BookSummary.SummarizedBook')
+            ->getJoin('SummarizedBook');
+        $populator = new RelationPopulator($join);
+        $this->assertEquals('book', $populator->getNameInQuery(), 'should use table name over relation name');
+
+        $join = BookSummaryQuery::create()
+            ->join('Propel\Tests\Bookstore\BookSummary.SummarizedBook s')
+            ->getJoin('s');
+        $populator = new RelationPopulator($join);
+        $this->assertEquals('s', $populator->getNameInQuery(), 'should use alias from relation specifier');
+    }
+
+    public function testJoinIdentifiersMatch()
+    {
+        $joins = AuthorQuery::create()
+            ->join('Propel\Tests\Bookstore\Author.Book')
+            ->join('Book.Publisher')
+            ->getJoins();
+
+        $parentPopulator = new RelationPopulator($joins['Book']);
+        $childPopulator = new RelationPopulator($joins['Publisher']);
+
+        $this->assertSame($parentPopulator->getJoinIdentifier(), $childPopulator->getParentJoinIdentifier());
+
     }
 }

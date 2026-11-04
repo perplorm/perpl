@@ -139,8 +139,8 @@ class OnDemandFormatter extends ObjectFormatter
             $relatedObject = $this->getSingleObjectFromRow($row, $class, $currentColumnIndex);
             if ($relationPopulator->joinsToMainModel()) {
                 $targetObject = $mainObject;
-            } elseif ($hydrationChain && isset($hydrationChain[$relationPopulator->getLeftPhpName()])) {
-                $targetObject = $hydrationChain[$relationPopulator->getLeftPhpName()];
+            } elseif ($hydrationChain && isset($hydrationChain[$relationPopulator->getParentJoinIdentifier()])) {
+                $targetObject = $hydrationChain[$relationPopulator->getParentJoinIdentifier()];
             } else {
                 continue;
             }
@@ -153,7 +153,7 @@ class OnDemandFormatter extends ObjectFormatter
                 continue;
             }
 
-            $hydrationChain[$relationPopulator->getRightPhpName()] = $relatedObject;
+            $hydrationChain[$relationPopulator->getJoinIdentifier()] = $relatedObject;
             $relationPopulator->addModelToTarget($relatedObject, $targetObject);
         }
         foreach ($this->virtualColumnNames as $columnName) {

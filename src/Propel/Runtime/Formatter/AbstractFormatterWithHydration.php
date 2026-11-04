@@ -110,7 +110,7 @@ abstract class AbstractFormatterWithHydration extends AbstractFormatter
             if ($relationPopulator->joinsToMainModel()) {
                 $parentTuple = &$this->localTuplePool[$this->class][$mainKey];
             } else {
-                $parentTuple = &$relatedTuplesByPhpName[$relationPopulator->getLeftPhpName()];
+                $parentTuple = &$relatedTuplesByPhpName[$relationPopulator->getParentJoinIdentifier()];
             }
 
             $relationName = $relationPopulator->getRelationName();
@@ -127,7 +127,7 @@ abstract class AbstractFormatterWithHydration extends AbstractFormatter
                 $parentTuple[$relationName][] = &$relatedTuple;
             }
 
-            $relatedTuplesByPhpName[$relationPopulator->getRightPhpName()] = &$relatedTuple;
+            $relatedTuplesByPhpName[$relationPopulator->getJoinIdentifier()] = &$relatedTuple;
         }
 
         // columns added using withColumn()

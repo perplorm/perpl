@@ -2384,7 +2384,7 @@ class ModelCriteriaTest extends BookstoreTestBase
         }), '$c1 criteria has selected Book columns twice');
         $with = $c1->getRelatedModelsToPopulate();
         $this->assertEquals(1, count($with), 'mergeWith() does not remove an existing join');
-        $this->assertEquals('modelName: Propel\Tests\Bookstore\Author, relationName: Author, relationMethod: setAuthor, leftPhpName: , rightPhpName: a', $with['a']->__toString(), 'mergeWith() does not remove an existing join');
+        $this->assertEquals('modelName: Propel\Tests\Bookstore\Author, relationName: Author, relationMethod: setAuthor, parent join: , name in query: a', $with['a']->__toString(), 'mergeWith() does not remove an existing join');
 
         $c1 = new ModelCriteria('bookstore', '\Propel\Tests\Bookstore\Book', 'b');
         $c1->leftJoinWith('b.Author a');
@@ -2395,7 +2395,7 @@ class ModelCriteriaTest extends BookstoreTestBase
         }), '$c1 criteria has selected Book columns twice');
         $with = $c1->getRelatedModelsToPopulate();
         $this->assertEquals(1, count($with), 'mergeWith() does not remove an existing join');
-        $this->assertEquals('modelName: Propel\Tests\Bookstore\Author, relationName: Author, relationMethod: setAuthor, leftPhpName: , rightPhpName: a', $with['a']->__toString(), 'mergeWith() does not remove an existing join');
+        $this->assertEquals('modelName: Propel\Tests\Bookstore\Author, relationName: Author, relationMethod: setAuthor, parent join: , name in query: a', $with['a']->__toString(), 'mergeWith() does not remove an existing join');
 
         $c1 = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\Book', 'b');
         $c2 = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\Book', 'b');
@@ -2406,7 +2406,7 @@ class ModelCriteriaTest extends BookstoreTestBase
         }), '$c1 criteria has selected Book columns twice');
         $with = $c1->getRelatedModelsToPopulate();
         $this->assertEquals(1, count($with), 'mergeWith() merge joins to an empty join');
-        $this->assertEquals('modelName: Propel\Tests\Bookstore\Author, relationName: Author, relationMethod: setAuthor, leftPhpName: , rightPhpName: a', $with['a']->__toString(), 'mergeWith() merge joins to an empty join');
+        $this->assertEquals('modelName: Propel\Tests\Bookstore\Author, relationName: Author, relationMethod: setAuthor, parent join: , name in query: a', $with['a']->__toString(), 'mergeWith() merge joins to an empty join');
 
         $c1 = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\Book', 'b');
         $c1->leftJoinWith('b.Author a');
@@ -2418,8 +2418,8 @@ class ModelCriteriaTest extends BookstoreTestBase
         }), '$c1 criteria has selected Book columns twice');
         $with = $c1->getRelatedModelsToPopulate();
         $this->assertEquals(2, count($with), 'mergeWith() merge joins to an existing join');
-        $this->assertEquals('modelName: Propel\Tests\Bookstore\Author, relationName: Author, relationMethod: setAuthor, leftPhpName: , rightPhpName: a', $with['a']->__toString(), 'mergeWith() merge joins to an empty join');
-        $this->assertEquals('modelName: Propel\Tests\Bookstore\Publisher, relationName: Publisher, relationMethod: setPublisher, leftPhpName: , rightPhpName: p', $with['p']->__toString(), 'mergeWith() merge joins to an empty join');
+        $this->assertEquals('modelName: Propel\Tests\Bookstore\Author, relationName: Author, relationMethod: setAuthor, parent join: , name in query: a', $with['a']->__toString(), 'mergeWith() merge joins to an empty join');
+        $this->assertEquals('modelName: Propel\Tests\Bookstore\Publisher, relationName: Publisher, relationMethod: setPublisher, parent join: , name in query: p', $with['p']->__toString(), 'mergeWith() merge joins to an empty join');
     }
 
     /**

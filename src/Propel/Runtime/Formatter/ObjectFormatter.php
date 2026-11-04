@@ -174,7 +174,7 @@ class ObjectFormatter extends AbstractFormatter
         foreach ($this->getRelatedModelsToPopulate() as $relationPopulator) {
             [$relatedObject, $rowOffset] = $relationPopulator->getTableMap()->populateObject($row, $rowOffset, $indexType);
 
-            $parentAlias = $relationPopulator->getLeftPhpName();
+            $parentAlias = $relationPopulator->getParentJoinIdentifier();
 
             if ($parentAlias && !isset($hydratedObjectsByPhpName[$parentAlias])) { // parent object not available (yet), current object probably referenced through parent
                 continue;
@@ -187,7 +187,7 @@ class ObjectFormatter extends AbstractFormatter
                 continue;
             }
 
-            $hydratedObjectsByPhpName[$relationPopulator->getRightPhpName()] = $relatedObject;
+            $hydratedObjectsByPhpName[$relationPopulator->getJoinIdentifier()] = $relatedObject;
             $relationPopulator->addModelToTarget($relatedObject, $parentObject);
             $relationPopulator->resetPartialRelationOnTarget($parentObject);
         }

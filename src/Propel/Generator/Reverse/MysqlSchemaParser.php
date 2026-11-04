@@ -715,8 +715,7 @@ EOT;
     {
         /** @var \PDOStatement $stmt */
         $stmt = $this->con->query("SHOW TABLE STATUS LIKE '" . $table->getName() . "'");
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        assert($row !== false);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
 
         if (!$this->addVendorInfo) {
             // since we depend on `Engine` in the MysqlPlatform, we always have to extract this vendor information

@@ -53,7 +53,7 @@ final class MatchesFormattedVendorSql extends Constraint
             $actualChar = $actualSql[$this->actualCharPos];
             $expectedChar = $expectedSql[$this->expectedCharPos];
 
-            if ($actualChar === $expectedChar || ($actualChar === ' ' && $expectedChar = "\n")) {
+            if ($actualChar === $expectedChar || ($actualChar === ' ' && $expectedChar === "\n")) {
                 $this->expectedCharPos++;
                 $this->actualCharPos++;
 
