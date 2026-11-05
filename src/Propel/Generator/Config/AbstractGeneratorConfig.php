@@ -294,7 +294,7 @@ abstract class AbstractGeneratorConfig extends ConfigurationManager
     {
         $builder = $this->setupBuilder($table, BuilderType::QueryInheritance);
         assert($builder instanceof QueryInheritanceBuilder);
-        $builder->setChild($child);
+        $builder->setInheritanceConfiguration($child);
 
         return $builder;
     }
@@ -309,7 +309,7 @@ abstract class AbstractGeneratorConfig extends ConfigurationManager
     {
         $builder = $this->setupBuilder($table, BuilderType::QueryInheritanceStub);
         assert($builder instanceof ExtensionQueryInheritanceBuilder);
-        $builder->setChild($child);
+        $builder->setInheritanceConfiguration($child);
 
         return $builder;
     }

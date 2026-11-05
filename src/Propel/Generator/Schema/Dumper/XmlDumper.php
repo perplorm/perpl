@@ -438,7 +438,7 @@ class XmlDumper implements DumperInterface
 
         if ($column->isInheritance()) {
             $columnNode->setAttribute('inheritance', $column->getInheritanceType());
-            foreach ($column->getInheritanceList() as $inheritance) {
+            foreach ($column->getInheritanceConfigurations() as $inheritance) {
                 $this->appendInheritanceNode($inheritance, $columnNode);
             }
         }
@@ -471,9 +471,9 @@ class XmlDumper implements DumperInterface
         $inheritanceNode->setAttribute('key', $inheritance->getKey());
         $inheritanceNode->setAttribute('class', $inheritance->getClassName());
 
-        $ancestor = $inheritance->getAncestor();
-        if ($ancestor) {
-            $inheritanceNode->setAttribute('extends', $ancestor);
+        $parentClassName = $inheritance->getParentClassIdentifier();
+        if ($parentClassName) {
+            $inheritanceNode->setAttribute('extends', $parentClassName);
         }
     }
 

@@ -25,12 +25,7 @@ class QueryInheritanceBuilder extends AbstractOMBuilder implements ExtensionBuil
 
     protected EntityObjectClassNames $tableNames;
 
-    /**
-     * The current child "object" we are operating on.
-     *
-     * @var \Propel\Generator\Model\Inheritance|null
-     */
-    protected $child;
+    protected Inheritance|null $inheritanceConfiguration = null;
 
     /**
      * @param \Propel\Generator\Model\Table $table
@@ -60,7 +55,7 @@ class QueryInheritanceBuilder extends AbstractOMBuilder implements ExtensionBuil
     #[\Override]
     public function getPackage(): string
     {
-        return ($this->getChild()->getPackage() ?: parent::getPackage()) . '.Base';
+        return ($this->getInheritanceConfiguration()->getPackage() ?: parent::getPackage()) . '.Base';
     }
 
     /**
@@ -77,59 +72,76 @@ class QueryInheritanceBuilder extends AbstractOMBuilder implements ExtensionBuil
     }
 
     /**
-     * Sets the child object that we're operating on currently.
-     *
-     * @param \Propel\Generator\Model\Inheritance $child
+     * @param \Propel\Generator\Model\Inheritance $inheritance
      *
      * @return void
      */
     #[\Override]
-    public function setChild(Inheritance $child): void
+    public function setInheritanceConfiguration(Inheritance $inheritance): void
     {
-        $this->child = $child;
+        $this->inheritanceConfiguration = $inheritance;
     }
 
     /**
-     * Returns the child object we're operating on currently.
-     *
      * @throws \Propel\Generator\Exception\BuildException
      *
      * @return \Propel\Generator\Model\Inheritance
      */
     #[\Override]
-    public function getChild(): Inheritance
+    public function getInheritanceConfiguration(): Inheritance
     {
-        if (!$this->child) {
+        if (!$this->inheritanceConfiguration) {
             throw new BuildException('The MultiExtendObjectBuilder needs to be told which child class to build (via setChild() method) before it can build the stub class.');
         }
 
-        return $this->child;
+        return $this->inheritanceConfiguration;
     }
 
     /**
-     * Returns classpath to parent class.
+     *@deprecated Use aptly named {@see static::setInheritanceConfiguration()}
      *
-     * @return string|null
+     * @param \Propel\Generator\Model\Inheritance $child
+     *
+     * @return void
      */
-    protected function getParentClassName(): ?string
+    public function setChild(Inheritance $child): void
     {
-        if ($this->getChild()->getAncestor() === null) {
-            return $this->getStubQueryBuilder($this->getTable())->getUnqualifiedClassName();
+        $this->setInheritanceConfiguration($child);
+    }
+
+    /**
+     * @deprecated Use aptly named {@see static::getInheritanceConfiguration()}
+     *
+     * @return \Propel\Generator\Model\Inheritance
+     */
+    public function getChild(): Inheritance
+    {
+        return $this->getInheritanceConfiguration();
+    }
+
+    /**
+     * Returns parent class builder.
+     *
+     * @return \Propel\Generator\Builder\Om\ExtensionQueryBuilder|\Propel\Generator\Builder\Om\ExtensionQueryInheritanceBuilder|null
+     */
+    protected function getParentClassBuilder(): ExtensionQueryBuilder|ExtensionQueryInheritanceBuilder|null
+    {
+        if ($this->inheritanceConfiguration->isMainTableClass()) {
+            return $this->getStubQueryBuilder($this->getTable());
         }
 
-        $ancestorClassName = ClassTools::classname($this->getChild()->getAncestor());
-        if ($this->getDatabase()->hasTableByPhpName($ancestorClassName)) {
-            return $this->getStubQueryBuilder($this->getDatabase()->getTableByPhpName($ancestorClassName))->getUnqualifiedClassName();
+        $parentClassIdentifier = ClassTools::classname($this->inheritanceConfiguration->getParentClassIdentifier());
+        $parentTable = $this->getDatabase()->getTableByPhpName($parentClassIdentifier);
+        if ($parentTable) {
+            return $this->getStubQueryBuilder($parentTable);
         }
 
-        // find the inheritance for the parent class
-        foreach ($this->getTable()->getChildrenColumn()->getChildren() as $child) {
-            if ($child->getClassName() == $ancestorClassName) {
-                return $this->getStubQueryInheritanceBuilder($child)->getUnqualifiedClassName();
-            }
-        }
+        $inheritanceConfigurations = $this->getTable()->getClassKeyColumn()->getInheritanceConfigurations();
+        $parentConfiguration = array_find($inheritanceConfigurations, fn (Inheritance $i) => $i->getClassName() === $parentClassIdentifier);
 
-        return null;
+        return $parentConfiguration
+            ? $this->getStubQueryInheritanceBuilder($parentConfiguration)
+            : null;
     }
 
     /**
@@ -158,8 +170,8 @@ class QueryInheritanceBuilder extends AbstractOMBuilder implements ExtensionBuil
  *";
         if ($tableDesc) {
             $script .= "
- *
- * $tableDesc";
+ * $tableDesc
+ *";
         }
 
         $script .= "{$timeStampBlock}
@@ -209,7 +221,7 @@ class " . $this->getUnqualifiedClassName() . ' extends ' . $baseClassName . "
      */
     protected function addFactory(string &$script): void
     {
-        $builder = $this->getStubQueryInheritanceBuilder($this->getChild());
+        $builder = $this->getStubQueryInheritanceBuilder($this->getInheritanceConfiguration());
         $queryClassName = $this->declareClassFromBuilder($builder, 'Child');
         $queryClassNameFq = $builder->getFullyQualifiedClassName();
 
@@ -246,7 +258,7 @@ class " . $this->getUnqualifiedClassName() . ' extends ' . $baseClassName . "
      */
     protected function addPreSelect(string &$script): void
     {
-        $childClassName = $this->child->getClassName();
+        $childClassName = $this->inheritanceConfiguration->getClassName();
 
         $script .= "
     /**
@@ -269,7 +281,7 @@ class " . $this->getUnqualifiedClassName() . ' extends ' . $baseClassName . "
      */
     protected function addPreUpdate(string &$script): void
     {
-        $childClassName = $this->child->getClassName();
+        $childClassName = $this->inheritanceConfiguration->getClassName();
 
         $script .= "
     /**
@@ -296,7 +308,7 @@ class " . $this->getUnqualifiedClassName() . ' extends ' . $baseClassName . "
      */
     protected function addPreDelete(string &$script): void
     {
-        $childClassName = $this->child->getClassName();
+        $childClassName = $this->inheritanceConfiguration->getClassName();
 
         $script .= "
     /**
@@ -320,8 +332,8 @@ class " . $this->getUnqualifiedClassName() . ' extends ' . $baseClassName . "
     protected function getClassKeyCondition(): string
     {
         $tableMapClassName = $this->getTableMapClassName();
-        $columnConstant = $this->child->getConstantSuffix();
-        $columnName = $this->child->getColumn()->getName();
+        $columnConstant = $this->inheritanceConfiguration->getConstantSuffix();
+        $columnName = $this->inheritanceConfiguration->getColumn()->getName();
 
         return "\$this->addUsingOperator(\$this->resolveLocalColumnByName('{$columnName}'), {$tableMapClassName}::CLASSKEY_{$columnConstant});";
     }
@@ -333,7 +345,7 @@ class " . $this->getUnqualifiedClassName() . ' extends ' . $baseClassName . "
      */
     protected function addDoDeleteAll(string &$script): void
     {
-        $childClassName = $this->child->getClassName();
+        $childClassName = $this->inheritanceConfiguration->getClassName();
 
         $script .= "
     /**

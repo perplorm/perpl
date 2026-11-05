@@ -522,20 +522,20 @@ class QuickBuilder
             BuilderType::QueryStub => BuilderType::QueryInheritanceStub,
             default => null
         };
-        $column = $table->getChildrenColumn();
+        $column = $table->getClassKeyColumn();
         if (!$childTarget || !$column?->isEnumeratedClasses()) {
             return '';
         }
 
         $code = '';
-        foreach ($column->getInheritanceList() as $child) {
-            if (!$child->getAncestor()) {
+        foreach ($column->getInheritanceConfigurations() as $inheritance) {
+            if (!$inheritance->getParentClassIdentifier()) {
                 continue;
             }
 
             /** @var \Propel\Generator\Builder\Om\AbstractOMBuilder&\Propel\Generator\Builder\Om\ExtensionBuilderInterface $builder */
             $builder = $this->getConfig()->loadConfiguredBuilder($table, $childTarget);
-            $builder->setChild($child);
+            $builder->setInheritanceConfiguration($inheritance);
             $classCode = $builder->build();
             $code .= $this->fixNamespaceDeclarations($classCode);
         }

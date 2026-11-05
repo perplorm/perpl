@@ -811,19 +811,19 @@ class Column extends MappingModel
     /**
      * @return array<\Propel\Generator\Model\Inheritance>|null
      */
-    public function getInheritanceList(): ?array
+    public function getInheritanceConfigurations(): ?array
     {
         return $this->inheritanceList;
     }
 
     /**
-     * @deprecated Use aptly named {@see static::getInheritanceList()}
+     * @deprecated Use aptly named {@see static::getInheritanceConfigurations()}
      *
      * @return array<\Propel\Generator\Model\Inheritance>|null
      */
     public function getChildren(): ?array
     {
-        return $this->getInheritanceList();
+        return $this->getInheritanceConfigurations();
     }
 
     /**

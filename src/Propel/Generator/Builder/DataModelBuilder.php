@@ -493,13 +493,13 @@ abstract class DataModelBuilder
     }
 
     /**
-     * @param \Propel\Generator\Model\Inheritance $child
+     * @param \Propel\Generator\Model\Inheritance $inheritanceConfiguration
      *
      * @return \Propel\Generator\Builder\Om\ExtensionQueryInheritanceBuilder
      */
-    public function getStubQueryInheritanceBuilder(Inheritance $child): ExtensionQueryInheritanceBuilder
+    public function getStubQueryInheritanceBuilder(Inheritance $inheritanceConfiguration): ExtensionQueryInheritanceBuilder
     {
-        return $this->generatorConfig->loadQueryInheritanceStubBuilder($this->getTable(), $child);
+        return $this->generatorConfig->loadQueryInheritanceStubBuilder($this->getTable(), $inheritanceConfiguration);
     }
 
     /**

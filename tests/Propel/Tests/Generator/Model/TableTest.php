@@ -323,7 +323,7 @@ class TableTest extends ModelTestCase
         $column = $this->getColumnMock('created_at', ['inheritance' => true]);
 
         $this->assertInstanceOf('Propel\Generator\Model\Column', $table->addColumn($column));
-        $this->assertInstanceOf('Propel\Generator\Model\Column', $table->getChildrenColumn());
+        $this->assertInstanceOf('Propel\Generator\Model\Column', $table->getClassKeyColumn());
         $this->assertTrue($table->hasColumn($column, true));
         $this->assertTrue($table->hasColumn($column, false));
         $this->assertCount(1, $table->getColumns());
@@ -366,7 +366,7 @@ class TableTest extends ModelTestCase
         $column = $this->getColumnMock('created_at');
 
         $this->assertInstanceOf('Propel\Generator\Model\Column', $table->addColumn($column));
-        $this->assertNull($table->getChildrenColumn());
+        $this->assertNull($table->getClassKeyColumn());
         $this->assertTrue($table->requiresTransactionInPostgres());
         $this->assertTrue($table->hasColumn($column));
         $this->assertTrue($table->hasColumn('CREATED_AT', true));
