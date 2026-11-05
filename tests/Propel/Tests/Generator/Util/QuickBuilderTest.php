@@ -93,32 +93,6 @@ EOF;
      * @return void
      */
     #[\PHPUnit\Framework\Attributes\DataProvider('simpleSchemaProvider')]
-    public function testGetClasses($builder): void
-    {
-        $script = $builder->getClasses();
-        $this->assertStringContainsString('class QuickBuildFoo1 extends BaseQuickBuildFoo1', $script);
-        $this->assertStringContainsString('class QuickBuildFoo1Query extends BaseQuickBuildFoo1Query', $script);
-        $this->assertStringContainsString('class QuickBuildFoo1 implements ActiveRecordInterface', $script);
-        $this->assertStringContainsString('class QuickBuildFoo1Query extends TypedModelCriteria', $script);
-    }
-
-    /**
-     * @return void
-     */
-    #[\PHPUnit\Framework\Attributes\DataProvider('simpleSchemaProvider')]
-    public function testGetClassesLimitedClassTargets($builder): void
-    {
-        $script = $builder->getClasses([BuilderType::TableMap, BuilderType::ObjectBase, BuilderType::QueryBase]);
-        $this->assertStringNotContainsString('class QuickBuildFoo1 extends BaseQuickBuildFoo1', $script);
-        $this->assertStringNotContainsString('class QuickBuildFoo1Query extends BaseQuickBuildFoo1Query', $script);
-        $this->assertStringContainsString('class QuickBuildFoo1 implements ActiveRecordInterface', $script);
-        $this->assertStringContainsString('class QuickBuildFoo1Query extends TypedModelCriteria', $script);
-    }
-
-    /**
-     * @return void
-     */
-    #[\PHPUnit\Framework\Attributes\DataProvider('simpleSchemaProvider')]
     public function testBuildClasses($builder): void
     {
         $builder->buildClasses();

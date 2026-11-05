@@ -457,37 +457,24 @@ class QuickBuilder
     }
 
     /**
-     * @param array<\Propel\Generator\Builder\Om\BuilderType>|null $classTargets
-     *
-     * @return string
-     */
-    public function getClasses(?array $classTargets = null): string
-    {
-        $tables = $this->getDatabase()->getTables();
-        $classCode = array_map(fn (Table $table) => $this->getClassesForTable($table, $classTargets), $tables);
-
-        return implode('', $classCode);
-    }
-
-    /**
      * @param \Propel\Generator\Model\Table $table
-     * @param array<\Propel\Generator\Builder\Om\BuilderType>|null $classTargets
+     * @param array<\Propel\Generator\Builder\Om\BuilderType>|null $builderTypes
      *
      * @return string
      */
-    public function getClassesForTable(Table $table, ?array $classTargets = null): string
+    public function getClassesForTable(Table $table, ?array $builderTypes = null): string
     {
-        $classTargets ??= static::getDefaultClassTargets();
+        $builderTypes ??= static::getDefaultClassTargets();
         $script = '';
 
-        foreach ($classTargets as $target) {
+        foreach ($builderTypes as $builderType) {
             /** @var \Propel\Generator\Builder\Om\AbstractOMBuilder $abstractBuilder */
-            $abstractBuilder = $this->getConfig()->loadConfiguredBuilder($table, $target);
+            $abstractBuilder = $this->getConfig()->loadConfiguredBuilder($table, $builderType);
             $class = $abstractBuilder->build();
             $script .= $this->fixNamespaceDeclarations($class);
-            $script .= $this->buildInheritanceClassesCode($target, $table);
+            $script .= $this->buildInheritanceClassesCode($builderType, $table);
 
-            if ($target === BuilderType::ObjectBase && $table->getInterface()) {
+            if ($builderType === BuilderType::ObjectBase && $table->getInterface()) {
                 $interface = $this->getConfig()->loadInterfaceBuilder($table)->build();
                 $script .= $this->fixNamespaceDeclarations($interface);
             }
@@ -522,12 +509,12 @@ class QuickBuilder
             BuilderType::QueryStub => BuilderType::QueryInheritanceStub,
             default => null
         };
-        $column = $table->getClassKeyColumn();
-        if (!$childTarget || !$column?->isEnumeratedClasses()) {
+        if (!$childTarget) {
             return '';
         }
 
         $code = '';
+        $column = $table->getClassKeyColumn();
         foreach ($column->getInheritanceConfigurations() as $inheritance) {
             if (!$inheritance->getParentClassIdentifier()) {
                 continue;
@@ -643,12 +630,12 @@ class QuickBuilder
     /**
      * Create separate classes to write to physical filesystem.
      *
-     * @param array<\Propel\Generator\Builder\Om\BuilderType> $targets
+     * @param array<\Propel\Generator\Builder\Om\BuilderType> $builderTypes
      * @param array<\Propel\Generator\Model\Table> $tables Array of Table objects
      *
      * @return array<string> The files to include
      */
-    private function buildClassesToPhysical(array $targets, array $tables): array
+    private function buildClassesToPhysical(array $builderTypes, array $tables): array
     {
         $includes = [];
         $hashFromCwd = substr(sha1((string)getcwd()), 0, 10);
@@ -658,13 +645,12 @@ class QuickBuilder
             mkdir($dirName, 0777, true);
         }
         foreach ($tables as $table) {
-            foreach ($targets as $target) {
-                $code = $this->getClassesForTable($table, [$target]);
+            foreach ($builderTypes as $builderType) {
+                $code = $this->getClassesForTable($table, [$builderType]);
                 $cleanerNamespace = str_replace('\\', '-', $table->getPhpName());
-                $targetId = $target->value;
-                $tempFile = "{$dirName}{$cleanerNamespace}-$targetId.php";
-                file_put_contents($tempFile, "<?php\n" . $code);
-                $includes[] = $tempFile;
+                $tempFileName = "{$dirName}{$cleanerNamespace}-{$builderType->value}.php";
+                file_put_contents($tempFileName, "<?php\n" . $code);
+                $includes[] = $tempFileName;
             }
         }
 
