@@ -8,6 +8,7 @@
 
 namespace Propel\Tests\Generator\Builder\Util;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use Propel\Generator\Builder\Om\ObjectBuilder;
 use Propel\Generator\Builder\Util\ReferencedClasses;
 use Propel\Tests\TestCase;
@@ -75,18 +76,27 @@ use const CONST_3;
         $this->assertEquals($expected, $useStatements);
     }
 
-    public function testResolveQualifiedNameFromClassAlias()
+    public static function ClassNameDataProvider(): array
+    {
+        return [
+            ['LeNamespace\LeSubNamespace\LeFullName'],
+            ['LeRootClassName'],
+        ];
+    }
+
+    #[DataProvider('ClassNameDataProvider')]
+    public function testResolveQualifiedNameFromClassAlias(string $classNameFq)
     {
         $referencedClasses = new ReferencedClasses($this->createMock(ObjectBuilder::class));
-        $classAlias = $referencedClasses->registerClassByFullyQualifiedName('\LeNamespace\LeFullName', 'LeShortName');
+        $classAlias = $referencedClasses->registerClassByFullyQualifiedName($classNameFq, 'LeWhatever');
         $resolvedFcqn = $referencedClasses->getQualifiedNameForClassAlias($classAlias);
 
-        $this->assertSame('LeNamespace\LeFullName', $resolvedFcqn);
+        $this->assertSame($classNameFq, $resolvedFcqn);
 
-        $resolvedAlias = $referencedClasses->getLocalNameForClass('LeNamespace\LeFullName');
+        $resolvedAlias = $referencedClasses->getLocalNameForClass($classNameFq);
         $this->assertSame($classAlias, $resolvedAlias);
 
-        $resolvedAlias = $referencedClasses->getLocalNameForClass('\LeNamespace\LeFullName');
+        $resolvedAlias = $referencedClasses->getLocalNameForClass("\\$classNameFq");
         $this->assertSame($classAlias, $resolvedAlias);
     }
 }

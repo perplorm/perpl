@@ -2,30 +2,27 @@
 
 namespace Base;
 
+use GenQuery as ChildGenQuery;
 use Map\GenspecTableTableMap;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\Connection\ConnectionInterface;
 use SpecQuery as ChildSpecQuery;
 
 /**
- * Skeleton subclass for representing a query for one of the subclasses of the
- * 'genspec_table' table.
+ * Base query class for one of the classes of the 'genspec_table' table.
  *
- * You should add additional methods to this class to meet the application
- * requirements.
- *
- * This class will only be generated as long as it does not already exist in
- * the output directory.
+ * @template ParentQuery extends \Propel\Runtime\ActiveQuery\ModelCriteria|null = null
+ * @extends \GenQuery<ParentQuery>
  */
-class SpecQuery extends GenQuery
+class SpecQuery extends ChildGenQuery
 {
     /**
-     * Returns a new ChildSpecQuery object.
+     * Returns a new SpecQuery object.
      *
      * @param string|null $modelAlias The alias of a model in the query
      * @param \Propel\Runtime\ActiveQuery\Criteria|null $criteria Optional Criteria to build the query from
      *
-     * @return \SpecQuery
+     * @return \SpecQuery<null>
      */
     public static function create(?string $modelAlias = null, ?Criteria $criteria = null): Criteria
     {

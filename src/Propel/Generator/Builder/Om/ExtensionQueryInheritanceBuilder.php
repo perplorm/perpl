@@ -91,29 +91,29 @@ class ExtensionQueryInheritanceBuilder extends AbstractOMBuilder implements Exte
     {
         $table = $this->getTable();
         $tableName = $table->getName();
-        $tableDesc = $table->getDescription();
+        $tableDesc = $table->getDescription() ? $table->getDescription() . "\n * " : '';
 
-        $baseBuilder = $this->getQueryInheritanceBuilder($this->getChild());
+        $className = $this->getUnqualifiedClassName();
+        $baseBuilder = $this->getQueryInheritanceBuilder($this->getInheritanceConfiguration());
         $baseClassName = $this->getClassNameFromBuilder($baseBuilder);
+        $baseClassNameFq = $this->referencedClasses->getQualifiedNameForClassAlias($baseClassName);
         $timeStampBlock = $this->generateTimestampBlock();
 
-        if ($this->getBuildProperty('generator.objectModel.addClassLevelComment')) {
-            $script .= "
-
-/**
+        $classLevelComment = $this->getBuildProperty('generator.objectModel.addClassLevelComment')
+            ? "
  * Skeleton subclass for representing a query for one of the subclasses of the '$tableName' table.
- *
- * $tableDesc
- *{$timeStampBlock}
  * You should add additional methods to this class to meet the
  * application requirements.  This class will only be generated as
  * long as it does not already exist in the output directory.
- */";
-        }
+ *{$tableDesc}{$timeStampBlock}" : '';
+
         $script .= "
-class " . $this->getUnqualifiedClassName() . ' extends ' . $baseClassName . "
-{
-";
+/**$classLevelComment
+ * @template ParentQuery extends \Propel\Runtime\ActiveQuery\ModelCriteria|null = null
+ * @extends \\$baseClassNameFq<ParentQuery>
+ */
+class $className extends $baseClassName
+{\n";
     }
 
     /**

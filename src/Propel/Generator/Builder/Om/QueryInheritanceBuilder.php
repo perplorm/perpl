@@ -8,13 +8,11 @@ use Propel\Generator\Builder\Util\EntityObjectClassNames;
 use Propel\Generator\Exception\BuildException;
 use Propel\Generator\Model\Inheritance;
 use Propel\Generator\Model\Table;
+use function array_find;
+use function assert;
 
 /**
- * Generates the empty stub query class for use with single table
- * inheritance.
- *
- * This class produces the empty stub class that can be customized with
- * application business logic, custom behavior, etc.
+ * Generates the base query class for use with single table inheritance.
  */
 class QueryInheritanceBuilder extends AbstractOMBuilder implements ExtensionBuilderInterface
 {
@@ -44,7 +42,7 @@ class QueryInheritanceBuilder extends AbstractOMBuilder implements ExtensionBuil
     #[\Override]
     public function getUnprefixedClassName(): string
     {
-        return $this->getStubQueryInheritanceBuilder($this->getChild())->getUnprefixedClassName();
+        return $this->getStubQueryInheritanceBuilder($this->getInheritanceConfiguration())->getUnprefixedClassName();
     }
 
     /**
@@ -98,7 +96,7 @@ class QueryInheritanceBuilder extends AbstractOMBuilder implements ExtensionBuil
     }
 
     /**
-     *@deprecated Use aptly named {@see static::setInheritanceConfiguration()}
+     * @deprecated Use aptly named {@see static::setInheritanceConfiguration()}
      *
      * @param \Propel\Generator\Model\Inheritance $child
      *
@@ -156,32 +154,25 @@ class QueryInheritanceBuilder extends AbstractOMBuilder implements ExtensionBuil
     {
         $table = $this->getTable();
         $tableName = $table->getName();
-        $tableDesc = $table->getDescription();
+        $tableDesc = $table->getDescription() ? $table->getDescription() . "\n * " : '';
 
-        $baseBuilder = $this->getStubQueryBuilder();
-        $this->declareClassFromBuilder($baseBuilder);
-        $baseClassName = $this->getParentClassName();
+        $className = $this->getUnqualifiedClassName();
+
+        $parentClassBuilder = $this->getParentClassBuilder();
+        assert($parentClassBuilder !== null);
+        $localParentClassName = $this->declareClassFromBuilder($parentClassBuilder);
+        $parentClassNameFq = $this->referencedClasses->getQualifiedNameForClassAlias($localParentClassName);
+
         $timeStampBlock = $this->generateTimestampBlock();
 
         $script .= "
 /**
- * Skeleton subclass for representing a query for one of the subclasses of the
- * '$tableName' table.
- *";
-        if ($tableDesc) {
-            $script .= "
- * $tableDesc
- *";
-        }
-
-        $script .= "{$timeStampBlock}
- * You should add additional methods to this class to meet the application
- * requirements.
- * 
- * This class will only be generated as long as it does not already exist in
- * the output directory.
+ * Base query class for one of the classes of the '$tableName' table.
+ *{$tableDesc}{$timeStampBlock}
+ * @template ParentQuery extends \Propel\Runtime\ActiveQuery\ModelCriteria|null = null
+ * @extends \\$parentClassNameFq<ParentQuery>
  */
-class " . $this->getUnqualifiedClassName() . ' extends ' . $baseClassName . "
+class $className extends $localParentClassName
 {";
     }
 
@@ -221,25 +212,26 @@ class " . $this->getUnqualifiedClassName() . ' extends ' . $baseClassName . "
      */
     protected function addFactory(string &$script): void
     {
+        $stubClassName = $this->getUnqualifiedClassName();
         $builder = $this->getStubQueryInheritanceBuilder($this->getInheritanceConfiguration());
-        $queryClassName = $this->declareClassFromBuilder($builder, 'Child');
-        $queryClassNameFq = $builder->getFullyQualifiedClassName();
+        $localStubClassName = $this->declareClassFromBuilder($builder, 'Child');
+        $stubClassNameFq = $builder->getFullyQualifiedClassName();
 
         $script .= "
     /**
-     * Returns a new $queryClassName object.
+     * Returns a new $stubClassName object.
      *
      * @param string|null \$modelAlias The alias of a model in the query
      * @param \Propel\Runtime\ActiveQuery\Criteria|null \$criteria Optional Criteria to build the query from
      *
-     * @return $queryClassNameFq
+     * @return $stubClassNameFq<null>
      */
     public static function create(?string \$modelAlias = null, ?Criteria \$criteria = null): Criteria
     {
-        if (\$criteria instanceof $queryClassName) {
+        if (\$criteria instanceof $localStubClassName) {
             return \$criteria;
         }
-        \$query = new $queryClassName();
+        \$query = new $localStubClassName();
         if (\$modelAlias !== null) {
             \$query->setModelAlias(\$modelAlias);
         }
