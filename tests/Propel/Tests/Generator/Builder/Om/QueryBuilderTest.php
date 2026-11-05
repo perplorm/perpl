@@ -1426,4 +1426,25 @@ class QueryBuilderTest extends BookstoreTestBase
         $msg = 'Query class for abstract table should not have abstract findPkSimple() method if table uses inheritance';
         $this->assertStringNotContainsString($throwStatement, $script, $msg);
     }
+    
+    /**
+     * @return void
+     */
+    public function testResolveInheritedParentClass(): void
+    {
+        $databaseXml =<<<XML
+<database namespace="\LeExtendParentTableTest">
+    <table name="parent_table"/>
+    <table name="child_table">
+        <behavior name="concrete_inheritance">
+            <parameter name="extends" value="parent_table" />
+        </behavior>
+    </table>
+</database>
+XML;
+
+        $builder = TestableQueryBuilder::forTableFromXml($databaseXml, 'child_table');
+        $parentClass = 'LeExtendParentTableTest\ParentTableQuery';
+        $this->assertSame($parentClass, $builder->getParentClass(true));
+    }
 }

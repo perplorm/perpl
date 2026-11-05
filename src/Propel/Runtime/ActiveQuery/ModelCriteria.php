@@ -1216,12 +1216,11 @@ class ModelCriteria extends BaseModelCriteria
 
     /**
      * Issue a SELECT query based on the current ModelCriteria
-     * and format the list of results with the current formatter
-     * By default, returns an array of model objects
+     * and format the list of results with the current formatter.
      *
-     * @param \Propel\Runtime\Connection\ConnectionInterface|null $con an optional connection object
+     * @param \Propel\Runtime\Connection\ConnectionInterface|null $con
      *
-     * @return \Propel\Runtime\Collection\Collection<\Propel\Runtime\ActiveRecord\ActiveRecordInterface>|mixed the list of results, formatted by the current formatter
+     * @return \Propel\Runtime\Collection\Collection<\Propel\Runtime\ActiveRecord\ActiveRecordInterface>|mixed Collection of models, formatted by the current formatter
      */
     public function find(?ConnectionInterface $con = null)
     {
@@ -1232,7 +1231,7 @@ class ModelCriteria extends BaseModelCriteria
     }
 
     /**
-     * Same as find(), but returns a typed ObjectCollection.
+     * Type-safe version of find(), returning an ObjectCollection.
      *
      * @param \Propel\Runtime\Connection\ConnectionInterface|null $con
      *
@@ -1246,7 +1245,7 @@ class ModelCriteria extends BaseModelCriteria
     }
 
     /**
-     * Typed version of find(), returning an ArrayCollection.
+     * Type-safe version of find(), returning an ArrayCollection.
      *
      * NOTE: In contrast to {@see static::findRows()}, this will resolve
      * values according to model logic - values match return values of
@@ -1264,7 +1263,7 @@ class ModelCriteria extends BaseModelCriteria
     }
 
     /**
-     * Typed version of find(), returning an ArrayCollection. Mainly used in
+     * Type-safe version of find(), returning an ArrayCollection. Mainly used in
      * combination with {@see static::select()}.
      *
      * NOTE: In contrast to {@see static::findTuples()}, this will copy values

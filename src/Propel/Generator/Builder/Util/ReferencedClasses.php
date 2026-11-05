@@ -14,6 +14,7 @@ use Propel\Generator\Model\ForeignKey;
 use Propel\Generator\Model\Table;
 use function array_map;
 use function array_push;
+use function array_search;
 use function array_unique;
 use function asort;
 use function explode;
@@ -21,6 +22,7 @@ use function implode;
 use function in_array;
 use function is_string;
 use function is_subclass_of;
+use function ltrim;
 use function preg_match;
 use function preg_replace;
 use function sprintf;
@@ -52,9 +54,9 @@ class ReferencedClasses
     /**
      * Mapping between fully qualified classnames and their short classname or alias
      *
-     * @var array<string, string>
+     * @var array<string, class-string>
      */
-    protected array $declaredShortClassesOrAlias = [];
+    protected array $localClassNamesToQualifiedName = [];
 
     /**
      * List of classes that can be used without alias when model has no namespace
@@ -195,7 +197,7 @@ class ReferencedClasses
     /**
      * Declare a class to be use and return its name or its alias
      *
-     * @param string $class the class name
+     * @param string $className the class name
      * @param string $namespace the namespace
      * @param string|bool|null $alias the alias wanted, if set to True, it automatically adds an alias when needed
      *
@@ -203,54 +205,57 @@ class ReferencedClasses
      *
      * @return string The class name or its alias
      */
-    public function registerSimpleClassName(string $class, string $namespace = '', $alias = false): string
+    public function registerSimpleClassName(string $className, string $namespace = '', $alias = false): string
     {
         // old name: declareClassNamespace
         $namespace = trim($namespace, '\\');
 
         // check if the class is already declared
-        if (isset($this->declaredClasses[$namespace][$class])) {
-            return $this->declaredClasses[$namespace][$class];
+        if (isset($this->declaredClasses[$namespace][$className])) {
+            return $this->declaredClasses[$namespace][$className];
         }
 
-        $forcedAlias = $this->needAliasForClassName($class, $namespace);
+        $forcedAlias = $this->needAliasForClassName($className, $namespace);
 
         if ($alias === false || $alias === true || $alias === null) {
-            $aliasWanted = $class;
+            $localName = $className;
             $alias = $alias || $forcedAlias;
         } else {
-            $aliasWanted = $alias;
+            $localName = $alias;
             $forcedAlias = false;
         }
 
-        if (!$forcedAlias && !isset($this->declaredShortClassesOrAlias[$aliasWanted])) {
-            $this->declaredClasses[$namespace][$class] = $aliasWanted;
-            $this->declaredShortClassesOrAlias[$aliasWanted] = $namespace . '\\' . $class;
+        if (!$forcedAlias && !isset($this->localClassNamesToQualifiedName[$localName])) {
+            $this->declaredClasses[$namespace][$className] = $localName;
 
-            return $aliasWanted;
+            /** @var class-string $classString */
+            $classString = "$namespace\\$className";
+            $this->localClassNamesToQualifiedName[$localName] = $classString;
+
+            return $localName;
         }
 
         // we have a duplicate class and asked for an automatic Alias
         if ($alias !== false) {
             if (substr($namespace, -5) === '\\Base' || $namespace === 'Base') {
-                return $this->registerSimpleClassName($class, $namespace, 'Base' . $class);
+                return $this->registerSimpleClassName($className, $namespace, 'Base' . $className);
             }
 
             if (substr((string)$alias, 0, 5) === 'Child') {
                 //we already requested Child.$class and its in use too,
                 //so use the fqcn
-                return ($namespace ? '\\' . $namespace : '') . '\\' . $class;
+                return ($namespace ? '\\' . $namespace : '') . '\\' . $className;
             } else {
-                $autoAliasName = 'Child' . $class;
+                $autoAliasName = 'Child' . $className;
             }
 
-            return $this->registerSimpleClassName($class, $namespace, $autoAliasName);
+            return $this->registerSimpleClassName($className, $namespace, $autoAliasName);
         }
 
         throw new LogicException(sprintf(
             'The class %s duplicates the class %s and can\'t be used without alias',
-            "$namespace\\$class",
-            $this->declaredShortClassesOrAlias[$aliasWanted],
+            "$namespace\\$className",
+            $this->localClassNamesToQualifiedName[$localName],
         ));
     }
 
@@ -431,18 +436,18 @@ class ReferencedClasses
      */
     protected function buildImportClassStatements(string $ownNamespace, string $ownClassName, ?string $ignoredNamespace = null): array
     {
-        $declaredClasses = $this->getDeclaredClasses();
-        unset($declaredClasses[$ignoredNamespace]);
         $importStatements = [];
-        foreach ($declaredClasses as $namespace => $classes) {
-            foreach ($classes as $class => $alias) {
-                if ($class == $ownClassName && $namespace === $ownNamespace) {
+        foreach ($this->declaredClasses as $namespace => $classNameToInternalName) {
+            if ($namespace === $ignoredNamespace) {
+                continue;
+            }
+            foreach ($classNameToInternalName as $className => $localName) {
+                if ($className === $ownClassName && $namespace === $ownNamespace) {
                     continue;
                 }
-                $fqcn = $namespace ? "$namespace\\$class" : $class;
-                $importStatements[] = ($class === $alias)
-                    ? "use $fqcn;"
-                    : "use $fqcn as $alias;";
+                $fqcn = $namespace ? "$namespace\\$className" : $className;
+                $localName = $className === $localName ? '' : " as $localName";
+                $importStatements[] = "use {$fqcn}{$localName};";
             }
         }
         asort($importStatements, SORT_STRING | SORT_FLAG_CASE);
@@ -505,5 +510,27 @@ class ReferencedClasses
     public function isGenericTypeDeclaration(string $typeDeclaration): bool
     {
         return (bool)preg_match('/<.*>\s*$/', $typeDeclaration); // check if type ends with generic param like "array<string>"
+    }
+
+    /**
+     * @param string $classAlias
+     *
+     * @return class-string|null
+     */
+    public function getQualifiedNameForClassAlias(string $classAlias): string|null
+    {
+        return $this->localClassNamesToQualifiedName[$classAlias] ?? null;
+    }
+
+    /**
+     * @param string $classString
+     *
+     * @return string|null
+     */
+    public function getLocalNameForClass(string $classString): string|null
+    {
+        $classString = ltrim($classString, '\\');
+
+        return array_search($classString, $this->localClassNamesToQualifiedName, true) ?: null;
     }
 }

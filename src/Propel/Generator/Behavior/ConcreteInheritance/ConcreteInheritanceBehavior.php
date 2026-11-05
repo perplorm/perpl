@@ -6,6 +6,7 @@ namespace Propel\Generator\Behavior\ConcreteInheritance;
 
 use Propel\Generator\Builder\Om\ObjectBuilder;
 use Propel\Generator\Builder\Om\QueryBuilder;
+use Propel\Generator\Exception\EngineException;
 use Propel\Generator\Exception\InvalidArgumentException;
 use Propel\Generator\Model\Behavior;
 use Propel\Generator\Model\ForeignKey;
@@ -155,7 +156,7 @@ class ConcreteInheritanceBehavior extends Behavior
     {
         $database = $this->getTable()->getDatabase();
         $tableName = $database->getTablePrefix() . $this->getParameter('extends');
-        if ($database->getPlatform()->supportsSchemas() && $this->getParameter('schema')) {
+        if ($database->getPlatform()?->supportsSchemas() && $this->getParameter('schema')) {
             $tableName = $this->getParameter('schema') . $database->getPlatform()->getSchemaDelimiter() . $tableName;
         }
 
@@ -191,21 +192,21 @@ class ConcreteInheritanceBehavior extends Behavior
     /**
      * @param \Propel\Generator\Builder\Om\ObjectBuilder|\Propel\Generator\Builder\Om\QueryBuilder $builder
      *
-     * @return string|null
+     * @throws \Propel\Generator\Exception\EngineException
+     *
+     * @return string
      */
-    public function parentClass($builder): ?string
+    public function parentClass($builder): string
     {
         $parentTable = $this->getParentTable();
 
-        $parentBuilder = match (get_class($builder)) {
-            'Propel\Generator\Builder\Om\ObjectBuilder' => $builder->getStubObjectBuilder($parentTable),
-            'Propel\Generator\Builder\Om\QueryBuilder' => $builder->getStubQueryBuilder($parentTable),
-            default => null
+        $parentBuilder = match (true) {
+            $builder instanceof ObjectBuilder => $builder->getStubObjectBuilder($parentTable),
+            $builder instanceof QueryBuilder => $builder->getStubQueryBuilder($parentTable), // @phpstan-ignore instanceof.alwaysTrue (current signature means only QueryBuilder remains)
+            default => throw new EngineException('Loading parent class currently not implement for builder type ' . get_class($builder))
         };
 
-        return $parentBuilder
-            ? $builder->declareClassFromBuilder($parentBuilder, true)
-            : null;
+        return $builder->declareClassFromBuilder($parentBuilder, true);
     }
 
     /**

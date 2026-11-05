@@ -75,8 +75,8 @@
  * @method <?= $modelClass ?> requireOneBy<?= $column->getPhpName() ?>(<?= $column->getPhpType() ?> $<?= $column->getName() ?>) Return the first <?= $modelClass ?> filtered by the <?= $column->getName() ?> column and throws <?= $entityNotFoundExceptionClass ?> when not found
 <?php endforeach;?>
  *
- * @method <?= $objectCollectionType ?>|array<<?= $modelClass ?>>|\Propel\Runtime\Collection\Collection<<?= $modelClass ?>> find(\Propel\Runtime\Connection\ConnectionInterface|null $con = null) Return <?= $modelClass ?> objects based on current ModelCriteria
- * @method <?= $objectCollectionType ?> findObjects(\Propel\Runtime\Connection\ConnectionInterface|null $con = null) Get <?= $modelClass ?> objects in ObjectCollection
+ * @method <?= $objectCollectionType ?>|\Propel\Runtime\Collection\Collection<<?= $modelClass ?>> find(\Propel\Runtime\Connection\ConnectionInterface|null $con = null) Return <?= $modelClass ?> objects based on current ModelCriteria
+ * @method <?= $objectCollectionType ?> findObjects(\Propel\Runtime\Connection\ConnectionInterface|null $con = null) Type-safe version of find(), returning an ObjectCollection.
  *
 <?php foreach($columns as $column):?>
  * @method array<<?= $modelClass ?>>|\Propel\Runtime\Collection\Collection<<?= $modelClass ?>> findBy<?= $column->getPhpName() ?>(<?= $column->getTypeHint() ?: $column->resolveQualifiedType() ?>|array<<?= $column->resolveQualifiedType() ?>> $<?= $column->getName() ?>) Return <?= $modelClass ?> objects filtered by the <?= $column->getName() ?> column

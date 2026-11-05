@@ -26,7 +26,6 @@ use function array_reduce;
 use function array_slice;
 use function array_values;
 use function count;
-use function get_class;
 use function implode;
 use function in_array;
 use function is_array;
@@ -525,11 +524,8 @@ class Table extends ScopedMappingModel
      */
     public function getBaseQueryClass(): ?string
     {
-        if ($this->baseQueryClass === null) {
-            return $this->database->getBaseQueryClass();
-        }
-
-        return $this->baseQueryClass;
+        return $this->baseQueryClass
+            ?? $this->database->getBaseQueryClass();
     }
 
     /**
@@ -737,35 +733,23 @@ class Table extends ScopedMappingModel
     }
 
     /**
-     * Checks whether the table uses concrete inheritance
+     * Checks whether the table uses single table inheritance
+     *
+     * @return bool
+     */
+    public function usesSingleTableInheritance(): bool
+    {
+        return $this->inheritanceColumn !== null;
+    }
+
+    /**
+     * @deprecated Use aptly named {@see static::usesSingleTableInheritance()}
      *
      * @return bool
      */
     public function usesConcreteInheritance(): bool
     {
-        return ($this->inheritanceColumn !== null);
-    }
-
-    /**
-     * Returns the subclasses that can be created from this table.
-     *
-     * @return array|null
-     */
-    public function getChildrenNames(): ?array
-    {
-        if (
-            $this->inheritanceColumn === null
-            || !$this->inheritanceColumn->isEnumeratedClasses()
-        ) {
-            return null;
-        }
-
-        $names = [];
-        foreach ($this->inheritanceColumn->getChildren() as $child) {
-            $names[] = get_class($child);
-        }
-
-        return $names;
+        return $this->usesSingleTableInheritance();
     }
 
     /**
@@ -2260,7 +2244,7 @@ class Table extends ScopedMappingModel
     }
 
     /**
-     * Collection class name used by this table, fully qualified.
+     * Collection class name used by this table, fully qualified (starting with \).
      *
      * @return class-string
      */

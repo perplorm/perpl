@@ -226,6 +226,20 @@ EOF;
         $collectionClass = Map\OgAccountTableMap::getTableMap()->getCollectionClassName();
 
         $this->assertEquals(ObjectCollectionWithOutputGroups::class, $collectionClass, 'Non-generated collection should be ObjectCollectionWithOutputGroups');
+    }
 
+    public function testObjectCollectionBaseClass(): void
+    {
+        $schemaXml = <<<EOF
+    <database>
+        <behavior name="output_group"/>
+        <table name="le_table"></table>
+    </database;
+EOF;
+        $db = $this->buildDatabaseFromSchema($schemaXml);
+        $table = $db->getTable('le_table');
+        $parentCollectionClass = $table->getCollectionClassNameFq();
+
+        $this->assertSame('\\' . ObjectCollectionWithOutputGroups::class, $parentCollectionClass);
     }
 }

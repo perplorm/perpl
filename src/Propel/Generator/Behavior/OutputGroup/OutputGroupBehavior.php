@@ -7,6 +7,7 @@ namespace Propel\Generator\Behavior\OutputGroup;
 use Propel\Generator\Builder\Om\ObjectCollectionBuilder;
 use Propel\Generator\Model\Behavior;
 use Propel\Generator\Model\MappingModel;
+use Propel\Generator\Model\ScopedMappingModel;
 use Propel\Generator\Model\Table;
 use function array_filter;
 use function array_merge;
@@ -112,7 +113,7 @@ class OutputGroupBehavior extends Behavior
     public function modifyTable(): void
     {
         $table = $this->getTable();
-        if ($table->useGeneratedCollectionClass() || $table->hasCollectionClassAttribute()) {
+        if ($table->hasCollectionClassAttribute()) {
              // output group method will be added in addObjectCollectionMethods() or is handled by user
             return;
         }
@@ -137,8 +138,11 @@ class OutputGroupBehavior extends Behavior
      */
     public function getObjectCollectionClass(): string
     {
-        return $this->getParameter(self::PARAMETER_OBJECT_COLLECTION_CLASS)
-            ?: ObjectCollectionWithOutputGroups::class;
+        $customClass = $this->getParameter(self::PARAMETER_OBJECT_COLLECTION_CLASS);
+
+        return $customClass
+            ? ScopedMappingModel::makeClassNameAbsolute($customClass)
+            : '\\' . ObjectCollectionWithOutputGroups::class;
     }
 
     /**

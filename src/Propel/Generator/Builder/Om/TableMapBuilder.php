@@ -453,7 +453,7 @@ class $className extends TableMap
         $type = $isNumericKey ? 'int' : 'string';
         $keyToClassName = [];
 
-        foreach ($col->getChildren() as $child) {
+        foreach ($col->getInheritanceList() as $child) {
             $childBuilder = $this->getObjectInheritanceStubBuilder();
             $childBuilder->setChild($child);
             $fqcn = $childBuilder->getFullyQualifiedClassName();

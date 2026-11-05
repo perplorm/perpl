@@ -11,10 +11,7 @@ use function preg_replace_callback;
 
 class OgQueryModifier
 {
-    /**
-     * @var \Propel\Generator\Behavior\OutputGroup\OutputGroupBehavior
-     */
-    protected $behavior;
+    protected OutputGroupBehavior $behavior;
 
     /**
      * @param \Propel\Generator\Behavior\OutputGroup\OutputGroupBehavior $behavior
@@ -32,15 +29,17 @@ class OgQueryModifier
      */
     public function queryFilter(string &$script, QueryBuilder $queryBuilder)
     {
-        $script = $this->addMethodSignaturesToDocBlock($script);
+        $modelType = $queryBuilder->getStubObjectBuilder()->getFullyQualifiedClassName();
+        $script = $this->addMethodSignaturesToDocBlock($script, $modelType);
     }
 
     /**
      * @param string $script
+     * @param string $modelType
      *
      * @return string
      */
-    protected function addMethodSignaturesToDocBlock(string $script): string
+    protected function addMethodSignaturesToDocBlock(string $script, string $modelType): string
     {
         $table = $this->behavior->getTable();
         $nonUniqueColumns = array_filter(
@@ -48,8 +47,13 @@ class OgQueryModifier
             fn (Column $column) => !$table->isUnique([$column]),
         );
 
+        $collectionClass = $this->behavior->getObjectCollectionClass();
+        if ($collectionClass === '\\' . ObjectCollectionWithOutputGroups::class) {
+            $collectionClass .= "<$modelType>";
+        }
+
         $methodDeclarations = $this->behavior->renderLocalTemplate('queryToOutputGroup', [
-            'collectionClass' => $this->behavior->getObjectCollectionClass(),
+            'collectionClass' => $collectionClass,
             'nonUniqueColumns' => $nonUniqueColumns,
 
         ]);

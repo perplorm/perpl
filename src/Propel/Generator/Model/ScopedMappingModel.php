@@ -148,7 +148,7 @@ abstract class ScopedMappingModel extends MappingModel
      *
      * @return bool
      */
-    public function isAbsoluteNamespace(?string $namespace): bool
+    public static function isAbsoluteNamespace(?string $namespace): bool
     {
         return $namespace && str_starts_with($namespace, '\\');
     }
@@ -162,9 +162,9 @@ abstract class ScopedMappingModel extends MappingModel
      *
      * @return string
      */
-    protected function makeNamespaceAbsolute(string $namespace): string
+    public static function makeNamespaceAbsolute(string $namespace): string
     {
-        return $this->isAbsoluteNamespace($namespace) ? $namespace : "\\$namespace";
+        return static::isAbsoluteNamespace($namespace) ? $namespace : "\\$namespace";
     }
 
     /**
@@ -174,10 +174,10 @@ abstract class ScopedMappingModel extends MappingModel
      *
      * @return class-string
      */
-    protected function makeClassNameAbsolute(string $className): string
+    public static function makeClassNameAbsolute(string $className): string
     {
         /** @var class-string $absoluteClassName */
-        $absoluteClassName = $this->makeNamespaceAbsolute($className);
+        $absoluteClassName = static::makeNamespaceAbsolute($className);
 
         return $absoluteClassName;
     }

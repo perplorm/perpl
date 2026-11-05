@@ -74,4 +74,19 @@ use const CONST_3;
 
         $this->assertEquals($expected, $useStatements);
     }
+
+    public function testResolveQualifiedNameFromClassAlias()
+    {
+        $referencedClasses = new ReferencedClasses($this->createMock(ObjectBuilder::class));
+        $classAlias = $referencedClasses->registerClassByFullyQualifiedName('\LeNamespace\LeFullName', 'LeShortName');
+        $resolvedFcqn = $referencedClasses->getQualifiedNameForClassAlias($classAlias);
+
+        $this->assertSame('LeNamespace\LeFullName', $resolvedFcqn);
+
+        $resolvedAlias = $referencedClasses->getLocalNameForClass('LeNamespace\LeFullName');
+        $this->assertSame($classAlias, $resolvedAlias);
+
+        $resolvedAlias = $referencedClasses->getLocalNameForClass('\LeNamespace\LeFullName');
+        $this->assertSame($classAlias, $resolvedAlias);
+    }
 }
