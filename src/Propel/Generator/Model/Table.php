@@ -727,9 +727,19 @@ class Table extends ScopedMappingModel
      *
      * @return \Propel\Generator\Model\Column|null
      */
-    public function getChildrenColumn(): ?Column
+    public function getClassKeyColumn(): Column|null
     {
         return $this->inheritanceColumn;
+    }
+
+    /**
+     * @deprecated Use aptly named {@see static::getClassKeyColumn()}
+     *
+     * @return \Propel\Generator\Model\Column|null
+     */
+    public function getChildrenColumn(): ?Column
+    {
+        return $this->getClassKeyColumn();
     }
 
     /**

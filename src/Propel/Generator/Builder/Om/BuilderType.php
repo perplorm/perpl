@@ -4,6 +4,8 @@ declare(strict_types = 1);
 
 namespace Propel\Generator\Builder\Om;
 
+use function in_array;
+
 /**
  * Ids for Om Builder classes.
  *
@@ -63,4 +65,22 @@ enum BuilderType: string
      * User stub model with single table inheritance code
      */
     case ObjectInheritanceStub = 'objectmultiextend';
+
+    /**
+     * Custom builders registered on table
+     *
+     * @see \Propel\Generator\Model\Table::getAdditionalBuilders()
+     * @see \Propel\Generator\Util\QuickBuilder::buildCodeBuilders()
+     */
+    case Custom = 'custom';
+
+    /**
+     * Check if builder creates a class specified through single table inheritance.
+     *
+     * @return bool
+     */
+    public function isInheritanceBuilder(): bool
+    {
+        return in_array($this, [BuilderType::ObjectInheritanceStub, BuilderType::QueryInheritance, BuilderType::QueryInheritanceStub]);
+    }
 }

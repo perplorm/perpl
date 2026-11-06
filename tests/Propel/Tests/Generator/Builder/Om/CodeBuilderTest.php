@@ -62,8 +62,8 @@ class CodeBuilderTest extends CompareGeneratedCodeTestCase
         $builder = (new QuickGeneratorConfig($config))->loadConfiguredBuilder($table, $builderType);
 
         if ($builder instanceof MultiExtendObjectBuilder || $builder instanceof QueryInheritanceBuilder || $builder instanceof ExtensionQueryInheritanceBuilder){
-            $inheritance = array_reverse($table->getChildrenColumn()->getChildren())[0];
-            $builder->setChild($inheritance);
+            $inheritance = array_reverse($table->getClassKeyColumn()->getChildren())[0];
+            $builder->setInheritanceConfiguration($inheritance);
         }
 
         return $builder->build();

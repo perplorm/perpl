@@ -14,30 +14,15 @@ use function strtoupper;
  */
 class Inheritance extends MappingModel
 {
-    /**
-     * @var string|null
-     */
-    private $key;
+    private string|null $key = null;
 
-    /**
-     * @var string|null
-     */
-    private $className;
+    private string|null $className = null;
 
-    /**
-     * @var string|null
-     */
-    private $package;
+    private string|null $package = null;
 
-    /**
-     * @var string|null
-     */
-    private $ancestor;
+    private string|null $parentClassIdentifier = null;
 
-    /**
-     * @var \Propel\Generator\Model\Column|null
-     */
-    private $column;
+    private Column|null $column = null;
 
     /**
      * Returns a key name.
@@ -62,8 +47,6 @@ class Inheritance extends MappingModel
     }
 
     /**
-     * Sets a key name.
-     *
      * @param string $key
      *
      * @return void
@@ -96,8 +79,6 @@ class Inheritance extends MappingModel
     }
 
     /**
-     * Returns the class name.
-     *
      * @throws \LogicException
      *
      * @return string
@@ -112,8 +93,6 @@ class Inheritance extends MappingModel
     }
 
     /**
-     * Sets the class name.
-     *
      * @param string $name
      *
      * @return void
@@ -124,8 +103,6 @@ class Inheritance extends MappingModel
     }
 
     /**
-     * Returns the package.
-     *
      * @return string|null
      */
     public function getPackage(): ?string
@@ -134,8 +111,6 @@ class Inheritance extends MappingModel
     }
 
     /**
-     * Sets the package.
-     *
      * @param string $package
      *
      * @return void
@@ -146,25 +121,31 @@ class Inheritance extends MappingModel
     }
 
     /**
-     * Returns the ancestor value.
+     * @return string|null
+     */
+    public function getParentClassIdentifier(): ?string
+    {
+        return $this->parentClassIdentifier;
+    }
+
+    /**
+     * @deprecated Use aptly named {@see static::parentClassIdentifier()}
      *
      * @return string|null
      */
     public function getAncestor(): ?string
     {
-        return $this->ancestor;
+        return $this->getParentClassIdentifier();
     }
 
     /**
-     * Sets the ancestor.
-     *
      * @param string $ancestor
      *
      * @return void
      */
     public function setAncestor(string $ancestor): void
     {
-        $this->ancestor = $ancestor;
+        $this->parentClassIdentifier = $ancestor;
     }
 
     /**
@@ -176,6 +157,17 @@ class Inheritance extends MappingModel
         $this->key = $this->getAttribute('key');
         $this->className = $this->getAttribute('class');
         $this->package = $this->getAttribute('package');
-        $this->ancestor = $this->getAttribute('extends');
+        $this->parentClassIdentifier = $this->getAttribute('extends');
+    }
+
+    /**
+     * Check if this is the instance associated with the main table,
+     * rather than a subclass extending the root class or another subclass.
+     *
+     * @return bool
+     */
+    public function isMainTableClass(): bool
+    {
+        return $this->parentClassIdentifier === null;
     }
 }

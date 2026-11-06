@@ -40,7 +40,7 @@ class InheritanceTest extends TestCase
 
         $this->assertInstanceOf('Propel\Generator\Model\Column', $inheritance->getColumn());
         $this->assertSame('Foo', $inheritance->getPackage());
-        $this->assertSame('BaseObject', $inheritance->getAncestor());
+        $this->assertSame('BaseObject', $inheritance->getParentClassIdentifier());
         $this->assertSame('baz', $inheritance->getKey());
         $this->assertSame('Foo\Bar', $inheritance->getClassName());
     }
@@ -59,7 +59,7 @@ class InheritanceTest extends TestCase
         ]);
 
         $this->assertSame('Foo', $inheritance->getPackage());
-        $this->assertSame('BaseObject', $inheritance->getAncestor());
+        $this->assertSame('BaseObject', $inheritance->getParentClassIdentifier());
         $this->assertSame('baz', $inheritance->getKey());
         $this->assertSame('Foo\Bar', $inheritance->getClassName());
     }

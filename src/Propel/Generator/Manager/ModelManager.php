@@ -91,23 +91,23 @@ class ModelManager extends AbstractManager
                     // -----------------------------------------------------------------------------------------
 
                     // If table has enumerated children (uses inheritance) then create the empty child stub classes if they don't already exist.
-                    $col = $table->getChildrenColumn();
+                    $col = $table->getClassKeyColumn();
                     if ($col?->isEnumeratedClasses()) {
-                        foreach ($col->getInheritanceList() as $child) {
+                        foreach ($col->getInheritanceConfigurations() as $inheritance) {
                             foreach ([BuilderType::QueryInheritance] as $target) {
-                                if (!$child->getAncestor() && $child->getClassName() === $table->getPhpName()) {
+                                if (!$inheritance->getParentClassIdentifier() && $inheritance->getClassName() === $table->getPhpName()) {
                                     continue;
                                 }
                                 /** @var \Propel\Generator\Builder\Om\QueryInheritanceBuilder $builder */
                                 $builder = $generatorConfig->loadConfiguredBuilder($table, $target);
-                                $builder->setChild($child);
+                                $builder->setInheritanceConfiguration($inheritance);
                                 $nbWrittenFiles += $this->doBuild($builder);
                             }
 
                             foreach ([BuilderType::ObjectInheritanceStub, BuilderType::QueryInheritanceStub] as $target) {
                                 /** @var \Propel\Generator\Builder\Om\MultiExtendObjectBuilder $builder */
                                 $builder = $generatorConfig->loadConfiguredBuilder($table, $target);
-                                $builder->setChild($child);
+                                $builder->setInheritanceConfiguration($inheritance);
                                 $nbWrittenFiles += $this->doBuild($builder, false);
                             }
                         }

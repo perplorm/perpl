@@ -210,6 +210,8 @@ class ObjectCollectionBuilder extends AbstractOMBuilder
      */
     protected function resolveParentCollectionClassNameFq(): string
     {
+        $objectBuilder = $this->getObjectBuilder()->getBehaviorContent('parentClass');
+
         return $this->getTable()->getCollectionClassNameFq();
     }
 
@@ -218,8 +220,7 @@ class ObjectCollectionBuilder extends AbstractOMBuilder
      */
     protected function resolveParentCollectionType(): string
     {
-        $table = $this->getTable();
-        $collectionClassNameFq = $this->normalizeClassName($table->getCollectionClassNameFq());
+        $collectionClassNameFq = $this->resolveParentCollectionClassNameFq();
         $modelClassName = $this->getStubObjectBuilder()->getFullyQualifiedClassName();
 
         return "$collectionClassNameFq<$modelClassName>";

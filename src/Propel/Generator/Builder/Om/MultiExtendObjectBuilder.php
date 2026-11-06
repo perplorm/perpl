@@ -21,12 +21,7 @@ class MultiExtendObjectBuilder extends AbstractObjectBuilder implements Extensio
      */
     public const BUILDER_TYPE = BuilderType::ObjectInheritanceStub;
 
-    /**
-     * The current child "object" we are operating on.
-     *
-     * @var \Propel\Generator\Model\Inheritance|null
-     */
-    private $child;
+    private Inheritance|null $inheritanceConfiguration = null;
 
     /**
      * Returns the name of the current class being built.
@@ -36,7 +31,7 @@ class MultiExtendObjectBuilder extends AbstractObjectBuilder implements Extensio
     #[\Override]
     public function getUnprefixedClassName(): string
     {
-        return $this->getChild()->getClassName();
+        return $this->getInheritanceConfiguration()->getClassName();
     }
 
     /**
@@ -47,20 +42,18 @@ class MultiExtendObjectBuilder extends AbstractObjectBuilder implements Extensio
     #[\Override]
     public function getPackage(): ?string
     {
-        return ($this->getChild()->getPackage() ?: parent::getPackage());
+        return ($this->getInheritanceConfiguration()->getPackage() ?: parent::getPackage());
     }
 
     /**
-     * Sets the child object that we're operating on currently.
-     *
-     * @param \Propel\Generator\Model\Inheritance $child Inheritance
+     * @param \Propel\Generator\Model\Inheritance $inheritance Inheritance
      *
      * @return void
      */
     #[\Override]
-    public function setChild(Inheritance $child): void
+    public function setInheritanceConfiguration(Inheritance $inheritance): void
     {
-        $this->child = $child;
+        $this->inheritanceConfiguration = $inheritance;
     }
 
     /**
@@ -71,13 +64,13 @@ class MultiExtendObjectBuilder extends AbstractObjectBuilder implements Extensio
      * @return \Propel\Generator\Model\Inheritance
      */
     #[\Override]
-    public function getChild(): Inheritance
+    public function getInheritanceConfiguration(): Inheritance
     {
-        if (!$this->child) {
+        if (!$this->inheritanceConfiguration) {
             throw new BuildException('The MultiExtendObjectBuilder needs to be told which child class to build (via setChild() method) before it can build the stub class.');
         }
 
-        return $this->child;
+        return $this->inheritanceConfiguration;
     }
 
     /**
@@ -87,11 +80,8 @@ class MultiExtendObjectBuilder extends AbstractObjectBuilder implements Extensio
      */
     protected function getParentClasspath(): ?string
     {
-        if ($this->getChild()->getAncestor()) {
-            return $this->getChild()->getAncestor();
-        }
-
-        return $this->getObjectBuilder()->getClasspath();
+        return $this->getInheritanceConfiguration()->getParentClassIdentifier()
+            ?? $this->getObjectBuilder()->getClasspath();
     }
 
     /**
@@ -114,38 +104,56 @@ class MultiExtendObjectBuilder extends AbstractObjectBuilder implements Extensio
     #[\Override]
     protected function addClassOpen(string &$script): void
     {
-        if ($this->getChild()->getAncestor()) {
-            $ancestorClassName = $this->getChild()->getAncestor();
-            if ($this->getDatabase()->hasTableByPhpName($ancestorClassName)) {
-                $this->declareClassFromBuilder($this->getStubObjectBuilder($this->getDatabase()->getTableByPhpName($ancestorClassName)));
-            } else {
-                $this->declareClassNamespace($ancestorClassName, $this->getNamespace());
-            }
-        } else {
-            $this->declareClassFromBuilder($this->getObjectBuilder());
+        if ($this->getBuildProperty('generator.objectModel.addClassLevelComment')) {
+            $this->addClassComment($script);
         }
+
+        $localParentClassName = $this->declareParentClass();
+        $className = $this->getUnqualifiedClassName();
+
+        $script .= "
+class $className extends $localParentClassName
+{";
+    }
+
+    /**
+     * @return string
+     */
+    protected function declareParentClass(): string
+    {
+        $parentClassNameFromConfiguration = $this->getInheritanceConfiguration()->getParentClassIdentifier();
+        if (!$parentClassNameFromConfiguration) {
+            return $this->declareClassFromBuilder($this->getStubObjectBuilder());
+        }
+
+        $parentTable = $this->getDatabase()->getTableByPhpName($parentClassNameFromConfiguration);
+
+        return $parentTable
+            ? $this->declareClassFromBuilder($this->getStubObjectBuilder($parentTable))
+            : $this->declareClassNamespace($parentClassNameFromConfiguration, $this->getNamespace());
+    }
+
+    /**
+     * @param string $script
+     *
+     * @return void
+     */
+    protected function addClassComment(string &$script): void
+    {
         $table = $this->getTable();
         $tableName = $table->getName();
-        $tableDesc = $table->getDescription();
+        $tableDesc = AbstractOMBuilder::formatOptionalDocblockContent($table->getDescription(), 2);
+        $timeStampBlock = $this->generateTimestampBlock();
 
-        if ($this->getBuildProperty('generator.objectModel.addClassLevelComment')) {
-            $timeStampBlock = $this->generateTimestampBlock();
-            $script .= "
-
+        $script .= "
 /**
  * Skeleton subclass for representing a row from one of the subclasses of the '$tableName' table.
  *
- * $tableDesc
- *{$timeStampBlock}
  * You should add additional methods to this class to meet the
  * application requirements.  This class will only be generated as
  * long as it does not already exist in the output directory.
+ * {$tableDesc}{$timeStampBlock}
  */";
-        }
-        $script .= "
-class " . $this->getUnqualifiedClassName() . ' extends ' . $this->getParentClassName() . "
-{
-";
     }
 
     /**
@@ -163,23 +171,22 @@ class " . $this->getUnqualifiedClassName() . ' extends ' . $this->getParentClass
     #[\Override]
     protected function addClassBody(string &$script): void
     {
-        $child = $this->getChild();
-        $col = $child->getColumn();
-        $cfc = $col->getPhpName();
-
-        $const = 'CLASSKEY_' . $child->getConstantSuffix();
+        $child = $this->getInheritanceConfiguration();
+        $column = $child->getColumn();
+        $columnPhpName = $column->getPhpName();
+        $classIdentifierConst = $this->getTableMapClassName() . '::CLASSKEY_' . $child->getConstantSuffix();
+        $className = $this->getInheritanceConfiguration()->getClassName();
+        $columnName = $column->getName();
 
         $script .= "
     /**
-     * Constructs a new " . $this->getChild()->getClassName() . ' class, setting the ' . $col->getName() . ' column to ' . $this->getTableMapClassName() . "::$const.
+     * Constructs a new $className class, setting the $columnName column to $classIdentifierConst.
      */
     public function __construct()
-    {";
-        $script .= "
+    {
         parent::__construct();
-        \$this->set$cfc(" . $this->getTableMapClassName() . '::CLASSKEY_' . $child->getConstantSuffix() . ");
-    }
-";
+        \$this->set$columnPhpName($classIdentifierConst);
+    }\n";
     }
 
     /**
@@ -192,8 +199,6 @@ class " . $this->getUnqualifiedClassName() . ' extends ' . $this->getParentClass
     #[\Override]
     protected function addClassClose(string &$script): void
     {
-        $script .= "
-}
-";
+        $script .= "}\n";
     }
 }
