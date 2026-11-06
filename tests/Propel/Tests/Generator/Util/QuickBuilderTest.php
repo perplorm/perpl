@@ -146,7 +146,8 @@ EOF;
         $this->assertEquals(1, QuickBuildFoo3Query::create()->count());
         $this->assertEquals($foo, QuickBuildFoo3Query::create()->findOne());
 
+        $version = Perpl::VERSION;
         $this->assertDirectoryExists(
-            sys_get_temp_dir() . '/perplQuickBuild/v' . Perpl::VERSION . '-' . substr(sha1(getcwd()), 0, 10));
+            sys_get_temp_dir() . "/perplQuickBuild/v$version/");
     }
 }

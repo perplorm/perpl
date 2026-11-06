@@ -113,6 +113,11 @@ abstract class AbstractGeneratorConfig extends ConfigurationManager
      */
     public function loadConfiguredBuilder(Table $table, BuilderType $type): AbstractOMBuilder
     {
+        if ($type->isInheritanceBuilder()) {
+            // possibly more than one inheritance builder per table, they cannot be cached like this
+            return $this->setupBuilder($table, $type);
+        }
+
         $tableId = $table->getQualifiedClassName();
         if (empty($this->buildersByTable[$tableId][$type->value])) {
             $this->buildersByTable[$tableId][$type->value] = $this->setupBuilder($table, $type);

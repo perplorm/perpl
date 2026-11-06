@@ -34,7 +34,6 @@ use function count;
 use function explode;
 use function file_put_contents;
 use function function_exists;
-use function getcwd;
 use function implode;
 use function in_array;
 use function is_array;
@@ -42,13 +41,11 @@ use function is_dir;
 use function is_string;
 use function mkdir;
 use function preg_match;
-use function sha1;
 use function sprintf;
 use function str_contains;
 use function str_replace;
 use function str_starts_with;
 use function strpos;
-use function substr;
 use function sys_get_temp_dir;
 use function token_get_all;
 use const PHP_EOL;
@@ -256,7 +253,21 @@ class QuickBuilder
      */
     public static function getDefaultClassTargets(): array
     {
-        return [BuilderType::TableMap, BuilderType::ObjectBase, BuilderType::ObjectStub, BuilderType::Collection, BuilderType::QueryBase, BuilderType::QueryStub];
+        return [
+            BuilderType::TableMap,
+
+            BuilderType::Interface,
+
+            BuilderType::ObjectBase,
+            BuilderType::ObjectStub,
+
+            BuilderType::Collection,
+
+            BuilderType::QueryBase,
+            BuilderType::QueryStub,
+
+            BuilderType::Custom, // HACK: includes inheritance
+        ];
     }
 
     /**
@@ -458,34 +469,19 @@ class QuickBuilder
 
     /**
      * @param \Propel\Generator\Model\Table $table
-     * @param array<\Propel\Generator\Builder\Om\BuilderType>|null $builderTypes
+     * @param array<\Propel\Generator\Builder\Om\AbstractOMBuilder> $builders
      *
-     * @return string
+     * @return string|null
      */
-    public function getClassesForTable(Table $table, ?array $builderTypes = null): string
+    protected function buildPhpCodeForTableClasses(Table $table, array $builders): string|null
     {
-        $builderTypes ??= static::getDefaultClassTargets();
-        $script = '';
-
-        foreach ($builderTypes as $builderType) {
-            /** @var \Propel\Generator\Builder\Om\AbstractOMBuilder $abstractBuilder */
-            $abstractBuilder = $this->getConfig()->loadConfiguredBuilder($table, $builderType);
-            $class = $abstractBuilder->build();
-            $script .= $this->fixNamespaceDeclarations($class);
-            $script .= $this->buildInheritanceClassesCode($builderType, $table);
-
-            if ($builderType === BuilderType::ObjectBase && $table->getInterface()) {
-                $interface = $this->getConfig()->loadInterfaceBuilder($table)->build();
-                $script .= $this->fixNamespaceDeclarations($interface);
-            }
+        if (!$builders) {
+            return null;
         }
-
-        if ($table->hasAdditionalBuilders()) { // will be built multiple times if this method is called for individual targets (buildToPhysical())
-            foreach ($table->getAdditionalBuilders() as $builderClass) {
-                $builder = new $builderClass($table);
-                $class = $builder->build();
-                $script .= $this->fixNamespaceDeclarations($class);
-            }
+        $script = '';
+        foreach ($builders as $builder) {
+            $code = $builder->build();
+            $script .= $this->fixNamespaceDeclarations($code);
         }
 
         $script = str_replace('<?php', '', $script);
@@ -494,40 +490,70 @@ class QuickBuilder
     }
 
     /**
-     * Build code for classes defined via inheritance in schema.xml.
-     *
-     * @param \Propel\Generator\Builder\Om\BuilderType $target
      * @param \Propel\Generator\Model\Table $table
+     * @param array<\Propel\Generator\Builder\Om\BuilderType> $builderTypes
      *
-     * @return string
+     * @return array<\Propel\Generator\Builder\Om\AbstractOMBuilder>
      */
-    protected function buildInheritanceClassesCode(BuilderType $target, Table $table): string
+    protected function buildCodeBuilders(Table $table, array $builderTypes): array
     {
-        $childTarget = match ($target) {
-            BuilderType::QueryBase => BuilderType::QueryInheritance,
-            BuilderType::ObjectStub => BuilderType::ObjectInheritanceStub,
-            BuilderType::QueryStub => BuilderType::QueryInheritanceStub,
-            default => null
-        };
-        if (!$childTarget) {
-            return '';
-        }
+        $builders = [];
+        foreach ($builderTypes as $builderType) {
+            if ($builderType === BuilderType::Interface && !$table->getInterface()) {
+                continue;
+            }
+            if ($builderType === BuilderType::Custom) {
+                foreach ($table->getAdditionalBuilders() as $builderClass) {
+                    $builders[] = new $builderClass($table);
+                }
 
-        $code = '';
-        $column = $table->getClassKeyColumn();
-        foreach ($column->getInheritanceConfigurations() as $inheritance) {
-            if (!$inheritance->getParentClassIdentifier()) {
+                // HACK: Inheritance code has to go into same file to match imports, do it during custom
+                if ($table->usesSingleTableInheritance()) {
+                    $builders = [...$builders, ...$this->buildInheritanceBuilders($table)];
+                }
+
                 continue;
             }
 
-            /** @var \Propel\Generator\Builder\Om\AbstractOMBuilder&\Propel\Generator\Builder\Om\ExtensionBuilderInterface $builder */
-            $builder = $this->getConfig()->loadConfiguredBuilder($table, $childTarget);
-            $builder->setInheritanceConfiguration($inheritance);
-            $classCode = $builder->build();
-            $code .= $this->fixNamespaceDeclarations($classCode);
+            $builders[] = $this->getConfig()->loadConfiguredBuilder($table, $builderType);
         }
 
-        return $code;
+        return $builders;
+    }
+
+    /**
+     * @param \Propel\Generator\Model\Table $table
+     *
+     * @return array<\Propel\Generator\Builder\Om\AbstractOMBuilder&\Propel\Generator\Builder\Om\ExtensionBuilderInterface>
+     */
+    protected function buildInheritanceBuilders(Table $table): array
+    {
+        $classKeyColumn = $table->getClassKeyColumn();
+        if (!$classKeyColumn) {
+            return [];
+        }
+
+        $inheritanceBuilderTypes = [
+            BuilderType::ObjectInheritanceStub,
+            BuilderType::QueryInheritance,
+            BuilderType::QueryInheritanceStub,
+        ];
+
+        $builders = [];
+        foreach ($inheritanceBuilderTypes as $builderType) {
+            foreach ($classKeyColumn->getInheritanceConfigurations() as $inheritance) {
+                if (!$inheritance->getParentClassIdentifier()) {
+                    continue;
+                }
+
+                /** @var \Propel\Generator\Builder\Om\AbstractOMBuilder&\Propel\Generator\Builder\Om\ExtensionBuilderInterface $builder */
+                $builder = $this->getConfig()->loadConfiguredBuilder($table, $builderType);
+                $builder->setInheritanceConfiguration($inheritance);
+                $builders[] = $builder;
+            }
+        }
+
+        return $builders;
     }
 
     /**
@@ -638,23 +664,42 @@ class QuickBuilder
     private function buildClassesToPhysical(array $builderTypes, array $tables): array
     {
         $includes = [];
-        $hashFromCwd = substr(sha1((string)getcwd()), 0, 10);
-        $version = Perpl::VERSION;
-        $dirName = sys_get_temp_dir() . "/perplQuickBuild/v{$version}-$hashFromCwd/";
-        if (!is_dir($dirName)) {
-            mkdir($dirName, 0777, true);
-        }
         foreach ($tables as $table) {
+            $targetDir = $this->createTargetDir($table);
+            $cleanedTableName = str_replace('\\', '-', $table->getPhpName());
+
             foreach ($builderTypes as $builderType) {
-                $code = $this->getClassesForTable($table, [$builderType]);
-                $cleanerNamespace = str_replace('\\', '-', $table->getPhpName());
-                $tempFileName = "{$dirName}{$cleanerNamespace}-{$builderType->value}.php";
+                $builders = $this->buildCodeBuilders($table, [$builderType]);
+                $code = $builders ? $this->buildPhpCodeForTableClasses($table, $builders) : null;
+                if (!$code) {
+                    continue;
+                }
+
+                $tempFileName = "{$targetDir}{$cleanedTableName}-{$builderType->value}.php";
                 file_put_contents($tempFileName, "<?php\n" . $code);
                 $includes[] = $tempFileName;
             }
         }
 
         return $includes;
+    }
+
+    /**
+     * @param \Propel\Generator\Model\Table $table
+     *
+     * @return string
+     */
+    protected function createTargetDir(Table $table): string
+    {
+        $namespace = $table->getNamespace() ?: 'root';
+        $namespaceDir = str_replace('\\', '__', $namespace);
+        $version = Perpl::VERSION;
+        $dirName = sys_get_temp_dir() . "/perplQuickBuild/v{$version}/$namespaceDir/";
+        if (!is_dir($dirName)) {
+            mkdir($dirName, 0777, true);
+        }
+
+        return $dirName;
     }
 
     /**
@@ -668,21 +713,19 @@ class QuickBuilder
     private function buildClassesToVirtual(array $targets, array $tables): array
     {
         $allCode = '';
-        $allCodeName = [];
-        $includes = [];
-
         foreach ($tables as $table) {
-            if (count($allCodeName) < 5) {
-                $allCodeName[] = $table->getPhpName();
-            }
-            $allCode .= $this->getClassesForTable($table, $targets);
+            $builders = $this->buildCodeBuilders($table, $targets);
+            $allCode .= $this->buildPhpCodeForTableClasses($table, $builders) ?? '';
         }
 
-        $tempFile = $this->newFile('propelQuickBuild/' . implode('_', $allCodeName) . '.php');
-        file_put_contents($tempFile->url(), "<?php\n$allCode");
-        $includes[] = $tempFile->url();
+        $firstFiveTables = array_slice($tables, 0, 5);
+        $tableNames = array_map(fn (Table $t) => $t->getPhpName(), $firstFiveTables);
+        $fileId = implode('_', $tableNames);
 
-        return $includes;
+        $tempFile = $this->newFile("perplQuickBuild/$fileId.php");
+        file_put_contents($tempFile->url(), "<?php\n$allCode");
+
+        return [$tempFile->url()];
     }
 
     /**
