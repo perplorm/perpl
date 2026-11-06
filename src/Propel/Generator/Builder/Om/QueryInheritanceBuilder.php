@@ -154,7 +154,7 @@ class QueryInheritanceBuilder extends AbstractOMBuilder implements ExtensionBuil
     {
         $table = $this->getTable();
         $tableName = $table->getName();
-        $tableDesc = $table->getDescription() ? $table->getDescription() . "\n * " : '';
+        $tableDesc = AbstractOMBuilder::formatOptionalDocblockContent($table->getDescription(), 1);
 
         $className = $this->getUnqualifiedClassName();
 

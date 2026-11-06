@@ -113,7 +113,7 @@ class MultiExtendObjectBuilder extends AbstractObjectBuilder implements Extensio
 
         $script .= "
 class $className extends $localParentClassName
-{\n";
+{";
     }
 
     /**
@@ -142,19 +142,17 @@ class $className extends $localParentClassName
     {
         $table = $this->getTable();
         $tableName = $table->getName();
-        $tableDesc = $table->getDescription();
+        $tableDesc = AbstractOMBuilder::formatOptionalDocblockContent($table->getDescription(), 2);
         $timeStampBlock = $this->generateTimestampBlock();
 
         $script .= "
-
 /**
  * Skeleton subclass for representing a row from one of the subclasses of the '$tableName' table.
  *
- * $tableDesc
- *{$timeStampBlock}
  * You should add additional methods to this class to meet the
  * application requirements.  This class will only be generated as
  * long as it does not already exist in the output directory.
+ * {$tableDesc}{$timeStampBlock}
  */";
     }
 
@@ -201,8 +199,6 @@ class $className extends $localParentClassName
     #[\Override]
     protected function addClassClose(string &$script): void
     {
-        $script .= "
-}
-";
+        $script .= "}\n";
     }
 }
