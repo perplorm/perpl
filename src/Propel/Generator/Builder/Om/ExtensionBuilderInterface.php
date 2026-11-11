@@ -14,11 +14,11 @@ interface ExtensionBuilderInterface
     /**
      * Sets the child object that we're operating on currently.
      *
-     * @param \Propel\Generator\Model\Inheritance $child Inheritance
+     * @param \Propel\Generator\Model\Inheritance $inheritance Inheritance
      *
      * @return void
      */
-    public function setChild(Inheritance $child): void;
+    public function setInheritanceConfiguration(Inheritance $inheritance): void;
 
     /**
      * Returns the child object we're operating on currently.
@@ -27,7 +27,7 @@ interface ExtensionBuilderInterface
      *
      * @return \Propel\Generator\Model\Inheritance
      */
-    public function getChild(): Inheritance;
+    public function getInheritanceConfiguration(): Inheritance;
 
     /**
      * Builds the PHP source for current class and returns it as a string.

@@ -23,6 +23,16 @@ use Propel\Tests\TestCase;
  */
 class AbstractOMBuilderTest extends TestCase
 {
+    protected static function buildBuilder(): AbstractOMBuilder
+    {
+        return new class(new Table('Foo')) extends AbstractOMBuilder{
+            protected function addClassBody(string &$script): void {}
+            protected function addClassClose(string &$script): void{}
+            protected function addClassOpen(string &$script): void{}
+            public function getUnprefixedClassName(): string { return 'Foo';}
+            public function getNamespace(): string { return 'FooNamespace';}
+        };
+    }
     /**
      * @return void
      */
@@ -122,18 +132,37 @@ EOF;
     #[\PHPUnit\Framework\Attributes\DataProvider('StrictTypesDataProvider')]
     public function testDeclareStrictTypes(bool $declareStrictType, string $expectedStart)
     {
-        $builder = new class(new Table('Foo')) extends AbstractOMBuilder{
-            protected function addClassBody(string &$script): void {}
-            protected function addClassClose(string &$script): void{}
-            protected function addClassOpen(string &$script): void{}
-            public function getUnprefixedClassName(): string { return 'Foo';}
-            public function getNamespace(): string { return 'FooNamespace';}
-        };
+        $builder = static::buildBuilder();
         $config = new QuickGeneratorConfig(['propel.generator.declareStrictTypesInBuilders' => $declareStrictType]);
         $builder->setGeneratorConfig($config);
         $content = $builder->build();
 
         $this->assertStringStartsWith($expectedStart, $content);
+    }
+
+
+    /**
+     * @return array<array{string|null, int, string}>
+     */
+    public static function DocBlockContentDataProvider(): array
+    {
+        return [
+            ['', 5, ''],
+            ['le content', 2, " le content\n  *"],
+            ['le content', 5, " le content\n     *"],
+            ["le\nmultiline\ncontent", 2, " le\n  * multiline\n  * content\n  *"],
+        ];
+    }
+
+    /**
+     * @return void
+     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('DocBlockContentDataProvider')]
+    public function testFormatOptionalDocblockContent(string|null $content, int $indent, string $expected)
+    {
+        $builder = static::buildBuilder();
+        $block = $this->callMethod($builder, 'formatOptionalDocblockContent', [$content, $indent]);
+        $this->assertSame($expected, $block);
     }
 }
 

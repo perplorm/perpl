@@ -35,7 +35,7 @@ class ExtensionQueryInheritanceBuilder extends AbstractOMBuilder implements Exte
     #[\Override]
     public function getUnprefixedClassName(): string
     {
-        return $this->getChild()->getClassName() . 'Query';
+        return $this->getInheritanceConfiguration()->getClassName() . 'Query';
     }
 
     /**
@@ -46,20 +46,20 @@ class ExtensionQueryInheritanceBuilder extends AbstractOMBuilder implements Exte
     #[\Override]
     public function getPackage(): ?string
     {
-        return ($this->getChild()->getPackage() ?: parent::getPackage());
+        return ($this->getInheritanceConfiguration()->getPackage() ?: parent::getPackage());
     }
 
     /**
      * Set the child object that we're operating on currently.
      *
-     * @param \Propel\Generator\Model\Inheritance $child Inheritance
+     * @param \Propel\Generator\Model\Inheritance $inheritance Inheritance
      *
      * @return void
      */
     #[\Override]
-    public function setChild(Inheritance $child): void
+    public function setInheritanceConfiguration(Inheritance $inheritance): void
     {
-        $this->child = $child;
+        $this->child = $inheritance;
     }
 
     /**
@@ -70,7 +70,7 @@ class ExtensionQueryInheritanceBuilder extends AbstractOMBuilder implements Exte
      * @return \Propel\Generator\Model\Inheritance
      */
     #[\Override]
-    public function getChild(): Inheritance
+    public function getInheritanceConfiguration(): Inheritance
     {
         if (!$this->child) {
             throw new BuildException('The MultiExtendObjectBuilder needs to be told which child class to build (via setChild() method) before it can build the stub class.');
@@ -91,29 +91,29 @@ class ExtensionQueryInheritanceBuilder extends AbstractOMBuilder implements Exte
     {
         $table = $this->getTable();
         $tableName = $table->getName();
-        $tableDesc = $table->getDescription();
+        $tableDesc = AbstractOMBuilder::formatOptionalDocblockContent($table->getDescription(), 2);
 
-        $baseBuilder = $this->getQueryInheritanceBuilder($this->getChild());
+        $className = $this->getUnqualifiedClassName();
+        $baseBuilder = $this->getQueryInheritanceBuilder($this->getInheritanceConfiguration());
         $baseClassName = $this->getClassNameFromBuilder($baseBuilder);
+        $baseClassNameFq = $this->referencedClasses->getQualifiedNameForClassAlias($baseClassName);
         $timeStampBlock = $this->generateTimestampBlock();
 
-        if ($this->getBuildProperty('generator.objectModel.addClassLevelComment')) {
-            $script .= "
-
-/**
+        $classLevelComment = $this->getBuildProperty('generator.objectModel.addClassLevelComment')
+            ? "
  * Skeleton subclass for representing a query for one of the subclasses of the '$tableName' table.
- *
- * $tableDesc
- *{$timeStampBlock}
  * You should add additional methods to this class to meet the
  * application requirements.  This class will only be generated as
  * long as it does not already exist in the output directory.
- */";
-        }
+ *{$tableDesc}{$timeStampBlock}" : '';
+
         $script .= "
-class " . $this->getUnqualifiedClassName() . ' extends ' . $baseClassName . "
-{
-";
+/**$classLevelComment
+ * @template ParentQuery extends \Propel\Runtime\ActiveQuery\ModelCriteria|null = null
+ * @extends \\$baseClassNameFq<ParentQuery>
+ */
+class $className extends $baseClassName
+{\n";
     }
 
     /**

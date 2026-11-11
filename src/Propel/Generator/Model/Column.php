@@ -114,8 +114,6 @@ class Column extends MappingModel
 
     private bool $isInheritance = false;
 
-    private bool $isEnumeratedClasses = false;
-
     /**
      * @var array<\Propel\Generator\Model\Inheritance>|null
      */
@@ -777,27 +775,23 @@ class Column extends MappingModel
      * Adds a new inheritance definition to the inheritance list and sets the
      * parent column of the inheritance to the current column.
      *
-     * @param \Propel\Generator\Model\Inheritance|array $inheritance
+     * @param \Propel\Generator\Model\Inheritance|array $inheritanceData
      *
      * @return \Propel\Generator\Model\Inheritance
      */
-    public function addInheritance($inheritance): Inheritance
+    public function addInheritance($inheritanceData): Inheritance
     {
-        if ($inheritance instanceof Inheritance) {
-            $inheritance->setColumn($this);
-            if ($this->inheritanceList === null) {
-                $this->inheritanceList = [];
-                $this->isEnumeratedClasses = true;
-            }
-            $this->inheritanceList[] = $inheritance;
-
-            return $inheritance;
+        if ($inheritanceData instanceof Inheritance) {
+            $inheritance = $inheritanceData;
+        } else {
+            $inheritance = new Inheritance();
+            $inheritance->loadMapping($inheritanceData);
         }
+        $inheritance->setColumn($this);
+        $this->inheritanceList ??= [];
+        $this->inheritanceList[] = $inheritance;
 
-        $inh = new Inheritance();
-        $inh->loadMapping($inheritance);
-
-        return $this->addInheritance($inh);
+        return $inheritance;
     }
 
     /**
@@ -811,19 +805,19 @@ class Column extends MappingModel
     /**
      * @return array<\Propel\Generator\Model\Inheritance>|null
      */
-    public function getInheritanceList(): ?array
+    public function getInheritanceConfigurations(): ?array
     {
         return $this->inheritanceList;
     }
 
     /**
-     * @deprecated Use aptly named {@see static::getInheritanceList()}
+     * @deprecated Use aptly named {@see static::getInheritanceConfigurations()}
      *
      * @return array<\Propel\Generator\Model\Inheritance>|null
      */
     public function getChildren(): ?array
     {
-        return $this->getInheritanceList();
+        return $this->getInheritanceConfigurations();
     }
 
     /**
@@ -845,7 +839,7 @@ class Column extends MappingModel
      */
     public function isEnumeratedClasses(): bool
     {
-        return $this->isEnumeratedClasses;
+        return $this->inheritanceList !== null;
     }
 
     /**

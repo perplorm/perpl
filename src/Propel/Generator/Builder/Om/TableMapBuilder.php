@@ -443,7 +443,7 @@ class $className extends TableMap
      */
     public function addInheritanceColumnConstants(string &$script): void
     {
-        $col = $this->getTable()->getChildrenColumn();
+        $col = $this->getTable()->getClassKeyColumn();
         if (!$col || !$col->isEnumeratedClasses()) {
             return;
         }
@@ -453,9 +453,9 @@ class $className extends TableMap
         $type = $isNumericKey ? 'int' : 'string';
         $keyToClassName = [];
 
-        foreach ($col->getInheritanceList() as $child) {
+        foreach ($col->getInheritanceConfigurations() as $child) {
             $childBuilder = $this->getObjectInheritanceStubBuilder();
-            $childBuilder->setChild($child);
+            $childBuilder->setInheritanceConfiguration($child);
             $fqcn = $childBuilder->getFullyQualifiedClassName();
             $className = $this->declareClassFromBuilder($childBuilder);
             $rawClassName = $child->getClassName();
@@ -658,7 +658,7 @@ class $className extends TableMap
         \$this->setPrimaryKeyMethodInfo('$idSequenceName');";
         }
 
-        if ($this->getTable()->getChildrenColumn()) {
+        if ($this->getTable()->getClassKeyColumn()) {
             $script .= "
         \$this->setSingleTableInheritance(true);";
         }
@@ -1122,7 +1122,7 @@ class $className extends TableMap
     protected function addGetOMClassMethod(string &$script): void
     {
         $table = $this->getTable();
-        if ($table->getChildrenColumn()) {
+        if ($table->getClassKeyColumn()) {
             $this->addGetOMClassInheritance($script);
         } elseif ($table->isAbstract()) {
             $this->addGetOMClassNoInheritanceAbstract($script);
@@ -1143,7 +1143,7 @@ class $className extends TableMap
         $this->declareClass(PropelException::class);
         $this->declareGlobalFunction('preg_replace');
 
-        $col = $this->getTable()->getChildrenColumn();
+        $col = $this->getTable()->getClassKeyColumn();
         $columnIndex = $col->getPosition() - 1;
         $stubObjectNameFq = $this->tableNames->useObjectStubClassName(false);
 
@@ -1278,7 +1278,7 @@ class $className extends TableMap
             \$nextColumnIndex = \$offset + static::NUM_HYDRATE_COLUMNS;";
         }
 
-        $clsLocation = $table->getChildrenColumn()
+        $clsLocation = $table->getClassKeyColumn()
             ? 'static::getOMClass($row, $offset, false)'
             : 'static::OM_CLASS';
 
@@ -1325,7 +1325,7 @@ class $className extends TableMap
             \$obj = static::getInstanceFromPool(\$key);
             if (!\$obj) {";
 
-        if (!$table->getChildrenColumn()) {
+        if (!$table->getClassKeyColumn()) {
             $script .= "
                 \$obj = new $objectStubClassName();";
         } else {

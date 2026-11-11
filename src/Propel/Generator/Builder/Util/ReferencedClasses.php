@@ -208,7 +208,7 @@ class ReferencedClasses
     public function registerSimpleClassName(string $className, string $namespace = '', $alias = false): string
     {
         // old name: declareClassNamespace
-        $namespace = trim($namespace, '\\');
+        $namespace = ltrim($namespace, '\\');
 
         // check if the class is already declared
         if (isset($this->declaredClasses[$namespace][$className])) {
@@ -229,7 +229,7 @@ class ReferencedClasses
             $this->declaredClasses[$namespace][$className] = $localName;
 
             /** @var class-string $classString */
-            $classString = "$namespace\\$className";
+            $classString = $namespace ? "$namespace\\$className" : $className;
             $this->localClassNamesToQualifiedName[$localName] = $classString;
 
             return $localName;
@@ -513,6 +513,8 @@ class ReferencedClasses
     }
 
     /**
+     * Get qualified class name (without starting backslash) from local class alias
+     *
      * @param string $classAlias
      *
      * @return class-string|null

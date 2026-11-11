@@ -1025,7 +1025,7 @@ static public function fixLevels(" . ($useScope ? '$scope, ' : '') . "?Connectio
     \$query->addAscendingOrderByColumn($objectClassName::LEFT_COL);
     \$dataFetcher = $queryClassName::create(null, \$query)->fetch(\$con);
     ";
-        if (!$this->table->getChildrenColumn()) {
+        if (!$this->table->getClassKeyColumn()) {
             $script .= "
     // set the class once to avoid overhead in the loop
     \$cls = $tableMapClassName::getOMClass(false);";
@@ -1040,7 +1040,7 @@ static public function fixLevels(" . ($useScope ? '$scope, ' : '') . "?Connectio
         \$key = $tableMapClassName::getPrimaryKeyHashFromRow(\$row, 0);
         /** @var \$obj $objectClassName */
         if (null === (\$obj = $tableMapClassName::getInstanceFromPool(\$key))) {";
-        if ($this->table->getChildrenColumn()) {
+        if ($this->table->getClassKeyColumn()) {
             $script .= "
             // class must be set each time from the record row
             \$cls = $tableMapClassName::getOMClass(\$row, 0);

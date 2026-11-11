@@ -481,8 +481,8 @@ class QueryBuilder extends AbstractOMBuilder
             return;
         }
 
-        $usesConcreteInheritance = $table->usesSingleTableInheritance();
-        if ($table->isAbstract() && !$usesConcreteInheritance) {
+        $usesSingleTableInheritance = $table->usesSingleTableInheritance();
+        if ($table->isAbstract() && !$usesSingleTableInheritance) {
             $tableName = $table->getPhpName();
             $script .= "
     protected function findPkSimple(\$key, ConnectionInterface \$con)
@@ -506,7 +506,7 @@ class QueryBuilder extends AbstractOMBuilder
             'objectClassNameFq' => $this->tableNames->useObjectStubClassName(false),
             'bindValueStatements' => $isBulkLoad ? '' : $this->buildPrimaryKeyColumnBindingStatements($table),
             'isBulkLoad' => $isBulkLoad,
-            'classNameLiteral' => $usesConcreteInheritance ? '$cls' : $objectClassName,
+            'classNameLiteral' => $usesSingleTableInheritance ? '$cls' : $objectClassName,
             'buildPoolKeyStatementFromKey' => $isBulkLoad
                 ? $this->instancePoolCodeBuilder->buildPoolKeyFromArrayAccess('$key', true)
                 : '',
