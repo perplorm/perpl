@@ -100,7 +100,7 @@ class I18nBehaviorObjectBuilderModifierTest extends TestCase
     </table>
 </database>
 EOF;
-            $this->con = QuickBuilder::buildSchema($schema);
+            $this->con = QuickBuilder::buildDatabaseAndClasses($schema);
         }
     }
 

@@ -43,7 +43,7 @@ class GeneratedObjectTemporalColumnTypeTest extends TestCase
     </table>
 </database>
 EOF;
-            QuickBuilder::buildSchema($schema);
+            QuickBuilder::buildDatabaseAndClasses($schema);
         }
     }
 
@@ -215,10 +215,8 @@ EOF;
 </table>
 </database>
 EOF;
-        $builder = new QuickBuilder();
-        $builder->setSchemaXml($schema);
-        $builder->setPlatform(new MysqlPlatform());
-        $builder->buildClasses();
+        QuickBuilder::buildClasses($schema, new MysqlPlatform());
+
         $r = new ComplexColumnTypeEntity6();
         $r->hydrate([
             123,

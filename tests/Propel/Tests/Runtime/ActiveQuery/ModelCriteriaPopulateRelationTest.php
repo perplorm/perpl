@@ -321,9 +321,7 @@ class ModelCriteriaPopulateRelationTest extends BookstoreTestBase
         </table>
     </database>
 XML;
-        $b = new QuickBuilder();
-        $b->setSchemaXml($schemaXml);
-        $b->buildClasses();
+        QuickBuilder::buildClasses($schemaXml);
 
         $query = \ParallelRelationsTest\CoupleQuery::create()
             ->populateRelation('Person1 p1')

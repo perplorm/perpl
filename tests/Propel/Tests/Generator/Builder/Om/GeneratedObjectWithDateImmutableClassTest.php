@@ -32,7 +32,6 @@ class GeneratedObjectWithDateImmutableClassTest extends TestCase
 </database>
 EOF;
             // Custom Configuration to use DateTimeImmutable
-            $builder = new QuickBuilder();
             $config = new QuickGeneratorConfig([
                 'propel' => [
                     'generator' => [
@@ -42,9 +41,7 @@ EOF;
                     ],
                 ],
             ]);
-            $builder->setSchemaXml($schema);
-            $builder->setConfig($config);
-            $builder->build();
+            QuickBuilder::buildDatabaseAndClasses($schema, null, $config);
         }
 
         if (!class_exists('Foo\SomeTableB')) {
@@ -56,7 +53,7 @@ EOF;
     </table>
 </database>
 EOF;
-            QuickBuilder::buildSchema($schema);
+            QuickBuilder::buildDatabaseAndClasses($schema);
         }
     }
 

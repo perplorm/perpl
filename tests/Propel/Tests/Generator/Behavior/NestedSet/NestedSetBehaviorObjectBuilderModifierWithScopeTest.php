@@ -19,7 +19,7 @@ use Propel\Tests\Fixtures\Generator\Behavior\NestedSet\PublicTable10;
  *
  * @author François Zaninotto
  */
-class NestedSetBehaviorObjectBuilderModifierWithScopeTest extends TestCase
+class NestedSetBehaviorObjectBuilderModifierWithScopeTest extends NestedSetBehaviorTestCase
 {
     protected function getByTitle($title)
     {

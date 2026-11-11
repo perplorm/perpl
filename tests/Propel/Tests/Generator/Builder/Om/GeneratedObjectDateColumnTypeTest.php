@@ -32,7 +32,7 @@ class GeneratedObjectDateColumnTypeTest extends TestCase
     </table>
 </database>
 XML;
-            QuickBuilder::buildSchema($schema);
+            QuickBuilder::buildDatabaseAndClasses($schema);
         }
     }
 

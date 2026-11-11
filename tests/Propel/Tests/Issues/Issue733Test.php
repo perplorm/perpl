@@ -15,8 +15,6 @@ use Propel\Tests\TestCase;
 
 /**
  * This test proves the bug described in https://github.com/propelorm/Propel2/issues/733.
- *
- * @group database
  */
 class Issue733Test extends TestCase
 {
@@ -54,7 +52,7 @@ class Issue733Test extends TestCase
     </table>
 </database>
 EOF;
-            $this->con = QuickBuilder::buildSchema($schema);
+            $this->con = QuickBuilder::buildDatabaseAndClasses($schema);
         }
     }
 

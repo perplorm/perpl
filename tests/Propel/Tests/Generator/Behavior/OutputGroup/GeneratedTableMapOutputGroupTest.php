@@ -62,7 +62,7 @@ class GeneratedTableMapOutputGroupTest extends TestCase
     </table>
 </database>
 EOF;
-        QuickBuilder::buildSchema($schema);
+        QuickBuilder::buildDatabaseAndClasses($schema);
     }
 
     public static function groupDataProvider(): array

@@ -18,12 +18,10 @@ use Propel\Generator\Model\Table;
 use Propel\Generator\Platform\PlatformInterface;
 use Propel\Generator\Platform\SqlitePlatform;
 use Propel\Generator\Reverse\SchemaParserInterface;
-use Propel\Runtime\Adapter\AdapterInterface;
 use Propel\Runtime\Adapter\Pdo\SqliteAdapter;
 use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Connection\ConnectionWrapper;
 use Propel\Runtime\Connection\PdoConnection;
-use Propel\Runtime\Connection\StatementInterface;
 use Propel\Runtime\Perpl;
 use RuntimeException;
 use function array_filter;
@@ -37,6 +35,7 @@ use function function_exists;
 use function implode;
 use function in_array;
 use function is_array;
+use function is_bool;
 use function is_dir;
 use function is_string;
 use function mkdir;
@@ -69,13 +68,11 @@ class QuickBuilder
      */
     public static bool $disableVfs = false;
 
-    protected string $schemaXml = '';
+    protected string|null $schemaXml = null;
 
-    protected string $schemaName = '';
+    protected PlatformInterface $platform;
 
-    protected PlatformInterface|null $platform = null;
-
-    protected AbstractGeneratorConfig|null $config = null;
+    protected AbstractGeneratorConfig $config;
 
     protected Database|null $database = null;
 
@@ -92,39 +89,68 @@ class QuickBuilder
     protected bool $vfs = true;
 
     /**
+     * @param string|null $schemaXml
+     * @param \Propel\Generator\Platform\PlatformInterface|null $platform
+     * @param \Propel\Generator\Config\AbstractGeneratorConfig|null $config
+     */
+    public function __construct(
+        string|null $schemaXml = null,
+        PlatformInterface|null $platform = null,
+        AbstractGeneratorConfig|null $config = null
+    ) {
+        $this->schemaXml = $schemaXml;
+        $this->platform = $platform ?? new SqlitePlatform();
+        $this->config = $config ?? new QuickGeneratorConfig();
+
+        $this->platform->setIdentifierQuoting($this->identifierQuoting);
+    }
+
+    /**
+     * @param string $schemaXml
+     * @param \Propel\Generator\Platform\PlatformInterface|null $platform
+     * @param \Propel\Generator\Config\AbstractGeneratorConfig|null $config
+     *
+     * @return \Propel\Runtime\Connection\ConnectionInterface|\Propel\Runtime\Connection\ConnectionWrapper
+     */
+    public static function buildDatabaseAndClasses(
+        string $schemaXml,
+        PlatformInterface|null $platform = null,
+        AbstractGeneratorConfig|null $config = null
+    ): ConnectionInterface {
+        $builder = new self($schemaXml, $platform, $config);
+
+        return $builder->build();
+    }
+
+    /**
+     * @param string $schemaXml
+     * @param \Propel\Generator\Platform\PlatformInterface|null $platform
+     * @param \Propel\Generator\Config\AbstractGeneratorConfig|null $config
+     *
+     * @return void
+     */
+    public static function buildClasses(
+        string $schemaXml,
+        PlatformInterface|null $platform = null,
+        AbstractGeneratorConfig|null $config = null
+    ): void {
+        $builder = new self($schemaXml, $platform, $config);
+        $builder->buildAndIncludeClasses();
+    }
+
+    /**
+     * Create Database object from schema.
+     * Does not create classes or DB tables.
+     *
      * @param string $schemaXml
      *
-     * @return void
+     * @return \Propel\Generator\Model\Database|null
      */
-    public function setSchemaXml(string $schemaXml): void
+    public static function parseSchema(string $schemaXml): ?Database
     {
-        $this->schemaXml = $schemaXml;
-    }
+        $builder = new self($schemaXml);
 
-    /**
-     * @return string
-     */
-    public function getSchemaXml(): string
-    {
-        return $this->schemaXml;
-    }
-
-    /**
-     * @param string $schemaName
-     *
-     * @return void
-     */
-    public function setSchemaName(string $schemaName): void
-    {
-        $this->schemaName = $schemaName;
-    }
-
-    /**
-     * @return string
-     */
-    public function getSchemaName(): string
-    {
-        return $this->schemaName;
+        return $builder->getDatabase();
     }
 
     /**
@@ -160,12 +186,6 @@ class QuickBuilder
      */
     public function getPlatform(): PlatformInterface
     {
-        if ($this->platform === null) {
-            $this->platform = new SqlitePlatform();
-        }
-
-        $this->platform->setIdentifierQuoting($this->identifierQuoting);
-
         return $this->platform;
     }
 
@@ -184,8 +204,6 @@ class QuickBuilder
      */
     public function getConfig(): AbstractGeneratorConfig
     {
-        $this->config ??= new QuickGeneratorConfig();
-
         return $this->config;
     }
 
@@ -205,47 +223,6 @@ class QuickBuilder
     public function setVfs(bool $vfs): void
     {
         $this->vfs = $vfs;
-    }
-
-    /**
-     * @param string $schemaXml
-     * @param string|null $dsn
-     * @param string|null $user
-     * @param string|null $pass
-     * @param \Propel\Runtime\Adapter\AdapterInterface|null $adapter
-     * @param bool $vfs
-     *
-     * @return \Propel\Runtime\Connection\ConnectionWrapper
-     */
-    public static function buildSchema(
-        string $schemaXml,
-        ?string $dsn = null,
-        ?string $user = null,
-        ?string $pass = null,
-        ?AdapterInterface $adapter = null,
-        bool $vfs = true
-    ): ConnectionWrapper {
-        $builder = new self();
-        $builder->setSchemaXml($schemaXml);
-        $builder->setVfs($vfs);
-
-        return $builder->build($dsn, $user, $pass, $adapter);
-    }
-
-    /**
-     * Create Database object from schema.
-     * Does not create classes or DB tables.
-     *
-     * @param string $schemaXml
-     *
-     * @return \Propel\Generator\Model\Database|null
-     */
-    public static function parseSchema(string $schemaXml): ?Database
-    {
-        $builder = new self();
-        $builder->setSchemaXml($schemaXml);
-
-        return $builder->getDatabase();
     }
 
     /**
@@ -271,37 +248,53 @@ class QuickBuilder
     }
 
     /**
-     * @param string|null $dsn
-     * @param string|null $user
-     * @param string|null $pass
-     * @param \Propel\Runtime\Adapter\AdapterInterface|null $adapter
-     * @param array<\Propel\Generator\Builder\Om\BuilderType>|null $classTargets
+     * @param string|null $connectionName
      *
-     * @return \Propel\Runtime\Connection\ConnectionWrapper
+     * @return \Propel\Runtime\Connection\ConnectionInterface|\Propel\Runtime\Connection\ConnectionWrapper
      */
     public function build(
-        ?string $dsn = null,
-        ?string $user = null,
-        ?string $pass = null,
-        ?AdapterInterface $adapter = null,
-        ?array $classTargets = null
-    ): ConnectionWrapper {
-        $dsn = $dsn ?? 'sqlite::memory:';
-        $adapter = $adapter ?? new SqliteAdapter();
-        $classTargets ??= static::getDefaultClassTargets();
+        string|null $connectionName = null,
+    ): ConnectionInterface {
+        $connectionName ??= $this->getDatabase()->getName();
 
-        $pdo = new PdoConnection($dsn, $user, $pass, [], $adapter->getPdoSubclass());
-        $con = new ConnectionWrapper($pdo);
+        if ($connectionName && Perpl::getServiceContainer()->hasConnectionManager($connectionName)) {
+            $con = Perpl::getConnection($connectionName);
+            $registerConnection = null;
+        } else {
+            [$con, $registerConnection] = $this->setupSqliteConnection();
+        }
         $con->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        /** @phpstan-var \Propel\Runtime\Adapter\Pdo\SqliteAdapter $adapter */
-        $adapter->initConnection($con, []);
+
         $this->buildAndRunSql($con);
-        $this->buildClasses($classTargets);
-        $name = (string)$this->getDatabase()->getName();
-        Perpl::getServiceContainer()->setAdapter($name, $adapter);
-        Perpl::getServiceContainer()->setConnection($name, $con);
+        $this->buildAndIncludeClasses();
+
+        if ($registerConnection) {
+            $name = (string)$this->getDatabase()->getName();
+            $registerConnection($name);
+        }
 
         return $con;
+    }
+
+    /**
+     * @return array{\Propel\Runtime\Connection\ConnectionWrapper, (callable(string ):void)}
+     */
+    protected function setupSqliteConnection(): array
+    {
+            $dsn = 'sqlite::memory:';
+            $adapter = new SqliteAdapter();
+
+            $pdo = new PdoConnection($dsn, null, null, [], $adapter->getPdoSubclass());
+            $con = new ConnectionWrapper($pdo);
+            /** @phpstan-var \Propel\Runtime\Adapter\Pdo\SqliteAdapter $adapter */
+            $adapter->initConnection($con, settings: []);
+
+            $registerConnection = function (string $name) use ($con, $adapter): void {
+                Perpl::getServiceContainer()->setAdapter($name, $adapter);
+                Perpl::getServiceContainer()->setConnection($name, $con);
+            };
+
+            return [$con, $registerConnection];
     }
 
     /**
@@ -338,10 +331,8 @@ class QuickBuilder
             }
             try {
                 $stmt = $con->prepare($statement);
-                if ($stmt instanceof StatementInterface) {
-                    // only execute if has no error
-                    $stmt->execute();
-                }
+                assert(assertion: !is_bool($stmt));
+                $stmt->execute();
             } catch (Exception $e) {
                 throw new Exception('SQL failed: ' . $statement, 0, $e);
             }
@@ -449,7 +440,7 @@ class QuickBuilder
      *
      * @return void
      */
-    public function buildClasses(?array $classTargets = null): void
+    public function buildAndIncludeClasses(?array $classTargets = null): void
     {
         $classTargets ??= static::getDefaultClassTargets();
         $tables = $this->getDatabase()->getTables();
@@ -651,6 +642,7 @@ class QuickBuilder
     public function setIdentifierQuoting(bool $identifierQuoting): void
     {
         $this->identifierQuoting = $identifierQuoting;
+        $this->platform->setIdentifierQuoting($identifierQuoting);
     }
 
     /**

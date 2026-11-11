@@ -22,8 +22,6 @@ use Propel\Tests\Helpers\Bookstore\BookstoreTestBase;
  * Test class for TableMapBuilder.
  *
  * @author François Zaninotto
- *
- * @group database
  */
 class TableMapBuilderTest extends BookstoreTestBase
 {
@@ -472,9 +470,7 @@ class TableMapBuilderTest extends BookstoreTestBase
     </table>
 </database>
 XML;
-        $builder = new QuickBuilder();
-        $builder->setSchemaXml($databaseXml);
-        $builder->build();
+        QuickBuilder::buildClasses($databaseXml);
 
         $this->assertTrue(\class_exists('\\ExampleNamespace\\Greens\\Map\\GreenThingTableMap'));
         $this->assertTrue(\class_exists('\\ExampleNamespace\\Greens\\Grass'));

@@ -52,7 +52,7 @@ class Issue989Test extends TestCase
                 </table>
             </database>
             ';
-            QuickBuilder::buildSchema($schema);
+            QuickBuilder::buildDatabaseAndClasses($schema);
         }
     }
 

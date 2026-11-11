@@ -14,8 +14,6 @@ use Propel\Tests\TestCase;
 
 /**
  * Regression test for https://github.com/propelorm/Propel2/issues/1420
- *
- * @group database
  */
 class Issue1420Test extends TestCase
 {
@@ -50,7 +48,7 @@ class Issue1420Test extends TestCase
                 </table>
             </database>
 XML;
-            QuickBuilder::buildSchema($schema);
+            QuickBuilder::buildDatabaseAndClasses($schema);
         }
     }
 

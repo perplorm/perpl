@@ -37,7 +37,7 @@ class GeneratedObjectLazyLoadTest extends TestCase
 </database>
 EOF;
             //QuickBuilder::debugClassesForTable($schema, 'lazy_load_active_record');
-            QuickBuilder::buildSchema($schema);
+            QuickBuilder::buildDatabaseAndClasses($schema);
         }
     }
 

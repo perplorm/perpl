@@ -18,8 +18,6 @@ use RechercheNature;
 
 /**
  * This test proves the bug described in https://github.com/propelorm/Propel2/issues/941.
- *
- * @group database
  */
 class Issue941Test extends TestCase
 {
@@ -64,7 +62,7 @@ class Issue941Test extends TestCase
 
             </database>
             ';
-            QuickBuilder::buildSchema($schema);
+            QuickBuilder::buildDatabaseAndClasses($schema);
         }
     }
 

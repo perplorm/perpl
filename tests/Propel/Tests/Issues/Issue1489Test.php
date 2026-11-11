@@ -50,10 +50,8 @@ class Issue1489Test extends TestCase
       </database>
       ';
 
-      $quickBuilder = new QuickBuilder();
-      $quickBuilder->setSchemaXml($schema);
+      $quickBuilder = new QuickBuilder($schema, new MysqlPlatform());
       $quickBuilder->setIdentifierQuoting(true);
-      $quickBuilder->setPlatform(new MysqlPlatform());
 
       $database = $quickBuilder->getDatabase();
       return $database->getTable('le_table')->getColumn('le_column');

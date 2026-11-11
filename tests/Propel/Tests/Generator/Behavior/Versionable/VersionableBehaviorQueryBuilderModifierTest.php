@@ -33,7 +33,7 @@ class VersionableBehaviorQueryBuilderModifierTest extends TestCase
     </table>
 </database>>
 EOF;
-            QuickBuilder::buildSchema($schema);
+            QuickBuilder::buildDatabaseAndClasses($schema);
         }
     }
 

@@ -28,17 +28,15 @@ use Propel\Tests\Bookstore\Behavior\Map\ConcreteArticleTableMap;
 use Propel\Tests\Bookstore\Behavior\Map\ConcreteAuthorTableMap;
 use Propel\Tests\Bookstore\Behavior\Map\ConcreteContentTableMap;
 use Propel\Tests\Bookstore\Behavior\Map\ConcreteQuizzTableMap;
-use Propel\Tests\Helpers\Bookstore\BookstoreTestBase;
+use Propel\Tests\TestCaseFixtures;
 use ReflectionClass;
 
 /**
  * Tests for ConcreteInheritanceBehavior class
  *
  * @author François Zaniontto
- *
- * @group database
  */
-class ConcreteInheritanceBehaviorTest extends BookstoreTestBase
+class ConcreteInheritanceBehaviorTest extends TestCaseFixtures
 {
     /**
      * @return void
@@ -68,7 +66,7 @@ class ConcreteInheritanceBehaviorTest extends BookstoreTestBase
 </database>
 EOF;
 
-            QuickBuilder::buildSchema($schema);
+            QuickBuilder::buildDatabaseAndClasses($schema);
         }
     }
 

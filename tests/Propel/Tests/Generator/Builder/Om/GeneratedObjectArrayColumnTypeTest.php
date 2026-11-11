@@ -15,7 +15,7 @@ use MyNameSpace\ComplexColumnTypeEntityWithConstructorQuery;
 use MyNameSpace\Map\ComplexColumnTypeEntity2TableMap;
 use Propel\Generator\Util\QuickBuilder;
 use Propel\Runtime\ActiveQuery\ModelCriteria;
-use Propel\Runtime\Propel;
+use Propel\Runtime\Perpl;
 use Propel\Tests\TestCase;
 
 /**
@@ -42,7 +42,7 @@ class GeneratedObjectArrayColumnTypeTest extends TestCase
     </table>
 </database>
 EOF;
-            QuickBuilder::buildSchema($schema);
+            QuickBuilder::buildDatabaseAndClasses($schema);
         }
 
         ComplexColumnTypeEntity2TableMap::doDeleteAll();
@@ -283,9 +283,9 @@ EOF;
   </table>
 </database>
 EOF;
-        QuickBuilder::buildSchema($schema);
+        QuickBuilder::buildDatabaseAndClasses($schema);
 
-        Propel::disableInstancePooling(); // need to be disabled to test the hydrate() method
+        Perpl::disableInstancePooling(); // need to be disabled to test the hydrate() method
 
         $obj = new ComplexColumnTypeEntityWithConstructor();
         $this->assertEquals([], $obj->getTags());
@@ -299,6 +299,6 @@ EOF;
             ->findOne();
         $this->assertEquals(['baz'], $obj->getTags());
 
-        Propel::enableInstancePooling();
+        Perpl::enableInstancePooling();
     }
 }

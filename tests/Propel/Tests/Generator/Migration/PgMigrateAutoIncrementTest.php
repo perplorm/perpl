@@ -69,10 +69,7 @@ class PgMigrateAutoIncrementTest extends MigrationTestCase
         $this->applyXmlAndTest($databaseXml, true);
 
         if ($phpTableName) {
-            $builder = new QuickBuilder();
-            $builder->setPlatform(new PgsqlPlatform());
-            $builder->setSchemaXml($databaseXml);
-            $builder->buildClasses();
+            QuickBuilder::buildClasses($databaseXml, new PgsqlPlatform());
         }
     }
 

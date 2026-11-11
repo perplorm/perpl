@@ -81,10 +81,8 @@ class MigrationTestCase extends TestCaseFixturesDatabase
     {
         $this->readDatabase();
 
-        $builder = new QuickBuilder();
+        $builder = new QuickBuilder($xml, $this->database->getPlatform());
         $builder->setIdentifierQuoting(true);
-        $builder->setPlatform($this->database->getPlatform());
-        $builder->setSchemaXml($xml);
 
         $database = $builder->getDatabase();
         $database->setSchema('migration');

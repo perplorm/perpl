@@ -15,7 +15,7 @@ use Propel\Generator\Platform\MysqlPlatform;
 use Propel\Generator\Util\QuickBuilder;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\Collection\ObjectCollection;
-use Propel\Runtime\Propel;
+use Propel\Runtime\Perpl;
 use Propel\Tests\TestCaseFixtures;
 
 /**
@@ -38,7 +38,7 @@ class GeneratedQuerySetNativeColumnTypeTest extends TestCaseFixtures
      */
     public static function tearDownAfterClass(): void
     {
-        $connection = Propel::getServiceContainer()->getConnection('bookstore');
+        $connection = Perpl::getServiceContainer()->getConnection('bookstore');
         $connection->exec('DROP TABLE IF EXISTS native_set_test_entity;');
 
         parent::tearDownAfterClass();
@@ -58,14 +58,11 @@ class GeneratedQuerySetNativeColumnTypeTest extends TestCaseFixtures
     </table>
 </database>
 EOF;
-            $builder = new QuickBuilder();
-            $builder->setSchemaXml($schema);
-            $builder->setVfs(false);
-            $builder->setPlatform(new MysqlPlatform());
-            $connection = Propel::getServiceContainer()->getConnection('bookstore');
+            $connection = Perpl::getServiceContainer()->getConnection('bookstore');
             $connection->exec('DROP TABLE IF EXISTS native_set_test_entity;');
-            $builder->buildAndRunSql($connection);
-            $builder->buildClasses();
+
+            QuickBuilder::buildDatabaseAndClasses($schema, new MysqlPlatform());
+
             $e0 = new NativeSetTestEntity();
             $e0->save();
             $e1 = new NativeSetTestEntity();

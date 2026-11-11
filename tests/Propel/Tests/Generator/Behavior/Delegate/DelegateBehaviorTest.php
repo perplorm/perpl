@@ -106,7 +106,7 @@ class DelegateBehaviorTest extends TestCase
 
 </database>
 EOF;
-            QuickBuilder::buildSchema($schema);
+            QuickBuilder::buildDatabaseAndClasses($schema);
         }
     }
 
@@ -298,7 +298,7 @@ EOF;
 
 </database>
 EOF;
-        QuickBuilder::buildSchema($schema);
+        QuickBuilder::buildDatabaseAndClasses($schema);
         $main = new TestTablePrefixSameDatabaseMain();
         $main->setSubtitle('bar');
         $delegate = $main->getTestTablePrefixSameDatabaseDelegate();

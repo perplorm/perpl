@@ -36,7 +36,7 @@ class GeneratedObjectObjectColumnTypeTest extends TestCase
     </table>
 </database>
 EOF;
-            QuickBuilder::buildSchema($schema);
+            QuickBuilder::buildDatabaseAndClasses($schema);
         }
     }
 

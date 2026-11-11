@@ -14,7 +14,6 @@ use MyNameSpace2\QuickBuildFoo2;
 use MyNameSpace2\QuickBuildFoo2Query;
 use MyNameSpace3\QuickBuildFoo3;
 use MyNameSpace3\QuickBuildFoo3Query;
-use Propel\Generator\Builder\Om\BuilderType;
 use Propel\Generator\Platform\MysqlPlatform;
 use Propel\Generator\Platform\SqlitePlatform;
 use Propel\Generator\Util\QuickBuilder;
@@ -46,8 +45,7 @@ class QuickBuilderTest extends TestCase
     </table>
 </database>
 EOF;
-        $builder = new QuickBuilder();
-        $builder->setSchemaXml($xmlSchema);
+        $builder = new QuickBuilder($xmlSchema);
 
         return [[$builder]];
     }
@@ -56,7 +54,7 @@ EOF;
      * @return void
      */
     #[\PHPUnit\Framework\Attributes\DataProvider('simpleSchemaProvider')]
-    public function testGetDatabase($builder): void
+    public function testGetDatabase(QuickBuilder $builder): void
     {
         $database = $builder->getDatabase();
         $this->assertEquals('test_quick_build_2', $database->getName());
@@ -68,7 +66,7 @@ EOF;
      * @return void
      */
     #[\PHPUnit\Framework\Attributes\DataProvider('simpleSchemaProvider')]
-    public function testGetSQL($builder): void
+    public function testGetSQL(QuickBuilder $builder): void
     {
         $expected = <<<EOF
 
@@ -93,9 +91,9 @@ EOF;
      * @return void
      */
     #[\PHPUnit\Framework\Attributes\DataProvider('simpleSchemaProvider')]
-    public function testBuildClasses($builder): void
+    public function testBuildClasses(QuickBuilder $builder): void
     {
-        $builder->buildClasses();
+        $builder->buildAndIncludeClasses();
         $foo = new QuickBuildFoo1();
         $this->assertTrue($foo instanceof ActiveRecordInterface);
         $this->assertTrue(QuickBuildFoo1TableMap::getTableMap() instanceof QuickBuildFoo1TableMap);
@@ -114,9 +112,7 @@ EOF;
     </table>
 </database>
 EOF;
-        $builder = new QuickBuilder();
-        $builder->setSchemaXml($xmlSchema);
-        $builder->build();
+        QuickBuilder::buildDatabaseAndClasses($xmlSchema);
         $this->assertEquals(0, QuickBuildFoo2Query::create()->count());
         $foo = new QuickBuildFoo2();
         $foo->setBar(3);
@@ -135,8 +131,7 @@ EOF;
     </table>
 </database>
 EOF;
-        $builder = new QuickBuilder();
-        $builder->setSchemaXml($xmlSchema);
+        $builder = new QuickBuilder($xmlSchema);
         $builder->setVfs(false);
         $builder->build();
         $this->assertEquals(0, QuickBuildFoo3Query::create()->count());

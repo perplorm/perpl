@@ -36,7 +36,7 @@ class GeneratedObjectJsonColumnTypeTest extends TestCase
     </table>
 </database>
 EOF;
-            QuickBuilder::buildSchema($schema);
+            QuickBuilder::buildDatabaseAndClasses($schema);
             // ok this is hackish but it makes testing of getter and setter independent of each other
             $publicAccessorCode = <<<EOF
 class PublicComplexColumnTypeJsonEntity extends ComplexColumnTypeJsonEntity

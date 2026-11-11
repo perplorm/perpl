@@ -82,14 +82,13 @@ class PlatformDatabaseBuildTimeBase extends TestCaseFixtures
      */
     public function buildAndMigrate($schema)
     {
-        $builder = new QuickBuilder();
         $platform = $this->getPlatform();
+        $builder = new QuickBuilder($schema, $platform);
 
         $builder->setPlatform($platform);
         $builder->setParser($this->getParser($this->con));
         $builder->getParser()->setPlatform($platform);
-        $builder->setSchemaXml($schema);
-        $builder->buildClasses();
+        $builder->buildAndIncludeClasses();
 
         $builder->updateDB($this->con);
     }
@@ -103,13 +102,11 @@ class PlatformDatabaseBuildTimeBase extends TestCaseFixtures
      */
     public function migrate($schema)
     {
-        $builder = new QuickBuilder();
         $platform = $this->getPlatform();
+        $builder = new QuickBuilder($schema, $platform);
 
-        $builder->setPlatform($platform);
         $builder->setParser($this->getParser($this->con));
         $builder->getParser()->setPlatform($platform);
-        $builder->setSchemaXml($schema);
 
         $builder->updateDB($this->con);
     }

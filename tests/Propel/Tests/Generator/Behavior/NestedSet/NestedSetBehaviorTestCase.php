@@ -20,7 +20,7 @@ use Propel\Tests\TestCase as BaseTestCase;
 /**
  * @author William Durand <william.durand1@gmail.com>
  */
-class TestCase extends BaseTestCase
+class NestedSetBehaviorTestCase extends BaseTestCase
 {
     protected $con;
 
@@ -31,7 +31,7 @@ class TestCase extends BaseTestCase
     {
         if (!class_exists('NestedSetTable9')) {
             $schema = <<<XML
-<database name="bookstore-behavior" defaultIdMethod="native">
+<database defaultIdMethod="native">
     <table name="nested_set_table9">
         <column name="id" required="true" primaryKey="true" autoIncrement="true" type="INTEGER"/>
         <column name="title" type="VARCHAR" size="100" primaryString="true"/>
@@ -58,7 +58,7 @@ class TestCase extends BaseTestCase
     </table>
 </database>
 XML;
-            $this->con = QuickBuilder::buildSchema($schema);
+            $this->con = QuickBuilder::buildDatabaseAndClasses($schema);
         }
     }
 

@@ -49,14 +49,10 @@ class BigintTypeTest extends BookstoreTestBase
     </table>
 </database>
 XML;
-        $builder = new QuickBuilder();
-        $builder->setSchemaXml($schema);
-        $builder->setVfs(false);
-        $builder->setPlatform(TestCase::getPlatform());
         $connection = Perpl::getServiceContainer()->getConnection('bookstore');
         $connection->exec('DROP TABLE IF EXISTS bigint_entity;');
-        $builder->buildAndRunSql($connection);
-        $builder->buildClasses();
+
+        QuickBuilder::buildDatabaseAndClasses($schema, TestCase::getPlatform());
     }
 
     protected function fillBigintEntity(int|string|null $value, $entity = null)
