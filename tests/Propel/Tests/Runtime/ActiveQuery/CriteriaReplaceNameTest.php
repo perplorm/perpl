@@ -13,19 +13,17 @@ use Propel\Runtime\ActiveQuery\ColumnResolver\ColumnExpression\RemoteTypedColumn
 use Propel\Runtime\ActiveQuery\ModelCriteria;
 use Propel\Tests\Bookstore\AuthorQuery;
 use Propel\Tests\Bookstore\BookQuery;
-use Propel\Tests\TestCase;
+use Propel\Tests\TestCaseFixtures;
 
 /**
  * Tests name replacement in conditions. The tests were scattered across several classes and are somewhat redundant.
  */
-class CriteriaReplaceNameTest extends TestCase
+class CriteriaReplaceNameTest extends TestCaseFixtures
 {
     private const PROJECT_ROOT = __DIR__ . '/../../../../..';
 
     /**
-     * Provides test data
-     *
-     * @return string[][]|null[][]
+     * @return array<array{string, string|null, string}>
      */
     public static function NamespacedBookReplaceNamesDataProvider()
     {
@@ -44,11 +42,20 @@ class CriteriaReplaceNameTest extends TestCase
     }
 
     /**
-     * Provides test data
-     *
-     * @return string[][]|null[][]
+     * @return void
      */
-    public static function BookReplaceNamesDataProvider()
+    #[\PHPUnit\Framework\Attributes\DataProvider('NamespacedBookReplaceNamesDataProvider')]
+    public function testReplaceNameFromNamespacedBook(string $origClause, ?string $columnPhpName, string $modifiedClause)
+    {
+        include self::PROJECT_ROOT . '/tests/Fixtures/namespaced/build/conf/bookstore_namespaced-conf.php';
+        $c = new ModelCriteria('bookstore_namespaced', 'Foo\\Bar\\NamespacedBook');
+        $this->runTestReplaceName($c, $origClause, $columnPhpName, $modifiedClause);
+    }
+
+    /**
+     * @return array<array{string, string|null, string}>
+     */
+    public static function NonNamespacedBookReplaceNamesDataProvider()
     {
         return [
             ['Propel\Tests\Bookstore\Book.Title = ?', 'Title', 'book.title = ?'], // basic case
@@ -75,42 +82,29 @@ class CriteriaReplaceNameTest extends TestCase
     }
 
     /**
-     * Provides test data
-     *
-     * @return string[][]
-     */
-    public static function BookstoreContestReplaceNamesDataProvider()
-    {
-        return [
-            ['BookstoreContest.PrizeBookId = ?', 'PrizeBookId', 'contest.bookstore_contest.prize_book_id = ?'], // basic case
-            ['BookstoreContest.PrizeBookId=?', 'PrizeBookId', 'contest.bookstore_contest.prize_book_id=?'], // without spaces
-            ['BookstoreContest.Id<= ?', 'Id', 'contest.bookstore_contest.id<= ?'], // with non-equal comparator
-            ['BookstoreContest.BookstoreId LIKE ?', 'BookstoreId', 'contest.bookstore_contest.bookstore_id LIKE ?'], // with SQL keyword separator
-            ['(BookstoreContest.BookstoreId) LIKE ?', 'BookstoreId', '(contest.bookstore_contest.bookstore_id) LIKE ?'], // with parenthesis
-            ['(BookstoreContest.Id*1.5)=1', 'Id', '(contest.bookstore_contest.id*1.5)=1'], // ignore numbers
-        ];
-    }
-
-    /**
      * @return void
      */
-    #[\PHPUnit\Framework\Attributes\DataProvider('NamespacedBookReplaceNamesDataProvider')]
-    public function testReplaceNameFromNamespacedBook(string $origClause, ?string $columnPhpName, string $modifiedClause)
-    {
-        include self::PROJECT_ROOT . '/tests/Fixtures/namespaced/build/conf/bookstore_namespaced-conf.php';
-        $c = new ModelCriteria('bookstore_namespaced', 'Foo\\Bar\\NamespacedBook');
-        $this->runTestReplaceName($c, $origClause, $columnPhpName, $modifiedClause);
-    }
-
-    /**
-     * @return void
-     */
-    #[\PHPUnit\Framework\Attributes\DataProvider('BookReplaceNamesDataProvider')]
+    #[\PHPUnit\Framework\Attributes\DataProvider('NonNamespacedBookReplaceNamesDataProvider')]
     public function testReplaceNameFromBook(string $origClause, ?string $columnPhpName, string $modifiedClause)
     {
         include self::PROJECT_ROOT . '/tests/Fixtures/bookstore/build/conf/bookstore-conf.php';
         $c = new ModelCriteria('bookstore', 'Propel\Tests\Bookstore\Book');
         $this->runTestReplaceName($c, $origClause, $columnPhpName, $modifiedClause);
+    }
+
+    /**
+     * @return array<array{string, string, string}>
+     */
+    public static function BookstoreContestReplaceNamesDataProvider(): array
+    {
+        return [
+            ['BookstoreContest.PrizeBookId = ?', 'PrizeBookId', 'contest§bookstore_contest.prize_book_id = ?'], // basic case
+            ['BookstoreContest.PrizeBookId=?', 'PrizeBookId', 'contest§bookstore_contest.prize_book_id=?'], // without spaces
+            ['BookstoreContest.Id<= ?', 'Id', 'contest§bookstore_contest.id<= ?'], // with non-equal comparator
+            ['BookstoreContest.BookstoreId LIKE ?', 'BookstoreId', 'contest§bookstore_contest.bookstore_id LIKE ?'], // with SQL keyword separator
+            ['(BookstoreContest.BookstoreId) LIKE ?', 'BookstoreId', '(contest§bookstore_contest.bookstore_id) LIKE ?'], // with parenthesis
+            ['(BookstoreContest.Id*1.5)=1', 'Id', '(contest§bookstore_contest.id*1.5)=1'], // ignore numbers
+        ];
     }
 
     /**
@@ -188,7 +182,7 @@ class CriteriaReplaceNameTest extends TestCase
         $authorQuery = AuthorQuery::create()
         ->addSubquery($numberOfBooksQuery, 'numberOfBooks')
         ->where($joinCondition)
-        ->withColumn('numberOfBooks.NumberOfBooks', 'NumberOfBooks');
+        ->addAsColumn('NumberOfBooks', 'numberOfBooks.NumberOfBooks');
 
         $replacedColumns = $this->replaceColumns($authorQuery, $joinCondition);        
         $this->assertEquals('author.id = numberOfBooks.author_id', $joinCondition, 'Aliases from subquery should not be replaced');
@@ -210,10 +204,9 @@ class CriteriaReplaceNameTest extends TestCase
      */
     protected function replaceColumns(ModelCriteria $c, &$sql): array
     {
-
         $expr = $c->normalizeFilterExpression($sql);
         $sql = $expr->getNormalizedFilterExpression();
 
-        return $replacedColumns = $expr->getReplacedColumns();
+        return $expr->getReplacedColumns();
     }
 }

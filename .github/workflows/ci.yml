@@ -85,9 +85,8 @@ jobs:
               env:
                 MYSQL_PWD: ${{ env.DB_PW }}
 
-            - name: Setup database for test suite
-              if: matrix.db-type != 'agnostic'
-              run: tests/bin/setup.${{ matrix.db-type }}.sh
+            - name: Setup database for test suite (agnostic uses sqlite for vender-agnostic db tests)
+              run: tests/bin/setup.${{ case(matrix.db-type == 'agnostic', 'sqlite', matrix.db-type) }}.sh
 
             - name: Run tests
               shell: bash
