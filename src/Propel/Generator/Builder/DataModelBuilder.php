@@ -477,9 +477,12 @@ abstract class DataModelBuilder
      *
      * @return \Propel\Generator\Builder\Om\MultiExtendObjectBuilder
      */
-    public function getObjectInheritanceStubBuilder(Table|null $table = null): MultiExtendObjectBuilder
+    public function getObjectInheritanceStubBuilder(Inheritance $inheritance, Table|null $table = null): MultiExtendObjectBuilder
     {
-        return $this->generatorConfig->loadObjectInheritanceStubBuilder($table ?? $this->getTable());
+        $builder = $this->generatorConfig->loadObjectInheritanceStubBuilder($table ?? $this->getTable());
+        $builder->setInheritanceConfiguration($inheritance);
+
+        return $builder;
     }
 
     /**

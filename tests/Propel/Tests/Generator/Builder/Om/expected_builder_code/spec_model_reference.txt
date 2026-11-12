@@ -14,7 +14,7 @@ use Map\GenspecTableTableMap;
 class Spec extends Gen
 {
     /**
-     * Constructs a new Spec class, setting the type column to GenspecTableTableMap::CLASSKEY_22.
+     * Constructs a new Spec class with the required database class key.
      */
     public function __construct()
     {

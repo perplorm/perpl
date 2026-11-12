@@ -453,15 +453,14 @@ class $className extends TableMap
         $type = $isNumericKey ? 'int' : 'string';
         $keyToClassName = [];
 
-        foreach ($col->getInheritanceConfigurations() as $child) {
-            $childBuilder = $this->getObjectInheritanceStubBuilder();
-            $childBuilder->setInheritanceConfiguration($child);
-            $fqcn = $childBuilder->getFullyQualifiedClassName();
-            $className = $this->declareClassFromBuilder($childBuilder);
-            $rawClassName = $child->getClassName();
+        foreach ($col->getInheritanceConfigurations() as $inheritance) {
+            $childClassBuilder = $this->getObjectInheritanceStubBuilder($inheritance);
+            $fqcn = $childClassBuilder->getFullyQualifiedClassName();
+            $className = $this->declareClassFromBuilder($childClassBuilder);
+            $rawClassName = $inheritance->getClassName();
 
-            $suffix = $child->getConstantSuffix();
-            $key = $isNumericKey ? $child->getKey() : "'" . $child->getKey() . "'";
+            $suffix = $inheritance->getConstantSuffix();
+            $key = $isNumericKey ? $inheritance->getKey() : "'" . $inheritance->getKey() . "'";
 
             $keyToClassName[$key] = $className;
 
