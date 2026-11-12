@@ -15,8 +15,6 @@ use Timing;
 
 /**
  * Regression test for https://github.com/propelorm/Propel2/issues/768
- *
- * @group database
  */
 class Issue768Test extends TestCase
 {
@@ -37,7 +35,7 @@ class Issue768Test extends TestCase
                 </table>
             </database>
             ';
-            QuickBuilder::buildSchema($schema);
+            QuickBuilder::buildDatabaseAndClasses($schema);
         }
     }
 

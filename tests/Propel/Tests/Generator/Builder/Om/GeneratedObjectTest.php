@@ -721,9 +721,7 @@ class GeneratedObjectTest extends BookstoreTestBase
             </table>
         </database>
 XML;
-        $builder = new QuickBuilder();
-        $builder->setSchemaXml($databaseXml);
-        $builder->build();
+        QuickBuilder::buildClasses($databaseXml);
 
         $t = new \ExampleNamespace\Thing();
         $this->assertInstanceOf(BoxedString::class, $t->getBoxedstring());
@@ -904,10 +902,7 @@ XML;
 EOF;
         $extraConf['propel']['generator']['objectModel']['defaultKeyType'] = 'camelName';
         $generatorConfig = new QuickGeneratorConfig($extraConf);
-        $builder = new QuickBuilder();
-        $builder->setSchemaXml($schema);
-        $builder->setConfig($generatorConfig);
-        $builder->buildClasses();
+        QuickBuilder::buildClasses($schema, null, $generatorConfig);
 
         $expectedKeys = [
             'idKeyType',

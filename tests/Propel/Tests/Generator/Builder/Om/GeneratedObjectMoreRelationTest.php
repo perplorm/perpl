@@ -77,9 +77,7 @@ class GeneratedObjectMoreRelationTest extends TestCase
 </database>
 EOF;
 
-            $builder = new QuickBuilder();
-            $builder->setSchemaXml($schema);
-            $builder->build();
+            QuickBuilder::buildDatabaseAndClasses($schema);
         }
 
         ContentCommentQuery::create()->doDeleteAll();

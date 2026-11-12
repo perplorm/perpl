@@ -33,9 +33,7 @@ class Issue1033Test extends BookstoreTestBase
     </table>
 </database>
 EOF;
-            $builder = new QuickBuilder();
-            $builder->setSchemaXml($schema);
-            $builder->buildClasses();
+            QuickBuilder::buildClasses($schema);
         }
     }
 

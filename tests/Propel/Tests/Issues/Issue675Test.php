@@ -52,9 +52,7 @@ class Issue675Test extends TestCaseFixtures
 </database>
 EOF;
 
-        $builder = new QuickBuilder();
-        $builder->setSchemaXml($schema);
-        $builder->buildClasses();
+        QuickBuilder::buildClasses($schema);
 
         // Propel should disallow incomplete foreign reference
         $this->expectException('\Propel\Generator\Exception\BuildException');

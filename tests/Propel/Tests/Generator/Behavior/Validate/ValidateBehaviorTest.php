@@ -8,7 +8,7 @@
 
 namespace Propel\Tests\Generator\Behavior\Validate;
 
-use Exception;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Propel\Generator\Exception\ConstraintNotFoundException;
 use Propel\Generator\Exception\InvalidArgumentException;
 use Propel\Generator\Util\QuickBuilder;
@@ -16,6 +16,7 @@ use Propel\Tests\Bookstore\Behavior\ValidateAuthor;
 use Propel\Tests\Bookstore\Behavior\ValidateBook;
 use Propel\Tests\Bookstore\Behavior\ValidatePublisher;
 use Propel\Tests\Bookstore\Behavior\ValidateReader;
+use Propel\Tests\Bookstore\Behavior\ValidateReaderBook;
 use Propel\Tests\Helpers\Bookstore\BookstoreTestBase;
 use ReflectionMethod;
 use ReflectionObject;
@@ -30,78 +31,32 @@ use ReflectionObject;
 class ValidateBehaviorTest extends BookstoreTestBase
 {
     /**
-     * @private array The names of ValidateAuthor, ValidateBook, ValidatePublisher, ValidateReader classes.
-     *                 This classes are created by test:prepare command
+     * @return array<array{class-string}>
      */
-    private $classes;
-
-    /**
-     * @throws \Exception
-     *
-     * @return void
-     */
-    public function assertPreConditions(): void
+    public static function ValidationClassesDataProvider(): array
     {
-        if (!class_exists('Propel\Tests\Bookstore\Behavior\ValidateAuthor')) {
-            throw new Exception('Please, run \'bin/propel test:prepare\' command before starting to test this behavior');
-        }
-
-        $this->classes[] = 'Propel\Tests\Bookstore\Behavior\ValidateAuthor';
-        $this->classes[] = 'Propel\Tests\Bookstore\Behavior\ValidateBook';
-        $this->classes[] = 'Propel\Tests\Bookstore\Behavior\ValidatePublisher';
-        $this->classes[] = 'Propel\Tests\Bookstore\Behavior\ValidateReader';
-        $this->classes[] = 'Propel\Tests\Bookstore\Behavior\ValidateReaderBook';
+        return [
+            [ValidateAuthor::class],
+            [ValidateBook::class],
+            [ValidatePublisher::class],
+            [ValidateReader::class],
+            [ValidateReaderBook::class],
+        ];
     }
 
     /**
      * @return void
      */
-    public function testHasValidateMethod()
+    #[DataProvider('ValidationClassesDataProvider')]
+    public function testInjectedModelProperties(string $class)
     {
-        foreach ($this->classes as $class) {
-             $this->assertTrue(method_exists($class, 'validate'));
-        }
-    }
-
-    /**
-     * @return void
-     */
-    public function testHasLoadValidatorMetadataMethod()
-    {
-        foreach ($this->classes as $class) {
-             $this->assertTrue(method_exists($class, 'loadValidatorMetadata'));
-        }
-    }
-
-    /**
-     * @return void
-     */
-    public function testHasAlreadyInValidationAttribute()
-    {
-        foreach ($this->classes as $class) {
-            $this->assertObjectHasProperty('alreadyInValidation', new $class());
-        }
-    }
-
-    /**
-     * @return void
-     */
-    public function testHasValidationFailuresAttribute()
-    {
-        foreach ($this->classes as $class) {
-             $this->assertObjectHasProperty('validationFailures', new $class());
-        }
-    }
-
-    /**
-     * @return void
-     */
-    public function testLoadValidatorMetadataMethodIsStatic()
-    {
-        foreach ($this->classes as $class) {
-             $method = new ReflectionMethod($class, 'loadValidatorMetadata');
-             $this->assertTrue($method->isStatic());
-        }
+        $this->assertTrue(method_exists($class, 'validate'));
+        $this->assertTrue(method_exists($class, 'loadValidatorMetadata'));
+        $instance = new $class();
+        $this->assertObjectHasProperty('alreadyInValidation', $instance);
+        $this->assertObjectHasProperty('validationFailures', $instance);
+        $method = new ReflectionMethod($class, 'loadValidatorMetadata');
+        $this->assertTrue($method->isStatic());
     }
 
     /**
@@ -112,16 +67,16 @@ class ValidateBehaviorTest extends BookstoreTestBase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Please, define your rules for validation.');
 
-        $schema = <<<EOF
-<database name="bookstore-behavior">
-  <table name="validate_author" description="Author Table">
+        $schema = <<<XML
+<database>
+  <table name="validate_author">
     <column name="id" required="true" primaryKey="true" autoIncrement="true" type="INTEGER"/>
     <column name="first_name" required="true" type="VARCHAR" size="128"/>
     <behavior name="validate"/>
   </table>
 </database>
-EOF;
-        QuickBuilder::buildSchema($schema);
+XML;
+        QuickBuilder::buildClasses($schema);
     }
 
     /**
@@ -132,19 +87,19 @@ EOF;
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Please, define the column to validate.');
 
-        $schema = <<<EOF
-<database name="bookstore-behavior">
-  <table name="validate_author" description="Author Table">
-     <column name="id" required="true" primaryKey="true" autoIncrement="true" type="INTEGER" description="Author Id"/>
-     <column name="first_name" required="true" type="VARCHAR" size="128" description="First Name"/>
+        $schema = <<<XML
+<database>
+  <table name="validate_author">
+     <column name="id" required="true" primaryKey="true" autoIncrement="true" type="INTEGER"/>
+     <column name="first_name" required="true" type="VARCHAR" size="128"/>
      <behavior name="validate">
        <parameter name="rule1" value="{validator: NotNull}"/>
        <parameter name="rule2" value="{column: first_name, validator: Length, options: {max: 128}}"/>
       </behavior>
   </table>
   </database>
-EOF;
-        QuickBuilder::buildSchema($schema);
+XML;
+        QuickBuilder::buildClasses($schema);
     }
 
     /**
@@ -155,19 +110,19 @@ EOF;
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Please, define the validator constraint.');
 
-        $schema = <<<EOF
-<database name="bookstore-behavior">
-  <table name="validate_author" description="Author Table">
-     <column name="id" required="true" primaryKey="true" autoIncrement="true" type="INTEGER" description="Author Id"/>
-     <column name="first_name" required="true" type="VARCHAR" size="128" description="First Name"/>
+        $schema = <<<XML
+<database>
+  <table name="validate_author">
+     <column name="id" required="true" primaryKey="true" autoIncrement="true" type="INTEGER"/>
+     <column name="first_name" required="true" type="VARCHAR" size="128"/>
      <behavior name="validate">
        <parameter name="rule1" value="{column: first_name}"/>
        <parameter name="rule2" value="{column: first_name, validator: Length, options: {max: 128}}"/>
       </behavior>
   </table>
   </database>
-EOF;
-        QuickBuilder::buildSchema($schema);
+XML;
+        QuickBuilder::buildClasses($schema);
     }
 
     /**
@@ -178,19 +133,19 @@ EOF;
         $this->expectException(ConstraintNotFoundException::class);
         $this->expectExceptionMessage('The constraint class MaximumLength does not exist.');
 
-        $schema = <<<EOF
-<database name="bookstore-behavior">
-  <table name="validate_author" description="Author Table">
-     <column name="id" required="true" primaryKey="true" autoIncrement="true" type="INTEGER" description="Author Id"/>
-     <column name="first_name" required="true" type="VARCHAR" size="128" description="First Name"/>
+        $schema = <<<XML
+<database>
+  <table name="validate_author">
+     <column name="id" required="true" primaryKey="true" autoIncrement="true" type="INTEGER"/>
+     <column name="first_name" required="true" type="VARCHAR" size="128"/>
      <behavior name="validate">
        <parameter name="rule1" value="{column: first_name, validator: NotNull}"/>
        <parameter name="rule2" value="{column: first_name, validator: MaximumLength, options: {limit: 128}}"/>
       </behavior>
   </table>
   </database>
-EOF;
-        QuickBuilder::buildSchema($schema);
+XML;
+        QuickBuilder::buildClasses($schema);
     }
 
     /**
@@ -201,19 +156,19 @@ EOF;
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('The options value, in <parameter> tag must be an array');
 
-        $schema = <<<EOF
-<database name="bookstore-behavior">
-  <table name="validate_author" description="Author Table">
-     <column name="id" required="true" primaryKey="true" autoIncrement="true" type="INTEGER" description="Author Id"/>
-     <column name="first_name" required="true" type="VARCHAR" size="128" description="First Name"/>
+        $schema = <<<XML
+<database>
+  <table name="validate_author">
+     <column name="id" required="true" primaryKey="true" autoIncrement="true" type="INTEGER"/>
+     <column name="first_name" required="true" type="VARCHAR" size="128"/>
      <behavior name="validate">
        <parameter name="rule1" value="{column: first_name, validator: NotNull, foo: bar}"/>
        <parameter name="rule2" value="{column: first_name, validator: Length, options: 128}"/>
       </behavior>
   </table>
   </database>
-EOF;
-        QuickBuilder::buildSchema($schema);
+XML;
+        QuickBuilder::buildClasses($schema);
     }
 
     /**

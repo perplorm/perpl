@@ -97,10 +97,8 @@ class Issue617Test extends PlatformDatabaseBuildTimeBase
 </database>
 ';
 
-        $builder = new QuickBuilder();
+        $builder = new QuickBuilder($schema, $this->database->getPlatform());
         $builder->setIdentifierQuoting(true);
-        $builder->setPlatform($this->database->getPlatform());
-        $builder->setSchemaXml($schema);
 
         $diff = DatabaseComparator::computeDiff($this->database, $builder->getDatabase());
         $sql = $this->database->getPlatform()->buildModifyDatabaseDdl($diff);
@@ -162,10 +160,8 @@ CREATE TABLE `issue617_group`
 </database>
 ';
 
-        $this->updatedBuilder = new QuickBuilder();
+        $this->updatedBuilder = new QuickBuilder($updatedSchema, $this->database->getPlatform());
         $this->updatedBuilder->setIdentifierQuoting(true);
-        $this->updatedBuilder->setPlatform($this->database->getPlatform());
-        $this->updatedBuilder->setSchemaXml($updatedSchema);
 
         $diff = DatabaseComparator::computeDiff($this->database, $this->updatedBuilder->getDatabase());
         $sql = $this->database->getPlatform()->buildModifyDatabaseDdl($diff);

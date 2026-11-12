@@ -16,7 +16,7 @@ use Map\NestedSetTable9TableMap;
  *
  * @author François Zaninotto
  */
-class NestedSetBehaviorTest extends TestCase
+class NestedSetBehaviorTest extends NestedSetBehaviorTestCase
 {
     /**
      * @return void

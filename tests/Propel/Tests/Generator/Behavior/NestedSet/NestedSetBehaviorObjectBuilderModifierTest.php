@@ -23,7 +23,7 @@ use Propel\Tests\Fixtures\Generator\Behavior\NestedSet\PublicTable9;
 /**
  * Tests for NestedSetBehaviorObjectBuilderModifier class
  */
-class NestedSetBehaviorObjectBuilderModifierTest extends TestCase
+class NestedSetBehaviorObjectBuilderModifierTest extends NestedSetBehaviorTestCase
 {
     /**
      * @return void

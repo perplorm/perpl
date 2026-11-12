@@ -39,8 +39,7 @@ EOF;
     #[\PHPUnit\Framework\Attributes\DataProvider('basicSchemaDataProvider')]
     public function testModifyTableAddsVersionColumn($schema)
     {
-        $builder = new QuickBuilder();
-        $builder->setSchemaXml($schema);
+        $builder = new QuickBuilder($schema);
         $expected = <<<EOF
 -- ---------------------------------------------------------------------
 -- versionable_behavior_test_0
@@ -75,8 +74,7 @@ EOF;
     </table>
 </database>
 EOF;
-        $builder = new QuickBuilder();
-        $builder->setSchemaXml($schema);
+        $builder = new QuickBuilder($schema);
         $expected = <<<EOF
 -- ---------------------------------------------------------------------
 -- versionable_behavior_test_0
@@ -110,8 +108,7 @@ EOF;
     </table>
 </database>
 EOF;
-        $builder = new QuickBuilder();
-        $builder->setSchemaXml($schema);
+        $builder = new QuickBuilder($schema);
         $expected = <<<EOF
 -- ---------------------------------------------------------------------
 -- versionable_behavior_test_0
@@ -160,8 +157,7 @@ EOF;
     #[\PHPUnit\Framework\Attributes\DataProvider('foreignTableSchemaDataProvider')]
     public function testModifyTableAddsVersionColumnForForeignKeysIfForeignTableIsVersioned($schema)
     {
-        $builder = new QuickBuilder();
-        $builder->setSchemaXml($schema);
+        $builder = new QuickBuilder($schema);
         $expected = <<<EOF
 -- ---------------------------------------------------------------------
 -- versionable_behavior_test_0
@@ -210,8 +206,7 @@ EOF;
     #[\PHPUnit\Framework\Attributes\DataProvider('foreignTableSchemaDataProvider')]
     public function testModifyTableAddsVersionColumnForReferrersIfForeignTableIsVersioned($schema)
     {
-        $builder = new QuickBuilder();
-        $builder->setSchemaXml($schema);
+        $builder = new QuickBuilder($schema);
         $expected = <<<EOF
 -- ---------------------------------------------------------------------
 -- versionable_behavior_test_1
@@ -294,8 +289,7 @@ EOF;
     #[\PHPUnit\Framework\Attributes\DataProvider('basicSchemaDataProvider')]
     public function testModifyTableAddsVersionTable($schema)
     {
-        $builder = new QuickBuilder();
-        $builder->setSchemaXml($schema);
+        $builder = new QuickBuilder($schema);
         $expected = <<<EOF
 -- ---------------------------------------------------------------------
 -- versionable_behavior_test_0_version
@@ -333,8 +327,7 @@ EOF;
     </table>
 </database>
 EOF;
-        $builder = new QuickBuilder();
-        $builder->setSchemaXml($schema);
+        $builder = new QuickBuilder($schema);
         $expected = <<<EOF
 -- ---------------------------------------------------------------------
 -- foo_ver
@@ -374,8 +367,7 @@ EOF;
     </table>
 </database>
 EOF;
-        $builder = new QuickBuilder();
-        $builder->setSchemaXml($schema);
+        $builder = new QuickBuilder($schema);
         $expected = <<<EOF
 
 -- ---------------------------------------------------------------------
@@ -434,8 +426,7 @@ EOF;
     #[\PHPUnit\Framework\Attributes\DataProvider('logSchemaDataProvider')]
     public function testModifyTableAddsLogColumns($schema)
     {
-        $builder = new QuickBuilder();
-        $builder->setSchemaXml($schema);
+        $builder = new QuickBuilder($schema);
         $expected = <<<EOF
 -- ---------------------------------------------------------------------
 -- versionable_behavior_test_0
@@ -463,8 +454,7 @@ EOF;
     #[\PHPUnit\Framework\Attributes\DataProvider('logSchemaDataProvider')]
     public function testModifyTableAddsVersionTableLogColumns($schema)
     {
-        $builder = new QuickBuilder();
-        $builder->setSchemaXml($schema);
+        $builder = new QuickBuilder($schema);
         $expected = <<<EOF
 -- ---------------------------------------------------------------------
 -- versionable_behavior_test_0_version
@@ -521,8 +511,7 @@ CREATE TABLE versionable_behavior_test_0_version
         ON DELETE CASCADE
 );
 EOF;
-        $builder = new QuickBuilder();
-        $builder->setSchemaXml($schema);
+        $builder = new QuickBuilder($schema);
         $this->assertStringContainsString($expected, $builder->buildSql());
     }
 
@@ -559,8 +548,7 @@ CREATE TABLE versionable_behavior_test_0_version
 
 CREATE INDEX versionable_behavior_test_0_version_i_14f552 ON versionable_behavior_test_0_version (bar);
 EOF;
-        $builder = new QuickBuilder();
-        $builder->setSchemaXml($schema);
+        $builder = new QuickBuilder($schema);
         $this->assertStringContainsString($expected, $builder->buildSql());
     }
 
@@ -579,8 +567,7 @@ EOF;
 </database>
 EOF;
 
-        $builder = new QuickBuilder();
-        $builder->setSchemaXml($schema);
+        $builder = new QuickBuilder($schema);
 
         $this->assertEmpty($builder->buildSql());
     }
@@ -606,8 +593,7 @@ XML;
     #[\PHPUnit\Framework\Attributes\DataProvider('tablePrefixSchemaDataProvider')]
     public function testModifyTableAddsVersionColumnWithPrefix($schema)
     {
-        $builder = new QuickBuilder();
-        $builder->setSchemaXml($schema);
+        $builder = new QuickBuilder($schema);
         $expected = <<<SQL
 -- ---------------------------------------------------------------------
 -- prefix_versionable_behavior_test_0
@@ -632,8 +618,7 @@ SQL;
     #[\PHPUnit\Framework\Attributes\DataProvider('tablePrefixSchemaDataProvider')]
     public function testModifyTableAddsVersionTableWithPrefix($schema)
     {
-        $builder = new QuickBuilder();
-        $builder->setSchemaXml($schema);
+        $builder = new QuickBuilder($schema);
         $expected = <<<SQL
 -- ---------------------------------------------------------------------
 -- prefix_versionable_behavior_test_0_version

@@ -96,7 +96,7 @@ class VersionableBehaviorObjectBuilderModifierTest extends TestCase
     </table>
 </database>
 EOF;
-        QuickBuilder::buildSchema($schema);
+        QuickBuilder::buildDatabaseAndClasses($schema);
 
         $schema2 = <<<EOF
 <database name="versionable_behavior_test_2" defaultPhpNamingMethod="nochange">
@@ -129,7 +129,7 @@ EOF;
     </table>
 </database>
 EOF;
-        QuickBuilder::buildSchema($schema2);
+        QuickBuilder::buildDatabaseAndClasses($schema2);
 
         $schema3 = <<<EOF
 <database name="versionable_behavior_test_3" defaultPhpNamingMethod="nochange">
@@ -146,7 +146,7 @@ EOF;
     </table>
 </database>
 EOF;
-        QuickBuilder::buildSchema($schema3);
+        QuickBuilder::buildDatabaseAndClasses($schema3);
 
         $schema4 = <<<EOF
 <database name="versionable_behavior_test_4">
@@ -179,7 +179,7 @@ EOF;
     </table>
 </database>
 EOF;
-        QuickBuilder::buildSchema($schema4);
+        QuickBuilder::buildDatabaseAndClasses($schema4);
 
     /**
      *  Schema to test relation 1:1 versionable
@@ -202,7 +202,7 @@ EOF;
     </table>
 </database>
 XML;
-        QuickBuilder::buildSchema($schema5);
+        QuickBuilder::buildDatabaseAndClasses($schema5);
 
         $schemaCustomName = <<<EOF
 <database name="versionable_behavior_test_custom_field_database">
@@ -231,7 +231,7 @@ XML;
     </table>
 </database>
 EOF;
-        QuickBuilder::buildSchema($schemaCustomName);
+        QuickBuilder::buildDatabaseAndClasses($schemaCustomName);
     }
 
     /**

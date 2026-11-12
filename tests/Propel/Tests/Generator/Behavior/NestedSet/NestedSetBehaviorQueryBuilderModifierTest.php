@@ -19,7 +19,7 @@ use Propel\Runtime\Collection\ObjectCollection;
  *
  * @author François Zaninotto
  */
-class NestedSetBehaviorQueryBuilderModifierTest extends TestCase
+class NestedSetBehaviorQueryBuilderModifierTest extends NestedSetBehaviorTestCase
 {
     /**
      * @return void

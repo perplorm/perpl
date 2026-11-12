@@ -53,10 +53,7 @@ class SchemaValidatorTest extends TestCase
     </table>
 </database>
 EOF;
-        $builder = new QuickBuilder();
-        $builder->setSchemaXml($xmlSchema);
-
-        $database = $builder->getDatabase();
+        $database = QuickBuilder::parseSchema($xmlSchema);
 
         $schema = new Schema();
         $schema->addDatabase($database);

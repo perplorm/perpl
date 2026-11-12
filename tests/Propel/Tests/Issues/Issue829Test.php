@@ -16,8 +16,6 @@ use Table829;
 
 /**
  * Regression test for https://github.com/propelorm/Propel2/issues/829
- *
- * @group database
  */
 class Issue829Test extends TestCase
 {
@@ -36,7 +34,7 @@ class Issue829Test extends TestCase
                 </table>
             </database>
             ';
-            QuickBuilder::buildSchema($schema);
+            QuickBuilder::buildClasses($schema);
         }
     }
 

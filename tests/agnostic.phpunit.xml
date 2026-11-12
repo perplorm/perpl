@@ -17,6 +17,9 @@
       <group>mysql</group>
     </exclude>
   </groups>
+  <php>
+    <env name="DB" value="sqlite"/>
+  </php>
   <source>
     <include>
       <directory>../src/Propel/</directory>

@@ -41,11 +41,8 @@ class Issue730Test extends TestCaseFixtures
 </database>
 EOF;
 
-        $quickBuilder = new QuickBuilder();
-        $quickBuilder->setSchemaXml($schema);
+        $quickBuilder = new QuickBuilder($schema, new SqlitePlatform());
         $quickBuilder->setIdentifierQuoting(true);
-        $platform = new SqlitePlatform();
-        $quickBuilder->setPlatform($platform);
 
         $quickBuilder->build();
 

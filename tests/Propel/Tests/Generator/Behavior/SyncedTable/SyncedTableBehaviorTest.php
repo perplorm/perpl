@@ -962,8 +962,7 @@ EOT;
      */
     protected function buildSchema(string $schema): Database
     {
-        $builder = new QuickBuilder();
-        $builder->setSchemaXml($schema);
+        $builder = new QuickBuilder($schema);
 
         return $builder->getDatabase();
     }

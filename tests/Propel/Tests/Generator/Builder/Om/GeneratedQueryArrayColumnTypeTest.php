@@ -36,7 +36,7 @@ class GeneratedQueryArrayColumnTypeTest extends TestCase
     </table>
 </database>
 EOF;
-            QuickBuilder::buildSchema($schema);
+            QuickBuilder::buildDatabaseAndClasses($schema);
             $e0 = new ComplexColumnTypeEntity11();
             $e0->save();
             $e1 = new ComplexColumnTypeEntity11();

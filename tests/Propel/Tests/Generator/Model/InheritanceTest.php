@@ -96,9 +96,7 @@ class InheritanceTest extends TestCase
     </table>
 </database>
 XML;
-        $schemaBuilder = new QuickBuilder();
-        $schemaBuilder->setSchemaXml($databaseXml);
-        $database = $schemaBuilder->getDatabase();
+        $database = QuickBuilder::parseSchema($databaseXml);
         $table = $database->getTable('Inheriter');
         $builder = new TableMapBuilder($table);
         $builder->setGeneratorConfig(new QuickGeneratorConfig());

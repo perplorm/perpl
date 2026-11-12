@@ -37,7 +37,7 @@ class GeneratedQuerySetBinaryColumnTypeTest extends TestCase
     </table>
 </database>
 EOF;
-            QuickBuilder::buildSchema($schema);
+            QuickBuilder::buildDatabaseAndClasses($schema);
             $e0 = new ComplexColumnTypeEntitySet2();
             $e0->save();
             $e1 = new ComplexColumnTypeEntitySet2();

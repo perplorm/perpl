@@ -38,7 +38,7 @@ class ConstantNameTest extends TestCase
   </table>
 </database>
 XML;
-        $this->buildClasses($schema);
+        QuickBuilder::buildClasses($schema);
         $this->assertTrue(class_exists('ConstantNameTest1\UserCheck1'));
         $this->assertTrue(class_exists('ConstantNameTest1\UserCheck1Expiration'));
         $this->assertTrue(class_exists('ConstantNameTest1\Map\UserCheck1TableMap'));
@@ -63,7 +63,7 @@ XML;
   </table>
 </database>
 XML;
-        $this->buildClasses($schema);
+        QuickBuilder::buildClasses($schema);
         $this->assertTrue(class_exists('ConstantNameTest2\UserCheck2'));
         $this->assertTrue(class_exists('ConstantNameTest2\UserCheck2MacAddress'));
         $this->assertTrue(class_exists('ConstantNameTest2\Map\UserCheck2TableMap'));
@@ -88,23 +88,11 @@ XML;
   </table>
 </database>
 XML;
-        $this->buildClasses($schema);
+        QuickBuilder::buildClasses($schema);
         $this->assertTrue(class_exists('ConstantNameTest3\UserCheck3'));
         $this->assertTrue(class_exists('ConstantNameTest3\UserCheck3MacAddress'));
         $this->assertTrue(class_exists('ConstantNameTest3\Map\UserCheck3TableMap'));
         $this->assertTrue(defined('\ConstantNameTest3\Map\UserCheck3TableMap::CLASSKEY_KEY'));
         $this->assertEquals('Key.-_:*', UserCheck3TableMap::CLASSKEY_KEY);
-    }
-
-    /**
-     * @param string $schema
-     *
-     * @return void
-     */
-    protected function buildClasses($schema)
-    {
-        $builder = new QuickBuilder();
-        $builder->setSchemaXml($schema);
-        $builder->buildClasses();
     }
 }

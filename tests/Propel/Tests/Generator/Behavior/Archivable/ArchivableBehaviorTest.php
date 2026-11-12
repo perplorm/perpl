@@ -116,8 +116,7 @@ class ArchivableBehaviorTest extends TestCase
 
 </database>
 EOF;
-            $builder = new QuickBuilder();
-            $builder->setSchemaXml($schema);
+            $builder = new QuickBuilder($schema);
             self::$generatedSQL = $builder->buildSql();
             $builder->build();
         }
@@ -236,8 +235,7 @@ EOF;
         </database>
         EOF;
 
-        $builder = new QuickBuilder();
-        $builder->setSchemaXml($schema);
+        $builder = new QuickBuilder($schema);
 
         $this->expectException(SyncedTableException::class);
         $builder->getDatabase();
@@ -336,8 +334,7 @@ EOF;
 
 </database>
 EOF;
-        $builder = new QuickBuilder();
-        $builder->setSchemaXml($schema);
+        $builder = new QuickBuilder($schema);
         $fks = $builder->getDatabase()->getTable($archiveTableName)->getForeignKeys();
 
         $expectedCount = $fkColumnName ? 1 : 0;
@@ -418,8 +415,7 @@ EOF;
     </table>
 </database>
 EOF;
-        $builder = new QuickBuilder();
-        $builder->setSchemaXml($schema);
+        $builder = new QuickBuilder($schema);
         $sql = $builder->buildSql();
 
         $this->assertNotEmpty($sql);
@@ -481,9 +477,8 @@ SQL;
     #[\PHPUnit\Framework\Attributes\DataProvider('tablePrefixDataProvider')]
     public function testGeneratedSqlWithTablePrefix($schema, $expectSQL, $expectClasses)
     {
-        $builder = new QuickBuilder();
+        $builder = new QuickBuilder($schema);
 
-        $builder->setSchemaXml($schema);
 
         $actualSQL = $builder->buildSql();
 
@@ -494,12 +489,9 @@ SQL;
      * @return void
      */
     #[\PHPUnit\Framework\Attributes\DataProvider('tablePrefixDataProvider')]
-    public function testGeneratedClassesWithTablePrefix($schema, $expectSQL, $expectClasses)
+    public function testGeneratedClassesWithTablePrefix($schemaXml, $expectSQL, $expectClasses)
     {
-        $builder = new QuickBuilder();
-
-        $builder->setSchemaXml($schema);
-        $builder->buildClasses();
+        QuickBuilder::buildClasses($schemaXml);
 
         foreach ($expectClasses as $expectClass) {
             $this->assertTrue(class_exists($expectClass), sprintf('expected class "%s" not exists', $expectClass));

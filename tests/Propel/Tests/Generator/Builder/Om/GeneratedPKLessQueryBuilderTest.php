@@ -38,7 +38,7 @@ class GeneratedPKLessQueryBuilderTest extends TestCase
 </database>
 SCHEMA;
 
-        QuickBuilder::buildSchema($schema);
+        QuickBuilder::buildDatabaseAndClasses($schema);
     }
 
     /**

@@ -52,7 +52,7 @@ class ConcreteInheritanceBehaviorWithBehaviorExclusionTest extends TestCase
 </database>
 EOF;
 
-            QuickBuilder::buildSchema($schema);
+            QuickBuilder::buildDatabaseAndClasses($schema);
         }
     }
 
