@@ -18,6 +18,7 @@ use Propel\Generator\Model\Column;
 use Propel\Generator\Model\Datatype\ColumnType;
 use Propel\Generator\Model\ForeignKey;
 use Propel\Generator\Model\IdMethod;
+use Propel\Generator\Model\Inheritance;
 use Propel\Generator\Model\Table;
 use Propel\Generator\Platform\MssqlPlatform;
 use Propel\Runtime\ActiveQuery\ColumnResolver\ColumnExpression\LocalColumnExpression;
@@ -37,6 +38,7 @@ use function addcslashes;
 use function addslashes;
 use function array_any;
 use function array_filter;
+use function array_find;
 use function array_intersect;
 use function array_map;
 use function array_values;
@@ -604,6 +606,23 @@ abstract class {$this->getUnqualifiedClassName()}$parentClass implements $interf
             $script .= "
         \$this->applyDefaultValues();";
         }
+
+        $setClassKeyExpression = $this->getSetupClassKeyStatement();
+            $script .= !$setClassKeyExpression ? '' : "
+        $setClassKeyExpression;";
+    }
+
+    /**
+     * @return string|null
+     */
+    protected function getSetupClassKeyStatement(): string|null
+    {
+        $inheritances = $this->getTable()->getClassKeyColumn()?->getInheritanceConfigurations() ?? [];
+        $mainClassInheritance = array_find($inheritances, fn (Inheritance $i) => !$i->getParentClassIdentifier());
+
+        return $mainClassInheritance
+            ? $this->getObjectInheritanceStubBuilder($mainClassInheritance)->buildSetClassKeyExpression()
+            : null;
     }
 
     /**
@@ -2409,8 +2428,8 @@ $indent};";
                 $setValueStatement = "\$this->set{$columnName}($cast\$pk);";
 
                 $script .= !$table->isAllowPkInsert()
-                ? "\n        $setValueStatement"
-                : "
+                    ? "\n        $setValueStatement"
+                    : "
         if (\$pk !== null) {
             $setValueStatement
         }";

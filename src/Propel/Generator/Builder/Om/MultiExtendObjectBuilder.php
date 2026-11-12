@@ -123,6 +123,7 @@ class $className extends $localParentClassName
     {
         $parentClassNameFromConfiguration = $this->getInheritanceConfiguration()->getParentClassIdentifier();
         if (!$parentClassNameFromConfiguration) {
+            // no parent class means its the main table class, which extends the base object as always
             return $this->declareClassFromBuilder($this->getStubObjectBuilder());
         }
 
@@ -171,22 +172,31 @@ class $className extends $localParentClassName
     #[\Override]
     protected function addClassBody(string &$script): void
     {
-        $child = $this->getInheritanceConfiguration();
-        $column = $child->getColumn();
-        $columnPhpName = $column->getPhpName();
-        $classIdentifierConst = $this->getTableMapClassName() . '::CLASSKEY_' . $child->getConstantSuffix();
         $className = $this->getInheritanceConfiguration()->getClassName();
-        $columnName = $column->getName();
+        $setClassKeyExpression = $this->buildSetClassKeyExpression();
 
         $script .= "
     /**
-     * Constructs a new $className class, setting the $columnName column to $classIdentifierConst.
+     * Constructs a new $className class with the required database class key.
      */
     public function __construct()
     {
         parent::__construct();
-        \$this->set$columnPhpName($classIdentifierConst);
+        $setClassKeyExpression;
     }\n";
+    }
+
+    /**
+     * @return string
+     */
+    public function buildSetClassKeyExpression(): string
+    {
+        $child = $this->getInheritanceConfiguration();
+        $column = $child->getColumn();
+        $columnPhpName = $column->getPhpName();
+        $classIdentifierConst = $this->getTableMapClassName() . '::CLASSKEY_' . $child->getConstantSuffix();
+
+        return "\$this->set$columnPhpName($classIdentifierConst)";
     }
 
     /**
